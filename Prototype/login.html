@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Aplicación de Cargas de Trabajo</title>
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="style.css"
+    />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="screen">
+        <div class="top-strip"></div>
+
+        <div class="page-body login-main">
+          <div class="login-box">
+            <h1 class="login-title">Vicerrectoría de Administración</h1>
+            <h2 class="login-subtitle">Aplicación de Cargas de Trabajo</h2>
+
+            <form
+              class="login-form"
+              id="loginForm"
+            >
+              <input
+                class="input"
+                type="email"
+                value="carlos.gomezlopez@ucr.ac.cr"
+                aria-label="Correo institucional"
+                readonly
+              />
+              <input
+                class="input"
+                type="password"
+                value="***************"
+                aria-label="Contraseña"
+                readonly
+              />
+              <button
+                class="login-btn"
+                type="submit"
+              >
+                Iniciar Sesión
+              </button>
+
+              <div class="login-links">
+                <p class="recover">Recuperar Contraseña</p>
+                <p class="tiny-muted">Universidad De Costa Rica | Pingponeros S.A.</p>
+              </div>
+            </form>
+          </div>
+
+          <div></div>
+        </div>
+
+        <footer class="page-footer">
+          <div class="footer-left">
+            <p class="footer-title">Universidad de Costa Rica</p>
+            <p class="facebook-mark">f</p>
+            <p class="footer-copy">© Universidad de Costa Rica, 2026.</p>
+          </div>
+          <div class="footer-right">
+            <p class="footer-contact-title">Contacto</p>
+            <p class="footer-contact-line">+506 2222-2222</p>
+            <p class="footer-contact-line">Contacto@ucr.ac.cr</p>
+          </div>
+        </footer>
+      </section>
+    </main>
+
+    <script>
+      const loginForm = document.getElementById("loginForm");
+
+      loginForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const homeUrl = "home.html";
+        const homeWindow = window.open(homeUrl, "_blank", "noopener,noreferrer");
+
+        // Si el navegador bloquea la nueva ventana, abrimos en la misma pestaña.
+        if (!homeWindow) {
+          window.location.href = homeUrl;
+        }
+      });
+    </script>
+  </body>
+</html>
