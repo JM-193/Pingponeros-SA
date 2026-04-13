@@ -9,4 +9,5 @@ Repository for the Integrating Project in Software Engineering and Databases (PI
 * *Diseño_DB_Pingponeros.svg* - Database design diagram showing the system architecture and data structure
 * *Pila de producto(Jira).pdf* - Product backlog from Jira with features and requirements prioritization
 * *User Personas.pdf* - User personas documentation describing target users and their characteristics
+* *Prototipo de Baja Fidelidad (Figma)* - Low-fidelity prototype created in Figma illustrating the user interface and experience design
 
