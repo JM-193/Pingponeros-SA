@@ -1,0 +1,12 @@
+= Pingponeros-SA Project Documentation
+
+== Project Overview
+Repository for the Integrating Project in Software Engineering and Databases (PI de Ingeniería de Software y Bases de Datos).
+
+== Documentation Files
+
+* *Conceptualización.pdf* - Project conceptualization document outlining the vision and objectives
+* *Diseño_DB_Pingponeros.svg* - Database design diagram showing the system architecture and data structure
+* *Pila de producto(Jira).pdf* - Product backlog from Jira with features and requirements prioritization
+* *User Personas.pdf* - User personas documentation describing target users and their characteristics
+
