@@ -10,54 +10,46 @@
 :source-highlighter: highlight.js
 :nofooter:
 
-This document explains the branch protection rules that have been configured for the `Pingponeros-SA` repository, and the manual steps required to activate them in the GitHub UI.
+This document describes the branch protection rules configured for the `Pingponeros-SA` repository and the repository files that support them. Branch protection rules are configured in GitHub (Settings > Branches) and are not stored in repository files.
 
 ---
 
-== Automated setup (already in place)
+== Repository-enforced files
 
-The following files were committed to this repository and take effect automatically:
+The following files are committed to this repository and provide automation used by branch protection rules:
 
-* `.github/CODEOWNERS` — marks all three team members (`@JM-193`, `@Carlos-Obando-L`, `@SebasGomezCastro`) as required reviewers for every file.
-* `.github/workflows/ci.yml` — GitHub Actions workflow that runs ESLint + Prettier (frontend) and `dotnet build` + `dotnet test` (backend) on every PR targeting `main` or `dev`.
+* `.github/CODEOWNERS` - marks all three team members (`@JM-193`, `@Carlos-Obando-L`, `@SebasGomezCastro`) as required reviewers for every file.
+* `.github/workflows/ci.yml` - GitHub Actions workflow that runs ESLint + Prettier (frontend) and `dotnet build` + `dotnet test` (backend) on every push and PR in all branches.
 
 ---
 
-== Manual steps required in the GitHub UI
+== Branch protection rules (GitHub)
 
-Branch protection rules themselves cannot be stored in repository files; they must be configured in *Settings → Branches*.
+The rules below are configured in GitHub and apply to the specified branches.
 
-=== 1. Protect `main`
+=== `main`
 
-. Go to https://github.com/JM-193/Pingponeros-SA/settings/branches and click *Add branch protection rule*.
-. *Branch name pattern:* `main`
-. Enable *Require a pull request before merging*
-  ** *Required approvals:* `2`
-  ** Check *Dismiss stale pull request approvals when new commits are pushed*
-  ** Check *Require review from Code Owners*
-. Enable *Require status checks to pass before merging*
-  ** Check *Require branches to be up to date before merging*
-  ** Search for and add the following checks as required:
-     *** `Frontend (Lint, Build & Test)`
-     *** `Backend (Build & Test)`
-. Under *Rules*, check *Do not allow bypassing the above settings* so that admins are also restricted.
-. Click *Save changes*.
+* Pull requests are required before merging.
+* Required approvals: `2`.
+* Dismiss stale pull request approvals when new commits are pushed.
+* Code owner reviews are required.
+* Required status checks must pass before merging.
+* Branches must be up to date before merging.
+* Required checks:
+  ** `Frontend (Lint, Build & Test)`
+  ** `Backend (Build & Test)`
+* Administrators cannot bypass these settings.
 
-=== 2. Protect `dev`
+=== `dev`
 
-. Click *Add branch protection rule* again.
-. *Branch name pattern:* `dev`
-. Enable *Require a pull request before merging*
-  ** *Required approvals:* `1`
-  ** Check *Dismiss stale pull request approvals when new commits are pushed*
-. Enable *Require status checks to pass before merging*
-  ** Check *Require branches to be up to date before merging*
-  ** Add the same required checks:
-     *** `Frontend (Lint, Build & Test)`
-     *** `Backend (Build & Test)`
-. Click *Save changes*.
-
-NOTE: Status check names appear in the dropdown only after the CI workflow has run at least once on a PR. If you cannot find them, open a test PR first to trigger the workflow, then come back and add them as required checks.
+* Pull requests are required before merging.
+* Required approvals: `1`.
+* Dismiss stale pull request approvals when new commits are pushed.
+* Required status checks must pass before merging.
+* Branches must be up to date before merging.
+* Required checks:
+  ** `Frontend (Lint, Build & Test)`
+  ** `Backend (Build & Test)`
 
 ---
 
@@ -78,7 +70,7 @@ NOTE: Status check names appear in the dropdown only after the CI workflow has r
 | Frontend + Backend
 
 | `feature/*` / `fix/*`
-| Isolated work — merged into `dev` via PR
-| —
-| —
+| Isolated work - merged into `dev` via PR
+| N/A
+| N/A
 |===
