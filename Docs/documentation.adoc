@@ -10,43 +10,23 @@
 :source-highlighter: highlight.js
 :nofooter:
 
-
 == Project Overview
 Repository for the Integrating Project in Software Engineering and Databases (PI de Ingeniería de Software y Bases de Datos).
 
 == Documentation Files
 
+* `images/` - Directory containing documentation images and diagrams
+** `Diseño_DB_Pingponeros.svg` - Database design diagram showing the system architecture and data structure (Old version)
+* `pdfs/` - Directory containing documentation PDFs
+** `Conceptualización.pdf` - Project conceptualization document outlining the vision and objectives
+** `Pila de producto(Jira).pdf` - Product backlog from Jira with features and requirements prioritization
+** `Prototipo de Alta Fidelidad (Figma).pdf` - High-fidelity prototype created in Figma with detailed design and interactions
+** `Prototipo de Baja Fidelidad (Figma).pdf` - Low-fidelity prototype created in Figma illustrating the user interface and experience design
+** `User Personas.pdf` - User personas documentation describing target users and their characteristics
+* `stack/` - Directory containing documentation related to the technology stack used in the project
+** `INSTALL.md` - Installation instructions for setting up the development environment and dependencies
+** `STACK.md` - Detailed documentation of the technology stack in written form
+** `tech_stack_summary.html` - Visual summary of the technology stack used in the project
 * `branch-protection.adoc` - Documentation of branch protection rules and related repository files
-* `Conceptualización.pdf` - Project conceptualization document outlining the vision and objectives
-* `Diseño_DB_Pingponeros.svg` - Database design diagram showing the system architecture and data structure (Old version)
-* `Pila de producto(Jira).pdf` - Product backlog from Jira with features and requirements prioritization
-* `Prototipo de Alta Fidelidad (Figma).pdf` - High-fidelity prototype created in Figma with detailed design and interactions
-* `Prototipo de Baja Fidelidad (Figma).pdf` - Low-fidelity prototype created in Figma illustrating the user interface and experience design
-* `tech_stack_summary.png` - Summary of the technology stack used in the project, including frontend and backend technologies
-* `User Personas.pdf` - User personas documentation describing target users and their characteristics
-= Pingponeros-SA Project Documentation
-:authors: José_Manuel Mora, Carlos_Alberto Obando, Sebastian Gómez
-:lang: en
-:encoding: UTF-8
-:toc: left
-:toclevels: 2
-:toc-title: Contents
-:sectnums:
-:stem: latexmath
-:source-highlighter: highlight.js
-:nofooter:
+* `documentation.adoc` - This file, providing an overview of the project documentation structure and contents
 
-
-== Project Overview
-Repository for the Integrating Project in Software Engineering and Databases (PI de Ingeniería de Software y Bases de Datos).
-
-== Documentation Files
-
-* `branch-protection.adoc` - Documentation of branch protection rules and related repository files
-* `Conceptualización.pdf` - Project conceptualization document outlining the vision and objectives
-* `Diseño_DB_Pingponeros.svg` - Database design diagram showing the system architecture and data structure (Old version)
-* `Pila de producto(Jira).pdf` - Product backlog from Jira with features and requirements prioritization
-* `Prototipo de Alta Fidelidad (Figma).pdf` - High-fidelity prototype created in Figma with detailed design and interactions
-* `Prototipo de Baja Fidelidad (Figma).pdf` - Low-fidelity prototype created in Figma illustrating the user interface and experience design
-* `tech_stack_summary.png` - Summary of the technology stack used in the project, including frontend and backend technologies
-* `User Personas.pdf` - User personas documentation describing target users and their characteristics
