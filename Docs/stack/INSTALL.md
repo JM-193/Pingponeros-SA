@@ -1,12 +1,21 @@
 # Install Commands — Proyecto de Cargas Administrativas
 
 Copy-paste reference for setting up the project from scratch.
+Statuses mark what is already done in this repo vs what each developer must do locally.
+
+Status key:
+
+- [DONE] Already done in this repo.
+- [TODO] Not done in this repo yet.
+- [LOCAL] Must be installed on each developer machine.
 
 ---
 
-## Prerequisites
+## Prerequisites (local machine)
 
 ### 1. Node.js 24 LTS
+
+Status: [LOCAL] Required on each developer machine; not tracked in repo.
 
 Download from: <https://nodejs.org/en/download> (select "LTS")
 
@@ -19,6 +28,8 @@ npm --version
 
 ### 2. .NET 10 SDK
 
+Status: [LOCAL] Required on each developer machine; not tracked in repo.
+
 Download from: <https://dotnet.microsoft.com/en-us/download/dotnet/10.0>
 
 Verify:
@@ -29,18 +40,25 @@ dotnet --version   # should print 10.x.x
 
 ---
 
-## Frontend Setup
+## Frontend Setup (repo)
 
 ### Scaffold the React + TypeScript project
 
+Status: [DONE] Frontend already exists in the repo (Vite + React + TS).
+
 ```bash
-npm create vite@latest frontend -- --template react-ts
-cd frontend
+npm create vite@latest Frontend -- --template react-ts
+cd Frontend
 ```
 
 This creates a Vite project with React 19 and TypeScript 6 pre-configured.
 
 ### Install all frontend dependencies
+
+Status: [DONE] Dependencies are already listed and locked in the repo.
+
+Local setup: run `npm install` in Frontend to restore node_modules.
+The individual install commands below are only needed if re-creating the lockfile.
 
 ```bash
 npm install react-router-dom
@@ -55,6 +73,8 @@ npm install -D @typescript-eslint/eslint-plugin @typescript-eslint/parser
 
 ### Initialize Tailwind
 
+Status: [DONE] Tailwind is already configured in Vite and the main CSS.
+
 ```bash
 # In vite.config.ts, add the Tailwind plugin (see Tailwind v4 docs)
 # Then add @import "tailwindcss"; to your main CSS file
@@ -62,9 +82,11 @@ npm install -D @typescript-eslint/eslint-plugin @typescript-eslint/parser
 
 ---
 
-## Backend Setup
+## Backend Setup (repo)
 
 ### Create the ASP.NET Core Web API project
+
+Status: [DONE] Backend project already exists in the repo.
 
 ```bash
 dotnet new webapi -n Backend --framework net10.0
@@ -72,6 +94,8 @@ cd Backend
 ```
 
 ### Install NuGet packages
+
+Status: [DONE] Required packages are already referenced in the repo.
 
 ```bash
 # Oracle database driver
@@ -89,6 +113,8 @@ dotnet add package QuestPDF
 
 ### Roslyn Analyzers (no install needed)
 
+Status: [DONE] Analyzer settings are already present in the repo.
+
 Roslyn Analyzers are bundled with the .NET 10 SDK. To enable the full recommended ruleset, add this to your `.csproj`:
 
 ```xml
@@ -103,6 +129,8 @@ Roslyn Analyzers are bundled with the .NET 10 SDK. To enable the full recommende
 
 ## SonarCloud Setup
 
+Status: [TODO] No SonarCloud config file is present in the repo yet.
+
 1. Go to <https://sonarcloud.io> and sign in with GitHub/GitLab
 2. Create a new project linked to your repository
 3. Follow the setup wizard — it's free for public/student repos
@@ -112,9 +140,11 @@ Roslyn Analyzers are bundled with the .NET 10 SDK. To enable the full recommende
 
 ## Version lock reminder
 
+Status: [DONE] Version lock files are already present in the repo.
+
 After setup, always commit these files to the repo:
 
-- `frontend/package-lock.json` — locks exact frontend dependency versions
+- `Frontend/package-lock.json` — locks exact frontend dependency versions
 - `Backend/Backend.csproj` — locks NuGet package versions
 
 This ensures every teammate gets the exact same versions when they clone and install.
