@@ -48,6 +48,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: powershell
         run: |
-          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"JM-193_Pingponeros-SA" /o:"pingponeros-sa" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.sources="Backend,Frontend" /d:sonar.exclusions="**/bin/**,**/obj/**,**/node_modules/**,**/dist/**,**/coverage/**"
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"JM-193_Pingponeros-SA" /o:"pingponeros-sa" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.sources="Backend,Frontend" /d:sonar.exclusions="**/bin/**,**/obj/**,**/node_modules/**,**/dist/**,**/coverage/**"
           dotnet build Pingponeros-SA.sln --configuration Release
-          ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="$env:SONAR_TOKEN"
