@@ -34,7 +34,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.detect.outputs.exists == 'true'
-        run: npm ci
+        run: npm ci --ignore-scripts
         working-directory: Frontend
 
       - name: Lint (ESLint + Prettier)
