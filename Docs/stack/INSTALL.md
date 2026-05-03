@@ -127,9 +127,9 @@ Roslyn Analyzers are bundled with the .NET 10 SDK. To enable the full recommende
 
 ---
 
-## SonarCloud Setup
+## SonarQube Cloud Setup
 
-Status: [TODO] No SonarCloud config file is present in the repo yet.
+Status: [TODO] No SonarQube Cloud config file is present in the repo yet.
 
 1. Go to <https://sonarcloud.io> and sign in with GitHub/GitLab
 2. Create a new project linked to your repository

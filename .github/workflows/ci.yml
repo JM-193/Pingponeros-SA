@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Frontend – React + TypeScript (ESLint, Prettier, build, tests)
+  # Frontend - React + TypeScript (ESLint, Prettier, build, tests)
   # Skips gracefully when the frontend directory does not exist yet.
   # ---------------------------------------------------------------------------
   frontend:
@@ -17,43 +17,43 @@ jobs:
       - name: Detect frontend
         id: detect
         run: |
-          if [ -f "frontend/package.json" ]; then
+          if [ -f "Frontend/package.json" ]; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::frontend/package.json not found – skipping frontend checks."
+            echo "::notice::Frontend/package.json not found - skipping frontend checks."
           fi
 
       - name: Set up Node.js
         if: steps.detect.outputs.exists == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: Frontend/package-lock.json
 
       - name: Install dependencies
         if: steps.detect.outputs.exists == 'true'
         run: npm ci
-        working-directory: frontend
+        working-directory: Frontend
 
       - name: Lint (ESLint + Prettier)
         if: steps.detect.outputs.exists == 'true'
         run: npm run lint
-        working-directory: frontend
+        working-directory: Frontend
 
       - name: Build
         if: steps.detect.outputs.exists == 'true'
         run: npm run build
-        working-directory: frontend
+        working-directory: Frontend
 
       - name: Test
         if: steps.detect.outputs.exists == 'true'
         run: npm test -- --run
-        working-directory: frontend
+        working-directory: Frontend
 
   # ---------------------------------------------------------------------------
-  # Backend – ASP.NET Core + C# (build & tests with Roslyn analyzers)
+  # Backend - ASP.NET Core + C# (build & tests with Roslyn analyzers)
   # Skips gracefully when the backend directory does not exist yet.
   # ---------------------------------------------------------------------------
   backend:
@@ -66,38 +66,38 @@ jobs:
       - name: Detect backend
         id: detect
         run: |
-          if compgen -G "backend/**/*.csproj" > /dev/null 2>&1; then
+          if compgen -G "Backend/**/*.csproj" > /dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::No .csproj found under backend/ – skipping backend checks."
+            echo "::notice::No .csproj found under Backend/ - skipping backend checks."
           fi
 
       - name: Set up .NET
         if: steps.detect.outputs.exists == 'true'
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Restore
         if: steps.detect.outputs.exists == 'true'
         run: dotnet restore
-        working-directory: backend
+        working-directory: Backend
 
       - name: Build (with analyzers)
         if: steps.detect.outputs.exists == 'true'
         run: dotnet build --no-restore --configuration Release /warnaserror
-        working-directory: backend
+        working-directory: Backend
 
       - name: Test
         if: steps.detect.outputs.exists == 'true'
         run: dotnet test --no-build --configuration Release --logger "trx;LogFileName=results.trx"
-        working-directory: backend
+        working-directory: Backend
 
       - name: Upload test results
         if: steps.detect.outputs.exists == 'true' && always()
         uses: actions/upload-artifact@v4
         with:
           name: backend-test-results
-          path: backend/**/*.trx
+          path: Backend/**/*.trx
           if-no-files-found: ignore
