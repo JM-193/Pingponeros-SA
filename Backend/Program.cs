@@ -2,13 +2,8 @@ namespace Backend;
 
 public static class Program
 {
-    public static void Main(string[] args)
+    public static void Main()
     {
-        var builder = WebApplication.CreateBuilder(args);
-        var app = builder.Build();
-
-        app.MapGet("/", () => string.Empty);
-
-        app.Run();
+        // No code yet, but this is where the backend server would be started.
     }
 }
