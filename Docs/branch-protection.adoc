@@ -19,7 +19,7 @@ This document describes the branch protection rules configured for the `Pingpone
 The following files are committed to this repository and provide automation used by branch protection rules:
 
 * `.github/CODEOWNERS` - marks all three team members (`@JM-193`, `@Carlos-Obando-L`, `@SebasGomezCastro`) as required reviewers for every file.
-* `.github/workflows/ci.yml` - GitHub Actions workflow that runs ESLint + Prettier (frontend) and `dotnet build` + `dotnet test` (backend) on every PR targeting `main` or `dev`.
+* `.github/workflows/ci.yml` - GitHub Actions workflow that runs ESLint + Prettier (frontend) and `dotnet build` + `dotnet test` (backend) on every push and PR in all branches.
 
 ---
 
