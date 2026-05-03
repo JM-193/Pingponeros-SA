@@ -1,0 +1,6 @@
+# Code Owners for Pingponeros-SA
+# All three team members must review every change.
+# The last matching rule takes precedence.
+
+# Global rule: all files require review from all team members
+* @JM-193 @Carlos-Obando-L @SebasGomezCastro
