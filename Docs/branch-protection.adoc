@@ -32,7 +32,6 @@ Branch protection rules themselves cannot be stored in repository files; they mu
   ** Search for and add the following checks as required:
      *** `Frontend (Lint, Build & Test)`
      *** `Backend (Build & Test)`
-. Enable *Require signed commits* *(recommended)*
 . Under *Rules*, check *Do not allow bypassing the above settings* so that admins are also restricted.
 . Click *Save changes*.
 
