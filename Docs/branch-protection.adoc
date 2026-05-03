@@ -1,6 +1,14 @@
 = Branch Protection Rules
-:toc:
+:authors: José_Manuel Mora, Carlos_Alberto Obando, Sebastian Gómez
+:lang: en
+:encoding: UTF-8
+:toc: left
+:toclevels: 2
 :toc-title: Contents
+:sectnums:
+:stem: latexmath
+:source-highlighter: highlight.js
+:nofooter:
 
 This document explains the branch protection rules that have been configured for the `Pingponeros-SA` repository, and the manual steps required to activate them in the GitHub UI.
 

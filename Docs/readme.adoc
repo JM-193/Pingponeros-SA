@@ -1,4 +1,15 @@
 = Pingponeros-SA Project Documentation
+:authors: José_Manuel Mora, Carlos_Alberto Obando, Sebastian Gómez
+:lang: en
+:encoding: UTF-8
+:toc: left
+:toclevels: 2
+:toc-title: Contents
+:sectnums:
+:stem: latexmath
+:source-highlighter: highlight.js
+:nofooter:
+
 
 == Project Overview
 Repository for the Integrating Project in Software Engineering and Databases (PI de Ingeniería de Software y Bases de Datos).
