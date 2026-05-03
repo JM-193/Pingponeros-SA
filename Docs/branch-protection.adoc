@@ -1,0 +1,84 @@
+= Branch Protection Rules
+:authors: José_Manuel Mora, Carlos_Alberto Obando, Sebastian Gómez
+:lang: en
+:encoding: UTF-8
+:toc: left
+:toclevels: 2
+:toc-title: Contents
+:sectnums:
+:stem: latexmath
+:source-highlighter: highlight.js
+:nofooter:
+
+This document explains the branch protection rules that have been configured for the `Pingponeros-SA` repository, and the manual steps required to activate them in the GitHub UI.
+
+---
+
+== Automated setup (already in place)
+
+The following files were committed to this repository and take effect automatically:
+
+* `.github/CODEOWNERS` — marks all three team members (`@JM-193`, `@Carlos-Obando-L`, `@SebasGomezCastro`) as required reviewers for every file.
+* `.github/workflows/ci.yml` — GitHub Actions workflow that runs ESLint + Prettier (frontend) and `dotnet build` + `dotnet test` (backend) on every PR targeting `main` or `dev`.
+
+---
+
+== Manual steps required in the GitHub UI
+
+Branch protection rules themselves cannot be stored in repository files; they must be configured in *Settings → Branches*.
+
+=== 1. Protect `main`
+
+. Go to https://github.com/JM-193/Pingponeros-SA/settings/branches and click *Add branch protection rule*.
+. *Branch name pattern:* `main`
+. Enable *Require a pull request before merging*
+  ** *Required approvals:* `2`
+  ** Check *Dismiss stale pull request approvals when new commits are pushed*
+  ** Check *Require review from Code Owners*
+. Enable *Require status checks to pass before merging*
+  ** Check *Require branches to be up to date before merging*
+  ** Search for and add the following checks as required:
+     *** `Frontend (Lint, Build & Test)`
+     *** `Backend (Build & Test)`
+. Under *Rules*, check *Do not allow bypassing the above settings* so that admins are also restricted.
+. Click *Save changes*.
+
+=== 2. Protect `dev`
+
+. Click *Add branch protection rule* again.
+. *Branch name pattern:* `dev`
+. Enable *Require a pull request before merging*
+  ** *Required approvals:* `1`
+  ** Check *Dismiss stale pull request approvals when new commits are pushed*
+. Enable *Require status checks to pass before merging*
+  ** Check *Require branches to be up to date before merging*
+  ** Add the same required checks:
+     *** `Frontend (Lint, Build & Test)`
+     *** `Backend (Build & Test)`
+. Click *Save changes*.
+
+NOTE: Status check names appear in the dropdown only after the CI workflow has run at least once on a PR. If you cannot find them, open a test PR first to trigger the workflow, then come back and add them as required checks.
+
+---
+
+== Branch model summary
+
+[cols="1,3,1,1", options="header"]
+|===
+| Branch | Purpose | Min. approvals | Required CI
+
+| `main`
+| Stable, production-ready releases
+| 2 (+ code owners)
+| Frontend + Backend
+
+| `dev`
+| Active sprint development
+| 1
+| Frontend + Backend
+
+| `feature/*` / `fix/*`
+| Isolated work — merged into `dev` via PR
+| —
+| —
+|===
