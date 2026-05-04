@@ -152,6 +152,169 @@ export default function Navbar() {
     }
   }
 
+  // Render submenu arrow icon
+  const renderArrow = (isOpen, rotation = '180deg') => (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      style={{
+        transform: isOpen ? `rotate(${rotation})` : 'rotate(0deg)',
+        transition: 'transform 0.2s',
+      }}
+    >
+      <path d="M7 10l5 5 5-5z" />
+    </svg>
+  )
+
+  // Main navbar level item (level 0)
+  const renderNavbarItem = (item, menuId, isActive, hasSubmenu, isOpen) => (
+    <div 
+      key={menuId} 
+      style={{ position: 'relative' }}
+      onMouseEnter={() => hasSubmenu && toggleSubmenu(menuId)}
+      onMouseLeave={() => hasSubmenu && setOpenMenus({})}
+    >
+      <button
+        onClick={(e) => {
+          e.preventDefault()
+          if (!hasSubmenu) handleNavClick(item.path)
+        }}
+        style={{
+          fontSize: '13px',
+          fontWeight: 600,
+          color: '#fff',
+          backgroundColor: isActive ? COLORS.navBtn : isOpen ? COLORS.submenuBg : 'transparent',
+          border: isActive || isOpen ? 'none' : '1px solid rgba(255,255,255,0.35)',
+          borderRadius: '20px',
+          padding: '7px 18px',
+          cursor: 'pointer',
+          transition: 'background-color 0.15s',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+        }}
+        onMouseEnter={(e) => {
+          if (!isActive && !isOpen) e.currentTarget.style.backgroundColor = 'rgba(0,174,239,0.25)'
+        }}
+        onMouseLeave={(e) => {
+          if (!isActive && !isOpen) e.currentTarget.style.backgroundColor = 'transparent'
+        }}
+      >
+        {item.label}
+        {hasSubmenu && renderArrow(isOpen)}
+      </button>
+
+      {hasSubmenu && isOpen && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            backgroundColor: COLORS.submenuBg,
+            borderRadius: '6px',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+            minWidth: '220px',
+            zIndex: 100,
+            overflow: 'visible',
+            marginTop: '4px',
+          }}
+        >
+          {renderMenuItems(item.submenu, 1, menuId)}
+        </div>
+      )}
+    </div>
+  )
+
+  // First submenu level item (level 1)
+  const renderSubmenuLevel1Item = (item, menuId, hasSubmenu, isOpen) => (
+    <div 
+      key={menuId} 
+      style={{ position: 'relative' }}
+      onMouseEnter={() => hasSubmenu && toggleSubmenu(menuId)}
+      onMouseLeave={() => {
+        if (hasSubmenu) {
+          const newState = { ...openMenus }
+          delete newState[menuId]
+          setOpenMenus(newState)
+        }
+      }}
+    >
+      <button
+        onClick={(e) => {
+          e.preventDefault()
+          if (!hasSubmenu) handleNavClick(item.path)
+        }}
+        style={{
+          width: '100%',
+          padding: '12px 16px',
+          textAlign: 'left',
+          border: 'none',
+          background: 'none',
+          fontSize: '13px',
+          color: '#fff',
+          cursor: 'pointer',
+          borderBottom: '1px solid #eee',
+          transition: 'background-color 0.15s',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = COLORS.navBtn}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+      >
+        <span>{item.label}</span>
+        {hasSubmenu && renderArrow(isOpen, '90deg')}
+      </button>
+
+      {hasSubmenu && isOpen && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: '100%',
+            backgroundColor: COLORS.submenuBg,
+            borderRadius: '6px',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+            minWidth: '200px',
+            zIndex: 101,
+            overflow: 'visible',
+            marginLeft: '4px',
+          }}
+        >
+          {renderMenuItems(item.submenu, 2, menuId)}
+        </div>
+      )}
+    </div>
+  )
+
+  // Level 2+ submenu item (no more nesting)
+  const renderSubmenuLevel2Item = (item, menuId) => (
+    <button
+      key={menuId}
+      onClick={() => handleNavClick(item.path)}
+      style={{
+        display: 'block',
+        width: '100%',
+        padding: '12px 16px',
+        textAlign: 'left',
+        border: 'none',
+        background: 'none',
+        fontSize: '13px',
+        color: '#fff',
+        cursor: 'pointer',
+        borderBottom: '1px solid #eee',
+        transition: 'background-color 0.15s',
+      }}
+      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = COLORS.navBtn}
+      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+    >
+      {item.label}
+    </button>
+  )
+
+  // Main render function
   const renderMenuItems = (items, level = 0, parentId = '') => {
     return items.map((item, index) => {
       const menuId = `${parentId ? parentId + '-' : ''}${index}`
@@ -160,206 +323,11 @@ export default function Navbar() {
       const isOpen = openMenus[menuId]
 
       if (level === 0) {
-        // Main navbar level
-        return (
-          <div 
-            key={menuId} 
-            style={{ position: 'relative' }}
-            onMouseEnter={() => {
-              if (hasSubmenu) {
-                toggleSubmenu(menuId)
-              }
-            }}
-            onMouseLeave={() => {
-              if (hasSubmenu) {
-                setOpenMenus({})
-              }
-            }}
-          >
-            <button
-              onClick={(e) => {
-                e.preventDefault()
-                if (!hasSubmenu) {
-                  handleNavClick(item.path)
-                }
-              }}
-              style={{
-                fontSize: '13px',
-                fontWeight: 600,
-                color: '#fff',
-                backgroundColor:
-                  isActive? COLORS.navBtn : isOpen? COLORS.submenuBg : 'transparent',
-                border: isActive || isOpen ? 'none' : '1px solid rgba(255,255,255,0.35)',
-                borderRadius: '20px',
-                padding: '7px 18px',
-                cursor: 'pointer',
-                transition: 'background-color 0.15s',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-              }}
-              onMouseEnter={(e) => {
-                if (!isActive && !isOpen) {
-                  e.currentTarget.style.backgroundColor = 'rgba(0,174,239,0.25)'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isActive && !isOpen) {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }
-              }}
-            >
-              {item.label}
-              {hasSubmenu && (
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  style={{
-                    transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                    transition: 'transform 0.2s',
-                  }}
-                >
-                  <path d="M7 10l5 5 5-5z" />
-                </svg>
-              )}
-            </button>
-
-            {hasSubmenu && isOpen && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  backgroundColor: COLORS.submenuBg,
-                  borderRadius: '6px',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-                  minWidth: '220px',
-                  zIndex: 100,
-                  overflow: 'visible',
-                  marginTop: '4px',
-                }}
-              >
-                {renderMenuItems(item.submenu, level + 1, menuId)}
-              </div>
-            )}
-          </div>
-        )
+        return renderNavbarItem(item, menuId, isActive, hasSubmenu, isOpen)
       } else if (level === 1) {
-        // First submenu level
-        return (
-          <div 
-            key={menuId} 
-            style={{ position: 'relative' }}
-            onMouseEnter={() => {
-              if (hasSubmenu) {
-                toggleSubmenu(menuId)
-              }
-            }}
-            onMouseLeave={() => {
-              if (hasSubmenu) {
-                const newState = { ...openMenus }
-                delete newState[menuId]
-                setOpenMenus(newState)
-              }
-            }}
-          >
-            <button
-              onClick={(e) => {
-                e.preventDefault()
-                if (!hasSubmenu) {
-                  handleNavClick(item.path)
-                }
-              }}
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                textAlign: 'left',
-                border: 'none',
-                background: 'none',
-                fontSize: '13px',
-                color: '#fff',
-                cursor: 'pointer',
-                borderBottom: '1px solid #eee',
-                transition: 'background-color 0.15s',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = COLORS.navBtn
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent'
-              }}
-            >
-              <span>{item.label}</span>
-              {hasSubmenu && (
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  style={{
-                    transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-                    transition: 'transform 0.2s',
-                  }}
-                >
-                  <path d="M7 10l5 5 5-5z" />
-                </svg>
-              )}
-            </button>
-
-            {hasSubmenu && isOpen && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: '100%',
-                  backgroundColor: COLORS.submenuBg,
-                  borderRadius: '6px',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-                  minWidth: '200px',
-                  zIndex: 101,
-                  overflow: 'visible',
-                  marginLeft: '4px',
-                }}
-              >
-                {renderMenuItems(item.submenu, level + 1, menuId)}
-              </div>
-            )}
-          </div>
-        )
+        return renderSubmenuLevel1Item(item, menuId, hasSubmenu, isOpen)
       } else {
-        // Level 2+ submenu (no more nesting)
-        return (
-          <button
-            key={menuId}
-            onClick={() => handleNavClick(item.path)}
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: '12px 16px',
-              textAlign: 'left',
-              border: 'none',
-              background: 'none',
-              fontSize: '13px',
-              color: '#fff',
-              cursor: 'pointer',
-              borderBottom: '1px solid #eee',
-              transition: 'background-color 0.15s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = COLORS.navBtn
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent'
-            }}
-          >
-            {item.label}
-          </button>
-        )
+        return renderSubmenuLevel2Item(item, menuId)
       }
     })
   }
