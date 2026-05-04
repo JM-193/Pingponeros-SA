@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 const COLORS = {
-  navBg: '#1D4F91',
+  navBg: '#0e4671',
   submenuBg: '#002948',
-  navBtn: '#00AEEF',
+  navBtn: '#005da4',
 }
 
 const NAV_ITEMS = [
@@ -249,10 +249,10 @@ export default function Navbar() {
     return (
       <div
         key={menuId}
-        style={{ position: 'relative' }}
+        style={{ position: 'relative', display: 'flex', alignItems: 'stretch' }}
         data-menu-root={menuId}
       >
-      <button
+        <button
         type="button"
         aria-haspopup={hasSubmenu ? 'true' : undefined}
         aria-expanded={hasSubmenu ? isOpen : undefined}
@@ -271,14 +271,18 @@ export default function Navbar() {
           fontWeight: 600,
           color: '#fff',
           backgroundColor: buttonBgColor,
-          border: isActive || isOpen ? 'none' : '1px solid rgba(255,255,255,0.35)',
-          borderRadius: '20px',
-          padding: '7px 18px',
+          border: 'none',
+          borderRadius: 0,
+          padding: '14px 20px',
+          margin: 0,
           cursor: 'pointer',
           transition: 'background-color 0.15s',
           display: 'flex',
           alignItems: 'center',
-          gap: '4px',
+          gap: '6px',
+          lineHeight: 1,
+          whiteSpace: 'nowrap',
+          height: '100%',
         }}
         onMouseEnter={(e) => {
           clearCloseTimer()
@@ -297,27 +301,28 @@ export default function Navbar() {
         {hasSubmenu && renderArrow(isOpen)}
       </button>
 
-      {hasSubmenu && isOpen && (
-        <div
-          id={`${menuId}-menu`}
-          style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            backgroundColor: COLORS.submenuBg,
-            borderRadius: '6px',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-            minWidth: '220px',
-            zIndex: 100,
-            overflow: 'visible',
-            marginTop: '4px',
-          }}
-        >
-          {renderMenuItems(item.submenu, 1, menuId)}
-        </div>
-      )}
-    </div>
-  )
+        {hasSubmenu && isOpen && (
+          <div
+            id={`${menuId}-menu`}
+            style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              backgroundColor: COLORS.submenuBg,
+              borderRadius: '0 0 6px 6px',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+              minWidth: '240px',
+              zIndex: 100,
+              overflow: 'visible',
+              marginTop: '-1px',
+              padding: '6px 0',
+            }}
+          >
+            {renderMenuItems(item.submenu, 1, menuId)}
+          </div>
+        )}
+      </div>
+    )
   }
 
   // First submenu level item (level 1)
@@ -343,14 +348,14 @@ export default function Navbar() {
         onFocus={() => hasSubmenu && !isOpen && toggleSubmenu(menuId)}
         style={{
           width: '100%',
-          padding: '12px 16px',
+          padding: '12px 18px',
           textAlign: 'left',
           border: 'none',
           background: 'none',
           fontSize: '13px',
           color: '#fff',
           cursor: 'pointer',
-          borderBottom: '1px solid #eee',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
           transition: 'background-color 0.15s',
           display: 'flex',
           alignItems: 'center',
@@ -390,6 +395,7 @@ export default function Navbar() {
             zIndex: 101,
             overflow: 'visible',
             marginLeft: '4px',
+            padding: '6px 0',
           }}
         >
           {renderMenuItems(item.submenu, 2, menuId)}
@@ -406,14 +412,14 @@ export default function Navbar() {
       style={{
         display: 'block',
         width: '100%',
-        padding: '12px 16px',
+        padding: '12px 18px',
         textAlign: 'left',
         border: 'none',
         background: 'none',
         fontSize: '13px',
         color: '#fff',
         cursor: 'pointer',
-        borderBottom: '1px solid #eee',
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
         transition: 'background-color 0.15s',
       }}
       onMouseEnter={(e) => {
@@ -458,15 +464,15 @@ export default function Navbar() {
     <nav
       style={{
         backgroundColor: COLORS.navBg,
-        padding: '8px 24px',
+        padding: '0 24px',
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'stretch',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: '8px',
+        gap: 0,
       }}
     >
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 0, alignItems: 'stretch' }}>
         {renderMenuItems(NAV_ITEMS)}
       </div>
 
@@ -518,7 +524,7 @@ export default function Navbar() {
             ref={profileMenuRef}
             style={{
               position: 'absolute',
-              top: '45px',
+              top: '52px',
               right: 0,
               backgroundColor: '#fff',
               borderRadius: '6px',
