@@ -14,8 +14,8 @@ const NAV_ITEMS = [
     activeOn: '/usuarios',
     submenu: [
       { label: 'Crear usuario', path: '/usuarios/crear' },
-      { label: 'Asignar N° de plaza', path: '/usuarios/asignar-plaza' },
-      { label: 'Consultar usuario', path: '/usuarios/consultar' },
+      /*{ label: 'Asignar N° de plaza', path: '/usuarios/asignar-plaza' },
+      { label: 'Consultar usuario', path: '/usuarios/consultar' },*/
     ],
   },
   {
@@ -32,7 +32,7 @@ const NAV_ITEMS = [
           { label: 'Eliminar', path: '/organizacion/areas/eliminar' },
         ],
       },
-      {
+      /*{
         label: 'Departamentos',
         activeOn: '/organizacion/departamentos',
         submenu: [
@@ -41,8 +41,8 @@ const NAV_ITEMS = [
           { label: 'Modificar', path: '/organizacion/departamentos/modificar' },
           { label: 'Eliminar', path: '/organizacion/departamentos/eliminar' },
         ],
-      },
-      {
+      },*/
+      /*{
         label: 'Secciones',
         activeOn: '/organizacion/secciones',
         submenu: [
@@ -51,8 +51,8 @@ const NAV_ITEMS = [
           { label: 'Modificar', path: '/organizacion/secciones/modificar' },
           { label: 'Eliminar', path: '/organizacion/secciones/eliminar' },
         ],
-      },
-      {
+      },*/
+      /*{
         label: 'Unidades',
         activeOn: '/organizacion/unidades',
         submenu: [
@@ -61,18 +61,18 @@ const NAV_ITEMS = [
           { label: 'Modificar', path: '/organizacion/unidades/modificar' },
           { label: 'Eliminar', path: '/organizacion/unidades/eliminar' },
         ],
-      },
+      },*/
     ],
   },
-  {
+  /*{
     label: 'Consultas',
     activeOn: '/consultas',
     submenu: [
       { label: 'Diagnostico de carga', path: '/organizacion/consultas/diagnostico' },
       { label: 'Consultas adicionales', path: '/organizacion/consultas/adicionales' },
     ],
-  },
-  {
+  },*/
+  /*{
     label: 'Funciones',
     activeOn: '/funciones',
     submenu: [
@@ -81,7 +81,7 @@ const NAV_ITEMS = [
       { label: 'Modificar', path: '/organizacion/funciones/modificar' },
       { label: 'Eliminar', path: '/organizacion/funciones/eliminar' },
     ],
-  },
+  },*/
 ]
 
 export default function Navbar() {
