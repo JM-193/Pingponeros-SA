@@ -241,12 +241,17 @@ export default function Navbar() {
   )
 
   // Main navbar level item (level 0)
-  const renderNavbarItem = (item, menuId, isActive, hasSubmenu, isOpen) => (
-    <div
-      key={menuId}
-      style={{ position: 'relative' }}
-      data-menu-root={menuId}
-    >
+  const renderNavbarItem = (item, menuId, isActive, hasSubmenu, isOpen) => {
+    let buttonBgColor = 'transparent'
+    if (isOpen) buttonBgColor = COLORS.submenuBg
+    if (isActive) buttonBgColor = COLORS.navBtn
+
+    return (
+      <div
+        key={menuId}
+        style={{ position: 'relative' }}
+        data-menu-root={menuId}
+      >
       <button
         type="button"
         aria-haspopup={hasSubmenu ? 'true' : undefined}
@@ -265,7 +270,7 @@ export default function Navbar() {
           fontSize: '13px',
           fontWeight: 600,
           color: '#fff',
-          backgroundColor: isActive ? COLORS.navBtn : isOpen ? COLORS.submenuBg : 'transparent',
+          backgroundColor: buttonBgColor,
           border: isActive || isOpen ? 'none' : '1px solid rgba(255,255,255,0.35)',
           borderRadius: '20px',
           padding: '7px 18px',
@@ -313,6 +318,7 @@ export default function Navbar() {
       )}
     </div>
   )
+  }
 
   // First submenu level item (level 1)
   const renderSubmenuLevel1Item = (item, menuId, hasSubmenu, isOpen, rootMenuId) => (
