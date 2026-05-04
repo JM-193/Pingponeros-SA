@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 
-/* ── UCR brand palette ──────────────────────────────────────
+/* UCR brand palette
    Azul UCR  #00AEEF  (Pantone 299 C)
    Azul oscuro institucional  #1D4F91
    Footer   #2D2F34
    Fondo     #e9e9e9
-   ─────────────────────────────────────────────────────────── */
+   */
 
 const COLORS = {
   bodyBg: '#e9e9e9',
