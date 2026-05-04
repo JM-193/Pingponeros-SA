@@ -68,7 +68,6 @@ export default function Login() {
         <div style={{ width: '100%', maxWidth: '440px', textAlign: 'center' }}>
           <h1
             style={{
-              fontFamily: 'Arial, sans-serif',
               fontWeight: 900,
               fontSize: 'clamp(20px, 3vw, 30px)',
               textTransform: 'uppercase',
@@ -81,7 +80,6 @@ export default function Login() {
           </h1>
           <h2
             style={{
-              fontFamily: 'Arial, sans-serif',
               fontWeight: 800,
               fontSize: 'clamp(13px, 1.8vw, 18px)',
               textTransform: 'uppercase',
@@ -101,7 +99,6 @@ export default function Login() {
               <label
                 htmlFor="email"
                 style={{
-                  fontFamily: 'Arial, sans-serif',
                   fontSize: '14px',
                   fontWeight: 600,
                   color: '#777',
@@ -116,7 +113,6 @@ export default function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder=""
                 style={{
-                  fontFamily: 'Arial, sans-serif',
                   padding: '14px 18px',
                   border: errors.email ? '2px solid #d10f0f' : '1px solid #d0d0d0',
                   borderRadius: '4px',
@@ -128,7 +124,7 @@ export default function Login() {
                 }}
               />
               {errors.email && (
-                <span style={{ fontFamily: 'Arial, sans-serif', fontSize: '12px', color: '#d10f0f' }}>
+                <span style={{ fontSize: '12px', color: '#d10f0f' }}>
                   {errors.email}
                 </span>
               )}
@@ -138,7 +134,6 @@ export default function Login() {
               <label
                 htmlFor="password"
                 style={{
-                  fontFamily: 'Arial, sans-serif',
                   fontSize: '14px',
                   fontWeight: 600,
                   color: '#777',
@@ -153,7 +148,6 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder=""
                 style={{
-                  fontFamily: 'Arial, sans-serif',
                   padding: '14px 18px',
                   border: errors.password ? '2px solid #d10f0f' : '1px solid #d0d0d0',
                   borderRadius: '4px',
@@ -165,7 +159,7 @@ export default function Login() {
                 }}
               />
               {errors.password && (
-                <span style={{ fontFamily: 'Arial, sans-serif', fontSize: '12px', color: '#d10f0f' }}>
+                <span style={{ fontSize: '12px', color: '#d10f0f' }}>
                   {errors.password}
                 </span>
               )}
@@ -174,7 +168,6 @@ export default function Login() {
             <button
               type="submit"
               style={{
-                fontFamily: 'Arial, sans-serif',
                 padding: '14px',
                 backgroundColor: COLORS.btnBg,
                 color: '#fff',
@@ -194,7 +187,6 @@ export default function Login() {
             <a
               href="/recuperar-contrasena"
               style={{
-                fontFamily: 'Arial, sans-serif',
                 color: COLORS.btnBg,
                 fontSize: '14px',
                 textDecoration: 'underline',
@@ -204,7 +196,6 @@ export default function Login() {
             </a>
             <p
               style={{
-                fontFamily: 'Arial, sans-serif',
                 fontSize: '12px',
                 color: '#777',
                 margin: '10px 0 0',

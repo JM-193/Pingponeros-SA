@@ -38,36 +38,36 @@ export default function Footer() {
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
             </svg>
           </div>
-          <p style={{ fontFamily: 'Arial, sans-serif', fontSize: '11px', color: '#aaa', margin: 0 }}>
+          <p style={{ fontSize: '11px', color: '#aaa', margin: 0 }}>
             © Escuela de Ciencias de la Computación e Informática, 2026.
           </p>
         </div>
 
         {/* Columna central: Contacto */}
         <div>
-          <p style={{ fontFamily: 'Arial, sans-serif', fontWeight: 700, fontSize: '14px', margin: '0 0 10px' }}>
+          <p style={{ fontWeight: 700, fontSize: '14px', margin: '0 0 10px' }}>
             Contacto
           </p>
-          <p style={{ fontFamily: 'Arial, sans-serif', fontSize: '13px', margin: '0 0 4px', color: '#ccc' }}>
+          <p style={{ fontSize: '13px', margin: '0 0 4px', color: '#ccc' }}>
             +506 2222-4040
           </p>
-          <p style={{ fontFamily: 'Arial, sans-serif', fontSize: '13px', margin: 0, color: '#ccc' }}>
+          <p style={{ fontSize: '13px', margin: 0, color: '#ccc' }}>
             ecci@ucr.ac.cr
           </p>
         </div>
 
         {/* Columna derecha – Enlaces rápidos */}
         <div>
-          <p style={{ fontFamily: 'Arial, sans-serif', fontWeight: 700, fontSize: '14px', margin: '0 0 10px' }}>
+          <p style={{ fontWeight: 700, fontSize: '14px', margin: '0 0 10px' }}>
             Enlaces rápidos
           </p>
-          <a href="https://portal.ucr.ac.cr/" target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'Arial, sans-serif', display: 'block', color: '#ccc', fontSize: '13px', textDecoration: 'none', marginBottom: '6px' }}>
+          <a href="https://portal.ucr.ac.cr/" target="_blank" rel="noopener noreferrer" style={{ display: 'block', color: '#ccc', fontSize: '13px', textDecoration: 'none', marginBottom: '6px' }}>
             Portal UCR
           </a>
-          <a href="https://ematricula.ucr.ac.cr/ematricula" target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'Arial, sans-serif', display: 'block', color: '#ccc', fontSize: '13px', textDecoration: 'none', marginBottom: '6px' }}>
+          <a href="https://ematricula.ucr.ac.cr/ematricula" target="_blank" rel="noopener noreferrer" style={{ display: 'block', color: '#ccc', fontSize: '13px', textDecoration: 'none', marginBottom: '6px' }}>
             Matrícula Web
           </a>
-          <a href="https://soporteci.ucr.ac.cr/" target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'Arial, sans-serif', display: 'block', color: '#ccc', fontSize: '13px', textDecoration: 'none' }}>
+          <a href="https://soporteci.ucr.ac.cr/" target="_blank" rel="noopener noreferrer" style={{ display: 'block', color: '#ccc', fontSize: '13px', textDecoration: 'none' }}>
             Soporte Técnico
           </a>
         </div>
