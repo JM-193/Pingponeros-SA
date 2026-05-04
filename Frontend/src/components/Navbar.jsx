@@ -3,16 +3,85 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 const COLORS = {
   navBg: '#1D4F91',
+  submenuBg: '#002948',
   navBtn: '#00AEEF',
 }
 
 const NAV_ITEMS = [
   { label: 'P\u00e1gina Principal', path: '/home', activeOn: '/home' },
-  // { label: 'Declaraciones', path: '/declaraciones', activeOn: '/declaraciones' },
-  // { label: 'Consultas', path: '/consultas', activeOn: '/consultas' },
-  { label: 'Usuarios', path: '/usuarios', activeOn: '/usuarios' },
-  { label: 'Organizaci\u00f3n', path: '/organizacion', activeOn: '/organizacion' },
-  // { label: 'Funciones', path: '/funciones', activeOn: '/funciones' },
+  {
+    label: 'Usuarios',
+    activeOn: '/usuarios',
+    submenu: [
+      { label: 'Crear usuario', path: '/usuarios/crear' },
+      { label: 'Asignar N° de plaza', path: '/usuarios/asignar-plaza' },
+      { label: 'Consultar usuario', path: '/usuarios/consultar' },
+    ],
+  },
+  {
+    label: 'Organización',
+    activeOn: '/organizacion',
+    submenu: [
+      {
+        label: 'Áreas',
+        activeOn: '/organizacion/areas',
+        submenu: [
+          { label: 'Crear', path: '/organizacion/areas/crear' },
+          { label: 'Consultar', path: '/organizacion/areas/consultar' },
+          { label: 'Modificar', path: '/organizacion/areas/modificar' },
+          { label: 'Eliminar', path: '/organizacion/areas/eliminar' },
+        ],
+      },
+      {
+        label: 'Departamentos',
+        activeOn: '/organizacion/departamentos',
+        submenu: [
+          { label: 'Crear', path: '/organizacion/departamentos/crear' },
+          { label: 'Consultar', path: '/organizacion/departamentos/consultar' },
+          { label: 'Modificar', path: '/organizacion/departamentos/modificar' },
+          { label: 'Eliminar', path: '/organizacion/departamentos/eliminar' },
+        ],
+      },
+      {
+        label: 'Secciones',
+        activeOn: '/organizacion/secciones',
+        submenu: [
+          { label: 'Crear', path: '/organizacion/secciones/crear' },
+          { label: 'Consultar', path: '/organizacion/secciones/consultar' },
+          { label: 'Modificar', path: '/organizacion/secciones/modificar' },
+          { label: 'Eliminar', path: '/organizacion/secciones/eliminar' },
+        ],
+      },
+      {
+        label: 'Unidades',
+        activeOn: '/organizacion/unidades',
+        submenu: [
+          { label: 'Crear', path: '/organizacion/unidades/crear' },
+          { label: 'Consultar', path: '/organizacion/unidades/consultar' },
+          { label: 'Modificar', path: '/organizacion/unidades/modificar' },
+          { label: 'Eliminar', path: '/organizacion/unidades/eliminar' },
+        ],
+      },
+    ],
+  },
+  {
+    label: 'Consultas',
+    activeOn: '/consultas',
+    submenu: [
+      { label: 'Diagnostico de carga', path: '/organizacion/consultas/diagnostico' },
+      { label: 'Consultas adicionales', path: '/organizacion/consultas/adicionales' },
+    ],
+  },
+  {
+    label: 'Funciones',
+    activeOn: '/funciones',
+    submenu: [
+      { label: 'Crear', path: '/organizacion/funciones/crear' },
+      { label: 'Consultar', path: '/organizacion/funciones/consultar' },
+      { label: 'Modificar', path: '/organizacion/funciones/modificar' },
+      { label: 'Eliminar', path: '/organizacion/funciones/eliminar' },
+    ],
+  },
 ]
 
 export default function Navbar() {
@@ -33,41 +102,20 @@ export default function Navbar() {
       }}
     >
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-        {NAV_ITEMS.map((item) => {
-          const isActive = item.activeOn === location.pathname
-
-          return (
-            <button
-              key={item.label}
-              onClick={() => {
-                if (item.path) navigate(item.path)
-              }}
-              style={{
-                fontSize: '13px',
-                fontWeight: 600,
-                color: '#fff',
-                backgroundColor: isActive ? COLORS.navBtn : 'transparent',
-                border: isActive ? 'none' : '1px solid rgba(255,255,255,0.35)',
-                borderRadius: '20px',
-                padding: '7px 18px',
-                cursor: 'pointer',
-                transition: 'background-color 0.15s',
-              }}
-              onMouseEnter={(e) => {
-                if (!isActive) e.currentTarget.style.backgroundColor = 'rgba(0,174,239,0.25)'
-              }}
-              onMouseLeave={(e) => {
-                if (!isActive) e.currentTarget.style.backgroundColor = 'transparent'
-              }}
-            >
-              {item.label}
-            </button>
-          )
-        })}
+        {renderMenuItems(NAV_ITEMS)}
       </div>
 
       <button
-        style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
+        style={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          cursor: 'pointer',
+          background: 'none',
+          border: 'none',
+          padding: 0,
+        }}
         onClick={() => setMenuOpen(!menuOpen)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
