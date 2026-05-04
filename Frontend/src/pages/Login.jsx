@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import ucrLogo from '../assets/firma-tipografica-una-linea-blanco.png'
-import vraLogo from '../assets/vrasgv/VRA_B-N_2.svg'
+import { useNavigate } from 'react-router-dom'
+import Header from '../components/Header'
 import Footer from '../components/Footer'
 
 /* ── UCR brand palette ──────────────────────────────────────
@@ -11,12 +11,12 @@ import Footer from '../components/Footer'
    ─────────────────────────────────────────────────────────── */
 
 const COLORS = {
-  headerBg: '#00AEEF',
   bodyBg: '#e9e9e9',
   btnBg: '#1D4F91',
 }
 
 export default function Login() {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState({})
@@ -43,37 +43,17 @@ export default function Login() {
       return
     }
 
-    // Limpiar errores si todo es válido
+    // Limpiar errores si es válido
     setErrors({})
     // TODO: llamada al endpoint de autenticación
-    console.log('Formulario válido - correo:', email, 'password:', password)
+    navigate('/home')
   }
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: COLORS.bodyBg }}>
 
       {/* Header */}
-      <header
-        style={{
-          backgroundColor: COLORS.headerBg,
-          padding: '10px 40px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          gap: '20px',
-        }}
-      >
-        <img
-          src={ucrLogo}
-          alt="Universidad de Costa Rica"
-          style={{ height: '55px', objectFit: 'contain' }}
-        />
-        <img
-          src={vraLogo}
-          alt="Vicerrectoría de Administración"
-          style={{ height: '75px', objectFit: 'contain', maxWidth: '220px' }}
-        />
-      </header>
+      <Header />
 
       {/* Main */}
       <main
@@ -119,6 +99,7 @@ export default function Login() {
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' }}>
               <label
+                htmlFor="email"
                 style={{
                   fontFamily: 'Arial, sans-serif',
                   fontSize: '14px',
@@ -129,6 +110,7 @@ export default function Login() {
                 Correo Institucional
               </label>
               <input
+                id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -154,6 +136,7 @@ export default function Login() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' }}>
               <label
+                htmlFor="password"
                 style={{
                   fontFamily: 'Arial, sans-serif',
                   fontSize: '14px',
@@ -164,6 +147,7 @@ export default function Login() {
                 Contraseña
               </label>
               <input
+                id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -208,7 +192,7 @@ export default function Login() {
 
           <div style={{ marginTop: '20px' }}>
             <a
-              href="#"
+              href="/recuperar-contrasena"
               style={{
                 fontFamily: 'Arial, sans-serif',
                 color: COLORS.btnBg,

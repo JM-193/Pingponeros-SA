@@ -1,5 +1,5 @@
-import Login from './pages/Login'
+import AppRouter from './router/index'
 
 export default function App() {
-  return <Login />
+  return <AppRouter />
 }
