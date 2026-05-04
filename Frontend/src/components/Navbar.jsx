@@ -88,6 +88,282 @@ export default function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [openMenus, setOpenMenus] = useState({})
+
+  const toggleSubmenu = (menuId) => {
+    setOpenMenus((prev) => {
+      if (prev[menuId]) {
+        // If already open, close it
+        const newState = { ...prev }
+        delete newState[menuId]
+        return newState
+      } else {
+        // If not open, close only siblings at the same level
+        const newState = { ...prev }
+        
+        // Get the level and parent of the current menu
+        const parts = menuId.split('-')
+        const currentLevel = parts.length - 1
+        
+        // If level 2 or higher, keep parents open
+        if (currentLevel >= 1) {
+          // Build the parent ID
+          const parentId = parts.slice(0, -1).join('-')
+          
+          // Close only siblings at the same parent level
+          Object.keys(newState).forEach((key) => {
+            const keyParts = key.split('-')
+            const keyLevel = keyParts.length - 1
+            
+            // If it's a sibling (same level and parent), close it
+            if (keyLevel === currentLevel) {
+              const keyParent = keyParts.slice(0, -1).join('-')
+              if (keyParent === parentId) {
+                delete newState[key]
+              }
+            }
+          })
+          
+          // Ensure all parents are open
+          for (let i = 0; i < currentLevel; i++) {
+            const ancestorId = parts.slice(0, i + 1).join('-')
+            newState[ancestorId] = true
+          }
+        } else {
+          // If level 0, close all other level 0
+          Object.keys(newState).forEach((key) => {
+            const keyParts = key.split('-')
+            if (keyParts.length === 1) {
+              delete newState[key]
+            }
+          })
+        }
+        
+        newState[menuId] = true
+        return newState
+      }
+    })
+  }
+
+  const handleNavClick = (path) => {
+    if (path) {
+      navigate(path)
+      setOpenMenus({})
+    }
+  }
+
+  const renderMenuItems = (items, level = 0, parentId = '') => {
+    return items.map((item, index) => {
+      const menuId = `${parentId ? parentId + '-' : ''}${index}`
+      const isActive = item.activeOn === location.pathname
+      const hasSubmenu = item.submenu && item.submenu.length > 0
+      const isOpen = openMenus[menuId]
+
+      if (level === 0) {
+        // Main navbar level
+        return (
+          <div 
+            key={menuId} 
+            style={{ position: 'relative' }}
+            onMouseEnter={() => {
+              if (hasSubmenu) {
+                toggleSubmenu(menuId)
+              }
+            }}
+            onMouseLeave={() => {
+              if (hasSubmenu) {
+                setOpenMenus({})
+              }
+            }}
+          >
+            <button
+              onClick={(e) => {
+                e.preventDefault()
+                if (!hasSubmenu) {
+                  handleNavClick(item.path)
+                }
+              }}
+              style={{
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#fff',
+                backgroundColor:
+                  isActive? COLORS.navBtn : isOpen? COLORS.submenuBg : 'transparent',
+                border: isActive || isOpen ? 'none' : '1px solid rgba(255,255,255,0.35)',
+                borderRadius: '20px',
+                padding: '7px 18px',
+                cursor: 'pointer',
+                transition: 'background-color 0.15s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive && !isOpen) {
+                  e.currentTarget.style.backgroundColor = 'rgba(0,174,239,0.25)'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive && !isOpen) {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                }
+              }}
+            >
+              {item.label}
+              {hasSubmenu && (
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  style={{
+                    transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s',
+                  }}
+                >
+                  <path d="M7 10l5 5 5-5z" />
+                </svg>
+              )}
+            </button>
+
+            {hasSubmenu && isOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  backgroundColor: COLORS.submenuBg,
+                  borderRadius: '6px',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+                  minWidth: '220px',
+                  zIndex: 100,
+                  overflow: 'visible',
+                  marginTop: '4px',
+                }}
+              >
+                {renderMenuItems(item.submenu, level + 1, menuId)}
+              </div>
+            )}
+          </div>
+        )
+      } else if (level === 1) {
+        // First submenu level
+        return (
+          <div 
+            key={menuId} 
+            style={{ position: 'relative' }}
+            onMouseEnter={() => {
+              if (hasSubmenu) {
+                toggleSubmenu(menuId)
+              }
+            }}
+            onMouseLeave={() => {
+              if (hasSubmenu) {
+                const newState = { ...openMenus }
+                delete newState[menuId]
+                setOpenMenus(newState)
+              }
+            }}
+          >
+            <button
+              onClick={(e) => {
+                e.preventDefault()
+                if (!hasSubmenu) {
+                  handleNavClick(item.path)
+                }
+              }}
+              style={{
+                display: 'block',
+                width: '100%',
+                padding: '12px 16px',
+                textAlign: 'left',
+                border: 'none',
+                background: 'none',
+                fontSize: '13px',
+                color: '#fff',
+                cursor: 'pointer',
+                borderBottom: '1px solid #eee',
+                transition: 'background-color 0.15s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = COLORS.navBtn
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
+            >
+              <span>{item.label}</span>
+              {hasSubmenu && (
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  style={{
+                    transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s',
+                  }}
+                >
+                  <path d="M7 10l5 5 5-5z" />
+                </svg>
+              )}
+            </button>
+
+            {hasSubmenu && isOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: '100%',
+                  backgroundColor: COLORS.submenuBg,
+                  borderRadius: '6px',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+                  minWidth: '200px',
+                  zIndex: 101,
+                  overflow: 'visible',
+                  marginLeft: '4px',
+                }}
+              >
+                {renderMenuItems(item.submenu, level + 1, menuId)}
+              </div>
+            )}
+          </div>
+        )
+      } else {
+        // Level 2+ submenu (no more nesting)
+        return (
+          <button
+            key={menuId}
+            onClick={() => handleNavClick(item.path)}
+            style={{
+              display: 'block',
+              width: '100%',
+              padding: '12px 16px',
+              textAlign: 'left',
+              border: 'none',
+              background: 'none',
+              fontSize: '13px',
+              color: '#fff',
+              cursor: 'pointer',
+              borderBottom: '1px solid #eee',
+              transition: 'background-color 0.15s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = COLORS.navBtn
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+            }}
+          >
+            {item.label}
+          </button>
+        )
+      }
+    })
+  }
 
   return (
     <nav
