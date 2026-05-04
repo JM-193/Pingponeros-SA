@@ -60,7 +60,7 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* Columna derecha – Enlaces rápidos */}
+        {/* Columna derecha - Enlaces rápidos */}
         <div>
           <p style={{ fontWeight: 700, fontSize: '14px', margin: '0 0 10px' }}>
             Enlaces rápidos

@@ -1,11 +1,11 @@
 * {
   box-sizing: border-box;
-  font-family: 'Myriad Pro', sans-serif;
+  font-family: 'Myriad Pro', Arial, sans-serif;
 }
 
 body {
   margin: 0;
-  font-family: 'Myriad Pro', sans-serif;
+  font-family: 'Myriad Pro', Arial, sans-serif;
 }
 
 #root {
