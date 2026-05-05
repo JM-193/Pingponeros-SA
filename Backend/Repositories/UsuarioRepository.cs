@@ -3,7 +3,8 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace Backend.Repositories;
 
-internal class UsuarioRepository(OracleConnection db) : IUsuarioRepository
+#pragma warning disable CA1812 // Instanciado por el contenedor de DI
+internal sealed class UsuarioRepository(OracleConnection db) : IUsuarioRepository
 {
     // ------------------------------------------------------------------ //
     // SELECT ALL                                                           //
@@ -136,7 +137,7 @@ internal class UsuarioRepository(OracleConnection db) : IUsuarioRepository
         SegundoNombre = r.IsDBNull(2) ? null : r.GetString(2),
         PrimerApellido = r.GetString(3),
         SegundoApellido = r.IsDBNull(4) ? null : r.GetString(4),
-        Rol = r.GetString(5),
+        Rol = r.GetInt32(5),
         Estado = r.GetInt32(6),
     };
 

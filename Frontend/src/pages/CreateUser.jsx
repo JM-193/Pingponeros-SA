@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { crearUsuario } from '../services/usuarioService'
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -18,10 +19,15 @@ export default function CreateUser() {
     email: '',
     role: '',
   })
+  const [loading, setLoading] = useState(false)
+  const [successMsg, setSuccessMsg] = useState('')
+  const [errorMsg, setErrorMsg] = useState('')
 
   // Manejar cambios en los campos
   const handleInputChange = (e) => {
     const { name, value } = e.target
+    setSuccessMsg('')
+    setErrorMsg('')
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -29,9 +35,28 @@ export default function CreateUser() {
   }
 
   // Manejar envío del formulario
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Datos del formulario:', formData)
+    setLoading(true)
+    setSuccessMsg('')
+    setErrorMsg('')
+
+    try {
+      const mensaje = await crearUsuario({
+        correoInstitucional: formData.email,
+        primerNombre:        formData.firstName,
+        segundoNombre:       formData.secondName || null,
+        primerApellido:      formData.firstName_surname,
+        segundoApellido:     formData.secondName_surname || null,
+        rol:                 parseInt(formData.role, 10),
+      })
+      setSuccessMsg(typeof mensaje === 'string' ? mensaje : 'Usuario creado correctamente.')
+      handleReset()
+    } catch (err) {
+      setErrorMsg(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Manejar limpiar formulario
@@ -127,16 +152,30 @@ export default function CreateUser() {
             value={formData.role}
             onChange={handleInputChange}
             options={[
-              { value: '0', label: 'Usuario' },
+              { value: '0', label: 'Funcionario' },
               { value: '1', label: 'Administrador' },
             ]}
             defaultLabel="Seleccione un rol"
             required
           />
 
+          {/* Mensajes de feedback */}
+          {successMsg && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1b5e20', backgroundColor: '#e8f5e9', padding: '12px 16px', borderRadius: '6px', border: '1px solid #a5d6a7', fontSize: '14px', fontWeight: 600 }}>
+              <span>&#10003;</span>
+              <span>{successMsg}</span>
+            </div>
+          )}
+          {errorMsg && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#b71c1c', backgroundColor: '#ffebee', padding: '12px 16px', borderRadius: '6px', border: '1px solid #ef9a9a', fontSize: '14px', fontWeight: 600 }}>
+              <span>&#9888;</span>
+              <span>{errorMsg}</span>
+            </div>
+          )}
+
           {/* Botones */}
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-            <FormButton label="Crear Usuario" type="submit" variant="primary" />
+            <FormButton label={loading ? 'Guardando...' : 'Crear Usuario'} type="submit" variant="primary" disabled={loading} />
             <button
               type="button"
               onClick={handleReset}

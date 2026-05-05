@@ -1,6 +1,7 @@
 using DotNetEnv;
 using Oracle.ManagedDataAccess.Client;
 using Scalar.AspNetCore;
+using Backend.DTOs;
 using Backend.Repositories;
 
 namespace Backend;
@@ -26,11 +27,18 @@ internal static class Program
             new OracleConnection(builder.Configuration.GetConnectionString("OracleDB")));
         builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
         builder.Services.AddOpenApi();
+        builder.Services.AddCors(options =>
+            options.AddPolicy("FrontendOrigin", policy =>
+                policy.WithOrigins("http://localhost:5173")
+                      .AllowAnyMethod()
+                      .AllowAnyHeader()));
 
         var app = builder.Build();
+        var isDev = app.Environment.IsDevelopment();
 
         app.MapOpenApi();
         app.MapScalarApiReference();
+        app.UseCors("FrontendOrigin");
 
         // ---------------------------------------------------------------- //
         // Rutas de Usuarios                                                 //
@@ -68,22 +76,51 @@ internal static class Program
         });
 
         // POST /usuarios — Crea un nuevo usuario
-        usuarios.MapPost("/", async (Backend.Models.Usuario usuario, IUsuarioRepository repo) =>
+        usuarios.MapPost("/", async (CrearUsuarioDto dto, IUsuarioRepository repo) =>
         {
+            if (dto.Rol is not (0 or 1))
+                return Results.BadRequest(new { mensaje = "Rol inválido. Use 0 (Funcionario) o 1 (Administrador)." });
+
+            if (string.IsNullOrWhiteSpace(dto.CorreoInstitucional))
+                return Results.BadRequest(new { mensaje = "El correo institucional es obligatorio." });
+
+            if (string.IsNullOrWhiteSpace(dto.PrimerNombre))
+                return Results.BadRequest(new { mensaje = "El primer nombre es obligatorio." });
+
+            if (string.IsNullOrWhiteSpace(dto.PrimerApellido))
+                return Results.BadRequest(new { mensaje = "El primer apellido es obligatorio." });
+
+            var usuario = new Backend.Models.Usuario
+            {
+                CorreoInstitucional = dto.CorreoInstitucional.Trim(),
+                PrimerNombre        = dto.PrimerNombre.Trim(),
+                SegundoNombre       = string.IsNullOrWhiteSpace(dto.SegundoNombre) ? null : dto.SegundoNombre.Trim(),
+                PrimerApellido      = dto.PrimerApellido.Trim(),
+                SegundoApellido     = string.IsNullOrWhiteSpace(dto.SegundoApellido) ? null : dto.SegundoApellido.Trim(),
+                Rol                 = dto.Rol,   // 0 = Funcionario, 1 = Administrador (NUMBER en Oracle)
+                Estado              = 1,
+            };
+
             try
             {
                 await repo.InsertarAsync(usuario).ConfigureAwait(false);
                 return Results.Created(
                     $"/usuarios/{Uri.EscapeDataString(usuario.CorreoInstitucional)}",
-                    usuario);
+                    new { mensaje = $"Usuario '{usuario.PrimerNombre} {usuario.PrimerApellido}' creado correctamente." });
             }
             catch (OracleException ex) when (ex.Number == 1)
             {
-                return Results.Conflict(new { error = "Ya existe un usuario con ese correo institucional." });
+                return Results.Conflict(new { mensaje = $"El correo '{dto.CorreoInstitucional}' ya está registrado en el sistema." });
             }
             catch (OracleException ex)
             {
-                return Results.Problem(detail: ex.Message, statusCode: 500);
+                var detalle = isDev
+                    ? $"[ORA-{ex.Number}] {ex.Message}"
+                    : "No se pudo completar la operación. Verifique los datos e intente nuevamente.";
+                return Results.Problem(
+                    title: "Error de base de datos",
+                    detail: detalle,
+                    statusCode: 500);
             }
         });
 

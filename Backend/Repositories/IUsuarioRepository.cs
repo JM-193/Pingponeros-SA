@@ -2,7 +2,7 @@ using Backend.Models;
 
 namespace Backend.Repositories;
 
-public interface IUsuarioRepository
+internal interface IUsuarioRepository
 {
     Task<IEnumerable<Usuario>> ObtenerTodosAsync();
     Task<Usuario?> ObtenerPorCorreoAsync(string correo);
