@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -8,6 +9,7 @@ import FormButton from '../components/FormButton'
 import { COLORS } from '../constants/colors'
 
 export default function CreateArea() {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
@@ -108,10 +110,9 @@ export default function CreateArea() {
 
           {/* Botones */}
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-            <FormButton label="Crear Área" type="submit" variant="primary" />
             <button
               type="button"
-              onClick={handleReset}
+              onClick={() => navigate('/organizacion/areas/consultar')}
               style={{
                 padding: '12px 32px',
                 backgroundColor: COLORS.secondaryBtn,
@@ -126,8 +127,9 @@ export default function CreateArea() {
               onMouseEnter={(e) => (e.target.style.backgroundColor = '#555')}
               onMouseLeave={(e) => (e.target.style.backgroundColor = COLORS.secondaryBtn)}
             >
-              Limpiar
+              Regresar
             </button>
+            <FormButton label="Crear Área" type="submit" variant="primary" />
           </div>
         </FormContainer>
       </main>

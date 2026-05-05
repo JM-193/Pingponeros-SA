@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
@@ -178,59 +179,61 @@ PaginationControls.propTypes = {
 }
 
 export default function ConsultarArea() {
+  const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const [allAreas, setAllAreas] = useState([])
   const [results, setResults] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
-  const [hasSearched, setHasSearched] = useState(false)
   const resultsPerPage = 10
+
+  // Cargar todas las áreas cuando monta el componente
+  useEffect(() => {
+    const loadAllAreas = async () => {
+      setLoading(true)
+      try {
+        const mockAreas = [
+          { id: 1, nombre: 'Área de Tecnología', descripcion: 'Departamento encargado de sistemas y TI' },
+          { id: 2, nombre: 'Área de Recursos Humanos', descripcion: 'Gestión de personal y nómina' },
+          { id: 3, nombre: 'Área de Finanzas', descripcion: 'Contabilidad y análisis financiero' },
+          { id: 4, nombre: 'Área de Marketing', descripcion: 'Estrategias de comunicación y branding' },
+          { id: 5, nombre: 'Área de Operaciones', descripcion: 'Gestión de procesos operacionales' },
+          { id: 6, nombre: 'Área de Ventas', descripcion: 'Estrategia comercial y relaciones con clientes' },
+          { id: 7, nombre: 'Área de Logística', descripcion: 'Distribución y gestión de inventario' },
+          { id: 8, nombre: 'Área de Calidad', descripcion: 'Control y aseguramiento de calidad' },
+          { id: 9, nombre: 'Área de Investigación', descripcion: 'Desarrollo e innovación de productos' },
+          { id: 10, nombre: 'Área de Servicio al Cliente', descripcion: 'Atención y soporte al cliente' },
+          { id: 11, nombre: 'Área de Seguridad', descripcion: 'Seguridad física y protección de datos' },
+          { id: 12, nombre: 'Área de Administración', descripcion: 'Gestión administrativa y trámites' },
+        ]
+        setAllAreas(mockAreas)
+        setResults(mockAreas)
+      } catch (error) {
+        console.error('Error al cargar áreas:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadAllAreas()
+  }, [])
 
   const handleInputChange = (e) => {
     setSearchTerm(e.target.value)
-    setHasSearched(false)
     setCurrentPage(1)
   }
 
   const matchesSearch = (area, term) => {
+    if (!term.trim()) return true
     const lowerTerm = term.toLowerCase()
     return area.nombre.toLowerCase().includes(lowerTerm) || area.descripcion.toLowerCase().includes(lowerTerm)
   }
 
-  const handleSearch = async (e) => {
+  const handleSearch = (e) => {
     e.preventDefault()
-    if (!searchTerm.trim()) {
-      alert('Por favor ingrese un término de búsqueda')
-      return
-    }
-
-    setLoading(true)
     setCurrentPage(1)
-    setHasSearched(true)
-
-    try {
-      const mockResults = [
-        { id: 1, nombre: 'Área de Tecnología', descripcion: 'Departamento encargado de sistemas y TI' },
-        { id: 2, nombre: 'Área de Recursos Humanos', descripcion: 'Gestión de personal y nómina' },
-        { id: 3, nombre: 'Área de Finanzas', descripcion: 'Contabilidad y análisis financiero' },
-        { id: 4, nombre: 'Área de Marketing', descripcion: 'Estrategias de comunicación y branding' },
-        { id: 5, nombre: 'Área de Operaciones', descripcion: 'Gestión de procesos operacionales' },
-        { id: 6, nombre: 'Área de Ventas', descripcion: 'Estrategia comercial y relaciones con clientes' },
-        { id: 7, nombre: 'Área de Logística', descripcion: 'Distribución y gestión de inventario' },
-        { id: 8, nombre: 'Área de Calidad', descripcion: 'Control y aseguramiento de calidad' },
-        { id: 9, nombre: 'Área de Investigación', descripcion: 'Desarrollo e innovación de productos' },
-        { id: 10, nombre: 'Área de Servicio al Cliente', descripcion: 'Atención y soporte al cliente' },
-        { id: 11, nombre: 'Área de Seguridad', descripcion: 'Seguridad física y protección de datos' },
-        { id: 12, nombre: 'Área de Administración', descripcion: 'Gestión administrativa y trámites' },
-      ]
-
-      const filtered = mockResults.filter((area) => matchesSearch(area, searchTerm))
-      setResults(filtered)
-    } catch (error) {
-      console.error('Error al buscar:', error)
-      alert('Error al realizar la búsqueda')
-    } finally {
-      setLoading(false)
-    }
+    const filtered = allAreas.filter((area) => matchesSearch(area, searchTerm))
+    setResults(filtered)
   }
 
   const totalPages = Math.ceil(results.length / resultsPerPage)
@@ -246,8 +249,8 @@ export default function ConsultarArea() {
   }
 
   const renderResultsContent = () => {
-    if (!hasSearched) return null
-    if (results.length === 0) return <EmptyResults searchTerm={searchTerm} />
+    if (loading) return <p style={{ textAlign: 'center', color: '#666' }}>Cargando áreas...</p>
+    if (results.length === 0) return <EmptyResults searchTerm={searchTerm || 'sin resultados'} />
 
     return (
       <>
@@ -289,20 +292,8 @@ export default function ConsultarArea() {
               color: COLORS.labelColor,
             }}
           >
-            Consultar Áreas
+            Áreas
           </h1>
-          <h2
-            style={{
-              fontWeight: 800,
-              fontSize: 'clamp(14px, 1.8vw, 22px)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em',
-              margin: 0,
-              color: COLORS.labelColor,
-            }}
-          >
-            Buscar y Filtrar
-          </h2>
         </div>
 
         <div
@@ -365,13 +356,52 @@ export default function ConsultarArea() {
                 onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = COLORS.primaryBtnHover)}
                 onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = COLORS.primaryBtn)}
               >
-                {loading ? 'Buscando...' : 'Buscar'}
+                {loading ? 'Cargando...' : 'Buscar'}
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/organizacion/areas/crear')}
+                style={{
+                  padding: '10px 32px',
+                  backgroundColor: COLORS.primaryBtn,
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'background-color 0.3s ease',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={(e) => (e.target.style.backgroundColor = COLORS.primaryBtnHover)}
+                onMouseLeave={(e) => (e.target.style.backgroundColor = COLORS.primaryBtn)}
+              >
+                Crear área
               </button>
             </div>
           </form>
         </div>
 
         <div id="results-section">{renderResultsContent()}</div>
+        <button
+          type="button"
+          onClick={() => navigate('/home')}
+          style={{
+            padding: '12px 32px',
+            backgroundColor: COLORS.secondaryBtn,
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            fontSize: '14px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'background-color 0.3s ease',
+          }}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = COLORS.secondaryBtnHover)}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = COLORS.secondaryBtn)}
+        >
+          Regresar
+        </button>
       </main>
 
       <Footer />

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { crearUsuario } from '../services/usuarioService'
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
@@ -11,6 +12,7 @@ import FormButton from '../components/FormButton'
 import { COLORS } from '../constants/colors'
 
 export default function CreateUser() {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     firstName: '',
     secondName: '',
@@ -175,10 +177,9 @@ export default function CreateUser() {
 
           {/* Botones */}
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-            <FormButton label={loading ? 'Guardando...' : 'Crear Usuario'} type="submit" variant="primary" disabled={loading} />
             <button
               type="button"
-              onClick={handleReset}
+              onClick={() => navigate('/home')}
               style={{
                 padding: '12px 32px',
                 backgroundColor: COLORS.secondaryBtn,
@@ -193,8 +194,9 @@ export default function CreateUser() {
               onMouseEnter={(e) => (e.target.style.backgroundColor = COLORS.secondaryBtnHover)}
               onMouseLeave={(e) => (e.target.style.backgroundColor = COLORS.secondaryBtn)}
             >
-              Limpiar
+              Regresar
             </button>
+            <FormButton label={loading ? 'Guardando...' : 'Crear Usuario'} type="submit" variant="primary" disabled={loading} />
           </div>
         </FormContainer>
       </main>
