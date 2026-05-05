@@ -16,9 +16,7 @@ export default function CreateUser() {
     firstName_surname: '',
     secondName_surname: '',
     email: '',
-    plazaId: '',
-    jobPosition: '',
-    occupationalClass: '',
+    role: '',
   })
 
   // Manejar cambios en los campos
@@ -44,9 +42,7 @@ export default function CreateUser() {
       firstName_surname: '',
       secondName_surname: '',
       email: '',
-      plazaId: '',
-      jobPosition: '',
-      occupationalClass: '',
+      role: '',
     })
   }
 
@@ -123,38 +119,19 @@ export default function CreateUser() {
             required
           />
 
-          {/* Plaza */}
+          {/* Rol */}
           <FormSelect
-            label="Número de Plaza"
-            id="plazaId"
-            name="plazaId"
-            value={formData.plazaId}
+            label="Rol"
+            id="role"
+            name="role"
+            value={formData.role}
             onChange={handleInputChange}
-            options={[]} 
-            defaultLabel="Seleccione una plaza"
+            options={[
+              { value: '0', label: 'Usuario' },
+              { value: '1', label: 'Administrador' },
+            ]}
+            defaultLabel="Seleccione un rol"
             required
-          />
-
-          {/* Puesto de trabajo */}
-          <FormInput
-            label="Puesto de Trabajo"
-            id="jobPosition"
-            name="jobPosition"
-            value={formData.jobPosition}
-            onChange={handleInputChange}
-            disabled={true}
-            required
-          />
-
-          {/* Clase ocupacional */}
-          <FormInput
-            label="Clase Ocupacional"
-            id="occupationalClass"
-            name="occupationalClass"
-            value={formData.occupationalClass}
-            onChange={handleInputChange}
-            required
-            style={{ marginBottom: '28px' }}
           />
 
           {/* Botones */}
