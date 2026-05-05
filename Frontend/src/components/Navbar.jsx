@@ -24,13 +24,13 @@ const NAV_ITEMS = [
     submenu: [
       {
         label: 'Áreas',
-        activeOn: '/organizacion/areas',
-        submenu: [
+        path: '/organizacion/areas/consultar',
+        /*submenu: [
           { label: 'Crear', path: '/organizacion/areas/crear' },
           { label: 'Consultar', path: '/organizacion/areas/consultar' },
           { label: 'Modificar', path: '/organizacion/areas/modificar' },
           { label: 'Eliminar', path: '/organizacion/areas/eliminar' },
-        ],
+        ],*/
       },
       /*{
         label: 'Departamentos',
