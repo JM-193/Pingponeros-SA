@@ -13,7 +13,7 @@ export default function CreateArea() {
     descripcion: '',
   })
 
-  // Manejar cambios en los campos
+  // Manage changes in the fields
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({
@@ -22,13 +22,13 @@ export default function CreateArea() {
     }))
   }
 
-  // Manejar envío del formulario
+  // Manage form submission
   const handleSubmit = (e) => {
     e.preventDefault()
     console.log('Datos del formulario:', formData)
   }
 
-  // Manejar limpiar formulario
+  // Manage form reset
   const handleReset = () => {
     setFormData({
       nombre: '',
