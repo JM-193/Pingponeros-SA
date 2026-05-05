@@ -327,14 +327,14 @@ export default function ConsultarArea() {
                     fontSize: '14px',
                   }}
                 >
-                  Buscar por nombre o descripción
+                  Buscar por nombre
                 </label>
                 <input
                   type="text"
                   id="search"
                   value={searchTerm}
                   onChange={handleInputChange}
-                  placeholder="Ingrese el nombre o descripción del área"
+                  placeholder="Ingrese el nombre del área"
                   style={{
                     width: '100%',
                     padding: '10px',
