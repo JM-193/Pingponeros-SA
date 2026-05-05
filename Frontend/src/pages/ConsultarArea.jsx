@@ -18,7 +18,7 @@ function EmptyResults({ searchTerm }) {
       }}
     >
       <p style={{ color: '#666', fontSize: '16px', margin: 0 }}>
-        No se encontraron áreas que coincidan con "{searchTerm}"
+        No se encontraron áreas que coincidan con &quot;{searchTerm}&quot;
       </p>
     </div>
   )
