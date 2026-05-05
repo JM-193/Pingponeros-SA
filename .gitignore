@@ -53,7 +53,7 @@ TestResult.xml
 nunit-*.xml
 
 # Connected to Data Base
-wallet/
+[Ww]allet*/
 
 # Environment variables (credentials)
 .env
