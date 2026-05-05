@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Header from '../components/Header'
-import Footer from '../components/Footer'
+import AuthLayout from '../components/AuthLayout'
 
 /* UCR brand palette
    Azul UCR  #00AEEF  (Pantone 299 C)
@@ -11,7 +10,6 @@ import Footer from '../components/Footer'
    */
 
 const COLORS = {
-  bodyBg: '#e9e9e9',
   btnBg: '#1D4F91',
 }
 
@@ -50,165 +48,145 @@ export default function Login() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: COLORS.bodyBg }}>
-
-      {/* Header */}
-      <Header />
-
-      {/* Main */}
-      <main
+    <AuthLayout>
+      <h1
         style={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '60px 16px',
+          fontWeight: 900,
+          fontSize: 'clamp(20px, 3vw, 30px)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.02em',
+          margin: '0 0 10px',
+          color: '#1a1a1a',
         }}
       >
-        <div style={{ width: '100%', maxWidth: '440px', textAlign: 'center' }}>
-          <h1
+        Vicerrectoría de Administración
+      </h1>
+      <h2
+        style={{
+          fontWeight: 800,
+          fontSize: 'clamp(13px, 1.8vw, 18px)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.02em',
+          margin: '0 0 40px',
+          color: '#1a1a1a',
+        }}
+      >
+        Aplicación de Cargas de Trabajo
+      </h2>
+
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' }}>
+          <label
+            htmlFor="email"
             style={{
-              fontWeight: 900,
-              fontSize: 'clamp(20px, 3vw, 30px)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.02em',
-              margin: '0 0 10px',
-              color: '#1a1a1a',
+              fontSize: '14px',
+              fontWeight: 600,
+              color: '#777',
             }}
           >
-            Vicerrectoría de Administración
-          </h1>
-          <h2
+            Correo Institucional
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder=""
             style={{
-              fontWeight: 800,
-              fontSize: 'clamp(13px, 1.8vw, 18px)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.02em',
-              margin: '0 0 40px',
-              color: '#1a1a1a',
+              padding: '14px 18px',
+              border: errors.email ? '2px solid #d10f0f' : '1px solid #d0d0d0',
+              borderRadius: '4px',
+              fontSize: '15px',
+              backgroundColor: '#fff',
+              outline: 'none',
+              color: '#333',
+              transition: 'border-color 0.2s',
             }}
-          >
-            Aplicación de Cargas de Trabajo
-          </h2>
-
-          <form
-            onSubmit={handleSubmit}
-            style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' }}>
-              <label
-                htmlFor="email"
-                style={{
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  color: '#777',
-                }}
-              >
-                Correo Institucional
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder=""
-                style={{
-                  padding: '14px 18px',
-                  border: errors.email ? '2px solid #d10f0f' : '1px solid #d0d0d0',
-                  borderRadius: '4px',
-                  fontSize: '15px',
-                  backgroundColor: '#fff',
-                  outline: 'none',
-                  color: '#333',
-                  transition: 'border-color 0.2s',
-                }}
-              />
-              {errors.email && (
-                <span style={{ fontSize: '12px', color: '#d10f0f' }}>
-                  {errors.email}
-                </span>
-              )}
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' }}>
-              <label
-                htmlFor="password"
-                style={{
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  color: '#777',
-                }}
-              >
-                Contraseña
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder=""
-                style={{
-                  padding: '14px 18px',
-                  border: errors.password ? '2px solid #d10f0f' : '1px solid #d0d0d0',
-                  borderRadius: '4px',
-                  fontSize: '15px',
-                  backgroundColor: '#fff',
-                  outline: 'none',
-                  color: '#333',
-                  transition: 'border-color 0.2s',
-                }}
-              />
-              {errors.password && (
-                <span style={{ fontSize: '12px', color: '#d10f0f' }}>
-                  {errors.password}
-                </span>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              style={{
-                padding: '14px',
-                backgroundColor: COLORS.btnBg,
-                color: '#fff',
-                border: 'none',
-                borderRadius: '4px',
-                fontSize: '16px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                letterSpacing: '0.01em',
-              }}
-            >
-              Iniciar Sesión
-            </button>
-          </form>
-
-          <div style={{ marginTop: '20px' }}>
-            <a
-              href="/recuperar-contrasena"
-              style={{
-                color: COLORS.btnBg,
-                fontSize: '14px',
-                textDecoration: 'underline',
-              }}
-            >
-              Recuperar Contraseña
-            </a>
-            <p
-              style={{
-                fontSize: '12px',
-                color: '#777',
-                margin: '10px 0 0',
-              }}
-            >
-              Universidad De Costa Rica | Pingponeros S.A.
-            </p>
-          </div>
+          />
+          {errors.email && (
+            <span style={{ fontSize: '12px', color: '#d10f0f' }}>
+              {errors.email}
+            </span>
+          )}
         </div>
-      </main>
 
-      <Footer />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' }}>
+          <label
+            htmlFor="password"
+            style={{
+              fontSize: '14px',
+              fontWeight: 600,
+              color: '#777',
+            }}
+          >
+            Contraseña
+          </label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder=""
+            style={{
+              padding: '14px 18px',
+              border: errors.password ? '2px solid #d10f0f' : '1px solid #d0d0d0',
+              borderRadius: '4px',
+              fontSize: '15px',
+              backgroundColor: '#fff',
+              outline: 'none',
+              color: '#333',
+              transition: 'border-color 0.2s',
+            }}
+          />
+          {errors.password && (
+            <span style={{ fontSize: '12px', color: '#d10f0f' }}>
+              {errors.password}
+            </span>
+          )}
+        </div>
 
-    </div>
+        <button
+          type="submit"
+          style={{
+            padding: '14px',
+            backgroundColor: COLORS.btnBg,
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            fontSize: '16px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            letterSpacing: '0.01em',
+          }}
+        >
+          Iniciar Sesión
+        </button>
+      </form>
+
+      <div style={{ marginTop: '20px' }}>
+        <a
+          href="/recuperar-contrasena"
+          style={{
+            color: COLORS.btnBg,
+            fontSize: '14px',
+            textDecoration: 'underline',
+          }}
+        >
+          Recuperar Contraseña
+        </a>
+        <p
+          style={{
+            fontSize: '12px',
+            color: '#777',
+            margin: '10px 0 0',
+          }}
+        >
+          Universidad De Costa Rica | Pingponeros S.A.
+        </p>
+      </div>
+    </AuthLayout>
   )
 }
