@@ -3,7 +3,7 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace Backend.Repositories;
 
-public class UsuarioRepository(OracleConnection db) : IUsuarioRepository
+internal class UsuarioRepository(OracleConnection db) : IUsuarioRepository
 {
     // ------------------------------------------------------------------ //
     // SELECT ALL                                                           //
@@ -19,16 +19,16 @@ public class UsuarioRepository(OracleConnection db) : IUsuarioRepository
 
         var lista = new List<Usuario>();
 
-        await db.OpenAsync();
+        await db.OpenAsync().ConfigureAwait(false);
         try
         {
-            using var cmd    = new OracleCommand(sql, db);
-            using var reader = await cmd.ExecuteReaderAsync();
+            using var cmd = new OracleCommand(sql, db);
+            using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
 
-            while (await reader.ReadAsync())
+            while (await reader.ReadAsync().ConfigureAwait(false))
                 lista.Add(MapearFila(reader));
         }
-        finally { await db.CloseAsync(); }
+        finally { await db.CloseAsync().ConfigureAwait(false); }
 
         return lista;
     }
@@ -45,16 +45,16 @@ public class UsuarioRepository(OracleConnection db) : IUsuarioRepository
             WHERE  CORREO_INSTITUCIONAL = :correo
             """;
 
-        await db.OpenAsync();
+        await db.OpenAsync().ConfigureAwait(false);
         try
         {
             using var cmd = new OracleCommand(sql, db);
             cmd.Parameters.Add("correo", correo);
 
-            using var reader = await cmd.ExecuteReaderAsync();
-            return await reader.ReadAsync() ? MapearFila(reader) : null;
+            using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+            return await reader.ReadAsync().ConfigureAwait(false) ? MapearFila(reader) : null;
         }
-        finally { await db.CloseAsync(); }
+        finally { await db.CloseAsync().ConfigureAwait(false); }
     }
 
     // ------------------------------------------------------------------ //
@@ -71,14 +71,14 @@ public class UsuarioRepository(OracleConnection db) : IUsuarioRepository
                  :primerApellido, :segundoApellido, :rol, :estado)
             """;
 
-        await db.OpenAsync();
+        await db.OpenAsync().ConfigureAwait(false);
         try
         {
             using var cmd = new OracleCommand(sql, db);
             AgregarParametros(cmd, usuario);
-            await cmd.ExecuteNonQueryAsync();
+            await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
         }
-        finally { await db.CloseAsync(); }
+        finally { await db.CloseAsync().ConfigureAwait(false); }
     }
 
     // ------------------------------------------------------------------ //
@@ -97,16 +97,16 @@ public class UsuarioRepository(OracleConnection db) : IUsuarioRepository
             WHERE CORREO_INSTITUCIONAL = :correo
             """;
 
-        await db.OpenAsync();
+        await db.OpenAsync().ConfigureAwait(false);
         try
         {
             using var cmd = new OracleCommand(sql, db);
             // Asegura que se use el correo del path, no el del body
             usuario.CorreoInstitucional = correo;
             AgregarParametros(cmd, usuario);
-            return await cmd.ExecuteNonQueryAsync() > 0;
+            return await cmd.ExecuteNonQueryAsync().ConfigureAwait(false) > 0;
         }
-        finally { await db.CloseAsync(); }
+        finally { await db.CloseAsync().ConfigureAwait(false); }
     }
 
     // ------------------------------------------------------------------ //
@@ -116,14 +116,14 @@ public class UsuarioRepository(OracleConnection db) : IUsuarioRepository
     {
         const string sql = "DELETE FROM USUARIOS WHERE CORREO_INSTITUCIONAL = :correo";
 
-        await db.OpenAsync();
+        await db.OpenAsync().ConfigureAwait(false);
         try
         {
             using var cmd = new OracleCommand(sql, db);
             cmd.Parameters.Add("correo", correo);
-            return await cmd.ExecuteNonQueryAsync() > 0;
+            return await cmd.ExecuteNonQueryAsync().ConfigureAwait(false) > 0;
         }
-        finally { await db.CloseAsync(); }
+        finally { await db.CloseAsync().ConfigureAwait(false); }
     }
 
     // ------------------------------------------------------------------ //
@@ -132,22 +132,22 @@ public class UsuarioRepository(OracleConnection db) : IUsuarioRepository
     private static Usuario MapearFila(System.Data.Common.DbDataReader r) => new()
     {
         CorreoInstitucional = r.GetString(0),
-        PrimerNombre        = r.GetString(1),
-        SegundoNombre       = r.IsDBNull(2) ? null : r.GetString(2),
-        PrimerApellido      = r.GetString(3),
-        SegundoApellido     = r.IsDBNull(4) ? null : r.GetString(4),
-        Rol                 = r.GetString(5),
-        Estado              = r.GetInt32(6),
+        PrimerNombre = r.GetString(1),
+        SegundoNombre = r.IsDBNull(2) ? null : r.GetString(2),
+        PrimerApellido = r.GetString(3),
+        SegundoApellido = r.IsDBNull(4) ? null : r.GetString(4),
+        Rol = r.GetString(5),
+        Estado = r.GetInt32(6),
     };
 
     private static void AgregarParametros(OracleCommand cmd, Usuario u)
     {
-        cmd.Parameters.Add("correo",         u.CorreoInstitucional);
-        cmd.Parameters.Add("primerNombre",   u.PrimerNombre);
-        cmd.Parameters.Add("segundoNombre",  u.SegundoNombre   ?? (object)DBNull.Value);
+        cmd.Parameters.Add("correo", u.CorreoInstitucional);
+        cmd.Parameters.Add("primerNombre", u.PrimerNombre);
+        cmd.Parameters.Add("segundoNombre", u.SegundoNombre ?? (object)DBNull.Value);
         cmd.Parameters.Add("primerApellido", u.PrimerApellido);
-        cmd.Parameters.Add("segundoApellido",u.SegundoApellido ?? (object)DBNull.Value);
-        cmd.Parameters.Add("rol",            u.Rol);
-        cmd.Parameters.Add("estado",         u.Estado);
+        cmd.Parameters.Add("segundoApellido", u.SegundoApellido ?? (object)DBNull.Value);
+        cmd.Parameters.Add("rol", u.Rol);
+        cmd.Parameters.Add("estado", u.Estado);
     }
 }

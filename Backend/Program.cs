@@ -5,7 +5,7 @@ using Backend.Repositories;
 
 namespace Backend;
 
-public static class Program
+internal static class Program
 {
     public static void Main(string[] args)
     {
@@ -18,7 +18,7 @@ public static class Program
             Path.Combine(builder.Environment.ContentRootPath,
                 builder.Configuration["Oracle:WalletPath"] ?? "wallet"));
 
-        OracleConfiguration.TnsAdmin      = walletPath;
+        OracleConfiguration.TnsAdmin = walletPath;
         OracleConfiguration.WalletLocation = walletPath;
 
         // Servicios
@@ -42,7 +42,7 @@ public static class Program
         {
             try
             {
-                var lista = await repo.ObtenerTodosAsync();
+                var lista = await repo.ObtenerTodosAsync().ConfigureAwait(false);
                 return Results.Ok(lista);
             }
             catch (OracleException ex)
@@ -56,7 +56,7 @@ public static class Program
         {
             try
             {
-                var usuario = await repo.ObtenerPorCorreoAsync(Uri.UnescapeDataString(correo));
+                var usuario = await repo.ObtenerPorCorreoAsync(Uri.UnescapeDataString(correo)).ConfigureAwait(false);
                 return usuario is null
                     ? Results.NotFound(new { error = $"No se encontró el usuario '{correo}'." })
                     : Results.Ok(usuario);
@@ -72,7 +72,7 @@ public static class Program
         {
             try
             {
-                await repo.InsertarAsync(usuario);
+                await repo.InsertarAsync(usuario).ConfigureAwait(false);
                 return Results.Created(
                     $"/usuarios/{Uri.EscapeDataString(usuario.CorreoInstitucional)}",
                     usuario);
@@ -92,7 +92,7 @@ public static class Program
         {
             try
             {
-                var actualizado = await repo.ActualizarAsync(Uri.UnescapeDataString(correo), usuario);
+                var actualizado = await repo.ActualizarAsync(Uri.UnescapeDataString(correo), usuario).ConfigureAwait(false);
                 return actualizado
                     ? Results.Ok(usuario)
                     : Results.NotFound(new { error = $"No se encontró el usuario '{correo}'." });
@@ -108,7 +108,7 @@ public static class Program
         {
             try
             {
-                var eliminado = await repo.EliminarAsync(Uri.UnescapeDataString(correo));
+                var eliminado = await repo.EliminarAsync(Uri.UnescapeDataString(correo)).ConfigureAwait(false);
                 return eliminado
                     ? Results.NoContent()
                     : Results.NotFound(new { error = $"No se encontró el usuario '{correo}'." });

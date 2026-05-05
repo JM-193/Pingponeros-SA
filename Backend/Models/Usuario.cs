@@ -1,6 +1,6 @@
 namespace Backend.Models;
 
-public class Usuario
+internal class Usuario
 {
     public string CorreoInstitucional { get; set; } = string.Empty;
     public string PrimerNombre { get; set; } = string.Empty;
