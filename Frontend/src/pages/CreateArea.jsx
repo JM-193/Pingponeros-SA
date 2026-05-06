@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { crearArea, obtenerAreas } from '../services/areaService'
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -14,10 +15,15 @@ export default function CreateArea() {
     nombre: '',
     descripcion: '',
   })
+  const [loading, setLoading] = useState(false)
+  const [successMsg, setSuccessMsg] = useState('')
+  const [errorMsg, setErrorMsg] = useState('')
 
   // Manage changes in the fields
   const handleInputChange = (e) => {
     const { name, value } = e.target
+    setSuccessMsg('')
+    setErrorMsg('')
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -25,9 +31,64 @@ export default function CreateArea() {
   }
 
   // Manage form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Datos del formulario:', formData)
+    setLoading(true)
+    setSuccessMsg('')
+    setErrorMsg('')
+
+    // Validar que el nombre no esté vacío
+    if (!formData.nombre.trim()) {
+      setErrorMsg('El nombre del área es requerido')
+      setLoading(false)
+      return
+    }
+
+    // Validar que la descripción no esté vacía
+    if (!formData.descripcion.trim()) {
+      setErrorMsg('La descripción es requerida')
+      setLoading(false)
+      return
+    }
+
+    try {
+      // Obtener todas las áreas para validar que el nombre no exista
+      const areasExistentes = await obtenerAreas()
+      const nombreNormalizadoNuevo = formData.nombre.trim().toLowerCase()
+      const nombreDuplicado = areasExistentes.some(
+        (area) => area.nombre.toLowerCase() === nombreNormalizadoNuevo
+      )
+
+      if (nombreDuplicado) {
+        setErrorMsg('Ya existe un área con este nombre')
+        setLoading(false)
+        return
+      }
+
+      // Crear el área con los datos parseados
+      await crearArea({
+        nombre: formData.nombre.trim().toLowerCase(),
+        descripcion: formData.descripcion.trim(),
+        estado: 1,
+      })
+
+      setSuccessMsg('Área creada correctamente')
+      handleReset()
+      // Redirigir después de 1.5 segundos
+      setTimeout(() => navigate('/organizacion/areas/consultar'), 1500)
+    } catch (err) {
+      setErrorMsg(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Manage form reset
+  const handleReset = () => {
+    setFormData({
+      nombre: '',
+      descripcion: '',
+    })
   }
 
   return (
@@ -53,6 +114,16 @@ export default function CreateArea() {
           title="Crear Área"
           subtitle="Formulario de Registro"
         >
+          <label
+            htmlFor="Área de "
+            style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontWeight: 600,
+              color: COLORS.labelColor,
+              fontSize: '14px',
+            }}
+          >Área de </label>
           {/* Nombre */}
           <FormInput
             label="Nombre"
@@ -100,28 +171,45 @@ export default function CreateArea() {
             />
           </div>
 
+          {/* Mensajes de feedback */}
+          {successMsg && (
+            <div style={{ color: '#1b5e20', backgroundColor: '#e8f5e9', padding: '12px 16px', borderRadius: '6px', border: '1px solid #a5d6a7', fontSize: '14px', fontWeight: 600, marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>&#10003;</span>
+                <span>{successMsg}</span>
+              </div>
+            </div>
+          )}
+          {errorMsg && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#b71c1c', backgroundColor: '#ffebee', padding: '12px 16px', borderRadius: '6px', border: '1px solid #ef9a9a', fontSize: '14px', fontWeight: 600, marginBottom: '20px' }}>
+              <span>&#9888;</span>
+              <span>{errorMsg}</span>
+            </div>
+          )}
+
           {/* Botones */}
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
             <button
               type="button"
               onClick={() => navigate('/organizacion/areas/consultar')}
+              disabled={loading}
               style={{
                 padding: '12px 32px',
-                backgroundColor: COLORS.secondaryBtn,
-                color: '#fff',
+                backgroundColor: loading ? COLORS.disabledBg : COLORS.secondaryBtn,
+                color: loading ? COLORS.disabledColor : '#fff',
                 border: 'none',
                 borderRadius: '4px',
                 fontSize: '14px',
                 fontWeight: 600,
-                cursor: 'pointer',
+                cursor: loading ? 'not-allowed' : 'pointer',
                 transition: 'background-color 0.3s ease',
               }}
-              onMouseEnter={(e) => (e.target.style.backgroundColor = '#555')}
-              onMouseLeave={(e) => (e.target.style.backgroundColor = COLORS.secondaryBtn)}
+              onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#555')}
+              onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = COLORS.secondaryBtn)}
             >
               Regresar
             </button>
-            <FormButton label="Crear Área" type="submit" variant="primary" />
+            <FormButton label={loading ? 'Guardando...' : 'Crear Área'} type="submit" variant="primary" disabled={loading} />
           </div>
         </FormContainer>
       </main>
