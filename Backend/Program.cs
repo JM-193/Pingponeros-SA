@@ -243,6 +243,15 @@ internal static class Program
     {
         var areas = app.MapGroup("/areas");
 
+        MapAreasGetAll(areas);
+        MapAreasCreate(areas, isDev);
+        MapAreasGetByNombre(areas);
+        MapAreasUpdate(areas, isDev);
+        MapAreasDelete(areas);
+    }
+
+    private static void MapAreasGetAll(RouteGroupBuilder areas)
+    {
         // GET /areas — Lista todas las áreas
         areas.MapGet("/", async (IAreaRepository repo) =>
         {
@@ -256,7 +265,10 @@ internal static class Program
                 return Results.Problem(detail: ex.Message, statusCode: 500);
             }
         });
+    }
 
+    private static void MapAreasCreate(RouteGroupBuilder areas, bool isDev)
+    {
         // POST /areas — Crea una nueva área
         areas.MapPost("/", async (CrearAreaDto dto, IAreaRepository repo) =>
         {
@@ -265,25 +277,11 @@ internal static class Program
                 return validationResult;
 
             // Verificar si el nombre ya existe
-            try
-            {
-                var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
-                if (existe)
-                    return Results.Conflict(new { mensaje = $"Ya existe un área con el nombre '{dto.Nombre}'." });
-            }
-            catch (OracleException ex)
-            {
-                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
-            }
+            var conflictResult = await ValidarNombreAreaUnicoAsync(repo, dto.Nombre).ConfigureAwait(false);
+            if (conflictResult is not null)
+                return conflictResult;
 
-#pragma warning disable CA1308 // ToLower es intencional: los nombres de área se almacenan en minúsculas
-            var area = new Backend.Models.Area
-            {
-                Nombre = dto.Nombre.Trim().ToLowerInvariant(),
-                Descripcion = dto.Descripcion.Trim(),
-                Estado = 1,
-            };
-#pragma warning restore CA1308
+            var area = CrearAreaDesdeDto(dto);
 
             try
             {
@@ -298,7 +296,10 @@ internal static class Program
                 return Results.Json(new { mensaje = msg }, statusCode: 500);
             }
         });
+    }
 
+    private static void MapAreasGetByNombre(RouteGroupBuilder areas)
+    {
         // GET /areas/{nombre} — Obtiene un área por nombre
         areas.MapGet("/{nombre}", async (string nombre, IAreaRepository repo) =>
         {
@@ -314,7 +315,10 @@ internal static class Program
                 return Results.Problem(detail: ex.Message, statusCode: 500);
             }
         });
+    }
 
+    private static void MapAreasUpdate(RouteGroupBuilder areas, bool isDev)
+    {
         // PUT /areas/{nombre} — Actualiza un área
         areas.MapPut("/{nombre}", async (string nombre, CrearAreaDto dto, IAreaRepository repo) =>
         {
@@ -327,26 +331,12 @@ internal static class Program
             // Verificar si el nombre cambió y si el nuevo nombre ya existe
             if (!dto.Nombre.Trim().Equals(nombreDescodificado, StringComparison.OrdinalIgnoreCase))
             {
-                try
-                {
-                    var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
-                    if (existe)
-                        return Results.Conflict(new { mensaje = $"Ya existe un área con el nombre '{dto.Nombre}'." });
-                }
-                catch (OracleException ex)
-                {
-                    return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
-                }
+                var conflictResult = await ValidarNombreAreaUnicoAsync(repo, dto.Nombre).ConfigureAwait(false);
+                if (conflictResult is not null)
+                    return conflictResult;
             }
 
-#pragma warning disable CA1308 // ToLower es intencional: los nombres de área se almacenan en minúsculas
-            var area = new Backend.Models.Area
-            {
-                Nombre = dto.Nombre.Trim().ToLowerInvariant(),
-                Descripcion = dto.Descripcion.Trim(),
-                Estado = 1,
-            };
-#pragma warning restore CA1308
+            var area = CrearAreaDesdeDto(dto);
 
             try
             {
@@ -363,6 +353,10 @@ internal static class Program
                 return Results.Json(new { mensaje = msg }, statusCode: 500);
             }
         });
+    }
+
+    private static void MapAreasDelete(RouteGroupBuilder areas)
+    {
         // DELETE /areas/{id} — Borrado lógico: pasa ESTADO de 1 a 0
         areas.MapDelete("/{id:int}", async (int id, IAreaRepository repo) =>
         {
@@ -379,6 +373,33 @@ internal static class Program
             }
         });
     }
+
+    private static async Task<IResult?> ValidarNombreAreaUnicoAsync(IAreaRepository repo, string nombre)
+    {
+        try
+        {
+            var existe = await repo.ExisteNombreAsync(nombre).ConfigureAwait(false);
+            return existe
+                ? Results.Conflict(new { mensaje = $"Ya existe un área con el nombre '{nombre}'." })
+                : null;
+        }
+        catch (OracleException ex)
+        {
+            return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+        }
+    }
+
+#pragma warning disable CA1308 // ToLower es intencional: los nombres de área se almacenan en minúsculas
+    private static Backend.Models.Area CrearAreaDesdeDto(CrearAreaDto dto)
+    {
+        return new Backend.Models.Area
+        {
+            Nombre = dto.Nombre.Trim().ToLowerInvariant(),
+            Descripcion = dto.Descripcion.Trim(),
+            Estado = 1,
+        };
+    }
+#pragma warning restore CA1308
 
     private static IResult? ValidarCrearArea(CrearAreaDto dto)
     {
