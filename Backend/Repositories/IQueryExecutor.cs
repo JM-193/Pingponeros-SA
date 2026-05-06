@@ -5,7 +5,7 @@ namespace Backend.Repositories;
 
 internal interface IQueryExecutor
 {
-    Task<T> QueryAsync<T>(string sql, Func<DbDataReader, Task<T>> map, Action<OracleCommand>? configure = null);
-    Task<int> ExecuteAsync(string sql, Action<OracleCommand>? configure = null);
-    Task<object?> ExecuteScalarAsync(string sql, Action<OracleCommand>? configure = null);
+    Task<T> QueryAsync<T>(Func<OracleConnection, OracleCommand> createCommand, Func<DbDataReader, Task<T>> map);
+    Task<int> ExecuteAsync(Func<OracleConnection, OracleCommand> createCommand);
+    Task<object?> ExecuteScalarAsync(Func<OracleConnection, OracleCommand> createCommand);
 }

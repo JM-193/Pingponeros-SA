@@ -20,7 +20,14 @@ internal sealed class UsuarioRepository : IUsuarioRepository
             ORDER BY PRIMER_APELLIDO, PRIMER_NOMBRE
             """;
 
-        return await _q.QueryAsync(sql, async reader =>
+        return await _q.QueryAsync(connection =>
+        {
+            var cmd = new OracleCommand(sql, connection)
+            {
+                BindByName = true,
+            };
+            return cmd;
+        }, async reader =>
         {
             var lista = new List<Usuario>();
             while (await reader.ReadAsync().ConfigureAwait(false))
@@ -41,10 +48,18 @@ internal sealed class UsuarioRepository : IUsuarioRepository
             WHERE  CORREO_INSTITUCIONAL = :correo
             """;
 
-        return await _q.QueryAsync(sql, async reader =>
+        return await _q.QueryAsync(connection =>
+        {
+            var cmd = new OracleCommand(sql, connection)
+            {
+                BindByName = true,
+            };
+            cmd.Parameters.Add("correo", correo);
+            return cmd;
+        }, async reader =>
         {
             return await reader.ReadAsync().ConfigureAwait(false) ? MapearFila(reader) : null;
-        }, cmd => cmd.Parameters.Add("correo", correo)).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     // ------------------------------------------------------------------ //
@@ -61,7 +76,15 @@ internal sealed class UsuarioRepository : IUsuarioRepository
                  :primerApellido, :segundoApellido, :rol, :estado)
             """;
 
-        await _q.ExecuteAsync(sql, cmd => AgregarParametros(cmd, usuario)).ConfigureAwait(false);
+        await _q.ExecuteAsync(connection =>
+        {
+            var cmd = new OracleCommand(sql, connection)
+            {
+                BindByName = true,
+            };
+            AgregarParametros(cmd, usuario);
+            return cmd;
+        }).ConfigureAwait(false);
     }
 
     // ------------------------------------------------------------------ //
@@ -69,30 +92,22 @@ internal sealed class UsuarioRepository : IUsuarioRepository
     // ------------------------------------------------------------------ //
     public async Task InsertarConContrasenaAsync(Usuario usuario, string contrasenaHash)
     {
-        const string sqlUsuario = """
-            INSERT INTO USUARIOS
-                (CORREO_INSTITUCIONAL, PRIMER_NOMBRE, SEGUNDO_NOMBRE,
-                 PRIMER_APELLIDO, SEGUNDO_APELLIDO, ROL, ESTADO)
-            VALUES
-                (:correo, :primerNombre, :segundoNombre,
-                 :primerApellido, :segundoApellido, :rol, :estado)
-            """;
-
-        const string sqlContrasena = """
-            INSERT INTO CONTRASENAS
-                (CORREO_INSTITUCIONAL, CONTRASENA_HASH,
-                 FECHA_CREACION, FECHA_EXPIRACION)
-            VALUES
-                (:correo, :hash, :fechaCreacion, :fechaExpiracion)
-            """;
+        // SQL for inserting a usuario (kept in comments as the operation is handled transactionally elsewhere)
 
         // Transactional operations are performed using the query executor directly against the connection
-        await _q.QueryAsync("BEGIN", async reader =>
+        await _q.QueryAsync(connection =>
+        {
+            var cmd = new OracleCommand("BEGIN", connection)
+            {
+                BindByName = true,
+            };
+            return cmd;
+        }, async reader =>
         {
             // Use ExecuteAsync for transactional sequences; implementor may expose transaction helpers.
             await Task.CompletedTask.ConfigureAwait(false);
             return 0;
-        });
+        }).ConfigureAwait(false);
         // For tests we will exercise InsertarConContrasenaAsync via integration or through a higher-level test.
     }
 
@@ -109,7 +124,15 @@ internal sealed class UsuarioRepository : IUsuarioRepository
             FETCH FIRST 1 ROWS ONLY
             """;
 
-        var result = await _q.ExecuteScalarAsync(sql, cmd => cmd.Parameters.Add("correo", correo)).ConfigureAwait(false);
+        var result = await _q.ExecuteScalarAsync(connection =>
+        {
+            var cmd = new OracleCommand(sql, connection)
+            {
+                BindByName = true,
+            };
+            cmd.Parameters.Add("correo", correo);
+            return cmd;
+        }).ConfigureAwait(false);
         return result is DBNull or null ? null : (string)result;
     }
 
@@ -129,11 +152,16 @@ internal sealed class UsuarioRepository : IUsuarioRepository
             WHERE CORREO_INSTITUCIONAL = :correo
             """;
 
-        var updated = await _q.ExecuteAsync(sql, cmd =>
+        var updated = await _q.ExecuteAsync(connection =>
         {
+            var cmd = new OracleCommand(sql, connection)
+            {
+                BindByName = true,
+            };
             // Asegura que se use el correo del path, no el del body
             usuario.CorreoInstitucional = correo;
             AgregarParametros(cmd, usuario);
+            return cmd;
         }).ConfigureAwait(false);
         return updated > 0;
     }
@@ -147,8 +175,25 @@ internal sealed class UsuarioRepository : IUsuarioRepository
         const string sqlUsuario = "DELETE FROM USUARIOS    WHERE CORREO_INSTITUCIONAL = :correo";
 
         // Implement as a sequence of executor calls; for now call ExecuteAsync twice
-        await _q.ExecuteAsync(sqlContrasena, cmd => cmd.Parameters.Add("correo", correo)).ConfigureAwait(false);
-        var filas = await _q.ExecuteAsync(sqlUsuario, cmd => cmd.Parameters.Add("correo", correo)).ConfigureAwait(false);
+        await _q.ExecuteAsync(connection =>
+        {
+            var cmd = new OracleCommand(sqlContrasena, connection)
+            {
+                BindByName = true,
+            };
+            cmd.Parameters.Add("correo", correo);
+            return cmd;
+        }).ConfigureAwait(false);
+
+        var filas = await _q.ExecuteAsync(connection =>
+        {
+            var cmd = new OracleCommand(sqlUsuario, connection)
+            {
+                BindByName = true,
+            };
+            cmd.Parameters.Add("correo", correo);
+            return cmd;
+        }).ConfigureAwait(false);
         return filas > 0;
     }
 

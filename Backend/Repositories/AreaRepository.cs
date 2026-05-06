@@ -15,8 +15,14 @@ internal sealed class AreaRepository : IAreaRepository
 
     public async Task<List<Area>> ObtenerTodasAsync()
     {
-        const string query = "SELECT ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM AREAS WHERE ESTADO = 1 ORDER BY NOMBRE";
-        return await _q.QueryAsync(query, async reader =>
+        return await _q.QueryAsync(connection =>
+        {
+            var cmd = new OracleCommand("SELECT ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM AREAS WHERE ESTADO = 1 ORDER BY NOMBRE", connection)
+            {
+                BindByName = true,
+            };
+            return cmd;
+        }, async reader =>
         {
             var areas = new List<Area>();
             while (await reader.ReadAsync().ConfigureAwait(false))
@@ -35,8 +41,15 @@ internal sealed class AreaRepository : IAreaRepository
 
     public async Task<bool> ExisteNombreAsync(string nombre)
     {
-        const string query = "SELECT COUNT(*) FROM AREAS WHERE LOWER(NOMBRE) = LOWER(:nombre) AND ESTADO = 1";
-        var result = await _q.ExecuteScalarAsync(query, cmd => cmd.Parameters.Add(ParamNombre, nombre)).ConfigureAwait(false);
+        var result = await _q.ExecuteScalarAsync(connection =>
+        {
+            var cmd = new OracleCommand("SELECT COUNT(*) FROM AREAS WHERE LOWER(NOMBRE) = LOWER(:nombre) AND ESTADO = 1", connection)
+            {
+                BindByName = true,
+            };
+            cmd.Parameters.Add(ParamNombre, nombre);
+            return cmd;
+        }).ConfigureAwait(false);
         var count = Convert.ToInt32(result, CultureInfo.InvariantCulture);
         return count > 0;
     }
@@ -51,13 +64,18 @@ internal sealed class AreaRepository : IAreaRepository
             RETURNING ID_AREA INTO :id
             """;
 
-        var result = await _q.ExecuteScalarAsync(query, cmd =>
+        var result = await _q.ExecuteScalarAsync(connection =>
         {
+            var cmd = new OracleCommand(query, connection)
+            {
+                BindByName = true,
+            };
             cmd.Parameters.Add(ParamNombre, area.Nombre);
             cmd.Parameters.Add(":descripcion", area.Descripcion);
             cmd.Parameters.Add(":estado", area.Estado);
             var idParam = new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output);
             cmd.Parameters.Add(idParam);
+            return cmd;
         }).ConfigureAwait(false);
 
         return (int)(OracleDecimal)result!;
@@ -65,8 +83,15 @@ internal sealed class AreaRepository : IAreaRepository
 
     public async Task<Area?> ObtenerPorNombreAsync(string nombre)
     {
-        const string query = "SELECT ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM AREAS WHERE LOWER(NOMBRE) = LOWER(:nombre) AND ESTADO = 1";
-        return await _q.QueryAsync(query, async reader =>
+        return await _q.QueryAsync(connection =>
+        {
+            var cmd = new OracleCommand("SELECT ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM AREAS WHERE LOWER(NOMBRE) = LOWER(:nombre) AND ESTADO = 1", connection)
+            {
+                BindByName = true,
+            };
+            cmd.Parameters.Add(ParamNombre, nombre);
+            return cmd;
+        }, async reader =>
         {
             if (await reader.ReadAsync().ConfigureAwait(false))
             {
@@ -79,7 +104,7 @@ internal sealed class AreaRepository : IAreaRepository
                 };
             }
             return null;
-        }, cmd => cmd.Parameters.Add(ParamNombre, nombre)).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     public async Task<bool> ActualizarAsync(string nombreOriginal, Area area)
@@ -92,13 +117,17 @@ internal sealed class AreaRepository : IAreaRepository
             WHERE LOWER(NOMBRE) = LOWER(:nombreOriginal) AND ESTADO = 1
             """;
 
-        var rows = await _q.ExecuteAsync(query, cmd =>
+        var rows = await _q.ExecuteAsync(connection =>
         {
-            cmd.BindByName = true;
+            var cmd = new OracleCommand(query, connection)
+            {
+                BindByName = true,
+            };
             cmd.Parameters.Add(ParamNombre, area.Nombre);
             cmd.Parameters.Add(":descripcion", area.Descripcion);
             cmd.Parameters.Add(":estado", area.Estado);
             cmd.Parameters.Add(":nombreOriginal", nombreOriginal);
+            return cmd;
         }).ConfigureAwait(false);
 
         return rows > 0;
@@ -106,8 +135,15 @@ internal sealed class AreaRepository : IAreaRepository
 
     public async Task<bool> DesactivarAsync(int id)
     {
-        const string query = "UPDATE AREAS SET ESTADO = 0 WHERE ID_AREA = :id AND ESTADO = 1";
-        var rows = await _q.ExecuteAsync(query, cmd => cmd.Parameters.Add(":id", id)).ConfigureAwait(false);
+        var rows = await _q.ExecuteAsync(connection =>
+        {
+            var cmd = new OracleCommand("UPDATE AREAS SET ESTADO = 0 WHERE ID_AREA = :id AND ESTADO = 1", connection)
+            {
+                BindByName = true,
+            };
+            cmd.Parameters.Add(":id", id);
+            return cmd;
+        }).ConfigureAwait(false);
         return rows > 0;
     }
 }
