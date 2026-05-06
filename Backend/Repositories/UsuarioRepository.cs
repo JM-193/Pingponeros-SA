@@ -135,6 +135,30 @@ internal sealed class UsuarioRepository(OracleConnection db) : IUsuarioRepositor
     }
 
     // ------------------------------------------------------------------ //
+    // GET HASH MÁS RECIENTE                                               //
+    // ------------------------------------------------------------------ //
+    public async Task<string?> ObtenerHashMasRecienteAsync(string correo)
+    {
+        const string sql = """
+            SELECT CONTRASENA_HASH
+            FROM   CONTRASENAS
+            WHERE  CORREO_INSTITUCIONAL = :correo
+            ORDER BY FECHA_CREACION DESC
+            FETCH FIRST 1 ROWS ONLY
+            """;
+
+        await db.OpenAsync().ConfigureAwait(false);
+        try
+        {
+            using var cmd = new OracleCommand(sql, db);
+            cmd.Parameters.Add("correo", correo);
+            var result = await cmd.ExecuteScalarAsync().ConfigureAwait(false);
+            return result is DBNull or null ? null : (string)result;
+        }
+        finally { await db.CloseAsync().ConfigureAwait(false); }
+    }
+
+    // ------------------------------------------------------------------ //
     // UPDATE                                                               //
     // ------------------------------------------------------------------ //
     public async Task<bool> ActualizarAsync(string correo, Usuario usuario)

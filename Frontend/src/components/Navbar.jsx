@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { cerrarSesion } from '../services/session'
 
 const COLORS = {
   navBg: '#0e4671',
@@ -550,7 +551,7 @@ export default function Navbar() {
               Mi Perfil
             </button>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => { cerrarSesion(); navigate('/') }}
               style={{
                 display: 'block',
                 width: '100%',

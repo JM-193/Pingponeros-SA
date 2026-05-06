@@ -160,7 +160,55 @@ internal static class Program
             }
         });
 
+        // ---------------------------------------------------------------- //
+        // Rutas de Auth                                                     //
+        // ---------------------------------------------------------------- //
+        MapAuth(app, isDev);
+
         app.Run();
+    }
+
+    // ---------------------------------------------------------------- //
+    // Auth                                                              //
+    // ---------------------------------------------------------------- //
+    private static void MapAuth(WebApplication app, bool isDev)
+    {
+        app.MapPost("/auth/login", async (LoginDto dto, IUsuarioRepository repo) =>
+        {
+            if (string.IsNullOrWhiteSpace(dto.CorreoInstitucional) ||
+                string.IsNullOrWhiteSpace(dto.Contrasena))
+                return Results.BadRequest(new { mensaje = "Correo y contraseña son obligatorios." });
+
+            try
+            {
+                var hash = await repo.ObtenerHashMasRecienteAsync(dto.CorreoInstitucional.Trim())
+                                     .ConfigureAwait(false);
+
+                if (hash is null || !BCrypt.Net.BCrypt.Verify(dto.Contrasena, hash))
+                    return Results.Json(new { mensaje = "Correo o contraseña incorrectos." }, statusCode: 401);
+
+                var usuario = await repo.ObtenerPorCorreoAsync(dto.CorreoInstitucional.Trim())
+                                        .ConfigureAwait(false);
+
+                return Results.Ok(new
+                {
+                    correoInstitucional = usuario!.CorreoInstitucional,
+                    primerNombre        = usuario.PrimerNombre,
+                    segundoNombre       = usuario.SegundoNombre,
+                    primerApellido      = usuario.PrimerApellido,
+                    segundoApellido     = usuario.SegundoApellido,
+                    rol                 = usuario.Rol,
+                    estado              = usuario.Estado,
+                });
+            }
+            catch (OracleException ex)
+            {
+                var msg = isDev
+                    ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                    : TraducirErrorOracle(ex.Number);
+                return Results.Json(new { mensaje = msg }, statusCode: 500);
+            }
+        });
     }
 
     private static string TraducirErrorOracle(int numero) => numero switch

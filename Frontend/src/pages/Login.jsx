@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
+import { login } from '../services/authService'
+import { guardarSesion } from '../services/session'
 
 /* UCR brand palette
    Azul UCR  #00AEEF  (Pantone 299 C)
@@ -18,33 +20,41 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState({})
+  const [serverError, setServerError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     const newErrors = {}
 
-    // Validar correo
     if (!email.trim()) {
       newErrors.email = 'El correo es requerido'
     } else if (!email.endsWith('@ucr.ac.cr')) {
       newErrors.email = 'El correo debe terminar en @ucr.ac.cr'
     }
 
-    // Validar contraseña
     if (!password.trim()) {
       newErrors.password = 'La contraseña es requerida'
     }
 
-    // Si hay errores, mostrarlos
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
       return
     }
 
-    // Limpiar errores si es válido
     setErrors({})
-    // TODO: llamada al endpoint de autenticación
-    navigate('/home')
+    setServerError('')
+    setLoading(true)
+
+    try {
+      const usuario = await login(email.trim(), password)
+      guardarSesion(usuario)
+      navigate('/home')
+    } catch (err) {
+      setServerError(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -150,20 +160,28 @@ export default function Login() {
 
         <button
           type="submit"
+          disabled={loading}
           style={{
             padding: '14px',
-            backgroundColor: COLORS.btnBg,
+            backgroundColor: loading ? '#5a7db5' : COLORS.btnBg,
             color: '#fff',
             border: 'none',
             borderRadius: '4px',
             fontSize: '16px',
             fontWeight: 600,
-            cursor: 'pointer',
+            cursor: loading ? 'not-allowed' : 'pointer',
             letterSpacing: '0.01em',
           }}
         >
-          Iniciar Sesión
+          {loading ? 'Verificando...' : 'Iniciar Sesión'}
         </button>
+
+        {serverError && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#b71c1c', backgroundColor: '#ffebee', padding: '10px 14px', borderRadius: '6px', border: '1px solid #ef9a9a', fontSize: '14px', fontWeight: 600 }}>
+            <span>&#9888;</span>
+            <span>{serverError}</span>
+          </div>
+        )}
       </form>
 
       <div style={{ marginTop: '20px' }}>
