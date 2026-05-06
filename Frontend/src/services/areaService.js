@@ -58,7 +58,23 @@ export async function crearArea(datos) {
 }
 
 /**
- * Actualiza un área en la base de datos.
+ * Elimina un área por ID.
+ * @param {number} id - ID del área a eliminar
+ * @returns {Promise<void>}
+ */
+export async function eliminarArea(id) {
+  const response = await fetch(`${API_URL}/areas/${id}`, {
+    method: 'DELETE',
+  })
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}))
+    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
+  }
+}
+
+/**
+ * Actualiza un área existente por nombre.
  * @param {string} nombreOriginal - Nombre original del área
  * @param {{ nombre: string, descripcion: string }} datos - Nuevos datos
  * @returns {Promise<object>} El área actualizada.

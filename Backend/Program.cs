@@ -276,12 +276,14 @@ internal static class Program
                 return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
             }
 
+#pragma warning disable CA1308 // ToLower es intencional: los nombres de área se almacenan en minúsculas
             var area = new Backend.Models.Area
             {
-                Nombre      = dto.Nombre.Trim(),
+                Nombre      = dto.Nombre.Trim().ToLowerInvariant(),
                 Descripcion = dto.Descripcion.Trim(),
                 Estado      = 1,
             };
+#pragma warning restore CA1308
 
             try
             {
@@ -323,7 +325,7 @@ internal static class Program
             var nombreDescodificado = Uri.UnescapeDataString(nombre);
 
             // Verificar si el nombre cambió y si el nuevo nombre ya existe
-            if (dto.Nombre.Trim().ToLower() != nombreDescodificado.ToLower())
+            if (!dto.Nombre.Trim().Equals(nombreDescodificado, StringComparison.OrdinalIgnoreCase))
             {
                 try
                 {
@@ -337,12 +339,14 @@ internal static class Program
                 }
             }
 
+#pragma warning disable CA1308 // ToLower es intencional: los nombres de área se almacenan en minúsculas
             var area = new Backend.Models.Area
             {
-                Nombre      = dto.Nombre.Trim().ToLower(),
+                Nombre      = dto.Nombre.Trim().ToLowerInvariant(),
                 Descripcion = dto.Descripcion.Trim(),
                 Estado      = 1,
             };
+#pragma warning restore CA1308
 
             try
             {
@@ -357,6 +361,21 @@ internal static class Program
                     ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
                     : TraducirErrorOracle(ex.Number);
                 return Results.Json(new { mensaje = msg }, statusCode: 500);
+            }
+        });
+        // DELETE /areas/{id} — Borrado lógico: pasa ESTADO de 1 a 0
+        areas.MapDelete("/{id:int}", async (int id, IAreaRepository repo) =>
+        {
+            try
+            {
+                var desactivado = await repo.DesactivarAsync(id).ConfigureAwait(false);
+                return desactivado
+                    ? Results.NoContent()
+                    : Results.NotFound(new { mensaje = $"No se encontró el área activa con ID '{id}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
             }
         });
     }

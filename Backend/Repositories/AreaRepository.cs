@@ -12,7 +12,7 @@ internal sealed class AreaRepository(OracleConnection connection) : IAreaReposit
     public async Task<List<Area>> ObtenerTodasAsync()
     {
         var areas = new List<Area>();
-        const string query = "SELECT ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM AREAS ORDER BY NOMBRE";
+        const string query = "SELECT ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM AREAS WHERE ESTADO = 1 ORDER BY NOMBRE";
 
         using var cmd = new OracleCommand(query, connection);
         try
@@ -41,7 +41,7 @@ internal sealed class AreaRepository(OracleConnection connection) : IAreaReposit
 
     public async Task<bool> ExisteNombreAsync(string nombre)
     {
-        const string query = "SELECT COUNT(*) FROM AREAS WHERE LOWER(NOMBRE) = LOWER(:nombre)";
+        const string query = "SELECT COUNT(*) FROM AREAS WHERE LOWER(NOMBRE) = LOWER(:nombre) AND ESTADO = 1";
 
         using var cmd = new OracleCommand(query, connection);
         cmd.Parameters.Add(":nombre", nombre);
@@ -92,7 +92,7 @@ internal sealed class AreaRepository(OracleConnection connection) : IAreaReposit
 
     public async Task<Area?> ObtenerPorNombreAsync(string nombre)
     {
-        const string query = "SELECT ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM AREAS WHERE LOWER(NOMBRE) = LOWER(:nombre)";
+        const string query = "SELECT ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM AREAS WHERE LOWER(NOMBRE) = LOWER(:nombre) AND ESTADO = 1";
 
         using var cmd = new OracleCommand(query, connection);
         cmd.Parameters.Add(":nombre", nombre);
@@ -127,7 +127,7 @@ internal sealed class AreaRepository(OracleConnection connection) : IAreaReposit
         const string query = """
             UPDATE AREAS
             SET NOMBRE = :nombre, DESCRIPCION = :descripcion, ESTADO = :estado
-            WHERE LOWER(NOMBRE) = LOWER(:nombreOriginal)
+            WHERE LOWER(NOMBRE) = LOWER(:nombreOriginal) AND ESTADO = 1
             """;
 
         using var cmd = new OracleCommand(query, connection) { BindByName = true };
@@ -135,6 +135,26 @@ internal sealed class AreaRepository(OracleConnection connection) : IAreaReposit
         cmd.Parameters.Add(":descripcion",    area.Descripcion);
         cmd.Parameters.Add(":estado",         area.Estado);
         cmd.Parameters.Add(":nombreOriginal", nombreOriginal);
+
+        try
+        {
+            await connection.OpenAsync().ConfigureAwait(false);
+            var rowsAffected = await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+            return rowsAffected > 0;
+        }
+        finally
+        {
+            if (connection.State == ConnectionState.Open)
+                await connection.CloseAsync().ConfigureAwait(false);
+        }
+    }
+
+    public async Task<bool> DesactivarAsync(int id)
+    {
+        const string query = "UPDATE AREAS SET ESTADO = 0 WHERE ID_AREA = :id AND ESTADO = 1";
+
+        using var cmd = new OracleCommand(query, connection);
+        cmd.Parameters.Add(":id", id);
 
         try
         {

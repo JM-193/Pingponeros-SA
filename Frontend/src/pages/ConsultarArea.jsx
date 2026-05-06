@@ -5,7 +5,7 @@ import Header from '../components/Header'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import ConfirmModal from '../components/ConfirmModal'
-import { obtenerAreas } from '../services/areaService'
+import { obtenerAreas, eliminarArea } from '../services/areaService'
 import { COLORS } from '../constants/colors'
 
 // Component to show when there are no results
@@ -54,9 +54,6 @@ function ResultsTable({ currentResults, onEdit, onDelete }) {
           <thead>
             <tr style={{ backgroundColor: COLORS.primaryBtn, color: '#fff' }}>
               <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, borderBottom: `1px solid ${COLORS.borderColor}` }}>
-                ID
-              </th>
-              <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, borderBottom: `1px solid ${COLORS.borderColor}` }}>
                 Nombre
               </th>
               <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, borderBottom: `1px solid ${COLORS.borderColor}` }}>
@@ -84,7 +81,6 @@ function ResultsTable({ currentResults, onEdit, onDelete }) {
                   (e.currentTarget.style.backgroundColor = index % 2 === 0 ? '#f9f9f9' : '#fff')
                 }
               >
-                <td style={{ padding: '12px 16px', color: '#666' }}>{area.id}</td>
                 <td style={{ padding: '12px 16px', fontWeight: 600, color: '#333' }}>{area.nombre}</td>
                 <td style={{ padding: '12px 16px', color: '#555' }}>{area.descripcion}</td>
                 <td style={{ padding: '12px 16px', textAlign: 'center', width: '1%', whiteSpace: 'nowrap' }}>
@@ -286,8 +282,21 @@ export default function ConsultarArea() {
     setAreaToDelete(null)
   }
 
-  const handleConfirmDelete = () => {
-    closeDeleteModal()
+  const handleConfirmDelete = async () => {
+    if (!areaToDelete) return
+    try {
+      await eliminarArea(areaToDelete.id)
+      const updated = allAreas.filter((a) => a.id !== areaToDelete.id)
+      setAllAreas(updated)
+      setResults(updated.filter((a) => matchesSearch(a, searchTerm)))
+      if (currentPage > Math.ceil(updated.length / resultsPerPage)) {
+        setCurrentPage((p) => Math.max(1, p - 1))
+      }
+    } catch (err) {
+      console.error('Error al eliminar:', err)
+    } finally {
+      closeDeleteModal()
+    }
   }
 
   const totalPages = Math.ceil(results.length / resultsPerPage)

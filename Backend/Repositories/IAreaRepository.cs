@@ -9,4 +9,5 @@ internal interface IAreaRepository
     Task<bool> ExisteNombreAsync(string nombre);
     Task<int> InsertarAsync(Area area);
     Task<bool> ActualizarAsync(string nombreOriginal, Area area);
+    Task<bool> DesactivarAsync(int id);
 }
