@@ -1,0 +1,129 @@
+// RepositoriesTests.cs
+using System.Data;
+using System.Data.Common;
+using Backend.Models;
+using Backend.Repositories;
+using NSubstitute;
+using Oracle.ManagedDataAccess.Client;
+using Oracle.ManagedDataAccess.Types;
+using Xunit;
+
+namespace Backend.Tests;
+
+public sealed class RepositoriesTests
+{
+    [Fact]
+    public async Task AreaRepository_ObtenerTodasAsync_ReturnsAreas()
+    {
+        var table = new DataTable();
+        table.Columns.Add("ID_AREA", typeof(int));
+        table.Columns.Add("NOMBRE", typeof(string));
+        table.Columns.Add("DESCRIPCION", typeof(string));
+        table.Columns.Add("ESTADO", typeof(int));
+        table.Rows.Add(1, "Area A", "Desc A", 1);
+
+        var q = Substitute.For<IQueryExecutor>();
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<Area>>>>())
+            .Returns(ci =>
+            {
+                var map = (Func<DbDataReader, Task<List<Area>>>)ci[1]!;
+                using var reader = table.CreateDataReader();
+                return map(reader);
+            });
+
+        var repo = new AreaRepository(q);
+        var res = await repo.ObtenerTodasAsync();
+
+        Assert.Single(res);
+        Assert.Equal("Area A", res[0].Nombre);
+    }
+
+    [Fact]
+    public async Task AreaRepository_ExisteNombreAsync_ReturnsTrueWhenExists()
+    {
+        var q = Substitute.For<IQueryExecutor>();
+        q.ExecuteScalarAsync(Arg.Any<Func<OracleConnection, OracleCommand>>()).Returns(1);
+
+        var repo = new AreaRepository(q);
+        var exists = await repo.ExisteNombreAsync("Area A");
+
+        Assert.True(exists);
+    }
+
+    [Fact]
+    public async Task AreaRepository_InsertarAsync_ReturnsInsertedId()
+    {
+        var q = Substitute.For<IQueryExecutor>();
+        q.ExecuteScalarAsync(Arg.Any<Func<OracleConnection, OracleCommand>>()).Returns(new OracleDecimal(42));
+
+        var repo = new AreaRepository(q);
+        var id = await repo.InsertarAsync(new Area { Nombre = "X", Descripcion = "Y", Estado = 1 });
+
+        Assert.Equal(42, id);
+    }
+
+    [Fact]
+    public async Task UsuarioRepository_ObtenerPorCorreoAsync_ReturnsUsuario()
+    {
+        var table = new DataTable();
+        table.Columns.Add("CORREO_INSTITUCIONAL", typeof(string));
+        table.Columns.Add("PRIMER_NOMBRE", typeof(string));
+        table.Columns.Add("SEGUNDO_NOMBRE", typeof(string));
+        table.Columns.Add("PRIMER_APELLIDO", typeof(string));
+        table.Columns.Add("SEGUNDO_APELLIDO", typeof(string));
+        table.Columns.Add("ROL", typeof(int));
+        table.Columns.Add("ESTADO", typeof(int));
+        table.Rows.Add("u@test.com", "U", DBNull.Value, "T", DBNull.Value, 1, 1);
+
+        var q = Substitute.For<IQueryExecutor>();
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Usuario?>>>() )
+            .Returns(ci =>
+            {
+                var map = (Func<DbDataReader, Task<Usuario?>>)ci[1]!;
+                using var reader = table.CreateDataReader();
+                return map(reader);
+            });
+
+        var repo = new UsuarioRepository(q);
+        var usuario = await repo.ObtenerPorCorreoAsync("u@test.com");
+
+        Assert.NotNull(usuario);
+        Assert.Equal("u@test.com", usuario!.CorreoInstitucional);
+    }
+
+  [Fact]
+    public async Task UsuarioRepository_ObtenerHashMasRecienteAsync_ReturnsHash()
+    {
+        var q = Substitute.For<IQueryExecutor>();
+        q.ExecuteScalarAsync(Arg.Any<Func<OracleConnection, OracleCommand>>()).Returns("hashvalue");
+
+        var repo = new UsuarioRepository(q);
+        var hash = await repo.ObtenerHashMasRecienteAsync("u@test.com");
+
+        Assert.Equal("hashvalue", hash);
+    }
+
+    [Fact]
+    public async Task UsuarioRepository_ActualizarAsync_ReturnsTrueWhenUpdated()
+    {
+        var q = Substitute.For<IQueryExecutor>();
+        q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>()).Returns(1);
+
+        var repo = new UsuarioRepository(q);
+        var updated = await repo.ActualizarAsync("u@test.com", new Usuario { CorreoInstitucional = "u@test.com", PrimerNombre = "A", PrimerApellido = "B", Rol = 0, Estado = 1 });
+
+        Assert.True(updated);
+    }
+
+    [Fact]
+    public async Task UsuarioRepository_EliminarAsync_ReturnsTrueWhenDeleted()
+    {
+        var q = Substitute.For<IQueryExecutor>();
+        q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>()).Returns(1);
+
+        var repo = new UsuarioRepository(q);
+        var deleted = await repo.EliminarAsync("u@test.com");
+
+        Assert.True(deleted);
+    }
+}
