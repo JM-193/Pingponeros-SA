@@ -4,7 +4,6 @@ import { COLORS } from '../constants/colors'
 const overlayStyle = {
   position: 'fixed',
   inset: 0,
-  backgroundColor: 'rgba(0,0,0,0.45)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -12,6 +11,11 @@ const overlayStyle = {
   padding: '24px',
   border: 'none',
   margin: 0,
+  width: '100vw',
+  height: '100vh',
+  maxWidth: 'none',
+  maxHeight: 'none',
+  backgroundColor: 'transparent',
 }
 
 const modalStyle = {
@@ -75,8 +79,8 @@ const backdropButtonStyle = {
   border: 'none',
   padding: 0,
   margin: 0,
-  background: 'transparent',
-  cursor: 'default',
+  background: 'rgba(0,0,0,0.45)',
+  cursor: 'pointer',
   zIndex: 0,
 }
 
