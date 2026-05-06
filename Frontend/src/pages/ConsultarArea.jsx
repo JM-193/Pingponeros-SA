@@ -31,7 +31,7 @@ EmptyResults.propTypes = {
 }
 
 // Component to display the results table
-function ResultsTable({ currentResults }) {
+function ResultsTable({ currentResults, onEdit }) {
   return (
     <div
       style={{
@@ -88,7 +88,7 @@ function ResultsTable({ currentResults }) {
                 <td style={{ padding: '12px 16px', color: '#555' }}>{area.descripcion}</td>
                 <td style={{ padding: '12px 16px', textAlign: 'center', width: '1%', whiteSpace: 'nowrap' }}>
                   <button
-                    onClick={() => alert(`Editar el área: ${area.nombre}`)}
+                    onClick={() => onEdit(area.nombre)}
                     style={{
                       padding: '8px 12px',
                       backgroundColor: COLORS.primaryBtn,
@@ -143,6 +143,7 @@ ResultsTable.propTypes = {
       descripcion: PropTypes.string.isRequired,
     })
   ).isRequired,
+  onEdit: PropTypes.func.isRequired,
 }
 
 // Component to display pagination controls
@@ -270,6 +271,10 @@ export default function ConsultarArea() {
     setResults(filtered)
   }
 
+  const handleEdit = (nombre) => {
+    navigate(`/organizacion/areas/editar/${encodeURIComponent(nombre)}`)
+  }
+
   const totalPages = Math.ceil(results.length / resultsPerPage)
   const startIndex = (currentPage - 1) * resultsPerPage
   const endIndex = startIndex + resultsPerPage
@@ -288,7 +293,7 @@ export default function ConsultarArea() {
 
     return (
       <>
-        <ResultsTable currentResults={currentResults} />
+        <ResultsTable currentResults={currentResults} onEdit={handleEdit} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>
             Mostrando {startIndex + 1} a {Math.min(endIndex, results.length)} de {results.length} resultados
