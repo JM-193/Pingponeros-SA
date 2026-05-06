@@ -89,4 +89,62 @@ internal sealed class AreaRepository(OracleConnection connection) : IAreaReposit
                 await connection.CloseAsync().ConfigureAwait(false);
         }
     }
+
+    public async Task<Area?> ObtenerPorNombreAsync(string nombre)
+    {
+        const string query = "SELECT ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM AREAS WHERE LOWER(NOMBRE) = LOWER(:nombre)";
+
+        using var cmd = new OracleCommand(query, connection);
+        cmd.Parameters.Add(":nombre", nombre);
+
+        try
+        {
+            await connection.OpenAsync().ConfigureAwait(false);
+            using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+            if (await reader.ReadAsync().ConfigureAwait(false))
+            {
+                return new Area
+                {
+                    Id          = Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
+                    Nombre      = reader["NOMBRE"].ToString() ?? "",
+                    Descripcion = reader["DESCRIPCION"].ToString() ?? "",
+                    Estado      = Convert.ToInt32(reader["ESTADO"], CultureInfo.InvariantCulture),
+                };
+            }
+            return null;
+        }
+        finally
+        {
+            if (connection.State == ConnectionState.Open)
+                await connection.CloseAsync().ConfigureAwait(false);
+        }
+    }
+
+    public async Task<bool> ActualizarAsync(string nombreOriginal, Area area)
+    {
+        ArgumentNullException.ThrowIfNull(area);
+
+        const string query = @"
+            UPDATE AREAS 
+            SET NOMBRE = :nombre, DESCRIPCION = :descripcion, ESTADO = :estado
+            WHERE LOWER(NOMBRE) = LOWER(:nombreOriginal)";
+
+        using var cmd = new OracleCommand(query, connection);
+        cmd.Parameters.Add(":nombreOriginal", nombreOriginal);
+        cmd.Parameters.Add(":nombre",         area.Nombre);
+        cmd.Parameters.Add(":descripcion",    area.Descripcion);
+        cmd.Parameters.Add(":estado",         area.Estado);
+
+        try
+        {
+            await connection.OpenAsync().ConfigureAwait(false);
+            var rowsAffected = await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+            return rowsAffected > 0;
+        }
+        finally
+        {
+            if (connection.State == ConnectionState.Open)
+                await connection.CloseAsync().ConfigureAwait(false);
+        }
+    }
 }
