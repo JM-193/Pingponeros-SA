@@ -85,7 +85,7 @@ function ResultsTable({ currentResults }) {
                 <td style={{ padding: '12px 16px', color: '#666' }}>{area.id}</td>
                 <td style={{ padding: '12px 16px', fontWeight: 600, color: '#333' }}>{area.nombre}</td>
                 <td style={{ padding: '12px 16px', color: '#555' }}>{area.descripcion}</td>
-                <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                <td style={{ padding: '12px 16px', textAlign: 'center', width: '1%', whiteSpace: 'nowrap' }}>
                   <button
                     onClick={() => alert(`Editar el área: ${area.nombre}`)}
                     style={{
@@ -105,7 +105,7 @@ function ResultsTable({ currentResults }) {
                     Editar
                   </button>
                 </td>
-                <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                <td style={{ padding: '12px 16px', textAlign: 'center', width: '1%', whiteSpace: 'nowrap' }}>
                   <button
                     onClick={() => alert(`Eliminar el área: ${area.nombre}`)}
                     style={{
