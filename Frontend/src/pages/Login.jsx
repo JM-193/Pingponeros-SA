@@ -29,8 +29,8 @@ export default function Login() {
 
     if (!email.trim()) {
       newErrors.email = 'El correo es requerido'
-    } else if (!email.endsWith('@ucr.ac.cr')) {
-      newErrors.email = 'El correo debe terminar en @ucr.ac.cr'
+    } else if (!/^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$/.test(email.trim())) {
+      newErrors.email = 'El correo debe ser válido. Formato: nombre.apellidos@ucr.ac.cr (solo letras antes de @)'
     }
 
     if (!password.trim()) {
@@ -47,7 +47,7 @@ export default function Login() {
     setLoading(true)
 
     try {
-      const usuario = await login(email.trim(), password)
+      const usuario = await login(email.trim().toLowerCase(), password)
       guardarSesion(usuario)
       navigate('/home')
     } catch (err) {

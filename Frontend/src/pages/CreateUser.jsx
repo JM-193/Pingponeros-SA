@@ -52,8 +52,8 @@ export default function CreateUser() {
       setLoading(false)
       return
     }
-    if (!formData.email.endsWith('@ucr.ac.cr')) {
-      setErrorMsg('El correo debe terminar en @ucr.ac.cr')
+    if (!/^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$/.test(formData.email.trim())) {
+      setErrorMsg('El correo debe ser válido. Formato: nombre@ucr.ac.cr (solo letras antes de @)')
       setLoading(false)
       return
     }
