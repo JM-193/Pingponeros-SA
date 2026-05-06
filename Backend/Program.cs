@@ -36,8 +36,11 @@ internal static class Program
             Path.Combine(builder.Environment.ContentRootPath,
                 builder.Configuration["Oracle:WalletPath"] ?? "wallet"));
 
-        OracleConfiguration.TnsAdmin = walletPath;
-        OracleConfiguration.WalletLocation = walletPath;
+        try { OracleConfiguration.TnsAdmin = walletPath; }
+        catch (InvalidOperationException) { /* ODP.NET solo permite fijar TnsAdmin una vez por proceso; se ignora si ya fue configurado. */ }
+
+        try { OracleConfiguration.WalletLocation = walletPath; }
+        catch (InvalidOperationException) { /* Ídem para WalletLocation. */ }
     }
 
     private static void ConfigureServices(WebApplicationBuilder builder)
