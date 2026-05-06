@@ -65,7 +65,7 @@ export default function CreateUser() {
         segundoNombre:       formData.secondName || null,
         primerApellido:      formData.firstName_surname,
         segundoApellido:     formData.secondName_surname || null,
-        rol:                 NUMBER.parseInt(formData.role, 10),
+        rol:                 Number.parseInt(formData.role, 10),
       })
       setSuccessMsg(data.mensaje ?? 'Usuario creado correctamente.')
       setTempPassword(data.contrasenaTemporal ?? '')
