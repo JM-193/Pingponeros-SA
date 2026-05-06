@@ -3,6 +3,7 @@ using System.Data;
 using System.Reflection;
 using Backend.Models;
 using Backend.Repositories;
+using NSubstitute;
 using Oracle.ManagedDataAccess.Client;
 using Xunit;
 
@@ -13,7 +14,7 @@ public sealed class AreaRepositoryTests
     [Fact]
     public async Task InsertarAsync_ThrowsCuandoAreaEsNull()
     {
-        var repo = new AreaRepository(new OracleConnection());
+        var repo = new AreaRepository(Substitute.For<IQueryExecutor>());
 
         await Assert.ThrowsAsync<ArgumentNullException>(() => repo.InsertarAsync(null!));
     }
@@ -21,7 +22,7 @@ public sealed class AreaRepositoryTests
     [Fact]
     public async Task ActualizarAsync_ThrowsCuandoAreaEsNull()
     {
-        var repo = new AreaRepository(new OracleConnection());
+        var repo = new AreaRepository(Substitute.For<IQueryExecutor>());
 
         await Assert.ThrowsAsync<ArgumentNullException>(() => repo.ActualizarAsync("area", null!));
     }

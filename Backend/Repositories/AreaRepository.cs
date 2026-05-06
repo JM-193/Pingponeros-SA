@@ -6,19 +6,19 @@ using Backend.Models;
 
 namespace Backend.Repositories;
 
-internal sealed class AreaRepository(OracleConnection connection) : IAreaRepository
+internal sealed class AreaRepository : IAreaRepository
 {
     private const string ParamNombre = ":nombre";
+    private readonly IQueryExecutor _q;
+
+    public AreaRepository(IQueryExecutor q) => _q = q;
+
     public async Task<List<Area>> ObtenerTodasAsync()
     {
-        var areas = new List<Area>();
         const string query = "SELECT ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM AREAS WHERE ESTADO = 1 ORDER BY NOMBRE";
-
-        using var cmd = new OracleCommand(query, connection);
-        try
+        return await _q.QueryAsync(query, async reader =>
         {
-            await connection.OpenAsync().ConfigureAwait(false);
-            using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+            var areas = new List<Area>();
             while (await reader.ReadAsync().ConfigureAwait(false))
             {
                 areas.Add(new Area
@@ -29,34 +29,16 @@ internal sealed class AreaRepository(OracleConnection connection) : IAreaReposit
                     Estado = Convert.ToInt32(reader["ESTADO"], CultureInfo.InvariantCulture),
                 });
             }
-        }
-        finally
-        {
-            if (connection.State == ConnectionState.Open)
-                await connection.CloseAsync().ConfigureAwait(false);
-        }
-
-        return areas;
+            return areas;
+        }).ConfigureAwait(false);
     }
 
     public async Task<bool> ExisteNombreAsync(string nombre)
     {
         const string query = "SELECT COUNT(*) FROM AREAS WHERE LOWER(NOMBRE) = LOWER(:nombre) AND ESTADO = 1";
-
-        using var cmd = new OracleCommand(query, connection);
-        cmd.Parameters.Add(ParamNombre, nombre);
-
-        try
-        {
-            await connection.OpenAsync().ConfigureAwait(false);
-            var count = Convert.ToInt32(await cmd.ExecuteScalarAsync().ConfigureAwait(false), CultureInfo.InvariantCulture);
-            return count > 0;
-        }
-        finally
-        {
-            if (connection.State == ConnectionState.Open)
-                await connection.CloseAsync().ConfigureAwait(false);
-        }
+        var result = await _q.ExecuteScalarAsync(query, cmd => cmd.Parameters.Add(ParamNombre, nombre)).ConfigureAwait(false);
+        var count = Convert.ToInt32(result, CultureInfo.InvariantCulture);
+        return count > 0;
     }
 
     public async Task<int> InsertarAsync(Area area)
@@ -69,38 +51,23 @@ internal sealed class AreaRepository(OracleConnection connection) : IAreaReposit
             RETURNING ID_AREA INTO :id
             """;
 
-        using var cmd = new OracleCommand(query, connection);
-        cmd.Parameters.Add(ParamNombre, area.Nombre);
-        cmd.Parameters.Add(":descripcion", area.Descripcion);
-        cmd.Parameters.Add(":estado", area.Estado);
-
-        var idParam = new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output);
-        cmd.Parameters.Add(idParam);
-
-        try
+        var result = await _q.ExecuteScalarAsync(query, cmd =>
         {
-            await connection.OpenAsync().ConfigureAwait(false);
-            await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
-            return (int)(OracleDecimal)idParam.Value;
-        }
-        finally
-        {
-            if (connection.State == ConnectionState.Open)
-                await connection.CloseAsync().ConfigureAwait(false);
-        }
+            cmd.Parameters.Add(ParamNombre, area.Nombre);
+            cmd.Parameters.Add(":descripcion", area.Descripcion);
+            cmd.Parameters.Add(":estado", area.Estado);
+            var idParam = new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output);
+            cmd.Parameters.Add(idParam);
+        }).ConfigureAwait(false);
+
+        return (int)(OracleDecimal)result!;
     }
 
     public async Task<Area?> ObtenerPorNombreAsync(string nombre)
     {
         const string query = "SELECT ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM AREAS WHERE LOWER(NOMBRE) = LOWER(:nombre) AND ESTADO = 1";
-
-        using var cmd = new OracleCommand(query, connection);
-        cmd.Parameters.Add(ParamNombre, nombre);
-
-        try
+        return await _q.QueryAsync(query, async reader =>
         {
-            await connection.OpenAsync().ConfigureAwait(false);
-            using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
             if (await reader.ReadAsync().ConfigureAwait(false))
             {
                 return new Area
@@ -112,12 +79,7 @@ internal sealed class AreaRepository(OracleConnection connection) : IAreaReposit
                 };
             }
             return null;
-        }
-        finally
-        {
-            if (connection.State == ConnectionState.Open)
-                await connection.CloseAsync().ConfigureAwait(false);
-        }
+        }, cmd => cmd.Parameters.Add(ParamNombre, nombre)).ConfigureAwait(false);
     }
 
     public async Task<bool> ActualizarAsync(string nombreOriginal, Area area)
@@ -130,42 +92,22 @@ internal sealed class AreaRepository(OracleConnection connection) : IAreaReposit
             WHERE LOWER(NOMBRE) = LOWER(:nombreOriginal) AND ESTADO = 1
             """;
 
-        using var cmd = new OracleCommand(query, connection) { BindByName = true };
-        cmd.Parameters.Add(ParamNombre, area.Nombre);
-        cmd.Parameters.Add(":descripcion", area.Descripcion);
-        cmd.Parameters.Add(":estado", area.Estado);
-        cmd.Parameters.Add(":nombreOriginal", nombreOriginal);
+        var rows = await _q.ExecuteAsync(query, cmd =>
+        {
+            cmd.BindByName = true;
+            cmd.Parameters.Add(ParamNombre, area.Nombre);
+            cmd.Parameters.Add(":descripcion", area.Descripcion);
+            cmd.Parameters.Add(":estado", area.Estado);
+            cmd.Parameters.Add(":nombreOriginal", nombreOriginal);
+        }).ConfigureAwait(false);
 
-        try
-        {
-            await connection.OpenAsync().ConfigureAwait(false);
-            var rowsAffected = await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
-            return rowsAffected > 0;
-        }
-        finally
-        {
-            if (connection.State == ConnectionState.Open)
-                await connection.CloseAsync().ConfigureAwait(false);
-        }
+        return rows > 0;
     }
 
     public async Task<bool> DesactivarAsync(int id)
     {
         const string query = "UPDATE AREAS SET ESTADO = 0 WHERE ID_AREA = :id AND ESTADO = 1";
-
-        using var cmd = new OracleCommand(query, connection);
-        cmd.Parameters.Add(":id", id);
-
-        try
-        {
-            await connection.OpenAsync().ConfigureAwait(false);
-            var rowsAffected = await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
-            return rowsAffected > 0;
-        }
-        finally
-        {
-            if (connection.State == ConnectionState.Open)
-                await connection.CloseAsync().ConfigureAwait(false);
-        }
+        var rows = await _q.ExecuteAsync(query, cmd => cmd.Parameters.Add(":id", id)).ConfigureAwait(false);
+        return rows > 0;
     }
 }

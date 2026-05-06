@@ -20,6 +20,7 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<TestEntryP
         builder.ConfigureServices(services =>
         {
             services.RemoveAll<OracleConnection>();
+            services.RemoveAll<IDbExecutor>();
             services.RemoveAll<IUsuarioRepository>();
             services.RemoveAll<IAreaRepository>();
             services.AddScoped<IUsuarioRepository>(_ => UsuarioRepo);

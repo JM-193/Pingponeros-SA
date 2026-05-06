@@ -6,6 +6,8 @@
         <Configuration>
           <Format>lcov,cobertura,opencover</Format>
           <Exclude>[*.Tests]*</Exclude>
+          <!-- Exclude generated OpenAPI and other generated files that skew coverage -->
+          <ExcludeByFile>**/Microsoft.AspNetCore.OpenApi.Generated.*;**/*OpenApi*.cs;**/*.g.cs;**/Generated/*</ExcludeByFile>
         </Configuration>
       </DataCollector>
     </DataCollectors>

@@ -47,10 +47,12 @@ internal static class Program
     {
         builder.Services.AddScoped(_ =>
             new OracleConnection(builder.Configuration.GetConnectionString("OracleDB")));
+        builder.Services.AddScoped<IDbExecutor, OracleDbExecutor>();
+        builder.Services.AddScoped<IQueryExecutor, OracleQueryExecutor>();
         builder.Services.AddScoped<IUsuarioRepository>(sp =>
-            new UsuarioRepository(sp.GetRequiredService<OracleConnection>()));
+            new UsuarioRepository(sp.GetRequiredService<IQueryExecutor>()));
         builder.Services.AddScoped<IAreaRepository>(sp =>
-            new AreaRepository(sp.GetRequiredService<OracleConnection>()));
+            new AreaRepository(sp.GetRequiredService<IQueryExecutor>()));
         builder.Services.AddOpenApi();
         builder.Services.AddCors(options =>
             options.AddPolicy("FrontendOrigin", policy =>
