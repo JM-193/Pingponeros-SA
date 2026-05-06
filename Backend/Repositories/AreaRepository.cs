@@ -124,16 +124,17 @@ internal sealed class AreaRepository(OracleConnection connection) : IAreaReposit
     {
         ArgumentNullException.ThrowIfNull(area);
 
-        const string query = @"
-            UPDATE AREAS 
+        const string query = """
+            UPDATE AREAS
             SET NOMBRE = :nombre, DESCRIPCION = :descripcion, ESTADO = :estado
-            WHERE LOWER(NOMBRE) = LOWER(:nombreOriginal)";
+            WHERE LOWER(NOMBRE) = LOWER(:nombreOriginal)
+            """;
 
-        using var cmd = new OracleCommand(query, connection);
-        cmd.Parameters.Add(":nombreOriginal", nombreOriginal);
+        using var cmd = new OracleCommand(query, connection) { BindByName = true };
         cmd.Parameters.Add(":nombre",         area.Nombre);
         cmd.Parameters.Add(":descripcion",    area.Descripcion);
         cmd.Parameters.Add(":estado",         area.Estado);
+        cmd.Parameters.Add(":nombreOriginal", nombreOriginal);
 
         try
         {

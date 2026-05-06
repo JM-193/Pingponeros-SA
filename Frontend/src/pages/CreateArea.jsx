@@ -100,18 +100,6 @@ export default function CreateArea() {
         >
           {/* Nombre con prefijo "Área de" inline */}
           <div style={{ marginBottom: '20px' }}>
-            <label
-              htmlFor="nombre"
-              style={{
-                display: 'block',
-                marginBottom: '8px',
-                fontWeight: 600,
-                color: COLORS.labelColor,
-                fontSize: '14px',
-              }}
-            >
-              Nombre *
-            </label>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontWeight: 600, color: COLORS.labelColor, fontSize: '14px', whiteSpace: 'nowrap' }}>
                 Área de
