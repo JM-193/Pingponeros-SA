@@ -296,6 +296,69 @@ internal static class Program
                 return Results.Json(new { mensaje = msg }, statusCode: 500);
             }
         });
+
+        // GET /areas/{nombre} — Obtiene un área por nombre
+        areas.MapGet("/{nombre}", async (string nombre, IAreaRepository repo) =>
+        {
+            try
+            {
+                var area = await repo.ObtenerPorNombreAsync(Uri.UnescapeDataString(nombre)).ConfigureAwait(false);
+                return area is null
+                    ? Results.NotFound(new { mensaje = $"No se encontró el área '{nombre}'." })
+                    : Results.Ok(area);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+
+        // PUT /areas/{nombre} — Actualiza un área
+        areas.MapPut("/{nombre}", async (string nombre, CrearAreaDto dto, IAreaRepository repo) =>
+        {
+            var validationResult = ValidarCrearArea(dto);
+            if (validationResult is not null)
+                return validationResult;
+
+            var nombreDescodificado = Uri.UnescapeDataString(nombre);
+
+            // Verificar si el nombre cambió y si el nuevo nombre ya existe
+            if (dto.Nombre.Trim().ToLower() != nombreDescodificado.ToLower())
+            {
+                try
+                {
+                    var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
+                    if (existe)
+                        return Results.Conflict(new { mensaje = $"Ya existe un área con el nombre '{dto.Nombre}'." });
+                }
+                catch (OracleException ex)
+                {
+                    return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+                }
+            }
+
+            var area = new Backend.Models.Area
+            {
+                Nombre      = dto.Nombre.Trim().ToLower(),
+                Descripcion = dto.Descripcion.Trim(),
+                Estado      = 1,
+            };
+
+            try
+            {
+                var actualizado = await repo.ActualizarAsync(nombreDescodificado, area).ConfigureAwait(false);
+                return actualizado
+                    ? Results.Ok(new { mensaje = $"Área '{area.Nombre}' actualizada correctamente." })
+                    : Results.NotFound(new { mensaje = $"No se encontró el área '{nombre}'." });
+            }
+            catch (OracleException ex)
+            {
+                var msg = isDev
+                    ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                    : TraducirErrorOracle(ex.Number);
+                return Results.Json(new { mensaje = msg }, statusCode: 500);
+            }
+        });
     }
 
     private static IResult? ValidarCrearArea(CrearAreaDto dto)
