@@ -46,6 +46,18 @@ export default function CreateUser() {
     setTempPassword('')
     setErrorMsg('')
 
+    // Validaciones
+    if (!formData.email.trim()) {
+      setErrorMsg('El correo es requerido')
+      setLoading(false)
+      return
+    }
+    if (!formData.email.endsWith('@ucr.ac.cr')) {
+      setErrorMsg('El correo debe terminar en @ucr.ac.cr')
+      setLoading(false)
+      return
+    }
+
     try {
       const data = await crearUsuario({
         correoInstitucional: formData.email,
@@ -53,7 +65,7 @@ export default function CreateUser() {
         segundoNombre:       formData.secondName || null,
         primerApellido:      formData.firstName_surname,
         segundoApellido:     formData.secondName_surname || null,
-        rol:                 parseInt(formData.role, 10),
+        rol:                 NUMBER.parseInt(formData.role, 10),
       })
       setSuccessMsg(data.mensaje ?? 'Usuario creado correctamente.')
       setTempPassword(data.contrasenaTemporal ?? '')
