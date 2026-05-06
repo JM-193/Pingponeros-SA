@@ -161,12 +161,12 @@ internal static class Program
         return new Backend.Models.Usuario
         {
             CorreoInstitucional = dto.CorreoInstitucional.Trim().ToLowerInvariant(),
-            PrimerNombre        = Capitalizar(dto.PrimerNombre),
-            SegundoNombre       = string.IsNullOrWhiteSpace(dto.SegundoNombre) ? null : Capitalizar(dto.SegundoNombre),
-            PrimerApellido      = Capitalizar(dto.PrimerApellido),
-            SegundoApellido     = string.IsNullOrWhiteSpace(dto.SegundoApellido) ? null : Capitalizar(dto.SegundoApellido),
-            Rol                 = dto.Rol,
-            Estado              = 1,
+            PrimerNombre = Capitalizar(dto.PrimerNombre),
+            SegundoNombre = string.IsNullOrWhiteSpace(dto.SegundoNombre) ? null : Capitalizar(dto.SegundoNombre),
+            PrimerApellido = Capitalizar(dto.PrimerApellido),
+            SegundoApellido = string.IsNullOrWhiteSpace(dto.SegundoApellido) ? null : Capitalizar(dto.SegundoApellido),
+            Rol = dto.Rol,
+            Estado = 1,
         };
     }
 
@@ -188,7 +188,7 @@ internal static class Program
                 $"/usuarios/{Uri.EscapeDataString(usuario.CorreoInstitucional)}",
                 new
                 {
-                    mensaje           = $"Usuario '{usuario.PrimerNombre} {usuario.PrimerApellido}' creado correctamente.",
+                    mensaje = $"Usuario '{usuario.PrimerNombre} {usuario.PrimerApellido}' creado correctamente.",
                     contrasenaTemporal = contrasenaTemp,
                 });
         }
@@ -250,6 +250,15 @@ internal static class Program
     {
         var areas = app.MapGroup("/areas");
 
+        MapAreasGetAll(areas);
+        MapAreasCreate(areas, isDev);
+        MapAreasGetByNombre(areas);
+        MapAreasUpdate(areas, isDev);
+        MapAreasDelete(areas);
+    }
+
+    private static void MapAreasGetAll(RouteGroupBuilder areas)
+    {
         // GET /areas — Lista todas las áreas
         areas.MapGet("/", async (IAreaRepository repo) =>
         {
@@ -263,7 +272,10 @@ internal static class Program
                 return Results.Problem(detail: ex.Message, statusCode: 500);
             }
         });
+    }
 
+    private static void MapAreasCreate(RouteGroupBuilder areas, bool isDev)
+    {
         // POST /areas — Crea una nueva área
         areas.MapPost("/", async (CrearAreaDto dto, IAreaRepository repo) =>
         {
@@ -271,7 +283,6 @@ internal static class Program
             if (validationResult is not null)
                 return validationResult;
 
-            // Verificar si el nombre ya existe
             try
             {
                 var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
@@ -285,25 +296,33 @@ internal static class Program
 
             var area = new Backend.Models.Area
             {
-                Nombre      = NormalizarNombreArea(dto.Nombre),
+                Nombre = NormalizarNombreArea(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
-                Estado      = 1,
+                Estado = 1,
             };
 
-            try
-            {
-                var id = await repo.InsertarAsync(area).ConfigureAwait(false);
-                return Results.Created($"/areas/{id}", new { mensaje = $"Área '{area.Nombre}' creada correctamente." });
-            }
-            catch (OracleException ex)
-            {
-                var msg = isDev
-                    ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                    : TraducirErrorOracle(ex.Number);
-                return Results.Json(new { mensaje = msg }, statusCode: 500);
-            }
+            return await InsertarAreaAsync(repo, area, isDev).ConfigureAwait(false);
         });
+    }
 
+    private static async Task<IResult> InsertarAreaAsync(IAreaRepository repo, Backend.Models.Area area, bool isDev)
+    {
+        try
+        {
+            var id = await repo.InsertarAsync(area).ConfigureAwait(false);
+            return Results.Created($"/areas/{id}", new { mensaje = $"Área '{area.Nombre}' creada correctamente." });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
+
+    private static void MapAreasGetByNombre(RouteGroupBuilder areas)
+    {
         // GET /areas/{nombre} — Obtiene un área por nombre
         areas.MapGet("/{nombre}", async (string nombre, IAreaRepository repo) =>
         {
@@ -319,7 +338,10 @@ internal static class Program
                 return Results.Problem(detail: ex.Message, statusCode: 500);
             }
         });
+    }
 
+    private static void MapAreasUpdate(RouteGroupBuilder areas, bool isDev)
+    {
         // PUT /areas/{nombre} — Actualiza un área
         areas.MapPut("/{nombre}", async (string nombre, CrearAreaDto dto, IAreaRepository repo) =>
         {
@@ -329,7 +351,6 @@ internal static class Program
 
             var nombreDescodificado = Uri.UnescapeDataString(nombre);
 
-            // Verificar si el nombre cambió y si el nuevo nombre ya existe
             if (!dto.Nombre.Trim().Equals(nombreDescodificado, StringComparison.OrdinalIgnoreCase))
             {
                 try
@@ -346,26 +367,40 @@ internal static class Program
 
             var area = new Backend.Models.Area
             {
-                Nombre      = NormalizarNombreArea(dto.Nombre),
+                Nombre = NormalizarNombreArea(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
-                Estado      = 1,
+                Estado = 1,
             };
 
-            try
-            {
-                var actualizado = await repo.ActualizarAsync(nombreDescodificado, area).ConfigureAwait(false);
-                return actualizado
-                    ? Results.Ok(new { mensaje = $"Área '{area.Nombre}' actualizada correctamente." })
-                    : Results.NotFound(new { mensaje = $"No se encontró el área '{nombre}'." });
-            }
-            catch (OracleException ex)
-            {
-                var msg = isDev
-                    ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                    : TraducirErrorOracle(ex.Number);
-                return Results.Json(new { mensaje = msg }, statusCode: 500);
-            }
+            return await ActualizarAreaAsync(repo, nombreDescodificado, nombre, area, isDev).ConfigureAwait(false);
         });
+    }
+
+    private static async Task<IResult> ActualizarAreaAsync(
+        IAreaRepository repo,
+        string nombreDescodificado,
+        string nombreOriginal,
+        Backend.Models.Area area,
+        bool isDev)
+    {
+        try
+        {
+            var actualizado = await repo.ActualizarAsync(nombreDescodificado, area).ConfigureAwait(false);
+            return actualizado
+                ? Results.Ok(new { mensaje = $"Área '{area.Nombre}' actualizada correctamente." })
+                : Results.NotFound(new { mensaje = $"No se encontró el área '{nombreOriginal}'." });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
+
+    private static void MapAreasDelete(RouteGroupBuilder areas)
+    {
         // DELETE /areas/{id} — Borrado lógico: pasa ESTADO de 1 a 0
         areas.MapDelete("/{id:int}", async (int id, IAreaRepository repo) =>
         {
@@ -419,12 +454,12 @@ internal static class Program
                 return Results.Ok(new
                 {
                     correoInstitucional = usuario!.CorreoInstitucional,
-                    primerNombre        = usuario.PrimerNombre,
-                    segundoNombre       = usuario.SegundoNombre,
-                    primerApellido      = usuario.PrimerApellido,
-                    segundoApellido     = usuario.SegundoApellido,
-                    rol                 = usuario.Rol,
-                    estado              = usuario.Estado,
+                    primerNombre = usuario.PrimerNombre,
+                    segundoNombre = usuario.SegundoNombre,
+                    primerApellido = usuario.PrimerApellido,
+                    segundoApellido = usuario.SegundoApellido,
+                    rol = usuario.Rol,
+                    estado = usuario.Estado,
                 });
             }
             catch (OracleException ex)
@@ -439,25 +474,25 @@ internal static class Program
 
     private static string TraducirErrorOracle(int numero) => numero switch
     {
-        1     => "El registro ya existe en el sistema.",
-        2289  => "Error de configuración interna: objeto de base de datos no encontrado.",
-        2291  => "Operación rechazada: referencia a un registro que no existe.",
-        2292  => "No se puede eliminar: el registro tiene datos relacionados.",
-        1400  => "Hay campos obligatorios sin valor.",
-        1438  => "El valor ingresado es demasiado grande para el campo.",
+        1 => "El registro ya existe en el sistema.",
+        2289 => "Error de configuración interna: objeto de base de datos no encontrado.",
+        2291 => "Operación rechazada: referencia a un registro que no existe.",
+        2292 => "No se puede eliminar: el registro tiene datos relacionados.",
+        1400 => "Hay campos obligatorios sin valor.",
+        1438 => "El valor ingresado es demasiado grande para el campo.",
         12541 => "No se pudo conectar a la base de datos. Intente más tarde.",
         12170 => "La conexión a la base de datos expiró. Intente más tarde.",
-        1017  => "Error de autenticación con la base de datos.",
-        _     => "No se pudo completar la operación. Intente nuevamente.",
+        1017 => "Error de autenticación con la base de datos.",
+        _ => "No se pudo completar la operación. Intente nuevamente.",
     };
 
     private static string GenerarContrasenaTemporal()
     {
-        const string upper   = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        const string lower   = "abcdefghijklmnopqrstuvwxyz";
-        const string digits  = "0123456789";
+        const string upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const string lower = "abcdefghijklmnopqrstuvwxyz";
+        const string digits = "0123456789";
         const string special = "!@#$%&*";
-        const string all     = upper + lower + digits + special;
+        const string all = upper + lower + digits + special;
 
         var chars = new char[12];
         chars[0] = upper[System.Security.Cryptography.RandomNumberGenerator.GetInt32(upper.Length)];

@@ -8,6 +8,7 @@ namespace Backend.Repositories;
 
 internal sealed class AreaRepository(OracleConnection connection) : IAreaRepository
 {
+    private const string ParamNombre = ":nombre";
     public async Task<List<Area>> ObtenerTodasAsync()
     {
         var areas = new List<Area>();
@@ -22,10 +23,10 @@ internal sealed class AreaRepository(OracleConnection connection) : IAreaReposit
             {
                 areas.Add(new Area
                 {
-                    Id          = Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
-                    Nombre      = reader["NOMBRE"].ToString() ?? "",
+                    Id = Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
+                    Nombre = reader["NOMBRE"].ToString() ?? "",
                     Descripcion = reader["DESCRIPCION"].ToString() ?? "",
-                    Estado      = Convert.ToInt32(reader["ESTADO"], CultureInfo.InvariantCulture),
+                    Estado = Convert.ToInt32(reader["ESTADO"], CultureInfo.InvariantCulture),
                 });
             }
         }
@@ -43,7 +44,7 @@ internal sealed class AreaRepository(OracleConnection connection) : IAreaReposit
         const string query = "SELECT COUNT(*) FROM AREAS WHERE LOWER(NOMBRE) = LOWER(:nombre) AND ESTADO = 1";
 
         using var cmd = new OracleCommand(query, connection);
-        cmd.Parameters.Add(":nombre", nombre);
+        cmd.Parameters.Add(ParamNombre, nombre);
 
         try
         {
@@ -69,9 +70,9 @@ internal sealed class AreaRepository(OracleConnection connection) : IAreaReposit
             """;
 
         using var cmd = new OracleCommand(query, connection);
-        cmd.Parameters.Add(":nombre",      area.Nombre);
+        cmd.Parameters.Add(ParamNombre, area.Nombre);
         cmd.Parameters.Add(":descripcion", area.Descripcion);
-        cmd.Parameters.Add(":estado",      area.Estado);
+        cmd.Parameters.Add(":estado", area.Estado);
 
         var idParam = new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output);
         cmd.Parameters.Add(idParam);
@@ -94,7 +95,7 @@ internal sealed class AreaRepository(OracleConnection connection) : IAreaReposit
         const string query = "SELECT ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM AREAS WHERE LOWER(NOMBRE) = LOWER(:nombre) AND ESTADO = 1";
 
         using var cmd = new OracleCommand(query, connection);
-        cmd.Parameters.Add(":nombre", nombre);
+        cmd.Parameters.Add(ParamNombre, nombre);
 
         try
         {
@@ -104,10 +105,10 @@ internal sealed class AreaRepository(OracleConnection connection) : IAreaReposit
             {
                 return new Area
                 {
-                    Id          = Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
-                    Nombre      = reader["NOMBRE"].ToString() ?? "",
+                    Id = Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
+                    Nombre = reader["NOMBRE"].ToString() ?? "",
                     Descripcion = reader["DESCRIPCION"].ToString() ?? "",
-                    Estado      = Convert.ToInt32(reader["ESTADO"], CultureInfo.InvariantCulture),
+                    Estado = Convert.ToInt32(reader["ESTADO"], CultureInfo.InvariantCulture),
                 };
             }
             return null;
@@ -130,9 +131,9 @@ internal sealed class AreaRepository(OracleConnection connection) : IAreaReposit
             """;
 
         using var cmd = new OracleCommand(query, connection) { BindByName = true };
-        cmd.Parameters.Add(":nombre",         area.Nombre);
-        cmd.Parameters.Add(":descripcion",    area.Descripcion);
-        cmd.Parameters.Add(":estado",         area.Estado);
+        cmd.Parameters.Add(ParamNombre, area.Nombre);
+        cmd.Parameters.Add(":descripcion", area.Descripcion);
+        cmd.Parameters.Add(":estado", area.Estado);
         cmd.Parameters.Add(":nombreOriginal", nombreOriginal);
 
         try

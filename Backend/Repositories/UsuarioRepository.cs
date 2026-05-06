@@ -118,8 +118,8 @@ internal sealed class UsuarioRepository(OracleConnection db) : IUsuarioRepositor
             using var cmdContrasena = new OracleCommand(sqlContrasena, db);
             cmdContrasena.Transaction = transaction;
             cmdContrasena.Parameters.Add("correo", usuario.CorreoInstitucional);
-            cmdContrasena.Parameters.Add("hash",   contrasenaHash);
-            cmdContrasena.Parameters.Add(new Oracle.ManagedDataAccess.Client.OracleParameter("fechaCreacion",   Oracle.ManagedDataAccess.Client.OracleDbType.Date) { Value = ahora });
+            cmdContrasena.Parameters.Add("hash", contrasenaHash);
+            cmdContrasena.Parameters.Add(new Oracle.ManagedDataAccess.Client.OracleParameter("fechaCreacion", Oracle.ManagedDataAccess.Client.OracleDbType.Date) { Value = ahora });
             cmdContrasena.Parameters.Add(new Oracle.ManagedDataAccess.Client.OracleParameter("fechaExpiracion", Oracle.ManagedDataAccess.Client.OracleDbType.Date) { Value = ahora.AddHours(48) });
             await cmdContrasena.ExecuteNonQueryAsync().ConfigureAwait(false);
 
@@ -191,7 +191,7 @@ internal sealed class UsuarioRepository(OracleConnection db) : IUsuarioRepositor
     public async Task<bool> EliminarAsync(string correo)
     {
         const string sqlContrasena = "DELETE FROM CONTRASENAS WHERE CORREO_INSTITUCIONAL = :correo";
-        const string sqlUsuario    = "DELETE FROM USUARIOS    WHERE CORREO_INSTITUCIONAL = :correo";
+        const string sqlUsuario = "DELETE FROM USUARIOS    WHERE CORREO_INSTITUCIONAL = :correo";
 
         await db.OpenAsync().ConfigureAwait(false);
         using var transaction = (Oracle.ManagedDataAccess.Client.OracleTransaction)
