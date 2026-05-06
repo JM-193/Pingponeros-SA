@@ -1,14 +1,18 @@
+using System.Data;
+using System.Globalization;
 using Oracle.ManagedDataAccess.Client;
+using Oracle.ManagedDataAccess.Types;
 using Backend.Models;
 
 namespace Backend.Repositories;
 
-public class AreaRepository(OracleConnection connection) : IAreaRepository
+#pragma warning disable CA1812 // Instanciado por el contenedor de DI
+internal sealed class AreaRepository(OracleConnection connection) : IAreaRepository
 {
     public async Task<List<Area>> ObtenerTodasAsync()
     {
         var areas = new List<Area>();
-        const string query = "SELECT NOMBRE, DESCRIPCION, ESTADO FROM AREAS ORDER BY NOMBRE";
+        const string query = "SELECT ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM AREAS ORDER BY NOMBRE";
 
         using var cmd = new OracleCommand(query, connection);
         try
@@ -19,16 +23,17 @@ public class AreaRepository(OracleConnection connection) : IAreaRepository
             {
                 areas.Add(new Area
                 {
-                    Nombre = reader["NOMBRE"].ToString() ?? "",
+                    Id          = Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
+                    Nombre      = reader["NOMBRE"].ToString() ?? "",
                     Descripcion = reader["DESCRIPCION"].ToString() ?? "",
-                    Estado = Convert.ToInt32(reader["ESTADO"]),
+                    Estado      = Convert.ToInt32(reader["ESTADO"], CultureInfo.InvariantCulture),
                 });
             }
         }
         finally
         {
-            if (connection.State == System.Data.ConnectionState.Open)
-                connection.Close();
+            if (connection.State == ConnectionState.Open)
+                await connection.CloseAsync().ConfigureAwait(false);
         }
 
         return areas;
@@ -44,36 +49,44 @@ public class AreaRepository(OracleConnection connection) : IAreaRepository
         try
         {
             await connection.OpenAsync().ConfigureAwait(false);
-            var count = Convert.ToInt32(await cmd.ExecuteScalarAsync().ConfigureAwait(false));
+            var count = Convert.ToInt32(await cmd.ExecuteScalarAsync().ConfigureAwait(false), CultureInfo.InvariantCulture);
             return count > 0;
         }
         finally
         {
-            if (connection.State == System.Data.ConnectionState.Open)
-                connection.Close();
+            if (connection.State == ConnectionState.Open)
+                await connection.CloseAsync().ConfigureAwait(false);
         }
     }
 
-    public async Task InsertarAsync(Area area)
+    public async Task<int> InsertarAsync(Area area)
     {
-        const string query = @"
+        ArgumentNullException.ThrowIfNull(area);
+
+        const string query = """
             INSERT INTO AREAS (NOMBRE, DESCRIPCION, ESTADO)
-            VALUES (:nombre, :descripcion, :estado)";
+            VALUES (:nombre, :descripcion, :estado)
+            RETURNING ID_AREA INTO :id
+            """;
 
         using var cmd = new OracleCommand(query, connection);
-        cmd.Parameters.Add(":nombre", area.Nombre);
+        cmd.Parameters.Add(":nombre",      area.Nombre);
         cmd.Parameters.Add(":descripcion", area.Descripcion);
-        cmd.Parameters.Add(":estado", area.Estado);
+        cmd.Parameters.Add(":estado",      area.Estado);
+
+        var idParam = new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output);
+        cmd.Parameters.Add(idParam);
 
         try
         {
             await connection.OpenAsync().ConfigureAwait(false);
             await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+            return (int)(OracleDecimal)idParam.Value;
         }
         finally
         {
-            if (connection.State == System.Data.ConnectionState.Open)
-                connection.Close();
+            if (connection.State == ConnectionState.Open)
+                await connection.CloseAsync().ConfigureAwait(false);
         }
     }
 }

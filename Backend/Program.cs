@@ -1,3 +1,4 @@
+using System.Globalization;
 using DotNetEnv;
 using Oracle.ManagedDataAccess.Client;
 using Scalar.AspNetCore;
@@ -145,16 +146,17 @@ internal static class Program
         return null;
     }
 
+#pragma warning disable CA1308 // ToLower es intencional: normalizar nombres y correos electrónicos
     private static Backend.Models.Usuario CrearUsuarioDesdeDto(CrearUsuarioDto dto)
     {
         // Función auxiliar para capitalizar (primera letra mayúscula, resto minúscula)
         static string Capitalizar(string? texto) =>
-            string.IsNullOrWhiteSpace(texto) ? texto?.Trim() ?? "" : 
-            char.ToUpper(texto.Trim()[0]) + texto.Trim()[1..].ToLower();
+            string.IsNullOrWhiteSpace(texto) ? texto?.Trim() ?? "" :
+            char.ToUpper(texto.Trim()[0], CultureInfo.InvariantCulture) + texto.Trim()[1..].ToLower(CultureInfo.InvariantCulture);
 
         return new Backend.Models.Usuario
         {
-            CorreoInstitucional = dto.CorreoInstitucional.Trim().ToLower(),
+            CorreoInstitucional = dto.CorreoInstitucional.Trim().ToLowerInvariant(),
             PrimerNombre        = Capitalizar(dto.PrimerNombre),
             SegundoNombre       = string.IsNullOrWhiteSpace(dto.SegundoNombre) ? null : Capitalizar(dto.SegundoNombre),
             PrimerApellido      = Capitalizar(dto.PrimerApellido),
@@ -163,6 +165,7 @@ internal static class Program
             Estado              = 1,
         };
     }
+#pragma warning restore CA1308
 
     private static async Task<IResult> CrearUsuarioAsync(
         IUsuarioRepository repo,
@@ -275,15 +278,15 @@ internal static class Program
 
             var area = new Backend.Models.Area
             {
-                Nombre = dto.Nombre.Trim().ToLower(),
+                Nombre      = dto.Nombre.Trim(),
                 Descripcion = dto.Descripcion.Trim(),
-                Estado = 1,
+                Estado      = 1,
             };
 
             try
             {
-                await repo.InsertarAsync(area).ConfigureAwait(false);
-                return Results.Created($"/areas/{area.Id}", new { mensaje = $"Área '{area.Nombre}' creada correctamente." });
+                var id = await repo.InsertarAsync(area).ConfigureAwait(false);
+                return Results.Created($"/areas/{id}", new { mensaje = $"Área '{area.Nombre}' creada correctamente." });
             }
             catch (OracleException ex)
             {

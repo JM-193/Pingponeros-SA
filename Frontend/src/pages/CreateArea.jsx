@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { crearArea, obtenerAreas } from '../services/areaService'
+import { crearArea } from '../services/areaService'
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -52,24 +52,9 @@ export default function CreateArea() {
     }
 
     try {
-      // Obtener todas las áreas para validar que el nombre no exista
-      const areasExistentes = await obtenerAreas()
-      const nombreNormalizadoNuevo = formData.nombre.trim().toLowerCase()
-      const nombreDuplicado = areasExistentes.some(
-        (area) => area.nombre.toLowerCase() === nombreNormalizadoNuevo
-      )
-
-      if (nombreDuplicado) {
-        setErrorMsg('Ya existe un área con este nombre')
-        setLoading(false)
-        return
-      }
-
-      // Crear el área con los datos parseados
       await crearArea({
-        nombre: formData.nombre.trim().toLowerCase(),
+        nombre: formData.nombre.trim(),
         descripcion: formData.descripcion.trim(),
-        estado: 1,
       })
 
       setSuccessMsg('Área creada correctamente')
@@ -114,25 +99,44 @@ export default function CreateArea() {
           title="Crear Área"
           subtitle="Formulario de Registro"
         >
-          <label
-            htmlFor="Área de "
-            style={{
-              display: 'block',
-              marginBottom: '8px',
-              fontWeight: 600,
-              color: COLORS.labelColor,
-              fontSize: '14px',
-            }}
-          >Área de </label>
-          {/* Nombre */}
-          <FormInput
-            label="Nombre"
-            id="nombre"
-            name="nombre"
-            value={formData.nombre}
-            onChange={handleInputChange}
-            required
-          />
+          {/* Nombre con prefijo "Área de" inline */}
+          <div style={{ marginBottom: '20px' }}>
+            <label
+              htmlFor="nombre"
+              style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontWeight: 600,
+                color: COLORS.labelColor,
+                fontSize: '14px',
+              }}
+            >
+              Nombre *
+            </label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontWeight: 600, color: COLORS.labelColor, fontSize: '14px', whiteSpace: 'nowrap' }}>
+                Área de
+              </span>
+              <input
+                id="nombre"
+                name="nombre"
+                value={formData.nombre}
+                onChange={handleInputChange}
+                required
+                placeholder="Nombre del área"
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  border: `1px solid ${COLORS.borderColor}`,
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  boxSizing: 'border-box',
+                  backgroundColor: COLORS.inputBg,
+                  color: '#000',
+                }}
+              />
+            </div>
+          </div>
 
           {/* Descripción */}
           <div style={{ marginBottom: '20px' }}>

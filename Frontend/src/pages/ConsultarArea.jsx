@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import { obtenerAreas } from '../services/areaService'
 import { COLORS } from '../constants/colors'
 
 // Component to show when there are no results
@@ -238,22 +239,9 @@ export default function ConsultarArea() {
     const loadAllAreas = async () => {
       setLoading(true)
       try {
-        const mockAreas = [
-          { id: 1, nombre: 'Área de Tecnología', descripcion: 'Departamento encargado de sistemas y TI' },
-          { id: 2, nombre: 'Área de Recursos Humanos', descripcion: 'Gestión de personal y nómina' },
-          { id: 3, nombre: 'Área de Finanzas', descripcion: 'Contabilidad y análisis financiero' },
-          { id: 4, nombre: 'Área de Marketing', descripcion: 'Estrategias de comunicación y branding' },
-          { id: 5, nombre: 'Área de Operaciones', descripcion: 'Gestión de procesos operacionales' },
-          { id: 6, nombre: 'Área de Ventas', descripcion: 'Estrategia comercial y relaciones con clientes' },
-          { id: 7, nombre: 'Área de Logística', descripcion: 'Distribución y gestión de inventario' },
-          { id: 8, nombre: 'Área de Calidad', descripcion: 'Control y aseguramiento de calidad' },
-          { id: 9, nombre: 'Área de Investigación', descripcion: 'Desarrollo e innovación de productos' },
-          { id: 10, nombre: 'Área de Servicio al Cliente', descripcion: 'Atención y soporte al cliente' },
-          { id: 11, nombre: 'Área de Seguridad', descripcion: 'Seguridad física y protección de datos' },
-          { id: 12, nombre: 'Área de Administración', descripcion: 'Gestión administrativa y trámites' },
-        ]
-        setAllAreas(mockAreas)
-        setResults(mockAreas)
+        const data = await obtenerAreas()
+        setAllAreas(data)
+        setResults(data)
       } catch (error) {
         console.error('Error al cargar áreas:', error)
       } finally {
