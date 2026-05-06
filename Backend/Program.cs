@@ -22,6 +22,7 @@ internal static class Program
 
         ConfigureMiddleware(app);
         MapUsuarioRoutes(app, isDev);
+        MapAreaRoutes(app, isDev);
         MapAuth(app, isDev);
 
         app.Run();
@@ -42,6 +43,7 @@ internal static class Program
         builder.Services.AddScoped(_ =>
             new OracleConnection(builder.Configuration.GetConnectionString("OracleDB")));
         builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+        builder.Services.AddScoped<IAreaRepository, AreaRepository>();
         builder.Services.AddOpenApi();
         builder.Services.AddCors(options =>
             options.AddPolicy("FrontendOrigin", policy =>
@@ -229,6 +231,79 @@ internal static class Program
                 return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
             }
         });
+    }
+
+    // ---------------------------------------------------------------- //
+    // Rutas de Áreas                                                    //
+    // ---------------------------------------------------------------- //
+    private static void MapAreaRoutes(WebApplication app, bool isDev)
+    {
+        var areas = app.MapGroup("/areas");
+
+        // GET /areas — Lista todas las áreas
+        areas.MapGet("/", async (IAreaRepository repo) =>
+        {
+            try
+            {
+                var lista = await repo.ObtenerTodasAsync().ConfigureAwait(false);
+                return Results.Ok(lista);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+
+        // POST /areas — Crea una nueva área
+        areas.MapPost("/", async (CrearAreaDto dto, IAreaRepository repo) =>
+        {
+            var validationResult = ValidarCrearArea(dto);
+            if (validationResult is not null)
+                return validationResult;
+
+            // Verificar si el nombre ya existe
+            try
+            {
+                var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
+                if (existe)
+                    return Results.Conflict(new { mensaje = $"Ya existe un área con el nombre '{dto.Nombre}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+
+            var area = new Backend.Models.Area
+            {
+                Nombre = dto.Nombre.Trim().ToLower(),
+                Descripcion = dto.Descripcion.Trim(),
+                Estado = 1,
+            };
+
+            try
+            {
+                await repo.InsertarAsync(area).ConfigureAwait(false);
+                return Results.Created($"/areas/{area.Id}", new { mensaje = $"Área '{area.Nombre}' creada correctamente." });
+            }
+            catch (OracleException ex)
+            {
+                var msg = isDev
+                    ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                    : TraducirErrorOracle(ex.Number);
+                return Results.Json(new { mensaje = msg }, statusCode: 500);
+            }
+        });
+    }
+
+    private static IResult? ValidarCrearArea(CrearAreaDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Nombre))
+            return Results.BadRequest(new { mensaje = "El nombre del área es obligatorio." });
+
+        if (string.IsNullOrWhiteSpace(dto.Descripcion))
+            return Results.BadRequest(new { mensaje = "La descripción es obligatoria." });
+
+        return null;
     }
 
     // ---------------------------------------------------------------- //
