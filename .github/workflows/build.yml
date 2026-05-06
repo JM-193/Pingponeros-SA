@@ -23,6 +23,12 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: Frontend/package-lock.json
       - name: Cache SonarQube Cloud packages
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
@@ -49,6 +55,8 @@ jobs:
         shell: powershell
         run: |
           ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"JM-193_Pingponeros-SA" /o:"pingponeros-sa" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.sources="Backend,Frontend" /d:sonar.exclusions="**/bin/**,**/obj/**,**/node_modules/**,**/dist/**,**/coverage/**" /d:sonar.cs.opencover.reportsPaths="Backend.Tests/TestResults/**/coverage.opencover.xml" /d:sonar.javascript.lcov.reportPaths="Frontend/coverage/lcov.info"
+          npm ci --ignore-scripts --prefix Frontend
+          npm run test:coverage --prefix Frontend
           dotnet build Pingponeros-SA.sln --configuration Release
           dotnet test Backend.Tests/Backend.Tests.csproj --no-build --configuration Release --collect:"XPlat Code Coverage" --settings Backend.Tests/coverage.runsettings --results-directory Backend.Tests/TestResults
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="$env:SONAR_TOKEN"

@@ -84,6 +84,16 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     }
 
     [Fact]
+    public async Task CrearUsuario_Returns400ConApellidoVacio()
+    {
+        var dto = new { CorreoInstitucional = "test@test.com", PrimerNombre = "Juan", PrimerApellido = "", Rol = 0 };
+
+        var response = await _client.PostAsJsonAsync("/usuarios", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
     public async Task CrearUsuario_Returns201CuandoSeCreaCorrecto()
     {
         _factory.UsuarioRepo

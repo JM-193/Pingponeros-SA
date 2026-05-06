@@ -31,4 +31,12 @@ export default defineConfig([
       'react/jsx-uses-react': 'off',
     },
   },
+  {
+    files: ['**/*.test.{js,jsx}', '**/test/**/*.{js,jsx}'],
+    languageOptions: {
+      globals: {
+        ...globals.vitest,
+      },
+    },
+  },
 ])

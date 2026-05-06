@@ -108,6 +108,17 @@ public sealed class AreasEndpointsTests : IClassFixture<TestWebApplicationFactor
     }
 
     [Fact]
+    public async Task ActualizarArea_Returns409CuandoNombreNuevoExiste()
+    {
+        _factory.AreaRepo.ExisteNombreAsync(Arg.Any<string>()).Returns(true);
+        var dto = new { Nombre = "nueva", Descripcion = "Descripción" };
+
+        var response = await _client.PutAsJsonAsync("/areas/vieja", dto);
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+    [Fact]
     public async Task ActualizarArea_Returns404CuandoNoExiste()
     {
         _factory.AreaRepo.ExisteNombreAsync(Arg.Any<string>()).Returns(false);
