@@ -225,6 +225,40 @@ export default function Navbar() {
     }
   }
 
+  const getMenuButtonProps = ({ menuId, hasSubmenu, isOpen, path }) => ({
+    type: 'button',
+    'aria-haspopup': hasSubmenu ? 'true' : undefined,
+    'aria-expanded': hasSubmenu ? isOpen : undefined,
+    'aria-controls': hasSubmenu ? `${menuId}-menu` : undefined,
+    onClick: (e) => {
+      e.preventDefault()
+      if (hasSubmenu) toggleSubmenu(menuId)
+      else handleNavClick(path)
+    },
+    onKeyDown: (e) =>
+      handleMenuButtonKeyDown(e, menuId, hasSubmenu, isOpen, path),
+    onFocus: () => hasSubmenu && !isOpen && toggleSubmenu(menuId),
+  })
+
+  const topLevelButtonBaseStyle = {
+    fontSize: '13px',
+    fontWeight: 600,
+    color: '#fff',
+    border: 'none',
+    borderRadius: 0,
+    padding: '14px 20px',
+    margin: 0,
+    cursor: 'pointer',
+    transition: 'background-color 0.15s',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    lineHeight: 1,
+    whiteSpace: 'nowrap',
+    height: '100%',
+    width: '100%',
+  }
+
   // Render submenu arrow icon
   const renderArrow = (isOpen, rotation = '180deg') => (
     <svg
@@ -254,37 +288,11 @@ export default function Navbar() {
         data-menu-root={menuId}
       >
         <button
-        type="button"
-        aria-haspopup={hasSubmenu ? 'true' : undefined}
-        aria-expanded={hasSubmenu ? isOpen : undefined}
-        aria-controls={hasSubmenu ? `${menuId}-menu` : undefined}
-        onClick={(e) => {
-          e.preventDefault()
-          if (hasSubmenu) toggleSubmenu(menuId)
-          else handleNavClick(item.path)
-        }}
-        onKeyDown={(e) =>
-          handleMenuButtonKeyDown(e, menuId, hasSubmenu, isOpen, item.path)
-        }
-        onFocus={() => hasSubmenu && !isOpen && toggleSubmenu(menuId)}
-        style={{
-          fontSize: '13px',
-          fontWeight: 600,
-          color: '#fff',
-          backgroundColor: buttonBgColor,
-          border: 'none',
-          borderRadius: 0,
-          padding: '14px 20px',
-          margin: 0,
-          cursor: 'pointer',
-          transition: 'background-color 0.15s',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          lineHeight: 1,
-          whiteSpace: 'nowrap',
-          height: '100%',
-        }}
+          {...getMenuButtonProps({ menuId, hasSubmenu, isOpen, path: item.path })}
+          style={{
+            ...topLevelButtonBaseStyle,
+            backgroundColor: buttonBgColor,
+          }}
         onMouseEnter={(e) => {
           clearCloseTimer()
           if (hasSubmenu && !isOpen) toggleSubmenu(menuId)
@@ -308,11 +316,12 @@ export default function Navbar() {
             style={{
               position: 'absolute',
               top: '100%',
-              left: 0,
+              left: '50%',
+              transform: 'translateX(-50%)',
               backgroundColor: COLORS.submenuBg,
               borderRadius: '0 0 6px 6px',
               boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-              minWidth: '240px',
+              minWidth: '100%',
               zIndex: 100,
               overflow: 'visible',
               marginTop: '-1px',
@@ -334,33 +343,10 @@ export default function Navbar() {
       data-submenu-root={menuId}
     >
       <button
-        type="button"
-        aria-haspopup={hasSubmenu ? 'true' : undefined}
-        aria-expanded={hasSubmenu ? isOpen : undefined}
-        aria-controls={hasSubmenu ? `${menuId}-menu` : undefined}
-        onClick={(e) => {
-          e.preventDefault()
-          if (hasSubmenu) toggleSubmenu(menuId)
-          else handleNavClick(item.path)
-        }}
-        onKeyDown={(e) =>
-          handleMenuButtonKeyDown(e, menuId, hasSubmenu, isOpen, item.path)
-        }
-        onFocus={() => hasSubmenu && !isOpen && toggleSubmenu(menuId)}
+        {...getMenuButtonProps({ menuId, hasSubmenu, isOpen, path: item.path })}
         style={{
-          width: '100%',
-          padding: '12px 18px',
-          textAlign: 'left',
-          border: 'none',
-          background: 'none',
-          fontSize: '13px',
-          color: '#fff',
-          cursor: 'pointer',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-          transition: 'background-color 0.15s',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          ...topLevelButtonBaseStyle,
+          backgroundColor: isOpen ? COLORS.submenuBg : 'transparent',
         }}
         onMouseEnter={(e) => {
           clearCloseTimer()
@@ -390,9 +376,9 @@ export default function Navbar() {
             top: 0,
             left: '100%',
             backgroundColor: COLORS.submenuBg,
-            borderRadius: '6px',
+            borderRadius: '0 0 6px 6px',
             boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-            minWidth: '200px',
+            minWidth: '100%',
             zIndex: 101,
             overflow: 'visible',
             marginLeft: '4px',
@@ -409,7 +395,7 @@ export default function Navbar() {
   const renderSubmenuLevel2Item = (item, menuId, rootMenuId, parentMenuId) => (
     <button
       key={menuId}
-      onClick={() => handleNavClick(item.path)}
+      {...getMenuButtonProps({ menuId, hasSubmenu: false, isOpen: false, path: item.path })}
       style={{
         display: 'block',
         width: '100%',
