@@ -30,14 +30,6 @@ export default function CreateArea() {
     console.log('Datos del formulario:', formData)
   }
 
-  // Manage form reset
-  const handleReset = () => {
-    setFormData({
-      nombre: '',
-      descripcion: '',
-    })
-  }
-
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: COLORS.bodyBg }}>
       {/* Header */}
