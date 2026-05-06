@@ -1,4 +1,5 @@
 import { Navigate } from 'react-router-dom'
+import PropTypes from 'prop-types'
 import { obtenerSesion } from '../services/session'
 
 /**
@@ -7,4 +8,8 @@ import { obtenerSesion } from '../services/session'
 export default function ProtectedRoute({ children }) {
   const sesion = obtenerSesion()
   return sesion ? children : <Navigate to="/" replace />
+}
+
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
 }
