@@ -9,6 +9,7 @@ import FormRow from '../components/FormRow'
 import FormInput from '../components/FormInput'
 import FormSelect from '../components/FormSelect'
 import FormButton from '../components/FormButton'
+import StatusMessage from '../components/StatusMessage'
 import { COLORS } from '../constants/colors'
 
 export default function CreateUser() {
@@ -179,48 +180,23 @@ export default function CreateUser() {
 
           {/* Mensajes de feedback */}
           {successMsg && (
-            <div style={{ color: '#1b5e20', backgroundColor: '#e8f5e9', padding: '12px 16px', borderRadius: '6px', border: '1px solid #a5d6a7', fontSize: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}>
-                <span>&#10003;</span>
-                <span>{successMsg}</span>
-              </div>
+            <StatusMessage variant="success" message={successMsg}>
               {tempPassword && (
-                <div style={{ marginTop: '10px', padding: '10px 14px', backgroundColor: '#fff', borderRadius: '4px', border: '1px dashed #66bb6a' }}>
+                <div style={{ padding: '10px 14px', backgroundColor: '#fff', borderRadius: '4px', border: '1px dashed #66bb6a' }}>
                   <span style={{ fontWeight: 600 }}>Contraseña temporal: </span>
                   <code style={{ fontSize: '15px', letterSpacing: '1px', color: '#1b5e20' }}>{tempPassword}</code>
                   <div style={{ marginTop: '4px', fontSize: '12px', color: '#388e3c' }}>Válida por 48 horas. Compártala con el usuario de forma segura.</div>
                 </div>
               )}
-            </div>
+            </StatusMessage>
           )}
           {errorMsg && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#b71c1c', backgroundColor: '#ffebee', padding: '12px 16px', borderRadius: '6px', border: '1px solid #ef9a9a', fontSize: '14px', fontWeight: 600 }}>
-              <span>&#9888;</span>
-              <span>{errorMsg}</span>
-            </div>
+            <StatusMessage variant="error" message={errorMsg} />
           )}
 
           {/* Botones */}
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-            <button
-              type="button"
-              onClick={() => navigate('/home')}
-              style={{
-                padding: '12px 32px',
-                backgroundColor: COLORS.secondaryBtn,
-                color: '#fff',
-                border: 'none',
-                borderRadius: '4px',
-                fontSize: '14px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'background-color 0.3s ease',
-              }}
-              onMouseEnter={(e) => (e.target.style.backgroundColor = COLORS.secondaryBtnHover)}
-              onMouseLeave={(e) => (e.target.style.backgroundColor = COLORS.secondaryBtn)}
-            >
-              Regresar
-            </button>
+            <FormButton label="Regresar" type="button" variant="secondary" onClick={() => navigate('/home')} />
             <FormButton label={loading ? 'Guardando...' : 'Crear Usuario'} type="submit" variant="primary" disabled={loading} />
           </div>
         </FormContainer>

@@ -5,6 +5,7 @@ import Header from '../components/Header'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import ConfirmModal from '../components/ConfirmModal'
+import FormButton from '../components/FormButton'
 import { obtenerAreas, eliminarArea } from '../services/areaService'
 import { COLORS } from '../constants/colors'
 
@@ -446,25 +447,7 @@ export default function ConsultarArea() {
         </div>
 
         <div id="results-section">{renderResultsContent()}</div>
-        <button
-          type="button"
-          onClick={() => navigate('/home')}
-          style={{
-            padding: '12px 32px',
-            backgroundColor: COLORS.secondaryBtn,
-            color: '#fff',
-            border: 'none',
-            borderRadius: '4px',
-            fontSize: '14px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'background-color 0.3s ease',
-          }}
-          onMouseEnter={(e) => (e.target.style.backgroundColor = COLORS.secondaryBtnHover)}
-          onMouseLeave={(e) => (e.target.style.backgroundColor = COLORS.secondaryBtn)}
-        >
-          Regresar
-        </button>
+        <FormButton label="Regresar" type="button" variant="secondary" onClick={() => navigate('/home')} />
       </main>
 
       <Footer />
