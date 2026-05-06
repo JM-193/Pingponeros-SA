@@ -96,6 +96,22 @@ public sealed class AreasEndpointsTests : IClassFixture<TestWebApplicationFactor
     }
 
     [Fact]
+    public async Task CrearArea_NormalizaNombreYDescripcionAntesDeInsertar()
+    {
+        Area? capturada = null;
+        _factory.AreaRepo.ExisteNombreAsync(Arg.Any<string>()).Returns(false);
+        _factory.AreaRepo.InsertarAsync(Arg.Do<Area>(area => capturada = area)).Returns(1);
+        var dto = new { Nombre = "  Sistemas  ", Descripcion = "  Area de sistemas  " };
+
+        var response = await _client.PostAsJsonAsync("/areas", dto);
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Assert.NotNull(capturada);
+        Assert.Equal("sistemas", capturada!.Nombre);
+        Assert.Equal("Area de sistemas", capturada.Descripcion);
+    }
+
+    [Fact]
     public async Task ActualizarArea_Returns200CuandoSeActualiza()
     {
         _factory.AreaRepo.ExisteNombreAsync(Arg.Any<string>()).Returns(false);

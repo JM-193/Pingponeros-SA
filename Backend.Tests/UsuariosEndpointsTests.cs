@@ -107,6 +107,65 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     }
 
     [Fact]
+    public async Task CrearUsuario_NormalizaCamposAntesDeInsertar()
+    {
+        Usuario? capturado = null;
+        string? hashCapturado = null;
+        _factory.UsuarioRepo
+            .InsertarConContrasenaAsync(
+                Arg.Do<Usuario>(usuario => capturado = usuario),
+                Arg.Do<string>(hash => hashCapturado = hash))
+            .Returns(Task.CompletedTask);
+        var dto = new
+        {
+            CorreoInstitucional = "  TEST@UCR.EDU  ",
+            PrimerNombre = "  jUaN ",
+            SegundoNombre = "  carlos ",
+            PrimerApellido = "  pEREZ  ",
+            SegundoApellido = "  gONZALEZ  ",
+            Rol = 0,
+        };
+
+        var response = await _client.PostAsJsonAsync("/usuarios", dto);
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Assert.NotNull(capturado);
+        Assert.Equal("test@ucr.edu", capturado!.CorreoInstitucional);
+        Assert.Equal("Juan", capturado.PrimerNombre);
+        Assert.Equal("Carlos", capturado.SegundoNombre);
+        Assert.Equal("Perez", capturado.PrimerApellido);
+        Assert.Equal("Gonzalez", capturado.SegundoApellido);
+        Assert.Equal(0, capturado.Rol);
+        Assert.Equal(1, capturado.Estado);
+        Assert.False(string.IsNullOrWhiteSpace(hashCapturado));
+    }
+
+    [Fact]
+    public async Task CrearUsuario_ConvierteSegundoNombreYApellidoEnNullCuandoVacios()
+    {
+        Usuario? capturado = null;
+        _factory.UsuarioRepo
+            .InsertarConContrasenaAsync(Arg.Do<Usuario>(usuario => capturado = usuario), Arg.Any<string>())
+            .Returns(Task.CompletedTask);
+        var dto = new
+        {
+            CorreoInstitucional = "test@test.com",
+            PrimerNombre = "Ana",
+            SegundoNombre = "   ",
+            PrimerApellido = "Lopez",
+            SegundoApellido = "",
+            Rol = 0,
+        };
+
+        var response = await _client.PostAsJsonAsync("/usuarios", dto);
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Assert.NotNull(capturado);
+        Assert.Null(capturado!.SegundoNombre);
+        Assert.Null(capturado.SegundoApellido);
+    }
+
+    [Fact]
     public async Task ActualizarUsuario_Returns200CuandoSeActualiza()
     {
         _factory.UsuarioRepo

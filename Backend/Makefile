@@ -16,5 +16,10 @@ coverage: test
 		-assemblyfilters:"-*.Tests"
 	@echo "Report generated: Backend.Tests/TestResults/CoverageReport/index.html"
 
+ifeq ($(OS),Windows_NT)
+report: coverage
+	powershell -NoProfile -Command "Start-Process ..\\Backend.Tests\\TestResults\\CoverageReport\\index.html"
+else
 report: coverage
 	xdg-open ../Backend.Tests/TestResults/CoverageReport/index.html
+endif
