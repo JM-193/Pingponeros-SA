@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using DotNetEnv;
 using Oracle.ManagedDataAccess.Client;
@@ -43,8 +44,10 @@ internal static class Program
     {
         builder.Services.AddScoped(_ =>
             new OracleConnection(builder.Configuration.GetConnectionString("OracleDB")));
-        builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-        builder.Services.AddScoped<IAreaRepository, AreaRepository>();
+        builder.Services.AddScoped<IUsuarioRepository>(sp =>
+            new UsuarioRepository(sp.GetRequiredService<OracleConnection>()));
+        builder.Services.AddScoped<IAreaRepository>(sp =>
+            new AreaRepository(sp.GetRequiredService<OracleConnection>()));
         builder.Services.AddOpenApi();
         builder.Services.AddCors(options =>
             options.AddPolicy("FrontendOrigin", policy =>
@@ -146,7 +149,8 @@ internal static class Program
         return null;
     }
 
-#pragma warning disable CA1308 // ToLower es intencional: normalizar nombres y correos electrónicos
+    [SuppressMessage("Globalization", "CA1308:NormalizeStringsToUppercase",
+        Justification = "Los correos y nombres se normalizan a minúsculas por requisito de negocio.")]
     private static Backend.Models.Usuario CrearUsuarioDesdeDto(CrearUsuarioDto dto)
     {
         // Función auxiliar para capitalizar (primera letra mayúscula, resto minúscula)
@@ -157,15 +161,18 @@ internal static class Program
         return new Backend.Models.Usuario
         {
             CorreoInstitucional = dto.CorreoInstitucional.Trim().ToLowerInvariant(),
-            PrimerNombre = Capitalizar(dto.PrimerNombre),
-            SegundoNombre = string.IsNullOrWhiteSpace(dto.SegundoNombre) ? null : Capitalizar(dto.SegundoNombre),
-            PrimerApellido = Capitalizar(dto.PrimerApellido),
-            SegundoApellido = string.IsNullOrWhiteSpace(dto.SegundoApellido) ? null : Capitalizar(dto.SegundoApellido),
-            Rol = dto.Rol,
-            Estado = 1,
+            PrimerNombre        = Capitalizar(dto.PrimerNombre),
+            SegundoNombre       = string.IsNullOrWhiteSpace(dto.SegundoNombre) ? null : Capitalizar(dto.SegundoNombre),
+            PrimerApellido      = Capitalizar(dto.PrimerApellido),
+            SegundoApellido     = string.IsNullOrWhiteSpace(dto.SegundoApellido) ? null : Capitalizar(dto.SegundoApellido),
+            Rol                 = dto.Rol,
+            Estado              = 1,
         };
     }
-#pragma warning restore CA1308
+
+    [SuppressMessage("Globalization", "CA1308:NormalizeStringsToUppercase",
+        Justification = "Los nombres de área se normalizan a minúsculas por requisito de negocio.")]
+    private static string NormalizarNombreArea(string nombre) => nombre.Trim().ToLowerInvariant();
 
     private static async Task<IResult> CrearUsuarioAsync(
         IUsuarioRepository repo,
@@ -181,7 +188,7 @@ internal static class Program
                 $"/usuarios/{Uri.EscapeDataString(usuario.CorreoInstitucional)}",
                 new
                 {
-                    mensaje = $"Usuario '{usuario.PrimerNombre} {usuario.PrimerApellido}' creado correctamente.",
+                    mensaje           = $"Usuario '{usuario.PrimerNombre} {usuario.PrimerApellido}' creado correctamente.",
                     contrasenaTemporal = contrasenaTemp,
                 });
         }
@@ -243,15 +250,6 @@ internal static class Program
     {
         var areas = app.MapGroup("/areas");
 
-        MapAreasGetAll(areas);
-        MapAreasCreate(areas, isDev);
-        MapAreasGetByNombre(areas);
-        MapAreasUpdate(areas, isDev);
-        MapAreasDelete(areas);
-    }
-
-    private static void MapAreasGetAll(RouteGroupBuilder areas)
-    {
         // GET /areas — Lista todas las áreas
         areas.MapGet("/", async (IAreaRepository repo) =>
         {
@@ -265,10 +263,7 @@ internal static class Program
                 return Results.Problem(detail: ex.Message, statusCode: 500);
             }
         });
-    }
 
-    private static void MapAreasCreate(RouteGroupBuilder areas, bool isDev)
-    {
         // POST /areas — Crea una nueva área
         areas.MapPost("/", async (CrearAreaDto dto, IAreaRepository repo) =>
         {
@@ -277,11 +272,23 @@ internal static class Program
                 return validationResult;
 
             // Verificar si el nombre ya existe
-            var conflictResult = await ValidarNombreAreaUnicoAsync(repo, dto.Nombre).ConfigureAwait(false);
-            if (conflictResult is not null)
-                return conflictResult;
+            try
+            {
+                var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
+                if (existe)
+                    return Results.Conflict(new { mensaje = $"Ya existe un área con el nombre '{dto.Nombre}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
 
-            var area = CrearAreaDesdeDto(dto);
+            var area = new Backend.Models.Area
+            {
+                Nombre      = NormalizarNombreArea(dto.Nombre),
+                Descripcion = dto.Descripcion.Trim(),
+                Estado      = 1,
+            };
 
             try
             {
@@ -296,10 +303,7 @@ internal static class Program
                 return Results.Json(new { mensaje = msg }, statusCode: 500);
             }
         });
-    }
 
-    private static void MapAreasGetByNombre(RouteGroupBuilder areas)
-    {
         // GET /areas/{nombre} — Obtiene un área por nombre
         areas.MapGet("/{nombre}", async (string nombre, IAreaRepository repo) =>
         {
@@ -315,10 +319,7 @@ internal static class Program
                 return Results.Problem(detail: ex.Message, statusCode: 500);
             }
         });
-    }
 
-    private static void MapAreasUpdate(RouteGroupBuilder areas, bool isDev)
-    {
         // PUT /areas/{nombre} — Actualiza un área
         areas.MapPut("/{nombre}", async (string nombre, CrearAreaDto dto, IAreaRepository repo) =>
         {
@@ -331,12 +332,24 @@ internal static class Program
             // Verificar si el nombre cambió y si el nuevo nombre ya existe
             if (!dto.Nombre.Trim().Equals(nombreDescodificado, StringComparison.OrdinalIgnoreCase))
             {
-                var conflictResult = await ValidarNombreAreaUnicoAsync(repo, dto.Nombre).ConfigureAwait(false);
-                if (conflictResult is not null)
-                    return conflictResult;
+                try
+                {
+                    var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
+                    if (existe)
+                        return Results.Conflict(new { mensaje = $"Ya existe un área con el nombre '{dto.Nombre}'." });
+                }
+                catch (OracleException ex)
+                {
+                    return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+                }
             }
 
-            var area = CrearAreaDesdeDto(dto);
+            var area = new Backend.Models.Area
+            {
+                Nombre      = NormalizarNombreArea(dto.Nombre),
+                Descripcion = dto.Descripcion.Trim(),
+                Estado      = 1,
+            };
 
             try
             {
@@ -353,10 +366,6 @@ internal static class Program
                 return Results.Json(new { mensaje = msg }, statusCode: 500);
             }
         });
-    }
-
-    private static void MapAreasDelete(RouteGroupBuilder areas)
-    {
         // DELETE /areas/{id} — Borrado lógico: pasa ESTADO de 1 a 0
         areas.MapDelete("/{id:int}", async (int id, IAreaRepository repo) =>
         {
@@ -373,33 +382,6 @@ internal static class Program
             }
         });
     }
-
-    private static async Task<IResult?> ValidarNombreAreaUnicoAsync(IAreaRepository repo, string nombre)
-    {
-        try
-        {
-            var existe = await repo.ExisteNombreAsync(nombre).ConfigureAwait(false);
-            return existe
-                ? Results.Conflict(new { mensaje = $"Ya existe un área con el nombre '{nombre}'." })
-                : null;
-        }
-        catch (OracleException ex)
-        {
-            return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
-        }
-    }
-
-#pragma warning disable CA1308 // ToLower es intencional: los nombres de área se almacenan en minúsculas
-    private static Backend.Models.Area CrearAreaDesdeDto(CrearAreaDto dto)
-    {
-        return new Backend.Models.Area
-        {
-            Nombre = dto.Nombre.Trim().ToLowerInvariant(),
-            Descripcion = dto.Descripcion.Trim(),
-            Estado = 1,
-        };
-    }
-#pragma warning restore CA1308
 
     private static IResult? ValidarCrearArea(CrearAreaDto dto)
     {
@@ -437,12 +419,12 @@ internal static class Program
                 return Results.Ok(new
                 {
                     correoInstitucional = usuario!.CorreoInstitucional,
-                    primerNombre = usuario.PrimerNombre,
-                    segundoNombre = usuario.SegundoNombre,
-                    primerApellido = usuario.PrimerApellido,
-                    segundoApellido = usuario.SegundoApellido,
-                    rol = usuario.Rol,
-                    estado = usuario.Estado,
+                    primerNombre        = usuario.PrimerNombre,
+                    segundoNombre       = usuario.SegundoNombre,
+                    primerApellido      = usuario.PrimerApellido,
+                    segundoApellido     = usuario.SegundoApellido,
+                    rol                 = usuario.Rol,
+                    estado              = usuario.Estado,
                 });
             }
             catch (OracleException ex)
@@ -457,25 +439,25 @@ internal static class Program
 
     private static string TraducirErrorOracle(int numero) => numero switch
     {
-        1 => "El registro ya existe en el sistema.",
-        2289 => "Error de configuración interna: objeto de base de datos no encontrado.",
-        2291 => "Operación rechazada: referencia a un registro que no existe.",
-        2292 => "No se puede eliminar: el registro tiene datos relacionados.",
-        1400 => "Hay campos obligatorios sin valor.",
-        1438 => "El valor ingresado es demasiado grande para el campo.",
+        1     => "El registro ya existe en el sistema.",
+        2289  => "Error de configuración interna: objeto de base de datos no encontrado.",
+        2291  => "Operación rechazada: referencia a un registro que no existe.",
+        2292  => "No se puede eliminar: el registro tiene datos relacionados.",
+        1400  => "Hay campos obligatorios sin valor.",
+        1438  => "El valor ingresado es demasiado grande para el campo.",
         12541 => "No se pudo conectar a la base de datos. Intente más tarde.",
         12170 => "La conexión a la base de datos expiró. Intente más tarde.",
-        1017 => "Error de autenticación con la base de datos.",
-        _ => "No se pudo completar la operación. Intente nuevamente.",
+        1017  => "Error de autenticación con la base de datos.",
+        _     => "No se pudo completar la operación. Intente nuevamente.",
     };
 
     private static string GenerarContrasenaTemporal()
     {
-        const string upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        const string lower = "abcdefghijklmnopqrstuvwxyz";
-        const string digits = "0123456789";
+        const string upper   = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const string lower   = "abcdefghijklmnopqrstuvwxyz";
+        const string digits  = "0123456789";
         const string special = "!@#$%&*";
-        const string all = upper + lower + digits + special;
+        const string all     = upper + lower + digits + special;
 
         var chars = new char[12];
         chars[0] = upper[System.Security.Cryptography.RandomNumberGenerator.GetInt32(upper.Length)];

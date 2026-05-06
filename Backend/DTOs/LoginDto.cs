@@ -1,4 +1,7 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Backend.DTOs;
 
-#pragma warning disable CA1812
+[SuppressMessage("Performance", "CA1812:AvoidUninstantiatedInternalClasses",
+    Justification = "Instanciado por el enlazador de modelos de ASP.NET Core.")]
 internal sealed record LoginDto(string CorreoInstitucional, string Contrasena);

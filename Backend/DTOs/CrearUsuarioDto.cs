@@ -1,6 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Backend.DTOs;
 
-#pragma warning disable CA1812 // Instanciado por el enlazador de modelos de ASP.NET Core
+[SuppressMessage("Performance", "CA1812:AvoidUninstantiatedInternalClasses",
+    Justification = "Instanciado por el enlazador de modelos de ASP.NET Core.")]
 /// <summary>
 /// DTO para la creación de un nuevo usuario.
 /// <para><c>Rol</c>: 0 = Funcionario, 1 = Administrador.</para>
