@@ -14,15 +14,31 @@ internal static class Program
 
         var builder = WebApplication.CreateBuilder(args);
 
-        // Oracle wallet
+        ConfigureOracle(builder);
+        ConfigureServices(builder);
+
+        var app = builder.Build();
+        var isDev = app.Environment.IsDevelopment();
+
+        ConfigureMiddleware(app);
+        MapUsuarioRoutes(app, isDev);
+        MapAuth(app, isDev);
+
+        app.Run();
+    }
+
+    private static void ConfigureOracle(WebApplicationBuilder builder)
+    {
         var walletPath = Path.GetFullPath(
             Path.Combine(builder.Environment.ContentRootPath,
                 builder.Configuration["Oracle:WalletPath"] ?? "wallet"));
 
         OracleConfiguration.TnsAdmin = walletPath;
         OracleConfiguration.WalletLocation = walletPath;
+    }
 
-        // Servicios
+    private static void ConfigureServices(WebApplicationBuilder builder)
+    {
         builder.Services.AddScoped(_ =>
             new OracleConnection(builder.Configuration.GetConnectionString("OracleDB")));
         builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
@@ -32,19 +48,31 @@ internal static class Program
                 policy.WithOrigins("http://localhost:5173")
                       .AllowAnyMethod()
                       .AllowAnyHeader()));
+    }
 
-        var app = builder.Build();
-        var isDev = app.Environment.IsDevelopment();
-
+    private static void ConfigureMiddleware(WebApplication app)
+    {
         app.MapOpenApi();
         app.MapScalarApiReference();
         app.UseCors("FrontendOrigin");
+    }
 
+    private static void MapUsuarioRoutes(WebApplication app, bool isDev)
+    {
         // ---------------------------------------------------------------- //
         // Rutas de Usuarios                                                 //
         // ---------------------------------------------------------------- //
         var usuarios = app.MapGroup("/usuarios");
 
+        MapUsuariosGetAll(usuarios);
+        MapUsuariosGetByCorreo(usuarios);
+        MapUsuariosCreate(usuarios, isDev);
+        MapUsuariosUpdate(usuarios);
+        MapUsuariosDelete(usuarios);
+    }
+
+    private static void MapUsuariosGetAll(RouteGroupBuilder usuarios)
+    {
         // GET /usuarios — Lista todos los usuarios
         usuarios.MapGet("/", async (IUsuarioRepository repo) =>
         {
@@ -58,7 +86,10 @@ internal static class Program
                 return Results.Problem(detail: ex.Message, statusCode: 500);
             }
         });
+    }
 
+    private static void MapUsuariosGetByCorreo(RouteGroupBuilder usuarios)
+    {
         // GET /usuarios/{correo} — Busca por clave primaria
         usuarios.MapGet("/{correo}", async (string correo, IUsuarioRepository repo) =>
         {
@@ -74,60 +105,91 @@ internal static class Program
                 return Results.Problem(detail: ex.Message, statusCode: 500);
             }
         });
+    }
 
+    private static void MapUsuariosCreate(RouteGroupBuilder usuarios, bool isDev)
+    {
         // POST /usuarios — Crea un nuevo usuario con contraseña temporal
         usuarios.MapPost("/", async (CrearUsuarioDto dto, IUsuarioRepository repo) =>
         {
-            if (dto.Rol is not (0 or 1))
-                return Results.BadRequest(new { mensaje = "Rol inválido. Use 0 (Funcionario) o 1 (Administrador)." });
+            var validationResult = ValidarCrearUsuario(dto);
+            if (validationResult is not null)
+                return validationResult;
 
-            if (string.IsNullOrWhiteSpace(dto.CorreoInstitucional))
-                return Results.BadRequest(new { mensaje = "El correo institucional es obligatorio." });
-
-            if (string.IsNullOrWhiteSpace(dto.PrimerNombre))
-                return Results.BadRequest(new { mensaje = "El primer nombre es obligatorio." });
-
-            if (string.IsNullOrWhiteSpace(dto.PrimerApellido))
-                return Results.BadRequest(new { mensaje = "El primer apellido es obligatorio." });
-
-            var usuario = new Backend.Models.Usuario
-            {
-                CorreoInstitucional = dto.CorreoInstitucional.Trim(),
-                PrimerNombre        = dto.PrimerNombre.Trim(),
-                SegundoNombre       = string.IsNullOrWhiteSpace(dto.SegundoNombre) ? null : dto.SegundoNombre.Trim(),
-                PrimerApellido      = dto.PrimerApellido.Trim(),
-                SegundoApellido     = string.IsNullOrWhiteSpace(dto.SegundoApellido) ? null : dto.SegundoApellido.Trim(),
-                Rol                 = dto.Rol,
-                Estado              = 1,
-            };
+            var usuario = CrearUsuarioDesdeDto(dto);
 
             var contrasenaTemp = GenerarContrasenaTemporal();
             var hash = BCrypt.Net.BCrypt.HashPassword(contrasenaTemp);
 
-            try
-            {
-                await repo.InsertarConContrasenaAsync(usuario, hash).ConfigureAwait(false);
-                return Results.Created(
-                    $"/usuarios/{Uri.EscapeDataString(usuario.CorreoInstitucional)}",
-                    new
-                    {
-                        mensaje           = $"Usuario '{usuario.PrimerNombre} {usuario.PrimerApellido}' creado correctamente.",
-                        contrasenaTemporal = contrasenaTemp,
-                    });
-            }
-            catch (OracleException ex) when (ex.Number == 1)
-            {
-                return Results.Conflict(new { mensaje = $"El correo '{dto.CorreoInstitucional}' ya está registrado en el sistema." });
-            }
-            catch (OracleException ex)
-            {
-                var msg = isDev
-                    ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                    : TraducirErrorOracle(ex.Number);
-                return Results.Json(new { mensaje = msg }, statusCode: 500);
-            }
+            return await CrearUsuarioAsync(repo, usuario, contrasenaTemp, hash, isDev)
+                .ConfigureAwait(false);
         });
+    }
 
+    private static IResult? ValidarCrearUsuario(CrearUsuarioDto dto)
+    {
+        if (dto.Rol is not (0 or 1))
+            return Results.BadRequest(new { mensaje = "Rol inválido. Use 0 (Funcionario) o 1 (Administrador)." });
+
+        if (string.IsNullOrWhiteSpace(dto.CorreoInstitucional))
+            return Results.BadRequest(new { mensaje = "El correo institucional es obligatorio." });
+
+        if (string.IsNullOrWhiteSpace(dto.PrimerNombre))
+            return Results.BadRequest(new { mensaje = "El primer nombre es obligatorio." });
+
+        if (string.IsNullOrWhiteSpace(dto.PrimerApellido))
+            return Results.BadRequest(new { mensaje = "El primer apellido es obligatorio." });
+
+        return null;
+    }
+
+    private static Backend.Models.Usuario CrearUsuarioDesdeDto(CrearUsuarioDto dto)
+    {
+        return new Backend.Models.Usuario
+        {
+            CorreoInstitucional = dto.CorreoInstitucional.Trim(),
+            PrimerNombre        = dto.PrimerNombre.Trim(),
+            SegundoNombre       = string.IsNullOrWhiteSpace(dto.SegundoNombre) ? null : dto.SegundoNombre.Trim(),
+            PrimerApellido      = dto.PrimerApellido.Trim(),
+            SegundoApellido     = string.IsNullOrWhiteSpace(dto.SegundoApellido) ? null : dto.SegundoApellido.Trim(),
+            Rol                 = dto.Rol,
+            Estado              = 1,
+        };
+    }
+
+    private static async Task<IResult> CrearUsuarioAsync(
+        IUsuarioRepository repo,
+        Backend.Models.Usuario usuario,
+        string contrasenaTemp,
+        string hash,
+        bool isDev)
+    {
+        try
+        {
+            await repo.InsertarConContrasenaAsync(usuario, hash).ConfigureAwait(false);
+            return Results.Created(
+                $"/usuarios/{Uri.EscapeDataString(usuario.CorreoInstitucional)}",
+                new
+                {
+                    mensaje           = $"Usuario '{usuario.PrimerNombre} {usuario.PrimerApellido}' creado correctamente.",
+                    contrasenaTemporal = contrasenaTemp,
+                });
+        }
+        catch (OracleException ex) when (ex.Number == 1)
+        {
+            return Results.Conflict(new { mensaje = $"El correo '{usuario.CorreoInstitucional}' ya está registrado en el sistema." });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
+
+    private static void MapUsuariosUpdate(RouteGroupBuilder usuarios)
+    {
         // PUT /usuarios/{correo} — Actualiza un usuario existente
         usuarios.MapPut("/{correo}", async (string correo, Backend.Models.Usuario usuario, IUsuarioRepository repo) =>
         {
@@ -143,7 +205,10 @@ internal static class Program
                 return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
             }
         });
+    }
 
+    private static void MapUsuariosDelete(RouteGroupBuilder usuarios)
+    {
         // DELETE /usuarios/{correo} — Elimina un usuario
         usuarios.MapDelete("/{correo}", async (string correo, IUsuarioRepository repo) =>
         {
@@ -159,13 +224,6 @@ internal static class Program
                 return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
             }
         });
-
-        // ---------------------------------------------------------------- //
-        // Rutas de Auth                                                     //
-        // ---------------------------------------------------------------- //
-        MapAuth(app, isDev);
-
-        app.Run();
     }
 
     // ---------------------------------------------------------------- //
