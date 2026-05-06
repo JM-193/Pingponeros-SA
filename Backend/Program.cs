@@ -145,13 +145,18 @@ internal static class Program
 
     private static Backend.Models.Usuario CrearUsuarioDesdeDto(CrearUsuarioDto dto)
     {
+        // Función auxiliar para capitalizar (primera letra mayúscula, resto minúscula)
+        static string Capitalizar(string? texto) =>
+            string.IsNullOrWhiteSpace(texto) ? texto?.Trim() ?? "" : 
+            char.ToUpper(texto.Trim()[0]) + texto.Trim()[1..].ToLower();
+
         return new Backend.Models.Usuario
         {
-            CorreoInstitucional = dto.CorreoInstitucional.Trim(),
-            PrimerNombre        = dto.PrimerNombre.Trim(),
-            SegundoNombre       = string.IsNullOrWhiteSpace(dto.SegundoNombre) ? null : dto.SegundoNombre.Trim(),
-            PrimerApellido      = dto.PrimerApellido.Trim(),
-            SegundoApellido     = string.IsNullOrWhiteSpace(dto.SegundoApellido) ? null : dto.SegundoApellido.Trim(),
+            CorreoInstitucional = dto.CorreoInstitucional.Trim().ToLower(),
+            PrimerNombre        = Capitalizar(dto.PrimerNombre),
+            SegundoNombre       = string.IsNullOrWhiteSpace(dto.SegundoNombre) ? null : Capitalizar(dto.SegundoNombre),
+            PrimerApellido      = Capitalizar(dto.PrimerApellido),
+            SegundoApellido     = string.IsNullOrWhiteSpace(dto.SegundoApellido) ? null : Capitalizar(dto.SegundoApellido),
             Rol                 = dto.Rol,
             Estado              = 1,
         };
