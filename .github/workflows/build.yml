@@ -48,7 +48,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: powershell
         run: |
-          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"JM-193_Pingponeros-SA" /o:"pingponeros-sa" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.sources="Backend,Frontend" /d:sonar.exclusions="**/bin/**,**/obj/**,**/node_modules/**,**/dist/**,**/coverage/**" /d:sonar.cs.opencover.reportsPaths="Backend.Tests/TestResults/**/coverage.opencover.xml"
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"JM-193_Pingponeros-SA" /o:"pingponeros-sa" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.sources="Backend,Frontend" /d:sonar.exclusions="**/bin/**,**/obj/**,**/node_modules/**,**/dist/**,**/coverage/**" /d:sonar.cs.opencover.reportsPaths="Backend.Tests/TestResults/**/coverage.opencover.xml" /d:sonar.javascript.lcov.reportPaths="Frontend/coverage/lcov.info"
           dotnet build Pingponeros-SA.sln --configuration Release
           dotnet test Backend.Tests/Backend.Tests.csproj --no-build --configuration Release --collect:"XPlat Code Coverage" --settings Backend.Tests/coverage.runsettings --results-directory Backend.Tests/TestResults
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="$env:SONAR_TOKEN"
