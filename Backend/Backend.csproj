@@ -24,6 +24,7 @@
     </Content>
   </ItemGroup>
 
+
   <PropertyGroup>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest-all</AnalysisLevel>
