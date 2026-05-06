@@ -126,18 +126,6 @@ export default function Navbar() {
     }, 150)
   }
 
-  const scheduleCloseMenu = (menuId) => {
-    clearCloseTimer()
-    closeTimerRef.current = setTimeout(() => {
-      setOpenMenus((prev) => {
-        if (!prev[menuId]) return prev
-        const newState = { ...prev }
-        delete newState[menuId]
-        return newState
-      })
-    }, 150)
-  }
-
   const isTargetWithinMenu = (target, attribute, menuId) => {
     if (!target || typeof target.closest !== 'function') return false
     return Boolean(target.closest(`[${attribute}="${menuId}"]`))
@@ -147,55 +135,11 @@ export default function Navbar() {
     clearCloseTimer()
     setOpenMenus((prev) => {
       if (prev[menuId]) {
-        // If already open, close it
         const newState = { ...prev }
         delete newState[menuId]
         return newState
-      } else {
-        // If not open, close only siblings at the same level
-        const newState = { ...prev }
-
-        // Get the level and parent of the current menu
-        const parts = menuId.split('-')
-        const currentLevel = parts.length - 1
-
-        // If level 2 or higher, keep parents open
-        if (currentLevel >= 1) {
-          // Build the parent ID
-          const parentId = parts.slice(0, -1).join('-')
-
-          // Close only siblings at the same parent level
-          Object.keys(newState).forEach((key) => {
-            const keyParts = key.split('-')
-            const keyLevel = keyParts.length - 1
-
-            // If it's a sibling (same level and parent), close it
-            if (keyLevel === currentLevel) {
-              const keyParent = keyParts.slice(0, -1).join('-')
-              if (keyParent === parentId) {
-                delete newState[key]
-              }
-            }
-          })
-
-          // Ensure all parents are open
-          for (let i = 0; i < currentLevel; i++) {
-            const ancestorId = parts.slice(0, i + 1).join('-')
-            newState[ancestorId] = true
-          }
-        } else {
-          // If level 0, close all other level 0
-          Object.keys(newState).forEach((key) => {
-            const keyParts = key.split('-')
-            if (keyParts.length === 1) {
-              delete newState[key]
-            }
-          })
-        }
-
-        newState[menuId] = true
-        return newState
       }
+      return { [menuId]: true }
     })
   }
 
@@ -336,96 +280,34 @@ export default function Navbar() {
   }
 
   // First submenu level item (level 1)
-  const renderSubmenuLevel1Item = (item, menuId, hasSubmenu, isOpen, rootMenuId) => (
-    <div
-      key={menuId}
-      style={{ position: 'relative' }}
-      data-submenu-root={menuId}
-    >
+  const renderSubmenuLevel1Item = (item, menuId, rootMenuId) => (
+    <div key={menuId} style={{ position: 'relative' }}>
       <button
-        {...getMenuButtonProps({ menuId, hasSubmenu, isOpen, path: item.path })}
+        {...getMenuButtonProps({
+          menuId,
+          hasSubmenu: false,
+          isOpen: false,
+          path: item.path,
+        })}
         style={{
           ...topLevelButtonBaseStyle,
-          backgroundColor: isOpen ? COLORS.submenuBg : 'transparent',
+          backgroundColor: 'transparent',
         }}
         onMouseEnter={(e) => {
           clearCloseTimer()
-          if (hasSubmenu && !isOpen) toggleSubmenu(menuId)
           e.currentTarget.style.backgroundColor = COLORS.navBtn
         }}
         onMouseLeave={(e) => {
           const isInRoot = isTargetWithinMenu(e.relatedTarget, 'data-menu-root', rootMenuId)
           if (!isInRoot) {
             scheduleCloseAll()
-          } else if (hasSubmenu) {
-            const isInSubmenu = isTargetWithinMenu(e.relatedTarget, 'data-submenu-root', menuId)
-            if (!isInSubmenu) scheduleCloseMenu(menuId)
           }
           e.currentTarget.style.backgroundColor = 'transparent'
         }}
       >
         <span>{item.label}</span>
-        {hasSubmenu && renderArrow(isOpen, '90deg')}
       </button>
-
-      {hasSubmenu && isOpen && (
-        <div
-          id={`${menuId}-menu`}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: '100%',
-            backgroundColor: COLORS.submenuBg,
-            borderRadius: '0 0 6px 6px',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-            minWidth: '100%',
-            zIndex: 101,
-            overflow: 'visible',
-            marginLeft: '4px',
-            padding: '6px 0',
-          }}
-        >
-          {renderMenuItems(item.submenu, 2, menuId)}
-        </div>
-      )}
     </div>
-  )
-
-  // Level 2+ submenu item (no more nesting)
-  const renderSubmenuLevel2Item = (item, menuId, rootMenuId, parentMenuId) => (
-    <button
-      key={menuId}
-      {...getMenuButtonProps({ menuId, hasSubmenu: false, isOpen: false, path: item.path })}
-      style={{
-        display: 'block',
-        width: '100%',
-        padding: '12px 18px',
-        textAlign: 'left',
-        border: 'none',
-        background: 'none',
-        fontSize: '13px',
-        color: '#fff',
-        cursor: 'pointer',
-        borderBottom: '1px solid rgba(255,255,255,0.08)',
-        transition: 'background-color 0.15s',
-      }}
-      onMouseEnter={(e) => {
-        clearCloseTimer()
-        e.currentTarget.style.backgroundColor = COLORS.navBtn
-      }}
-      onMouseLeave={(e) => {
-        const isInRoot = isTargetWithinMenu(e.relatedTarget, 'data-menu-root', rootMenuId)
-        if (!isInRoot) {
-          scheduleCloseAll()
-        } else if (parentMenuId) {
-          const isInSubmenu = isTargetWithinMenu(e.relatedTarget, 'data-submenu-root', parentMenuId)
-          if (!isInSubmenu) scheduleCloseMenu(parentMenuId)
-        }
-        e.currentTarget.style.backgroundColor = 'transparent'
-      }}
-    >
-      {item.label}
-    </button>
   )
 
   // Main render function
@@ -434,16 +316,14 @@ export default function Navbar() {
       const menuId = `${parentId ? parentId + '-' : ''}${index}`
       const rootMenuId = menuId.split('-')[0]
       const isActive = item.activeOn === location.pathname
-      const hasSubmenu = item.submenu && item.submenu.length > 0
-      const isOpen = openMenus[menuId]
+      const hasSubmenu = level === 0 && item.submenu && item.submenu.length > 0
+      const isOpen = hasSubmenu ? openMenus[menuId] : false
 
       if (level === 0) {
         return renderNavbarItem(item, menuId, isActive, hasSubmenu, isOpen)
-      } else if (level === 1) {
-        return renderSubmenuLevel1Item(item, menuId, hasSubmenu, isOpen, rootMenuId)
-      } else {
-        return renderSubmenuLevel2Item(item, menuId, rootMenuId, parentId)
       }
+
+      return renderSubmenuLevel1Item(item, menuId, rootMenuId)
     })
   }
 
