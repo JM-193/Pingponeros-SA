@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import ConfirmModal from '../components/ConfirmModal'
 import { obtenerAreas } from '../services/areaService'
 import { COLORS } from '../constants/colors'
 
@@ -31,7 +32,7 @@ EmptyResults.propTypes = {
 }
 
 // Component to display the results table
-function ResultsTable({ currentResults, onEdit }) {
+function ResultsTable({ currentResults, onEdit, onDelete }) {
   return (
     <div
       style={{
@@ -108,7 +109,7 @@ function ResultsTable({ currentResults, onEdit }) {
                 </td>
                 <td style={{ padding: '12px 16px', textAlign: 'center', width: '1%', whiteSpace: 'nowrap' }}>
                   <button
-                    onClick={() => alert(`Eliminar el área: ${area.nombre}`)}
+                    onClick={() => onDelete(area)}
                     style={{
                       padding: '8px 12px',
                       backgroundColor: COLORS.secondaryBtn,
@@ -144,6 +145,7 @@ ResultsTable.propTypes = {
     })
   ).isRequired,
   onEdit: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
 }
 
 // Component to display pagination controls
@@ -233,6 +235,7 @@ export default function ConsultarArea() {
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
+  const [areaToDelete, setAreaToDelete] = useState(null)
   const resultsPerPage = 10
 
   // Cargar todas las áreas cuando monta el componente
@@ -275,6 +278,18 @@ export default function ConsultarArea() {
     navigate(`/organizacion/areas/editar/${encodeURIComponent(nombre)}`)
   }
 
+  const handleDeleteClick = (area) => {
+    setAreaToDelete(area)
+  }
+
+  const closeDeleteModal = () => {
+    setAreaToDelete(null)
+  }
+
+  const handleConfirmDelete = () => {
+    closeDeleteModal()
+  }
+
   const totalPages = Math.ceil(results.length / resultsPerPage)
   const startIndex = (currentPage - 1) * resultsPerPage
   const endIndex = startIndex + resultsPerPage
@@ -293,7 +308,7 @@ export default function ConsultarArea() {
 
     return (
       <>
-        <ResultsTable currentResults={currentResults} onEdit={handleEdit} />
+        <ResultsTable currentResults={currentResults} onEdit={handleEdit} onDelete={handleDeleteClick} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>
             Mostrando {startIndex + 1} a {Math.min(endIndex, results.length)} de {results.length} resultados
@@ -444,6 +459,19 @@ export default function ConsultarArea() {
       </main>
 
       <Footer />
+      <ConfirmModal
+        isOpen={Boolean(areaToDelete)}
+        title="Confirmar eliminación"
+        message={
+          areaToDelete
+            ? `¿Seguro que deseas eliminar el área "${areaToDelete.nombre}"?`
+            : ''
+        }
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        onConfirm={handleConfirmDelete}
+        onCancel={closeDeleteModal}
+      />
     </div>
   )
 }
