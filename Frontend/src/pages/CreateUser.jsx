@@ -23,12 +23,14 @@ export default function CreateUser() {
   })
   const [loading, setLoading] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
+  const [tempPassword, setTempPassword] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
 
   // Manejar cambios en los campos
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setSuccessMsg('')
+    setTempPassword('')
     setErrorMsg('')
     setFormData((prev) => ({
       ...prev,
@@ -41,10 +43,11 @@ export default function CreateUser() {
     e.preventDefault()
     setLoading(true)
     setSuccessMsg('')
+    setTempPassword('')
     setErrorMsg('')
 
     try {
-      const mensaje = await crearUsuario({
+      const data = await crearUsuario({
         correoInstitucional: formData.email,
         primerNombre:        formData.firstName,
         segundoNombre:       formData.secondName || null,
@@ -52,7 +55,8 @@ export default function CreateUser() {
         segundoApellido:     formData.secondName_surname || null,
         rol:                 parseInt(formData.role, 10),
       })
-      setSuccessMsg(typeof mensaje === 'string' ? mensaje : 'Usuario creado correctamente.')
+      setSuccessMsg(data.mensaje ?? 'Usuario creado correctamente.')
+      setTempPassword(data.contrasenaTemporal ?? '')
       handleReset()
     } catch (err) {
       setErrorMsg(err.message)
@@ -163,9 +167,18 @@ export default function CreateUser() {
 
           {/* Mensajes de feedback */}
           {successMsg && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1b5e20', backgroundColor: '#e8f5e9', padding: '12px 16px', borderRadius: '6px', border: '1px solid #a5d6a7', fontSize: '14px', fontWeight: 600 }}>
-              <span>&#10003;</span>
-              <span>{successMsg}</span>
+            <div style={{ color: '#1b5e20', backgroundColor: '#e8f5e9', padding: '12px 16px', borderRadius: '6px', border: '1px solid #a5d6a7', fontSize: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}>
+                <span>&#10003;</span>
+                <span>{successMsg}</span>
+              </div>
+              {tempPassword && (
+                <div style={{ marginTop: '10px', padding: '10px 14px', backgroundColor: '#fff', borderRadius: '4px', border: '1px dashed #66bb6a' }}>
+                  <span style={{ fontWeight: 600 }}>Contraseña temporal: </span>
+                  <code style={{ fontSize: '15px', letterSpacing: '1px', color: '#1b5e20' }}>{tempPassword}</code>
+                  <div style={{ marginTop: '4px', fontSize: '12px', color: '#388e3c' }}>Válida por 48 horas. Compártala con el usuario de forma segura.</div>
+                </div>
+              )}
             </div>
           )}
           {errorMsg && (

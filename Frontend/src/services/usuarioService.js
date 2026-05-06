@@ -20,6 +20,6 @@ export async function crearUsuario(datos) {
   }
 
   const data = await response.json()
-  // Devuelve el mensaje de éxito o el objeto completo
-  return data.mensaje ?? data
+  // Devuelve el objeto completo (incluye mensaje y contrasenaTemporal en creación)
+  return data
 }

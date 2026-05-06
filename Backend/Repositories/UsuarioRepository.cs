@@ -83,6 +83,58 @@ internal sealed class UsuarioRepository(OracleConnection db) : IUsuarioRepositor
     }
 
     // ------------------------------------------------------------------ //
+    // INSERT USUARIO + CONTRASEÑA TEMPORAL (transaccional)                //
+    // ------------------------------------------------------------------ //
+    public async Task InsertarConContrasenaAsync(Usuario usuario, string contrasenaHash)
+    {
+        const string sqlUsuario = """
+            INSERT INTO USUARIOS
+                (CORREO_INSTITUCIONAL, PRIMER_NOMBRE, SEGUNDO_NOMBRE,
+                 PRIMER_APELLIDO, SEGUNDO_APELLIDO, ROL, ESTADO)
+            VALUES
+                (:correo, :primerNombre, :segundoNombre,
+                 :primerApellido, :segundoApellido, :rol, :estado)
+            """;
+
+        const string sqlContrasena = """
+            INSERT INTO CONTRASENAS
+                (CORREO_INSTITUCIONAL, CONTRASENA_HASH,
+                 FECHA_CREACION, FECHA_EXPIRACION)
+            VALUES
+                (:correo, :hash, :fechaCreacion, :fechaExpiracion)
+            """;
+
+        await db.OpenAsync().ConfigureAwait(false);
+        using var transaction = (Oracle.ManagedDataAccess.Client.OracleTransaction)
+            await db.BeginTransactionAsync().ConfigureAwait(false);
+        try
+        {
+            using var cmdUsuario = new OracleCommand(sqlUsuario, db);
+            cmdUsuario.Transaction = transaction;
+            AgregarParametros(cmdUsuario, usuario);
+            await cmdUsuario.ExecuteNonQueryAsync().ConfigureAwait(false);
+
+            var ahora = DateTime.UtcNow;
+
+            using var cmdContrasena = new OracleCommand(sqlContrasena, db);
+            cmdContrasena.Transaction = transaction;
+            cmdContrasena.Parameters.Add("correo", usuario.CorreoInstitucional);
+            cmdContrasena.Parameters.Add("hash",   contrasenaHash);
+            cmdContrasena.Parameters.Add(new Oracle.ManagedDataAccess.Client.OracleParameter("fechaCreacion",   Oracle.ManagedDataAccess.Client.OracleDbType.Date) { Value = ahora });
+            cmdContrasena.Parameters.Add(new Oracle.ManagedDataAccess.Client.OracleParameter("fechaExpiracion", Oracle.ManagedDataAccess.Client.OracleDbType.Date) { Value = ahora.AddHours(48) });
+            await cmdContrasena.ExecuteNonQueryAsync().ConfigureAwait(false);
+
+            await transaction.CommitAsync().ConfigureAwait(false);
+        }
+        catch
+        {
+            await transaction.RollbackAsync().ConfigureAwait(false);
+            throw;
+        }
+        finally { await db.CloseAsync().ConfigureAwait(false); }
+    }
+
+    // ------------------------------------------------------------------ //
     // UPDATE                                                               //
     // ------------------------------------------------------------------ //
     public async Task<bool> ActualizarAsync(string correo, Usuario usuario)
@@ -115,14 +167,31 @@ internal sealed class UsuarioRepository(OracleConnection db) : IUsuarioRepositor
     // ------------------------------------------------------------------ //
     public async Task<bool> EliminarAsync(string correo)
     {
-        const string sql = "DELETE FROM USUARIOS WHERE CORREO_INSTITUCIONAL = :correo";
+        const string sqlContrasena = "DELETE FROM CONTRASENAS WHERE CORREO_INSTITUCIONAL = :correo";
+        const string sqlUsuario    = "DELETE FROM USUARIOS    WHERE CORREO_INSTITUCIONAL = :correo";
 
         await db.OpenAsync().ConfigureAwait(false);
+        using var transaction = (Oracle.ManagedDataAccess.Client.OracleTransaction)
+            await db.BeginTransactionAsync().ConfigureAwait(false);
         try
         {
-            using var cmd = new OracleCommand(sql, db);
-            cmd.Parameters.Add("correo", correo);
-            return await cmd.ExecuteNonQueryAsync().ConfigureAwait(false) > 0;
+            using var cmdC = new OracleCommand(sqlContrasena, db);
+            cmdC.Transaction = transaction;
+            cmdC.Parameters.Add("correo", correo);
+            await cmdC.ExecuteNonQueryAsync().ConfigureAwait(false);
+
+            using var cmdU = new OracleCommand(sqlUsuario, db);
+            cmdU.Transaction = transaction;
+            cmdU.Parameters.Add("correo", correo);
+            var filas = await cmdU.ExecuteNonQueryAsync().ConfigureAwait(false);
+
+            await transaction.CommitAsync().ConfigureAwait(false);
+            return filas > 0;
+        }
+        catch
+        {
+            await transaction.RollbackAsync().ConfigureAwait(false);
+            throw;
         }
         finally { await db.CloseAsync().ConfigureAwait(false); }
     }

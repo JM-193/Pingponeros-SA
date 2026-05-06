@@ -75,7 +75,7 @@ internal static class Program
             }
         });
 
-        // POST /usuarios — Crea un nuevo usuario
+        // POST /usuarios — Crea un nuevo usuario con contraseña temporal
         usuarios.MapPost("/", async (CrearUsuarioDto dto, IUsuarioRepository repo) =>
         {
             if (dto.Rol is not (0 or 1))
@@ -97,16 +97,23 @@ internal static class Program
                 SegundoNombre       = string.IsNullOrWhiteSpace(dto.SegundoNombre) ? null : dto.SegundoNombre.Trim(),
                 PrimerApellido      = dto.PrimerApellido.Trim(),
                 SegundoApellido     = string.IsNullOrWhiteSpace(dto.SegundoApellido) ? null : dto.SegundoApellido.Trim(),
-                Rol                 = dto.Rol,   // 0 = Funcionario, 1 = Administrador (NUMBER en Oracle)
+                Rol                 = dto.Rol,
                 Estado              = 1,
             };
 
+            var contrasenaTemp = GenerarContrasenaTemporal();
+            var hash = BCrypt.Net.BCrypt.HashPassword(contrasenaTemp);
+
             try
             {
-                await repo.InsertarAsync(usuario).ConfigureAwait(false);
+                await repo.InsertarConContrasenaAsync(usuario, hash).ConfigureAwait(false);
                 return Results.Created(
                     $"/usuarios/{Uri.EscapeDataString(usuario.CorreoInstitucional)}",
-                    new { mensaje = $"Usuario '{usuario.PrimerNombre} {usuario.PrimerApellido}' creado correctamente." });
+                    new
+                    {
+                        mensaje           = $"Usuario '{usuario.PrimerNombre} {usuario.PrimerApellido}' creado correctamente.",
+                        contrasenaTemporal = contrasenaTemp,
+                    });
             }
             catch (OracleException ex) when (ex.Number == 1)
             {
@@ -114,13 +121,10 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                var detalle = isDev
-                    ? $"[ORA-{ex.Number}] {ex.Message}"
-                    : "No se pudo completar la operación. Verifique los datos e intente nuevamente.";
-                return Results.Problem(
-                    title: "Error de base de datos",
-                    detail: detalle,
-                    statusCode: 500);
+                var msg = isDev
+                    ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                    : TraducirErrorOracle(ex.Number);
+                return Results.Json(new { mensaje = msg }, statusCode: 500);
             }
         });
 
@@ -132,11 +136,11 @@ internal static class Program
                 var actualizado = await repo.ActualizarAsync(Uri.UnescapeDataString(correo), usuario).ConfigureAwait(false);
                 return actualizado
                     ? Results.Ok(usuario)
-                    : Results.NotFound(new { error = $"No se encontró el usuario '{correo}'." });
+                    : Results.NotFound(new { mensaje = $"No se encontró el usuario '{correo}'." });
             }
             catch (OracleException ex)
             {
-                return Results.Problem(detail: ex.Message, statusCode: 500);
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
             }
         });
 
@@ -148,15 +152,56 @@ internal static class Program
                 var eliminado = await repo.EliminarAsync(Uri.UnescapeDataString(correo)).ConfigureAwait(false);
                 return eliminado
                     ? Results.NoContent()
-                    : Results.NotFound(new { error = $"No se encontró el usuario '{correo}'." });
+                    : Results.NotFound(new { mensaje = $"No se encontró el usuario '{correo}'." });
             }
             catch (OracleException ex)
             {
-                return Results.Problem(detail: ex.Message, statusCode: 500);
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
             }
         });
 
         app.Run();
+    }
+
+    private static string TraducirErrorOracle(int numero) => numero switch
+    {
+        1     => "El registro ya existe en el sistema.",
+        2289  => "Error de configuración interna: objeto de base de datos no encontrado.",
+        2291  => "Operación rechazada: referencia a un registro que no existe.",
+        2292  => "No se puede eliminar: el registro tiene datos relacionados.",
+        1400  => "Hay campos obligatorios sin valor.",
+        1438  => "El valor ingresado es demasiado grande para el campo.",
+        12541 => "No se pudo conectar a la base de datos. Intente más tarde.",
+        12170 => "La conexión a la base de datos expiró. Intente más tarde.",
+        1017  => "Error de autenticación con la base de datos.",
+        _     => "No se pudo completar la operación. Intente nuevamente.",
+    };
+
+    private static string GenerarContrasenaTemporal()
+    {
+        const string upper   = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const string lower   = "abcdefghijklmnopqrstuvwxyz";
+        const string digits  = "0123456789";
+        const string special = "!@#$%&*";
+        const string all     = upper + lower + digits + special;
+
+        var chars = new char[12];
+        chars[0] = upper[System.Security.Cryptography.RandomNumberGenerator.GetInt32(upper.Length)];
+        chars[1] = lower[System.Security.Cryptography.RandomNumberGenerator.GetInt32(lower.Length)];
+        chars[2] = digits[System.Security.Cryptography.RandomNumberGenerator.GetInt32(digits.Length)];
+        chars[3] = special[System.Security.Cryptography.RandomNumberGenerator.GetInt32(special.Length)];
+
+        for (var i = 4; i < chars.Length; i++)
+            chars[i] = all[System.Security.Cryptography.RandomNumberGenerator.GetInt32(all.Length)];
+
+        // Fisher-Yates shuffle usando RNG criptográfico
+        for (var i = chars.Length - 1; i > 0; i--)
+        {
+            var j = System.Security.Cryptography.RandomNumberGenerator.GetInt32(i + 1);
+            (chars[i], chars[j]) = (chars[j], chars[i]);
+        }
+
+        return new string(chars);
     }
 }
 
