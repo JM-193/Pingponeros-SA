@@ -59,11 +59,11 @@ jobs:
         working-directory: Frontend
 
   # ---------------------------------------------------------------------------
-  # Backend - ASP.NET Core + C# (build & tests with Roslyn analyzers)
+  # Backend - ASP.NET Core + C# (lint, build & tests with Roslyn analyzers)
   # Skips gracefully when the backend directory does not exist yet.
   # ---------------------------------------------------------------------------
   backend:
-    name: Backend (Build & Test)
+    name: Backend (Lint, Build & Test)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -88,6 +88,15 @@ jobs:
       - name: Restore
         if: steps.detect.outputs.exists == 'true'
         run: dotnet restore
+        working-directory: Backend
+
+      - name: Install dotnet-format
+        if: steps.detect.outputs.exists == 'true'
+        run: dotnet tool install -g dotnet-format
+
+      - name: Lint (dotnet format)
+        if: steps.detect.outputs.exists == 'true'
+        run: dotnet format Backend.csproj --verify-no-changes --no-restore --severity warn
         working-directory: Backend
 
       - name: Build (with analyzers)

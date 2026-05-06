@@ -157,12 +157,12 @@ internal static class Program
         return new Backend.Models.Usuario
         {
             CorreoInstitucional = dto.CorreoInstitucional.Trim().ToLowerInvariant(),
-            PrimerNombre        = Capitalizar(dto.PrimerNombre),
-            SegundoNombre       = string.IsNullOrWhiteSpace(dto.SegundoNombre) ? null : Capitalizar(dto.SegundoNombre),
-            PrimerApellido      = Capitalizar(dto.PrimerApellido),
-            SegundoApellido     = string.IsNullOrWhiteSpace(dto.SegundoApellido) ? null : Capitalizar(dto.SegundoApellido),
-            Rol                 = dto.Rol,
-            Estado              = 1,
+            PrimerNombre = Capitalizar(dto.PrimerNombre),
+            SegundoNombre = string.IsNullOrWhiteSpace(dto.SegundoNombre) ? null : Capitalizar(dto.SegundoNombre),
+            PrimerApellido = Capitalizar(dto.PrimerApellido),
+            SegundoApellido = string.IsNullOrWhiteSpace(dto.SegundoApellido) ? null : Capitalizar(dto.SegundoApellido),
+            Rol = dto.Rol,
+            Estado = 1,
         };
     }
 #pragma warning restore CA1308
@@ -181,7 +181,7 @@ internal static class Program
                 $"/usuarios/{Uri.EscapeDataString(usuario.CorreoInstitucional)}",
                 new
                 {
-                    mensaje           = $"Usuario '{usuario.PrimerNombre} {usuario.PrimerApellido}' creado correctamente.",
+                    mensaje = $"Usuario '{usuario.PrimerNombre} {usuario.PrimerApellido}' creado correctamente.",
                     contrasenaTemporal = contrasenaTemp,
                 });
         }
@@ -279,9 +279,9 @@ internal static class Program
 #pragma warning disable CA1308 // ToLower es intencional: los nombres de área se almacenan en minúsculas
             var area = new Backend.Models.Area
             {
-                Nombre      = dto.Nombre.Trim().ToLowerInvariant(),
+                Nombre = dto.Nombre.Trim().ToLowerInvariant(),
                 Descripcion = dto.Descripcion.Trim(),
-                Estado      = 1,
+                Estado = 1,
             };
 #pragma warning restore CA1308
 
@@ -342,9 +342,9 @@ internal static class Program
 #pragma warning disable CA1308 // ToLower es intencional: los nombres de área se almacenan en minúsculas
             var area = new Backend.Models.Area
             {
-                Nombre      = dto.Nombre.Trim().ToLowerInvariant(),
+                Nombre = dto.Nombre.Trim().ToLowerInvariant(),
                 Descripcion = dto.Descripcion.Trim(),
-                Estado      = 1,
+                Estado = 1,
             };
 #pragma warning restore CA1308
 
@@ -416,12 +416,12 @@ internal static class Program
                 return Results.Ok(new
                 {
                     correoInstitucional = usuario!.CorreoInstitucional,
-                    primerNombre        = usuario.PrimerNombre,
-                    segundoNombre       = usuario.SegundoNombre,
-                    primerApellido      = usuario.PrimerApellido,
-                    segundoApellido     = usuario.SegundoApellido,
-                    rol                 = usuario.Rol,
-                    estado              = usuario.Estado,
+                    primerNombre = usuario.PrimerNombre,
+                    segundoNombre = usuario.SegundoNombre,
+                    primerApellido = usuario.PrimerApellido,
+                    segundoApellido = usuario.SegundoApellido,
+                    rol = usuario.Rol,
+                    estado = usuario.Estado,
                 });
             }
             catch (OracleException ex)
@@ -436,25 +436,25 @@ internal static class Program
 
     private static string TraducirErrorOracle(int numero) => numero switch
     {
-        1     => "El registro ya existe en el sistema.",
-        2289  => "Error de configuración interna: objeto de base de datos no encontrado.",
-        2291  => "Operación rechazada: referencia a un registro que no existe.",
-        2292  => "No se puede eliminar: el registro tiene datos relacionados.",
-        1400  => "Hay campos obligatorios sin valor.",
-        1438  => "El valor ingresado es demasiado grande para el campo.",
+        1 => "El registro ya existe en el sistema.",
+        2289 => "Error de configuración interna: objeto de base de datos no encontrado.",
+        2291 => "Operación rechazada: referencia a un registro que no existe.",
+        2292 => "No se puede eliminar: el registro tiene datos relacionados.",
+        1400 => "Hay campos obligatorios sin valor.",
+        1438 => "El valor ingresado es demasiado grande para el campo.",
         12541 => "No se pudo conectar a la base de datos. Intente más tarde.",
         12170 => "La conexión a la base de datos expiró. Intente más tarde.",
-        1017  => "Error de autenticación con la base de datos.",
-        _     => "No se pudo completar la operación. Intente nuevamente.",
+        1017 => "Error de autenticación con la base de datos.",
+        _ => "No se pudo completar la operación. Intente nuevamente.",
     };
 
     private static string GenerarContrasenaTemporal()
     {
-        const string upper   = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        const string lower   = "abcdefghijklmnopqrstuvwxyz";
-        const string digits  = "0123456789";
+        const string upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const string lower = "abcdefghijklmnopqrstuvwxyz";
+        const string digits = "0123456789";
         const string special = "!@#$%&*";
-        const string all     = upper + lower + digits + special;
+        const string all = upper + lower + digits + special;
 
         var chars = new char[12];
         chars[0] = upper[System.Security.Cryptography.RandomNumberGenerator.GetInt32(upper.Length)];
