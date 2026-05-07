@@ -8,7 +8,7 @@ describe('ConfirmModal', () => {
       <ConfirmModal
         isOpen={false}
         title="Confirmar"
-        message="Â¿Estás seguro?"
+        message="¿Estás seguro?"
         onConfirm={() => {}}
         onCancel={() => {}}
       />,
@@ -22,8 +22,8 @@ describe('ConfirmModal', () => {
       <ConfirmModal
         isOpen={true}
         title="Confirmar"
-        message="Â¿Estás seguro?"
-        confirmLabel="SÃ­"
+        message="¿Estás seguro?"
+        confirmLabel="Sí"
         cancelLabel="No"
         onConfirm={() => {}}
         onCancel={() => {}}
@@ -31,7 +31,7 @@ describe('ConfirmModal', () => {
     )
 
     expect(screen.getByText('Confirmar')).toBeInTheDocument()
-    expect(screen.getByText('Â¿Estás seguro?')).toBeInTheDocument()
+    expect(screen.getByText('¿Estás seguro?')).toBeInTheDocument()
   })
 
   it('renderiza botones con labels personalizados', () => {
@@ -39,7 +39,7 @@ describe('ConfirmModal', () => {
       <ConfirmModal
         isOpen={true}
         title="Confirmar"
-        message="Â¿Continuar?"
+        message="¿Continuar?"
         confirmLabel="Aceptar"
         cancelLabel="Rechazar"
         onConfirm={() => {}}
@@ -57,15 +57,15 @@ describe('ConfirmModal', () => {
       <ConfirmModal
         isOpen={true}
         title="Confirmar"
-        message="Â¿Estás seguro?"
-        confirmLabel="SÃ­"
+        message="¿Estás seguro?"
+        confirmLabel="Sí"
         cancelLabel="No"
         onConfirm={onConfirm}
         onCancel={() => {}}
       />,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: 'SÃ­' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Sí' }))
     expect(onConfirm).toHaveBeenCalled()
   })
 
@@ -75,8 +75,8 @@ describe('ConfirmModal', () => {
       <ConfirmModal
         isOpen={true}
         title="Confirmar"
-        message="Â¿Estás seguro?"
-        confirmLabel="SÃ­"
+        message="¿Estás seguro?"
+        confirmLabel="Sí"
         cancelLabel="No"
         onConfirm={() => {}}
         onCancel={onCancel}
@@ -92,7 +92,7 @@ describe('ConfirmModal', () => {
       <ConfirmModal
         isOpen={true}
         title="Confirmar"
-        message="Â¿Continuar?"
+        message="¿Continuar?"
         confirmLabel="Aceptar"
         cancelLabel="Cancelar"
         onConfirm={() => {}}

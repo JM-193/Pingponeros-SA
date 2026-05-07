@@ -38,7 +38,7 @@ describe('OrganizationUnitFormFields', () => {
       />,
     )
 
-    expect(screen.getByText('Ãrea de')).toBeInTheDocument()
+    expect(screen.getByText('Área de')).toBeInTheDocument()
   })
 
   it('muestra "Descripción *" indicando que es requerido', () => {
@@ -77,7 +77,7 @@ describe('OrganizationUnitFormFields', () => {
     )
 
     const descInput = screen.getByPlaceholderText('Ingrese la descripción del área')
-    fireEvent.change(descInput, { target: { value: 'Ãrea de administración general' } })
+    fireEvent.change(descInput, { target: { value: 'Área de administración general' } })
 
     expect(onChange).toHaveBeenCalled()
   })
@@ -85,7 +85,7 @@ describe('OrganizationUnitFormFields', () => {
   it('muestra los valores actuales del formulario', () => {
     const formData = {
       nombre: 'Contabilidad',
-      descripcion: 'Ãrea de contabilidad',
+      descripcion: 'Área de contabilidad',
     }
 
     render(
@@ -96,7 +96,7 @@ describe('OrganizationUnitFormFields', () => {
     )
 
     expect(screen.getByDisplayValue('Contabilidad')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('Ãrea de contabilidad')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Área de contabilidad')).toBeInTheDocument()
   })
 
   it('renderiza inputs como requeridos', () => {

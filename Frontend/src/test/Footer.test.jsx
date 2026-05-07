@@ -40,7 +40,7 @@ describe('Footer', () => {
     render(<Footer />)
 
     expect(screen.getByRole('link', { name: /Portal UCR/i })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /MatrÃ­cula Web/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Matrícula Web/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Soporte Técnico/i })).toBeInTheDocument()
   })
 
@@ -55,7 +55,7 @@ describe('Footer', () => {
   it('renderiza Instagram con atributo aria-label', () => {
     render(<Footer />)
 
-    const instagramLink = screen.getByLabelText('Instagram')
+    const instagramLink = screen.getByLabelText('Instagram').closest('a')
     expect(instagramLink).toBeInTheDocument()
     expect(instagramLink).toHaveAttribute('target', '_blank')
   })
@@ -63,7 +63,7 @@ describe('Footer', () => {
   it('renderiza Facebook con atributo aria-label', () => {
     render(<Footer />)
 
-    const facebookLink = screen.getByLabelText('Facebook')
+    const facebookLink = screen.getByLabelText('Facebook').closest('a')
     expect(facebookLink).toBeInTheDocument()
     expect(facebookLink).toHaveAttribute('target', '_blank')
   })

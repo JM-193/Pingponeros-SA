@@ -44,7 +44,7 @@ describe('Header', () => {
       </BrowserRouter>,
     )
 
-    expect(screen.getByAltText('VicerrectorÃ­a de Administración')).toBeInTheDocument()
+    expect(screen.getByAltText('Vicerrectoría de Administración')).toBeInTheDocument()
   })
 
   it('tiene links a home', () => {
