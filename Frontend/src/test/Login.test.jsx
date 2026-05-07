@@ -1,5 +1,5 @@
 ﻿// Login.test.jsx
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import Login from '../pages/Login'
 import * as authService from '../services/authService'
@@ -10,7 +10,7 @@ vi.mock('../services/session')
 
 describe('Login Page', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    vi.resetAllMocks()
   })
 
   it('renderiza formulario de login', () => {
@@ -25,14 +25,14 @@ describe('Login Page', () => {
     expect(screen.getByRole('button', { name: /Iniciar Sesión|Verificando/i })).toBeInTheDocument()
   })
 
-  it('renderiza tÃ­tulos correctos', () => {
+  it('renderiza títulos correctos', () => {
     render(
       <BrowserRouter>
         <Login />
       </BrowserRouter>,
     )
 
-    expect(screen.getByText('VicerrectorÃ­a de Administración')).toBeInTheDocument()
+    expect(screen.getByText('Vicerrectoría de Administración')).toBeInTheDocument()
     expect(screen.getByText('Aplicación de Cargas de Trabajo')).toBeInTheDocument()
   })
 
@@ -70,7 +70,7 @@ describe('Login Page', () => {
   })
 
   it('valida formato de correo UCR', async () => {
-    render(
+    const { container } = render(
       <BrowserRouter>
         <Login />
       </BrowserRouter>,
@@ -82,18 +82,16 @@ describe('Login Page', () => {
     const passwordInput = screen.getByLabelText('Contraseña')
     fireEvent.change(passwordInput, { target: { value: 'password' } })
 
-    const submitButton = screen.getByRole('button', { name: /Iniciar Sesión/i })
-    fireEvent.click(submitButton)
+    const form = container.querySelector('form')
+    await act(async () => { fireEvent.submit(form) })
 
-    await waitFor(() => {
-      expect(screen.getByText(/El correo debe ser válido/i)).toBeInTheDocument()
-    })
+    expect(screen.getByText((content) => content.startsWith('El correo debe ser'))).toBeInTheDocument()
   })
 
   it('realiza login exitoso', async () => {
     const mockUser = { id: 1, nombre: 'Test User', correoInstitucional: 'test.user@ucr.ac.cr' }
     authService.login.mockResolvedValueOnce(mockUser)
-    sessionService.guardarSesión.mockImplementation(() => {})
+    sessionService.guardarSesion.mockImplementation(() => {})
 
     render(
       <BrowserRouter>
@@ -112,7 +110,7 @@ describe('Login Page', () => {
 
     await waitFor(() => {
       expect(authService.login).toHaveBeenCalledWith('test.user@ucr.ac.cr', 'password123')
-      expect(sessionService.guardarSesión).toHaveBeenCalledWith(mockUser)
+      expect(sessionService.guardarSesion).toHaveBeenCalledWith(mockUser)
     })
   })
 
@@ -135,13 +133,13 @@ describe('Login Page', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Usuario no encontrado')).toBeInTheDocument()
+      expect(screen.getByText((content) => content.includes('Usuario no encontrado'))).toBeInTheDocument()
     })
   })
 
-  it('convierte email a minÃºsculas', async () => {
+  it('convierte email a minúsculas', async () => {
     authService.login.mockResolvedValueOnce({ id: 1 })
-    sessionService.guardarSesión.mockImplementation(() => {})
+    sessionService.guardarSesion.mockImplementation(() => {})
 
     render(
       <BrowserRouter>
@@ -163,13 +161,14 @@ describe('Login Page', () => {
     })
   })
 
-  it('limpia errores al actualizar campos', async () => {
+  it('correo de error se limpia al reenviar con datos válidos', async () => {
     render(
       <BrowserRouter>
         <Login />
       </BrowserRouter>,
     )
 
+    // Primer submit sin datos: aparece error de correo
     const submitButton = screen.getByRole('button', { name: /Iniciar Sesión/i })
     fireEvent.click(submitButton)
 
@@ -177,11 +176,14 @@ describe('Login Page', () => {
       expect(screen.getByText('El correo es requerido')).toBeInTheDocument()
     })
 
+    // Completar correo válido y volver a enviar: error de correo desaparece
     const emailInput = screen.getByLabelText('Correo Institucional')
     fireEvent.change(emailInput, { target: { value: 'test.user@ucr.ac.cr' } })
+    fireEvent.click(submitButton)
 
     await waitFor(() => {
       expect(screen.queryByText('El correo es requerido')).not.toBeInTheDocument()
+      expect(screen.getByText('La contraseña es requerida')).toBeInTheDocument()
     })
   })
 })

@@ -11,7 +11,7 @@ describe('ForgotPassword Page', () => {
       </BrowserRouter>,
     )
 
-    expect(screen.getByText(/Recuperar Contraseña|Olvidé mi contraseña|Reset/i)).toBeInTheDocument()
+    expect(screen.getByText(/Olvidó.*contraseña/i)).toBeInTheDocument()
   })
 
   it('renderiza Header y Navbar', () => {

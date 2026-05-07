@@ -181,10 +181,10 @@ describe('areaService', () => {
         json: async () => ({ id: 1 }),
       })
 
-      await actualizarArea('Ãrea Existente', { nombre: 'Nueva', descripcion: 'Desc' })
+      await actualizarArea('Área Existente', { nombre: 'Nueva', descripcion: 'Desc' })
 
       const url = mockFetch.mock.calls[0][0]
-      expect(url).toContain('%C3%81') // Ã codificada
+      expect(url).toContain('%C3%81') // Á codificada como %C3%81
     })
 
     it('lanza error cuando actualización falla', async () => {

@@ -1,5 +1,5 @@
 ﻿// CreateUser.test.jsx
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import CreateUser from '../pages/CreateUser'
 import * as usuarioService from '../services/usuarioService'
@@ -8,7 +8,7 @@ vi.mock('../services/usuarioService')
 
 describe('CreateUser Page', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    vi.resetAllMocks()
   })
 
   it('renderiza formulario de crear usuario', () => {
@@ -18,7 +18,7 @@ describe('CreateUser Page', () => {
       </BrowserRouter>,
     )
 
-    expect(screen.getByText(/Crear Usuario/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Crear Usuario/i })).toBeInTheDocument()
   })
 
   it('renderiza campos de nombre, apellido y email', () => {
@@ -33,36 +33,32 @@ describe('CreateUser Page', () => {
   })
 
   it('valida que email sea requerido', async () => {
-    render(
+    const { container } = render(
       <BrowserRouter>
         <CreateUser />
       </BrowserRouter>,
     )
 
-    const submitButton = screen.getByRole('button', { name: /Guardar|Enviar/i })
-    fireEvent.click(submitButton)
+    const form = container.querySelector('form')
+    await act(async () => { fireEvent.submit(form) })
 
-    await waitFor(() => {
-      expect(screen.getByText('El correo es requerido')).toBeInTheDocument()
-    })
+    expect(screen.getByText('El correo es requerido')).toBeInTheDocument()
   })
 
   it('valida formato de email UCR', async () => {
-    render(
+    const { container } = render(
       <BrowserRouter>
         <CreateUser />
       </BrowserRouter>,
     )
 
-    const emailInputs = screen.getAllByPlaceholderText(/correo|email/i)
-    fireEvent.change(emailInputs[0], { target: { value: 'invalid-email' } })
+    const emailInput = container.querySelector('input[name="email"]')
+    fireEvent.change(emailInput, { target: { value: 'invalid-email' } })
 
-    const submitButton = screen.getByRole('button', { name: /Guardar|Enviar/i })
-    fireEvent.click(submitButton)
+    const form = container.querySelector('form')
+    await act(async () => { fireEvent.submit(form) })
 
-    await waitFor(() => {
-      expect(screen.getByText(/El correo debe ser válido/i)).toBeInTheDocument()
-    })
+    expect(screen.getByText((content) => content.startsWith('El correo debe ser'))).toBeInTheDocument()
   })
 
   it('crea usuario correctamente', async () => {
@@ -98,8 +94,7 @@ describe('CreateUser Page', () => {
       </BrowserRouter>,
     )
 
-    // El test verifica que se haya renderizado la página correctamente
-    expect(screen.getByText(/Crear Usuario/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Crear Usuario/i })).toBeInTheDocument()
   })
 
   it('muestra error cuando creación falla', async () => {
@@ -113,7 +108,7 @@ describe('CreateUser Page', () => {
       </BrowserRouter>,
     )
 
-    expect(screen.getByText(/Crear Usuario/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Crear Usuario/i })).toBeInTheDocument()
   })
 
   it('renderiza Header y Navbar', () => {

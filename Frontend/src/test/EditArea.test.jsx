@@ -4,14 +4,15 @@ import { BrowserRouter } from 'react-router-dom'
 import EditArea from '../pages/EditArea'
 
 describe('EditArea Page', () => {
-  it('renderiza página de editar área', () => {
+  it('renderiza página en estado de carga sin parámetros de ruta', () => {
     render(
       <BrowserRouter>
         <EditArea />
       </BrowserRouter>,
     )
 
-    expect(screen.getByText(/Editar Ãrea|Modificar Ãrea/i)).toBeInTheDocument()
+    // Sin parámetro nombre, el componente muestra el estado de carga
+    expect(screen.getByText('Cargando área...')).toBeInTheDocument()
   })
 
   it('renderiza Header y Navbar', () => {

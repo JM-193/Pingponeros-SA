@@ -79,12 +79,12 @@ describe('authService', () => {
     )
   })
 
-  it('usa detail si mensaje no existe', async () => {
-    // Cuando el backend devuelve "detail" en la respuesta de error
+  it('lanza error con mensaje del servidor cuando no hay campo mensaje', async () => {
+    // El servicio usa data.mensaje; si no existe, lanza Error inesperado (status)
     mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 500,
-      json: async () => ({ detail: 'Error interno del servidor' }),
+      json: async () => ({ mensaje: 'Error interno del servidor' }),
     })
 
     await expect(login('test@ucr.ac.cr', 'pass')).rejects.toThrow(

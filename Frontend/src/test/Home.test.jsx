@@ -4,14 +4,14 @@ import { BrowserRouter } from 'react-router-dom'
 import Home from '../pages/Home'
 
 describe('Home Page', () => {
-  it('renderiza página principal con tÃ­tulos', () => {
+  it('renderiza página principal con títulos', () => {
     render(
       <BrowserRouter>
         <Home />
       </BrowserRouter>,
     )
 
-    expect(screen.getByText('VicerrectorÃ­a de Administración')).toBeInTheDocument()
+    expect(screen.getByText('Vicerrectoría de Administración')).toBeInTheDocument()
     expect(screen.getByText('La Aplicación de Cargas de Trabajo')).toBeInTheDocument()
   })
 

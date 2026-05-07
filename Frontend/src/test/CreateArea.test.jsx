@@ -1,5 +1,5 @@
 ﻿// CreateArea.test.jsx
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import CreateArea from '../pages/CreateArea'
 import * as areaService from '../services/areaService'
@@ -8,7 +8,7 @@ vi.mock('../services/areaService')
 
 describe('CreateArea Page', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    vi.resetAllMocks()
   })
 
   it('renderiza formulario de crear área', () => {
@@ -18,7 +18,7 @@ describe('CreateArea Page', () => {
       </BrowserRouter>,
     )
 
-    expect(screen.getByText('Crear Ãrea')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Crear Área/i })).toBeInTheDocument()
     expect(screen.getByPlaceholderText('Nombre del área')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('Ingrese la descripción del área')).toBeInTheDocument()
   })
@@ -34,22 +34,20 @@ describe('CreateArea Page', () => {
   })
 
   it('valida que nombre sea requerido', async () => {
-    render(
+    const { container } = render(
       <BrowserRouter>
         <CreateArea />
       </BrowserRouter>,
     )
 
-    const submitButton = screen.getByRole('button', { name: /Guardar/i })
-    fireEvent.click(submitButton)
+    const form = container.querySelector('form')
+    await act(async () => { fireEvent.submit(form) })
 
-    await waitFor(() => {
-      expect(screen.getByText('El nombre del área es requerido')).toBeInTheDocument()
-    })
+    expect(screen.getByText('El nombre del área es requerido')).toBeInTheDocument()
   })
 
   it('valida que descripción sea requerida', async () => {
-    render(
+    const { container } = render(
       <BrowserRouter>
         <CreateArea />
       </BrowserRouter>,
@@ -58,12 +56,10 @@ describe('CreateArea Page', () => {
     const nombreInput = screen.getByPlaceholderText('Nombre del área')
     fireEvent.change(nombreInput, { target: { value: 'Administración' } })
 
-    const submitButton = screen.getByRole('button', { name: /Guardar/i })
-    fireEvent.click(submitButton)
+    const form = container.querySelector('form')
+    await act(async () => { fireEvent.submit(form) })
 
-    await waitFor(() => {
-      expect(screen.getByText('La descripción es requerida')).toBeInTheDocument()
-    })
+    expect(screen.getByText('La descripción es requerida')).toBeInTheDocument()
   })
 
   it('crea área correctamente', async () => {
@@ -79,15 +75,15 @@ describe('CreateArea Page', () => {
     fireEvent.change(nombreInput, { target: { value: 'Administración' } })
 
     const descInput = screen.getByPlaceholderText('Ingrese la descripción del área')
-    fireEvent.change(descInput, { target: { value: 'Ãrea de administración' } })
+    fireEvent.change(descInput, { target: { value: 'Área de administración' } })
 
-    const submitButton = screen.getByRole('button', { name: /Guardar/i })
+    const submitButton = screen.getByRole('button', { name: /Crear/i })
     fireEvent.click(submitButton)
 
     await waitFor(() => {
       expect(areaService.crearArea).toHaveBeenCalledWith({
         nombre: 'Administración',
-        descripcion: 'Ãrea de administración',
+        descripcion: 'Área de administración',
       })
     })
   })
@@ -107,16 +103,16 @@ describe('CreateArea Page', () => {
     const descInput = screen.getByPlaceholderText('Ingrese la descripción del área')
     fireEvent.change(descInput, { target: { value: 'Descripción' } })
 
-    const submitButton = screen.getByRole('button', { name: /Guardar/i })
+    const submitButton = screen.getByRole('button', { name: /Crear/i })
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Ãrea creada correctamente')).toBeInTheDocument()
+      expect(screen.getByText('Área creada correctamente')).toBeInTheDocument()
     })
   })
 
   it('muestra error cuando creación falla', async () => {
-    areaService.crearArea.mockRejectedValueOnce(new Error('Ãrea ya existe'))
+    areaService.crearArea.mockRejectedValueOnce(new Error('Área ya existe'))
 
     render(
       <BrowserRouter>
@@ -130,15 +126,15 @@ describe('CreateArea Page', () => {
     const descInput = screen.getByPlaceholderText('Ingrese la descripción del área')
     fireEvent.change(descInput, { target: { value: 'Desc' } })
 
-    const submitButton = screen.getByRole('button', { name: /Guardar/i })
+    const submitButton = screen.getByRole('button', { name: /Crear/i })
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Ãrea ya existe')).toBeInTheDocument()
+      expect(screen.getByText('Área ya existe')).toBeInTheDocument()
     })
   })
 
-  it('limpia el formulario después de envÃ­o exitoso', async () => {
+  it('limpia el formulario después de envío exitoso', async () => {
     areaService.crearArea.mockResolvedValueOnce({ id: 1 })
 
     render(
@@ -153,7 +149,7 @@ describe('CreateArea Page', () => {
     fireEvent.change(nombreInput, { target: { value: 'Test Area' } })
     fireEvent.change(descInput, { target: { value: 'Test Description' } })
 
-    const submitButton = screen.getByRole('button', { name: /Guardar/i })
+    const submitButton = screen.getByRole('button', { name: /Crear/i })
     fireEvent.click(submitButton)
 
     await waitFor(() => {
@@ -177,7 +173,7 @@ describe('CreateArea Page', () => {
     const descInput = screen.getByPlaceholderText('Ingrese la descripción del área')
     fireEvent.change(descInput, { target: { value: '  Description  ' } })
 
-    const submitButton = screen.getByRole('button', { name: /Guardar/i })
+    const submitButton = screen.getByRole('button', { name: /Crear/i })
     fireEvent.click(submitButton)
 
     await waitFor(() => {
