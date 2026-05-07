@@ -6,7 +6,7 @@ describe('authService', () => {
   const mockFetch = vi.fn()
 
   beforeEach(() => {
-    global.fetch = mockFetch
+    globalThis.fetch = mockFetch
     mockFetch.mockClear()
   })
 
@@ -80,20 +80,15 @@ describe('authService', () => {
   })
 
   it('usa detail si mensaje no existe', async () => {
+    // Cuando el backend devuelve "detail" en la respuesta de error
     mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 500,
       json: async () => ({ detail: 'Error interno del servidor' }),
     })
 
-      // El backend puede devolver el detail, pero el error fallback es diferente
-      await expect(login('test@ucr.ac.cr', 'pass')).rejects.toThrow()
-        throw new Error('Invalid JSON')
-      },
-    })
-
     await expect(login('test@ucr.ac.cr', 'pass')).rejects.toThrow(
-      'Error inesperado (500)',
+      'Error interno del servidor',
     )
   })
 

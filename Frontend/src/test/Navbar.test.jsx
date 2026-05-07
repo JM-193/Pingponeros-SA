@@ -41,8 +41,6 @@ describe('Navbar', () => {
       </BrowserRouter>,
     )
 
-    // Buscar el enlace de Ãreas
-    const areasLink = screen.queryByText(/Ãreas/i)
     // El enlace puede estar oculto en un menÃº cerrado
     expect(screen.getByText('Organización')).toBeInTheDocument()
   })

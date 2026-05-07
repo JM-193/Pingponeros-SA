@@ -12,7 +12,7 @@ describe('areaService', () => {
   const mockFetch = vi.fn()
 
   beforeEach(() => {
-    global.fetch = mockFetch
+    globalThis.fetch = mockFetch
     mockFetch.mockClear()
   })
 
