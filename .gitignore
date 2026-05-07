@@ -22,7 +22,6 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
-
 # .NET Core
 project.lock.json
 project.fragment.lock.json
@@ -40,6 +39,7 @@ ScaffoldingReadMe.txt
 ~$*
 *~
 CodeCoverage/
+coverage/
 
 # MSBuild Binary and Structured Log
 *.binlog
@@ -52,3 +52,9 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Connected to Data Base
+[Ww]allet*/
+
+# Environment variables (credentials)
+.env

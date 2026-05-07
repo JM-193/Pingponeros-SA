@@ -1,0 +1,4 @@
+@Backend_HostAddress = http://localhost:5119
+
+# Todos los endpoints están disponibles en:
+# http://localhost:5119/scalar/v1

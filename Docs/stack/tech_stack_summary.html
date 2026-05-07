@@ -1,0 +1,124 @@
+
+<style>
+  :root {
+    color-scheme: dark;
+    --color-text-primary: #E7E7E7;
+    --color-text-secondary: #A6A6A6;
+    --color-border-tertiary: #2D2D2D;
+    --color-background-primary: #121212;
+    --color-background-secondary: #1C1C1C;
+    --border-radius-lg: 14px;
+    --border-radius-md: 8px;
+  }
+  .wrap {
+    padding: 16px;
+    font-size: 14px;
+    color: var(--color-text-primary);
+    background: var(--color-background-primary);
+    border: 1px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+  }
+  .stack-title { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+  .stack-sub { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 18px; }
+  .section { border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; margin-bottom: 12px; background: #181818; }
+  .section-header { display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-bottom: 1px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
+  .section-icon { width: 28px; height: 28px; border-radius: var(--border-radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .ic-purple { background: #3C3489; } .ic-blue { background: #0C447C; }
+  .ic-teal { background: #085041; } .ic-coral { background: #712B13; }
+  .ic-gray { background: #444441; } .ic-amber { background: #633806; }
+  .section-label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .05em; }
+  .section-name { font-size: 14px; font-weight: 500; }
+  .section-body { padding: 10px 16px 14px; }
+  .tool-row { display: flex; align-items: baseline; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--color-border-tertiary); }
+  .tool-row:last-child { border-bottom: none; }
+  .tool-name { font-size: 13px; font-weight: 500; min-width: 160px; flex-shrink: 0; }
+  .version-tag { font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 99px; flex-shrink: 0; }
+  .v-pinned { background: #0C447C; color: #B5D4F4; }
+  .v-latest { background: #2C2C2A; color: #C5C3B8; }
+  .tool-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.4; }
+  .legend { display: flex; gap: 14px; margin-bottom: 14px; font-size: 12px; color: var(--color-text-secondary); align-items: center; }
+  .legend-dot { display: inline-flex; align-items: center; gap: 5px; }
+</style>
+<div class="wrap">
+  <p class="stack-title">Proyecto de Cargas Administrativas — UCR</p>
+  <p class="stack-sub">ASP.NET Core + React · TypeScript throughout · Oracle Database</p>
+  <div class="legend">
+    <span class="legend-dot"><span class="version-tag v-pinned">v10.0</span> pinned version</span>
+    <span class="legend-dot"><span class="version-tag v-latest">latest</span> always use latest</span>
+  </div>
+
+  <!-- Frontend -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon ic-blue"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="9" rx="2" stroke="#185FA5" stroke-width="1.2"/><path d="M5 14h6M8 11v3" stroke="#185FA5" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+      <div><div class="section-label">Frontend</div><div class="section-name">React + TypeScript</div></div>
+    </div>
+    <div class="section-body">
+      <div class="tool-row"><span class="tool-name">React</span><span class="version-tag v-pinned">19.2.5</span><span class="tool-desc">Core UI library — latest stable, ecosystem now fully caught up</span></div>
+      <div class="tool-row"><span class="tool-name">TypeScript</span><span class="version-tag v-pinned">6.0</span><span class="tool-desc">Latest stable; strict mode on by default, targets ES2025</span></div>
+      <div class="tool-row"><span class="tool-name">Tailwind CSS</span><span class="version-tag v-latest">latest</span><span class="tool-desc">Responsive design and consistent styling system</span></div>
+      <div class="tool-row"><span class="tool-name">React Router</span><span class="version-tag v-latest">latest</span><span class="tool-desc">Client-side navigation and protected routes</span></div>
+      <div class="tool-row"><span class="tool-name">React Hook Form</span><span class="version-tag v-latest">latest</span><span class="tool-desc">Form handling + real-time validation</span></div>
+      <div class="tool-row"><span class="tool-name">Recharts</span><span class="version-tag v-latest">latest</span><span class="tool-desc">Dashboards and workload visualizations</span></div>
+    </div>
+  </div>
+
+  <!-- Backend -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon ic-purple"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="#533AB7" stroke-width="1.2"/><path d="M5 8h6M8 5v6" stroke="#533AB7" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+      <div><div class="section-label">Backend</div><div class="section-name">ASP.NET Core + C#</div></div>
+    </div>
+    <div class="section-body">
+      <div class="tool-row"><span class="tool-name">.NET SDK</span><span class="version-tag v-pinned">10.0 LTS</span><span class="tool-desc">LTS until November 2028 — includes ASP.NET Core 10 and C# 14</span></div>
+      <div class="tool-row"><span class="tool-name">ASP.NET Core</span><span class="version-tag v-pinned">10.0</span><span class="tool-desc">Comes bundled with .NET 10 SDK — no separate install</span></div>
+      <div class="tool-row"><span class="tool-name">C#</span><span class="version-tag v-pinned">14</span><span class="tool-desc">Comes bundled with .NET 10 SDK — no separate install</span></div>
+      <div class="tool-row"><span class="tool-name">ODP.NET</span><span class="version-tag v-latest">latest</span><span class="tool-desc">Official Oracle Data Provider for .NET</span></div>
+      <div class="tool-row"><span class="tool-name">ASP.NET Identity</span><span class="version-tag v-pinned">10.0</span><span class="tool-desc">Bundled with .NET 10 — auth, roles, hashed passwords, session expiry</span></div>
+      <div class="tool-row"><span class="tool-name">ClosedXML</span><span class="version-tag v-latest">latest</span><span class="tool-desc">Excel (.xlsx) report generation</span></div>
+      <div class="tool-row"><span class="tool-name">QuestPDF</span><span class="version-tag v-latest">latest</span><span class="tool-desc">PDF report generation</span></div>
+    </div>
+  </div>
+
+  <!-- Database -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon ic-coral"><svg viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="5" rx="5" ry="2" stroke="#993C1D" stroke-width="1.2"/><path d="M3 5v6c0 1.1 2.24 2 5 2s5-.9 5-2V5" stroke="#993C1D" stroke-width="1.2"/><path d="M3 8c0 1.1 2.24 2 5 2s5-.9 5-2" stroke="#993C1D" stroke-width="1.2"/></svg></div>
+      <div><div class="section-label">Database</div><div class="section-name">Oracle Database</div></div>
+    </div>
+    <div class="section-body">
+      <div class="tool-row"><span class="tool-name">Oracle DB</span><span class="version-tag v-latest">as provided by UCR</span><span class="tool-desc">Primary data store — users, functions, workloads, units</span></div>
+      <div class="tool-row"><span class="tool-name">Normalized schema</span><span class="version-tag v-latest">—</span><span class="tool-desc">3NF design for areas, departments, sections, roles</span></div>
+      <div class="tool-row"><span class="tool-name">Indexes + Pagination</span><span class="version-tag v-latest">—</span><span class="tool-desc">On frequently queried fields; server-side pagination for large listings</span></div>
+    </div>
+  </div>
+
+  <!-- Static Analysis -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon ic-teal"><svg viewBox="0 0 16 16" fill="none"><path d="M3 4h10M3 8h7M3 12h5" stroke="#0F6E56" stroke-width="1.2" stroke-linecap="round"/><circle cx="12" cy="11" r="2.5" stroke="#0F6E56" stroke-width="1.2"/><path d="M14 13l1.5 1.5" stroke="#0F6E56" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+      <div><div class="section-label">Static Analysis</div><div class="section-name">Three-tool strategy</div></div>
+    </div>
+    <div class="section-body">
+      <div class="tool-row"><span class="tool-name">ESLint + Prettier</span><span class="version-tag v-latest">latest</span><span class="tool-desc">Frontend — React/TS linting and consistent code formatting across the team</span></div>
+      <div class="tool-row"><span class="tool-name">Roslyn Analyzers</span><span class="version-tag v-pinned">bundled w/ .NET 10</span><span class="tool-desc">Backend — built into SDK, flags C# security issues at compile time</span></div>
+      <div class="tool-row"><span class="tool-name">SonarCloud</span><span class="version-tag v-latest">hosted / free</span><span class="tool-desc">Cross-stack quality dashboard for both C# and TypeScript</span></div>
+    </div>
+  </div>
+
+  <!-- Architecture -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon ic-gray"><svg viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="4" height="4" rx="1" stroke="#5F5E5A" stroke-width="1.2"/><rect x="6" y="3" width="4" height="4" rx="1" stroke="#5F5E5A" stroke-width="1.2"/><rect x="11" y="3" width="4" height="4" rx="1" stroke="#5F5E5A" stroke-width="1.2"/><rect x="6" y="10" width="4" height="3" rx="1" stroke="#5F5E5A" stroke-width="1.2"/><path d="M3 7v2.5h10V7M8 9.8V10" stroke="#5F5E5A" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+      <div><div class="section-label">Architecture & Tooling</div><div class="section-name">MVC + REST + Role-based auth</div></div>
+    </div>
+    <div class="section-body">
+      <div class="tool-row"><span class="tool-name">Node.js</span><span class="version-tag v-pinned">24 LTS</span><span class="tool-desc">Required to run the React dev toolchain (Vite, npm)</span></div>
+      <div class="tool-row"><span class="tool-name">Vite</span><span class="version-tag v-latest">latest</span><span class="tool-desc">Frontend build tool — fast dev server and bundler for React</span></div>
+      <div class="tool-row"><span class="tool-name">MVC pattern</span><span class="version-tag v-latest">—</span><span class="tool-desc">Controllers → Services → Repositories on the backend</span></div>
+      <div class="tool-row"><span class="tool-name">REST API</span><span class="version-tag v-latest">—</span><span class="tool-desc">JSON over HTTP between React frontend and ASP.NET backend</span></div>
+      <div class="tool-row"><span class="tool-name">Git</span><span class="version-tag v-latest">latest</span><span class="tool-desc">Version control with restricted access as required by spec</span></div>
+      <div class="tool-row"><span class="tool-name">Figma</span><span class="version-tag v-latest">—</span><span class="tool-desc">High-fidelity prototypes required before any screen is built</span></div>
+    </div>
+  </div>
+</div>
