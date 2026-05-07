@@ -47,23 +47,25 @@ jobs:
         run: npm run build
         working-directory: Frontend
 
-      - name: Test
+      - name: Test with coverage
         if: steps.detect.outputs.exists == 'true'
-        shell: bash
-        run: |
-          if node -e "process.exit(require('./package.json').scripts?.test ? 0 : 1)"; then
-            npm test -- --run
-          else
-            echo "::notice::No npm test script defined - skipping."
-          fi
+        run: npm run test:coverage
         working-directory: Frontend
 
+      - name: Upload coverage report
+        if: steps.detect.outputs.exists == 'true' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: Frontend/coverage/
+          if-no-files-found: ignore
+
   # ---------------------------------------------------------------------------
-  # Backend - ASP.NET Core + C# (build & tests with Roslyn analyzers)
+  # Backend - ASP.NET Core + C# (lint, build & tests with Roslyn analyzers)
   # Skips gracefully when the backend directory does not exist yet.
   # ---------------------------------------------------------------------------
   backend:
-    name: Backend (Build & Test)
+    name: Backend (Lint, Build & Test)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -88,6 +90,15 @@ jobs:
       - name: Restore
         if: steps.detect.outputs.exists == 'true'
         run: dotnet restore
+        working-directory: Backend
+
+      - name: Install dotnet-format
+        if: steps.detect.outputs.exists == 'true'
+        run: dotnet tool install -g dotnet-format
+
+      - name: Lint (dotnet format)
+        if: steps.detect.outputs.exists == 'true'
+        run: dotnet format Backend.csproj --verify-no-changes --no-restore --severity warn
         working-directory: Backend
 
       - name: Build (with analyzers)

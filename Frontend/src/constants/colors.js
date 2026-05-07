@@ -1,0 +1,18 @@
+export const COLORS = {
+  bodyBg: '#e9e9e9',
+  inputBg: '#fff',
+  labelColor: '#1a1a1a',
+  borderColor: '#ccc',
+  primaryBtn: '#005da4',
+  primaryBtnHover: '#004080',
+  successBg: '#efe',
+  successColor: '#060',
+  successBorder: '#cfc',
+  errorBg: '#fee',
+  errorColor: '#c00',
+  errorBorder: '#fcc',
+  secondaryBtn: '#999',
+  secondaryBtnHover: '#777',
+  disabledBg: '#f5f5f5',
+  disabledColor: '#666',
+}
