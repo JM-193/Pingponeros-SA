@@ -1,4 +1,4 @@
-// FormInput.test.jsx
+﻿// FormInput.test.jsx
 import { render, screen } from '@testing-library/react'
 import FormInput from '../components/FormInput'
 
@@ -33,3 +33,4 @@ describe('FormInput', () => {
     expect(screen.getByLabelText('Correo')).toBeDisabled()
   })
 })
+
