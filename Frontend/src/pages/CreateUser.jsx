@@ -182,9 +182,9 @@ export default function CreateUser() {
           {successMsg && (
             <StatusMessage variant="success" message={successMsg}>
               {tempPassword && (
-                <div style={{ padding: '10px 14px', backgroundColor: '#fff', borderRadius: '4px', border: '1px dashed #66bb6a' }}>
+                <div style={{ padding: '10px 14px', backgroundColor: COLORS.white, borderRadius: '4px', border: '1px dashed #66bb6a' }}>
                   <span style={{ fontWeight: 600 }}>Contraseña temporal: </span>
-                  <code style={{ fontSize: '15px', letterSpacing: '1px', color: '#1b5e20' }}>{tempPassword}</code>
+                  <code style={{ fontSize: '15px', letterSpacing: '1px', color: COLORS.successStrong }}>{tempPassword}</code>
                   <div style={{ marginTop: '4px', fontSize: '12px', color: '#388e3c' }}>Válida por 48 horas. Compártala con el usuario de forma segura.</div>
                 </div>
               )}

@@ -1,10 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
-
-const COLORS = {
-  btnBg: '#1D4F91',
-}
+import { COLORS } from '../constants/colors'
 
 export default function ForgotPassword() {
   const navigate = useNavigate()
@@ -39,7 +36,7 @@ export default function ForgotPassword() {
           fontWeight: 900,
           fontSize: 'clamp(20px, 3vw, 28px)',
           margin: '0 0 12px',
-          color: '#1a1a1a',
+          color: COLORS.labelColor,
         }}
       >
         ¿Olvidó su contraseña?
@@ -48,7 +45,7 @@ export default function ForgotPassword() {
       <p
         style={{
           fontSize: '14px',
-          color: '#555',
+          color: COLORS.textMuted,
           margin: '0 0 32px',
           lineHeight: 1.5,
         }}
@@ -81,7 +78,7 @@ export default function ForgotPassword() {
               style={{
                 fontSize: '14px',
                 fontWeight: 600,
-                color: '#777',
+                color: COLORS.textLabel,
               }}
             >
               Correo Institucional
@@ -94,17 +91,17 @@ export default function ForgotPassword() {
               placeholder="Ingrese su correo institucional"
               style={{
                 padding: '14px 18px',
-                border: errors.email ? '2px solid #d10f0f' : '1px solid #d0d0d0',
+                border: errors.email ? `2px solid ${COLORS.danger}` : `1px solid ${COLORS.borderLight}`,
                 borderRadius: '4px',
                 fontSize: '15px',
-                backgroundColor: '#fff',
+                backgroundColor: COLORS.white,
                 outline: 'none',
-                color: '#333',
+                color: COLORS.textDark,
                 transition: 'border-color 0.2s',
               }}
             />
             {errors.email && (
-              <span style={{ fontSize: '12px', color: '#d10f0f' }}>
+              <span style={{ fontSize: '12px', color: COLORS.danger }}>
                 {errors.email}
               </span>
             )}
@@ -114,8 +111,8 @@ export default function ForgotPassword() {
             type="submit"
             style={{
               padding: '14px',
-              backgroundColor: COLORS.btnBg,
-              color: '#fff',
+              backgroundColor: COLORS.authBtn,
+              color: COLORS.white,
               border: 'none',
               borderRadius: '4px',
               fontSize: '16px',
@@ -135,7 +132,7 @@ export default function ForgotPassword() {
           style={{
             background: 'none',
             border: 'none',
-            color: COLORS.btnBg,
+            color: COLORS.authBtn,
             fontSize: '14px',
             cursor: 'pointer',
             textDecoration: 'underline',
@@ -147,7 +144,7 @@ export default function ForgotPassword() {
         <p
           style={{
             fontSize: '12px',
-            color: '#777',
+            color: COLORS.textLabel,
             margin: '10px 0 0',
           }}
         >

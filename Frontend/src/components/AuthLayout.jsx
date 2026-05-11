@@ -1,13 +1,14 @@
 import PropTypes from 'prop-types'
 import Header from './Header'
 import Footer from './Footer'
+import { COLORS } from '../constants/colors'
 
 const styles = {
   page: {
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: '#e9e9e9',
+    backgroundColor: COLORS.bodyBg,
   },
   main: {
     flex: 1,

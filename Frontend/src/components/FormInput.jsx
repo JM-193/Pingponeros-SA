@@ -40,12 +40,12 @@ function FormInput({
         style={{
           width: '100%',
           padding: '10px',
-          border: `1px solid ${disabled ? '#ddd' : COLORS.borderColor}`,
+          border: `1px solid ${disabled ? COLORS.borderDisabled : COLORS.borderColor}`,
           borderRadius: '4px',
           fontSize: '14px',
           boxSizing: 'border-box',
           backgroundColor: disabled ? COLORS.disabledBg : COLORS.inputBg,
-          color: disabled ? COLORS.disabledColor : '#000',
+          color: disabled ? COLORS.disabledColor : COLORS.black,
           cursor: disabled ? 'not-allowed' : 'text',
           opacity: disabled ? 0.7 : 1,
         }}

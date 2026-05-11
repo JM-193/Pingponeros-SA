@@ -21,7 +21,7 @@ function EmptyResults({ searchTerm }) {
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
       }}
     >
-      <p style={{ color: '#666', fontSize: '16px', margin: 0 }}>
+      <p style={{ color: COLORS.textSubtle, fontSize: '16px', margin: 0 }}>
         No se encontraron áreas que coincidan con &quot;{searchTerm}&quot;
       </p>
     </div>
@@ -53,7 +53,7 @@ function ResultsTable({ currentResults, onEdit, onDelete }) {
           }}
         >
           <thead>
-            <tr style={{ backgroundColor: COLORS.primaryBtn, color: '#fff' }}>
+            <tr style={{ backgroundColor: COLORS.primaryBtn, color: COLORS.white }}>
               <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, borderBottom: `1px solid ${COLORS.borderColor}` }}>
                 Nombre
               </th>
@@ -73,24 +73,24 @@ function ResultsTable({ currentResults, onEdit, onDelete }) {
               <tr
                 key={area.id}
                 style={{
-                  backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#fff',
+                  backgroundColor: index % 2 === 0 ? COLORS.surfaceAlt : COLORS.white,
                   borderBottom: `1px solid ${COLORS.borderColor}`,
                   transition: 'background-color 0.2s',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = COLORS.surfaceHover)}
                 onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = index % 2 === 0 ? '#f9f9f9' : '#fff')
+                  (e.currentTarget.style.backgroundColor = index % 2 === 0 ? COLORS.surfaceAlt : COLORS.white)
                 }
               >
-                <td style={{ padding: '12px 16px', fontWeight: 600, color: '#333' }}>{area.nombre}</td>
-                <td style={{ padding: '12px 16px', color: '#555' }}>{area.descripcion}</td>
+                <td style={{ padding: '12px 16px', fontWeight: 600, color: COLORS.textDark }}>{area.nombre}</td>
+                <td style={{ padding: '12px 16px', color: COLORS.textMuted }}>{area.descripcion}</td>
                 <td style={{ padding: '12px 16px', textAlign: 'center', width: '1%', whiteSpace: 'nowrap' }}>
                   <button
                     onClick={() => onEdit(area.nombre)}
                     style={{
                       padding: '8px 12px',
                       backgroundColor: COLORS.primaryBtn,
-                      color: '#fff',
+                      color: COLORS.white,
                       border: 'none',
                       borderRadius: '4px',
                       cursor: 'pointer',
@@ -110,7 +110,7 @@ function ResultsTable({ currentResults, onEdit, onDelete }) {
                     style={{
                       padding: '8px 12px',
                       backgroundColor: COLORS.secondaryBtn,
-                      color: '#fff',
+                      color: COLORS.white,
                       border: 'none',
                       borderRadius: '4px',
                       cursor: 'pointer',
@@ -157,7 +157,7 @@ function PaginationControls({ currentPage, totalPages, handlePageChange }) {
         style={{
           padding: '8px 12px',
           backgroundColor: currentPage === 1 ? COLORS.disabledBg : COLORS.primaryBtn,
-          color: currentPage === 1 ? COLORS.disabledColor : '#fff',
+          color: currentPage === 1 ? COLORS.disabledColor : COLORS.white,
           border: 'none',
           borderRadius: '4px',
           cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
@@ -178,8 +178,8 @@ function PaginationControls({ currentPage, totalPages, handlePageChange }) {
             onClick={() => handlePageChange(page)}
             style={{
               padding: '8px 12px',
-              backgroundColor: page === currentPage ? COLORS.primaryBtn : '#e0e0e0',
-              color: page === currentPage ? '#fff' : '#333',
+              backgroundColor: page === currentPage ? COLORS.primaryBtn : COLORS.surfaceMuted,
+              color: page === currentPage ? COLORS.white : COLORS.textDark,
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer',
@@ -188,8 +188,8 @@ function PaginationControls({ currentPage, totalPages, handlePageChange }) {
               minWidth: '36px',
               transition: 'background-color 0.2s',
             }}
-            onMouseEnter={(e) => page !== currentPage && (e.target.style.backgroundColor = '#d0d0d0')}
-            onMouseLeave={(e) => page !== currentPage && (e.target.style.backgroundColor = '#e0e0e0')}
+            onMouseEnter={(e) => page !== currentPage && (e.target.style.backgroundColor = COLORS.borderLight)}
+            onMouseLeave={(e) => page !== currentPage && (e.target.style.backgroundColor = COLORS.surfaceMuted)}
           >
             {page}
           </button>
@@ -202,7 +202,7 @@ function PaginationControls({ currentPage, totalPages, handlePageChange }) {
         style={{
           padding: '8px 12px',
           backgroundColor: currentPage === totalPages ? COLORS.disabledBg : COLORS.primaryBtn,
-          color: currentPage === totalPages ? COLORS.disabledColor : '#fff',
+          color: currentPage === totalPages ? COLORS.disabledColor : COLORS.white,
           border: 'none',
           borderRadius: '4px',
           cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
@@ -313,14 +313,14 @@ export default function ConsultarArea() {
   }
 
   const renderResultsContent = () => {
-    if (loading) return <p style={{ textAlign: 'center', color: '#666' }}>Cargando áreas...</p>
+    if (loading) return <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando áreas...</p>
     if (results.length === 0) return <EmptyResults searchTerm={searchTerm || 'sin resultados'} />
 
     return (
       <>
         <ResultsTable currentResults={currentResults} onEdit={handleEdit} onDelete={handleDeleteClick} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-          <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>
+          <p style={{ margin: 0, color: COLORS.textSubtle, fontSize: '14px' }}>
             Mostrando {startIndex + 1} a {Math.min(endIndex, results.length)} de {results.length} resultados
           </p>
           <PaginationControls currentPage={currentPage} totalPages={totalPages} handlePageChange={handlePageChange} />
@@ -398,7 +398,7 @@ export default function ConsultarArea() {
                     fontSize: '14px',
                     boxSizing: 'border-box',
                     backgroundColor: COLORS.inputBg,
-                    color: '#000',
+                    color: COLORS.black,
                   }}
                 />
               </div>
@@ -408,7 +408,7 @@ export default function ConsultarArea() {
                 style={{
                   padding: '10px 32px',
                   backgroundColor: loading ? COLORS.disabledBg : COLORS.primaryBtn,
-                  color: loading ? COLORS.disabledColor : '#fff',
+                  color: loading ? COLORS.disabledColor : COLORS.white,
                   border: 'none',
                   borderRadius: '4px',
                   fontSize: '14px',
@@ -428,7 +428,7 @@ export default function ConsultarArea() {
                 style={{
                   padding: '10px 32px',
                   backgroundColor: COLORS.primaryBtn,
-                  color: '#fff',
+                  color: COLORS.white,
                   border: 'none',
                   borderRadius: '4px',
                   fontSize: '14px',

@@ -18,7 +18,7 @@ function FormButton({ label, type, variant, onClick, disabled }) {
   const { bg, bgHover } = getStylesByVariant()
 
   const backgroundColor = disabled ? COLORS.disabledBg : bg
-  const textColor = disabled ? COLORS.disabledColor : '#fff'
+  const textColor = disabled ? COLORS.disabledColor : COLORS.white
 
   return (
     <button
