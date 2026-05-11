@@ -1,5 +1,5 @@
 export const COLORS = {
-  bodyBg: '#e9e9e9',
+  bodyBg: '#e6e6e6',
   inputBg: '#fff',
   labelColor: '#1a1a1a',
   borderColor: '#ccc',

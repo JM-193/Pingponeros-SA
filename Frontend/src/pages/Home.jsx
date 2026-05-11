@@ -3,7 +3,7 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
 const COLORS = {
-  bodyBg: '#e9e9e9',
+  bodyBg: '#e6e6e6',
 }
 
 const DECLARATIONS = [

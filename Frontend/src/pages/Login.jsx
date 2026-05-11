@@ -8,7 +8,7 @@ import { guardarSesion } from '../services/session'
    Azul UCR  #00AEEF  (Pantone 299 C)
    Azul oscuro institucional  #1D4F91
    Footer   #2D2F34
-   Fondo     #e9e9e9
+   Fondo     #e6e6e6
    */
 
 const COLORS = {
