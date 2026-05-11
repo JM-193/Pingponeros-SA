@@ -1,17 +1,18 @@
 import PropTypes from 'prop-types'
+import { COLORS } from '../constants/colors'
 
 const VARIANT_CONFIG = {
   success: {
     icon: '\u2713',
-    color: '#1b5e20',
-    backgroundColor: '#e8f5e9',
-    borderColor: '#a5d6a7',
+    color: COLORS.successStrong,
+    backgroundColor: COLORS.successSoftBg,
+    borderColor: COLORS.successSoftBorder,
   },
   error: {
     icon: '\u26a0',
-    color: '#b71c1c',
-    backgroundColor: '#ffebee',
-    borderColor: '#ef9a9a',
+    color: COLORS.errorStrong,
+    backgroundColor: COLORS.errorSoftBg,
+    borderColor: COLORS.errorSoftBorder,
   },
 }
 

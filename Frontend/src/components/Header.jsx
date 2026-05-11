@@ -1,14 +1,13 @@
 import { Link } from 'react-router-dom'
 import ucrLogo from '../assets/firma-tipografica-una-linea-blanco.png'
 import vraLogo from '../assets/vrasgv/VRA_B-N_2.svg'
-
-const HEADER_BG = '#00AEEF'
+import { COLORS } from '../constants/colors'
 
 export default function Header() {
   return (
     <header
       style={{
-        backgroundColor: HEADER_BG,
+        backgroundColor: COLORS.headerBg,
         padding: '10px 40px',
         display: 'flex',
         alignItems: 'center',

@@ -19,7 +19,7 @@ const overlayStyle = {
 }
 
 const modalStyle = {
-  backgroundColor: '#fff',
+  backgroundColor: COLORS.white,
   borderRadius: '10px',
   boxShadow: '0 12px 30px rgba(0,0,0,0.18)',
   maxWidth: '480px',
@@ -64,13 +64,13 @@ const baseButtonStyle = {
 const cancelButtonStyle = {
   ...baseButtonStyle,
   backgroundColor: COLORS.disabledBg,
-  color: '#333',
+  color: COLORS.textDark,
 }
 
 const confirmButtonStyle = {
   ...baseButtonStyle,
   backgroundColor: COLORS.secondaryBtn,
-  color: '#fff',
+  color: COLORS.white,
 }
 
 const backdropButtonStyle = {
@@ -131,7 +131,7 @@ export default function ConfirmModal({
             onClick={onCancel}
             style={cancelButtonStyle}
             onMouseEnter={(event) => {
-              event.currentTarget.style.backgroundColor = '#e0e0e0'
+              event.currentTarget.style.backgroundColor = COLORS.surfaceMuted
             }}
             onMouseLeave={(event) => {
               event.currentTarget.style.backgroundColor = COLORS.disabledBg

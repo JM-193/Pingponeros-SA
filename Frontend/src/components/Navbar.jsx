@@ -1,12 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { cerrarSesion } from '../services/session'
-
-const COLORS = {
-  navBg: '#0e4671',
-  submenuBg: '#002948',
-  navBtn: '#005da4',
-}
+import { COLORS } from '../constants/colors'
 
 const NAV_ITEMS = [
   { label: 'P\u00e1gina Principal', path: '/home', activeOn: '/home' },
@@ -163,7 +158,7 @@ export default function Navbar() {
   const topLevelButtonBaseStyle = {
     fontSize: '13px',
     fontWeight: 600,
-    color: '#fff',
+    color: COLORS.white,
     border: 'none',
     borderRadius: 0,
     padding: '14px 20px',
@@ -199,7 +194,7 @@ export default function Navbar() {
   const renderNavbarItem = (item, menuId, isActive, hasSubmenu, isOpen) => {
     let buttonBgColor = 'transparent'
     if (isOpen) buttonBgColor = COLORS.submenuBg
-    if (isActive) buttonBgColor = COLORS.navBtn
+    if (isActive) buttonBgColor = COLORS.primaryBtn
 
     return (
       <div
@@ -271,7 +266,7 @@ export default function Navbar() {
         }}
         onMouseEnter={(e) => {
           clearCloseTimer()
-          e.currentTarget.style.backgroundColor = COLORS.navBtn
+          e.currentTarget.style.backgroundColor = COLORS.primaryBtn
         }}
         onMouseLeave={(e) => {
           const isInRoot = isTargetWithinMenu(e.relatedTarget, 'data-menu-root', rootMenuId)
@@ -354,11 +349,11 @@ export default function Navbar() {
             justifyContent: 'center',
           }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill={COLORS.white}>
             <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
           </svg>
         </div>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill={COLORS.white}>
           <path d="M7 10l5 5 5-5z" />
         </svg>
 
@@ -369,7 +364,7 @@ export default function Navbar() {
               position: 'absolute',
               top: '52px',
               right: 0,
-              backgroundColor: '#fff',
+              backgroundColor: COLORS.white,
               borderRadius: '6px',
               boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
               minWidth: '160px',
@@ -386,7 +381,7 @@ export default function Navbar() {
                 border: 'none',
                 background: 'none',
                 fontSize: '13px',
-                color: '#333',
+                color: COLORS.textDark,
                 cursor: 'pointer',
               }}
             >
@@ -403,7 +398,7 @@ export default function Navbar() {
                 borderTop: '1px solid #eee',
                 background: 'none',
                 fontSize: '13px',
-                color: '#d10f0f',
+                color: COLORS.danger,
                 cursor: 'pointer',
               }}
             >
