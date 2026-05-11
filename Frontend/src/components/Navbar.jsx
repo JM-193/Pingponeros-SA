@@ -26,42 +26,18 @@ const NAV_ITEMS = [
       {
         label: 'Áreas',
         path: '/organizacion/areas/consultar',
-        /*submenu: [
-          { label: 'Crear', path: '/organizacion/areas/crear' },
-          { label: 'Consultar', path: '/organizacion/areas/consultar' },
-          { label: 'Modificar', path: '/organizacion/areas/modificar' },
-          { label: 'Eliminar', path: '/organizacion/areas/eliminar' },
-        ],*/
       },
       /*{
         label: 'Departamentos',
         activeOn: '/organizacion/departamentos',
-        submenu: [
-          { label: 'Crear', path: '/organizacion/departamentos/crear' },
-          { label: 'Consultar', path: '/organizacion/departamentos/consultar' },
-          { label: 'Modificar', path: '/organizacion/departamentos/modificar' },
-          { label: 'Eliminar', path: '/organizacion/departamentos/eliminar' },
-        ],
       },*/
       /*{
         label: 'Secciones',
         activeOn: '/organizacion/secciones',
-        submenu: [
-          { label: 'Crear', path: '/organizacion/secciones/crear' },
-          { label: 'Consultar', path: '/organizacion/secciones/consultar' },
-          { label: 'Modificar', path: '/organizacion/secciones/modificar' },
-          { label: 'Eliminar', path: '/organizacion/secciones/eliminar' },
-        ],
       },*/
       /*{
         label: 'Unidades',
         activeOn: '/organizacion/unidades',
-        submenu: [
-          { label: 'Crear', path: '/organizacion/unidades/crear' },
-          { label: 'Consultar', path: '/organizacion/unidades/consultar' },
-          { label: 'Modificar', path: '/organizacion/unidades/modificar' },
-          { label: 'Eliminar', path: '/organizacion/unidades/eliminar' },
-        ],
       },*/
     ],
   },
