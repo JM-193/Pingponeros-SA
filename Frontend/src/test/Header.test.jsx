@@ -13,7 +13,7 @@ describe('Header', () => {
 
     const header = container.querySelector('header')
     expect(header).toBeInTheDocument()
-    expect(header).toHaveStyle('background-color: #00AEEF')
+    expect(header).toHaveStyle('background-color: #57bde8')
   })
 
   it('renderiza imágenes de logos', () => {

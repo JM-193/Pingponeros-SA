@@ -35,7 +35,7 @@ export const COLORS = {
   successSoftBg: '#e8f5e9',
   successSoftBorder: '#a5d6a7',
   authBtn: '#1D4F91',
-  headerBg: '#00AEEF',
+  headerBg: '#57bde8',
   footerBg: '#2D2F34',
   navBg: '#0e4671',
   submenuBg: '#002948',
