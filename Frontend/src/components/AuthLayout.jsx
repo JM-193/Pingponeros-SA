@@ -21,6 +21,11 @@ const styles = {
     width: '100%',
     maxWidth: '440px',
     textAlign: 'center',
+    backgroundColor: COLORS.white,
+    padding: '32px 28px',
+    borderRadius: '8px',
+    border: `1px solid ${COLORS.borderLight}`,
+    boxShadow: '0 12px 30px rgba(0, 0, 0, 0.08)',
   },
 }
 
