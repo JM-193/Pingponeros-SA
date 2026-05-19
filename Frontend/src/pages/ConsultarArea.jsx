@@ -464,7 +464,13 @@ export default function ConsultarArea() {
 
         <div id="results-section">{renderResultsContent()}</div>
         <div style={{ marginTop: '16px' }}>
-          <FormButton label="Regresar" type="button" variant="secondary" onClick={() => navigate('/home')} />
+          <FormButton
+            label="Regresar"
+            type="button"
+            variant="secondary"
+            onClick={() => navigate('/home')}
+            disabled={loading}
+          />
         </div>
       </main>
 

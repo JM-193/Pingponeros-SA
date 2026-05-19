@@ -157,7 +157,12 @@ export default function EditArea() {
               onClick={() => navigate('/organizacion/areas/consultar')}
               disabled={loading}
             />
-            <FormButton label={loading ? 'Guardando...' : 'Actualizar Área'} type="submit" variant="primary" disabled={loading} />
+            <FormButton
+              label={loading ? 'Guardando...' : 'Actualizar'}
+              type="submit"
+              variant="primary"
+              disabled={loading}
+            />
           </div>
         </FormContainer>
       </main>

@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import { COLORS } from '../constants/colors'
 
-function FormButton({ label, type, variant, onClick, disabled }) {
+function FormButton({ label, type, variant, onClick, disabled, width }) {
   const getStylesByVariant = () => {
     if (variant === 'primary') {
       return {
@@ -27,12 +27,17 @@ function FormButton({ label, type, variant, onClick, disabled }) {
       disabled={disabled}
       style={{
         padding: '12px 32px',
+        width,
         backgroundColor,
         color: textColor,
         border: 'none',
         borderRadius: '4px',
         fontSize: '14px',
         fontWeight: 600,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center',
         cursor: disabled ? 'not-allowed' : 'pointer',
         transition: 'background-color 0.3s ease',
       }}
@@ -50,6 +55,7 @@ FormButton.propTypes = {
   variant: PropTypes.oneOf(['primary', 'secondary']),
   onClick: PropTypes.func,
   disabled: PropTypes.bool,
+  width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 }
 
 FormButton.defaultProps = {
@@ -57,6 +63,7 @@ FormButton.defaultProps = {
   variant: 'primary',
   onClick: () => {},
   disabled: false,
+  width: '100px',
 }
 
 export default FormButton
