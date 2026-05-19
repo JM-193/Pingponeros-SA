@@ -24,17 +24,23 @@ jobs:
             echo "::notice::Frontend/package.json not found - skipping frontend checks."
           fi
 
+      - name: Set up pnpm
+        if: steps.detect.outputs.exists == 'true'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Set up Node.js
         if: steps.detect.outputs.exists == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '24'
           cache: pnpm
-          cache-dependency-path: Frontend/package-lock.json
+          cache-dependency-path: Frontend/pnpm-lock.yaml
 
       - name: Install dependencies
         if: steps.detect.outputs.exists == 'true'
-        run: pnpm ci --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
         working-directory: Frontend
 
       - name: Lint (ESLint + Prettier)
