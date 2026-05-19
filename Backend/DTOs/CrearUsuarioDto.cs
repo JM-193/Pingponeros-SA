@@ -13,5 +13,5 @@ internal sealed record CrearUsuarioDto(
     string PrimerNombre,
     string? SegundoNombre,
     string PrimerApellido,
-    string? SegundoApellido,
+    string SegundoApellido,
     int Rol);

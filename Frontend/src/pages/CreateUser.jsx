@@ -27,15 +27,19 @@ export default function CreateUser() {
   const [tempPassword, setTempPassword] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
 
+  const NAME_FIELDS = ['firstName', 'secondName', 'firstName_surname', 'secondName_surname']
+  const NAME_REGEX = /[^A-Za-záéíóúÁÉÍÓÚñÑüÜ]/g
+
   // Manejar cambios en los campos
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setSuccessMsg('')
     setTempPassword('')
     setErrorMsg('')
+    const sanitizedValue = NAME_FIELDS.includes(name) ? value.replace(NAME_REGEX, '') : value
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: sanitizedValue,
     }))
   }
 

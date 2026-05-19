@@ -56,7 +56,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task CrearUsuario_Returns400ConRolInvalido()
     {
-        var dto = new { CorreoInstitucional = "test@test.com", PrimerNombre = "Juan", PrimerApellido = "Perez", Rol = 5 };
+        var dto = new { CorreoInstitucional = "juan.perez@ucr.ac.cr", PrimerNombre = "Juan", PrimerApellido = "Perez", Rol = 5 };
 
         var response = await _client.PostAsJsonAsync("/usuarios", dto);
 
@@ -74,9 +74,19 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     }
 
     [Fact]
+    public async Task CrearUsuario_Returns400ConFormatoCorreoInvalido()
+    {
+        var dto = new { CorreoInstitucional = "test@test.com", PrimerNombre = "Juan", PrimerApellido = "Perez", Rol = 0 };
+
+        var response = await _client.PostAsJsonAsync("/usuarios", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
     public async Task CrearUsuario_Returns400ConNombreVacio()
     {
-        var dto = new { CorreoInstitucional = "test@test.com", PrimerNombre = "", PrimerApellido = "Perez", Rol = 0 };
+        var dto = new { CorreoInstitucional = "juan.perez@ucr.ac.cr", PrimerNombre = "", PrimerApellido = "Perez", Rol = 0 };
 
         var response = await _client.PostAsJsonAsync("/usuarios", dto);
 
@@ -86,7 +96,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task CrearUsuario_Returns400ConApellidoVacio()
     {
-        var dto = new { CorreoInstitucional = "test@test.com", PrimerNombre = "Juan", PrimerApellido = "", Rol = 0 };
+        var dto = new { CorreoInstitucional = "juan.perez@ucr.ac.cr", PrimerNombre = "Juan", PrimerApellido = "", Rol = 0 };
 
         var response = await _client.PostAsJsonAsync("/usuarios", dto);
 
@@ -99,7 +109,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
         _factory.UsuarioRepo
             .InsertarConContrasenaAsync(Arg.Any<Usuario>(), Arg.Any<string>())
             .Returns(Task.CompletedTask);
-        var dto = new { CorreoInstitucional = "nuevo@test.com", PrimerNombre = "Juan", PrimerApellido = "Perez", Rol = 0 };
+        var dto = new { CorreoInstitucional = "nuevo.usuario@ucr.ac.cr", PrimerNombre = "Juan", PrimerApellido = "Perez", SegundoApellido = "Garcia", Rol = 0 };
 
         var response = await _client.PostAsJsonAsync("/usuarios", dto);
 
@@ -118,7 +128,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
             .Returns(Task.CompletedTask);
         var dto = new
         {
-            CorreoInstitucional = "  TEST@UCR.EDU  ",
+            CorreoInstitucional = "  JUAN.PEREZ@UCR.AC.CR  ",
             PrimerNombre = "  jUaN ",
             SegundoNombre = "  carlos ",
             PrimerApellido = "  pEREZ  ",
@@ -130,7 +140,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         Assert.NotNull(capturado);
-        Assert.Equal("test@ucr.edu", capturado!.CorreoInstitucional);
+        Assert.Equal("juan.perez@ucr.ac.cr", capturado!.CorreoInstitucional);
         Assert.Equal("Juan", capturado.PrimerNombre);
         Assert.Equal("Carlos", capturado.SegundoNombre);
         Assert.Equal("Perez", capturado.PrimerApellido);
@@ -141,7 +151,17 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     }
 
     [Fact]
-    public async Task CrearUsuario_ConvierteSegundoNombreYApellidoEnNullCuandoVacios()
+    public async Task CrearUsuario_Returns400ConSegundoApellidoVacio()
+    {
+        var dto = new { CorreoInstitucional = "juan.perez@ucr.ac.cr", PrimerNombre = "Juan", PrimerApellido = "Perez", SegundoApellido = "", Rol = 0 };
+
+        var response = await _client.PostAsJsonAsync("/usuarios", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CrearUsuario_ConvierteSegundoNombreEnNullCuandoVacio()
     {
         Usuario? capturado = null;
         _factory.UsuarioRepo
@@ -149,11 +169,11 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
             .Returns(Task.CompletedTask);
         var dto = new
         {
-            CorreoInstitucional = "test@test.com",
+            CorreoInstitucional = "ana.lopez@ucr.ac.cr",
             PrimerNombre = "Ana",
             SegundoNombre = "   ",
             PrimerApellido = "Lopez",
-            SegundoApellido = "",
+            SegundoApellido = "Mora",
             Rol = 0,
         };
 
@@ -162,7 +182,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         Assert.NotNull(capturado);
         Assert.Null(capturado!.SegundoNombre);
-        Assert.Null(capturado.SegundoApellido);
+        Assert.Equal("Mora", capturado.SegundoApellido);
     }
 
     [Fact]
