@@ -29,27 +29,27 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: npm
+          cache: pnpm
           cache-dependency-path: Frontend/package-lock.json
 
       - name: Install dependencies
         if: steps.detect.outputs.exists == 'true'
-        run: npm ci --ignore-scripts
+        run: pnpm ci --ignore-scripts
         working-directory: Frontend
 
       - name: Lint (ESLint + Prettier)
         if: steps.detect.outputs.exists == 'true'
-        run: npm run lint
+        run: pnpm run lint
         working-directory: Frontend
 
       - name: Build
         if: steps.detect.outputs.exists == 'true'
-        run: npm run build
+        run: pnpm run build
         working-directory: Frontend
 
       - name: Test with coverage
         if: steps.detect.outputs.exists == 'true'
-        run: npm run test:coverage
+        run: pnpm run test:coverage
         working-directory: Frontend
 
       - name: Upload coverage report
