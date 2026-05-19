@@ -54,8 +54,10 @@ describe('ConsultarArea Page', () => {
     )
 
     await waitFor(() => {
-      const editButtons = screen.getAllByText(/Editar|âœ/i)
+      const editButtons = screen.getAllByRole('button', { name: /Editar/i })
+      const deleteButtons = screen.getAllByRole('button', { name: /Eliminar/i })
       expect(editButtons.length).toBeGreaterThan(0)
+      expect(deleteButtons.length).toBeGreaterThan(0)
     })
   })
 

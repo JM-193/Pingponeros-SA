@@ -23,12 +23,16 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+      - name: Set up pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          version: 9
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: npm
-          cache-dependency-path: Frontend/package-lock.json
+          cache: pnpm
+          cache-dependency-path: Frontend/pnpm-lock.yaml
       - name: Cache SonarQube Cloud packages
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
@@ -55,8 +59,10 @@ jobs:
         shell: powershell
         run: |
           ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"JM-193_Pingponeros-SA" /o:"pingponeros-sa" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.sources="Backend,Frontend" /d:sonar.exclusions="**/bin/**,**/obj/**,**/node_modules/**,**/dist/**,**/coverage/**" /d:sonar.cs.opencover.reportsPaths="Backend.Tests/TestResults/**/coverage.opencover.xml" /d:sonar.javascript.lcov.reportPaths="Frontend/coverage/lcov.info"
-          npm ci --ignore-scripts --prefix Frontend
-          npm run test:coverage --prefix Frontend
+          Push-Location Frontend
+          pnpm install --frozen-lockfile --ignore-scripts
+          pnpm run test:coverage
+          Pop-Location
           dotnet build Pingponeros-SA.sln --configuration Release
           dotnet test Backend.Tests/Backend.Tests.csproj --no-build --configuration Release --collect:"XPlat Code Coverage" --settings Backend.Tests/coverage.runsettings --results-directory Backend.Tests/TestResults
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="$env:SONAR_TOKEN"

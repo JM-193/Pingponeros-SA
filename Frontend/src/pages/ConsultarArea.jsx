@@ -8,6 +8,7 @@ import ConfirmModal from '../components/ConfirmModal'
 import FormButton from '../components/FormButton'
 import { obtenerAreas, eliminarArea } from '../services/areaService'
 import { COLORS } from '../constants/colors'
+import { FaPencilAlt, FaTrashAlt, FaSearch } from 'react-icons/fa'
 
 // Component to show when there are no results
 function EmptyResults({ searchTerm }) {
@@ -60,10 +61,8 @@ function ResultsTable({ currentResults, onEdit, onDelete }) {
               <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, borderBottom: `1px solid ${COLORS.borderColor}` }}>
                 Descripción
               </th>
-              <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, borderBottom: `1px solid ${COLORS.borderColor}` }}>
+              <th style={{ padding: '12px 32px', textAlign: 'right', fontWeight: 600, borderBottom: `1px solid ${COLORS.borderColor}` }}>
                 {/* Editar */}
-              </th>
-              <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, borderBottom: `1px solid ${COLORS.borderColor}` }}>
                 {/* Eliminar */}
               </th>
             </tr>
@@ -84,45 +83,55 @@ function ResultsTable({ currentResults, onEdit, onDelete }) {
               >
                 <td style={{ padding: '12px 16px', fontWeight: 600, color: COLORS.textDark }}>{area.nombre}</td>
                 <td style={{ padding: '12px 16px', color: COLORS.textMuted }}>{area.descripcion}</td>
-                <td style={{ padding: '12px 16px', textAlign: 'center', width: '1%', whiteSpace: 'nowrap' }}>
-                  <button
-                    onClick={() => onEdit(area.nombre)}
-                    style={{
-                      padding: '8px 12px',
-                      backgroundColor: COLORS.primaryBtn,
-                      color: COLORS.white,
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      transition: 'background-color 0.2s',
-                    }}
-                    onMouseEnter={(e) => (e.target.style.backgroundColor = COLORS.primaryBtnHover)}
-                    onMouseLeave={(e) => (e.target.style.backgroundColor = COLORS.primaryBtn)}
-                  >
-                    Editar
-                  </button>
-                </td>
-                <td style={{ padding: '12px 16px', textAlign: 'center', width: '1%', whiteSpace: 'nowrap' }}>
-                  <button
-                    onClick={() => onDelete(area)}
-                    style={{
-                      padding: '8px 12px',
-                      backgroundColor: COLORS.secondaryBtn,
-                      color: COLORS.white,
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      transition: 'background-color 0.2s',
-                    }}
-                    onMouseEnter={(e) => (e.target.style.backgroundColor = COLORS.secondaryBtnHover)}
-                    onMouseLeave={(e) => (e.target.style.backgroundColor = COLORS.secondaryBtn)}
-                  >
-                    Eliminar
-                  </button>
+                <td style={{ padding: '12px 32px', textAlign: 'center', width: '1%', whiteSpace: 'nowrap' }}>
+                  <div style={{ display: 'inline-flex', gap: '8px' }}>
+                    <button
+                      onClick={() => onEdit(area.nombre)}
+                      aria-label="Editar"
+                      title="Editar"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '8px 12px',
+                        backgroundColor: COLORS.primaryBtn,
+                        color: COLORS.white,
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        transition: 'background-color 0.2s',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = COLORS.primaryBtnHover)}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = COLORS.primaryBtn)}
+                    >
+                      <FaPencilAlt size={14} aria-hidden="true" focusable="false" />
+                    </button>
+                    <button
+                      onClick={() => onDelete(area)}
+                      aria-label="Eliminar"
+                      title="Eliminar"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '8px 12px',
+                        backgroundColor: COLORS.secondaryBtn,
+                        color: COLORS.white,
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        transition: 'background-color 0.2s',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = COLORS.secondaryBtnHover)}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = COLORS.secondaryBtn)}
+                    >
+                      <FaTrashAlt size={14} aria-hidden="true" focusable="false" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -384,44 +393,51 @@ export default function ConsultarArea() {
                 >
                   Buscar
                 </label>
-                <input
-                  type="text"
-                  id="search"
-                  value={searchTerm}
-                  onChange={handleInputChange}
-                  placeholder="Ingrese el nombre o descripción del área"
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    border: `1px solid ${COLORS.borderColor}`,
-                    borderRadius: '4px',
-                    fontSize: '14px',
-                    boxSizing: 'border-box',
-                    backgroundColor: COLORS.inputBg,
-                    color: COLORS.black,
-                  }}
-                />
+                <div style={{ display: 'flex', width: '100%' }}>
+                  <input
+                    type="text"
+                    id="search"
+                    value={searchTerm}
+                    onChange={handleInputChange}
+                    placeholder="Ingrese el nombre o descripción del área"
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      border: `1px solid ${COLORS.borderColor}`,
+                      borderRight: 'none',
+                      borderRadius: '4px 0 0 4px',
+                      fontSize: '14px',
+                      boxSizing: 'border-box',
+                      backgroundColor: COLORS.inputBg,
+                      color: COLORS.black,
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    aria-label="Buscar"
+                    title="Buscar"
+                    style={{
+                      minWidth: '44px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '0 14px',
+                      backgroundColor: loading ? COLORS.disabledBg : COLORS.secondaryBtn,
+                      color: loading ? COLORS.disabledColor : COLORS.white,
+                      border: `1px solid ${COLORS.borderColor}`,
+                      borderLeft: 'none',
+                      borderRadius: '0 4px 4px 0',
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                      transition: 'background-color 0.3s ease',
+                    }}
+                    onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = COLORS.secondaryBtnHover)}
+                    onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = COLORS.secondaryBtn)}
+                  >
+                    <FaSearch size={16} aria-hidden="true" focusable="false" />
+                  </button>
+                </div>
               </div>
-              <button
-                type="submit"
-                disabled={loading}
-                style={{
-                  padding: '10px 32px',
-                  backgroundColor: loading ? COLORS.disabledBg : COLORS.primaryBtn,
-                  color: loading ? COLORS.disabledColor : COLORS.white,
-                  border: 'none',
-                  borderRadius: '4px',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  transition: 'background-color 0.3s ease',
-                  whiteSpace: 'nowrap',
-                }}
-                onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = COLORS.primaryBtnHover)}
-                onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = COLORS.primaryBtn)}
-              >
-                {loading ? 'Cargando...' : 'Buscar'}
-              </button>
               <button
                 type="button"
                 onClick={() => navigate('/organizacion/areas/crear')}
@@ -440,14 +456,22 @@ export default function ConsultarArea() {
                 onMouseEnter={(e) => (e.target.style.backgroundColor = COLORS.primaryBtnHover)}
                 onMouseLeave={(e) => (e.target.style.backgroundColor = COLORS.primaryBtn)}
               >
-                Crear área
+                Crear
               </button>
             </div>
           </form>
         </div>
 
         <div id="results-section">{renderResultsContent()}</div>
-        <FormButton label="Regresar" type="button" variant="secondary" onClick={() => navigate('/home')} />
+        <div style={{ marginTop: '16px' }}>
+          <FormButton
+            label="Regresar"
+            type="button"
+            variant="secondary"
+            onClick={() => navigate('/home')}
+            disabled={loading}
+          />
+        </div>
       </main>
 
       <Footer />

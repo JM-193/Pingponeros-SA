@@ -196,8 +196,19 @@ export default function CreateUser() {
 
           {/* Botones */}
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-            <FormButton label="Regresar" type="button" variant="secondary" onClick={() => navigate('/home')} />
-            <FormButton label={loading ? 'Guardando...' : 'Crear Usuario'} type="submit" variant="primary" disabled={loading} />
+            <FormButton
+              label="Regresar"
+              type="button"
+              variant="secondary"
+              onClick={() => navigate('/home')}
+              disabled={loading}
+            />
+            <FormButton
+              label={loading ? 'Guardando...' : 'Crear'}
+              type="submit"
+              variant="primary"
+              disabled={loading}
+            />
           </div>
         </FormContainer>
       </main>
