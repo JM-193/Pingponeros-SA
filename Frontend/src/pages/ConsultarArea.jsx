@@ -8,6 +8,7 @@ import ConfirmModal from '../components/ConfirmModal'
 import FormButton from '../components/FormButton'
 import { obtenerAreas, eliminarArea } from '../services/areaService'
 import { COLORS } from '../constants/colors'
+import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 
 // Component to show when there are no results
 function EmptyResults({ searchTerm }) {
@@ -60,10 +61,8 @@ function ResultsTable({ currentResults, onEdit, onDelete }) {
               <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, borderBottom: `1px solid ${COLORS.borderColor}` }}>
                 Descripción
               </th>
-              <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, borderBottom: `1px solid ${COLORS.borderColor}` }}>
+              <th style={{ padding: '12px 32px', textAlign: 'right', fontWeight: 600, borderBottom: `1px solid ${COLORS.borderColor}` }}>
                 {/* Editar */}
-              </th>
-              <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, borderBottom: `1px solid ${COLORS.borderColor}` }}>
                 {/* Eliminar */}
               </th>
             </tr>
@@ -84,45 +83,55 @@ function ResultsTable({ currentResults, onEdit, onDelete }) {
               >
                 <td style={{ padding: '12px 16px', fontWeight: 600, color: COLORS.textDark }}>{area.nombre}</td>
                 <td style={{ padding: '12px 16px', color: COLORS.textMuted }}>{area.descripcion}</td>
-                <td style={{ padding: '12px 16px', textAlign: 'center', width: '1%', whiteSpace: 'nowrap' }}>
-                  <button
-                    onClick={() => onEdit(area.nombre)}
-                    style={{
-                      padding: '8px 12px',
-                      backgroundColor: COLORS.primaryBtn,
-                      color: COLORS.white,
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      transition: 'background-color 0.2s',
-                    }}
-                    onMouseEnter={(e) => (e.target.style.backgroundColor = COLORS.primaryBtnHover)}
-                    onMouseLeave={(e) => (e.target.style.backgroundColor = COLORS.primaryBtn)}
-                  >
-                    Editar
-                  </button>
-                </td>
-                <td style={{ padding: '12px 16px', textAlign: 'center', width: '1%', whiteSpace: 'nowrap' }}>
-                  <button
-                    onClick={() => onDelete(area)}
-                    style={{
-                      padding: '8px 12px',
-                      backgroundColor: COLORS.secondaryBtn,
-                      color: COLORS.white,
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      transition: 'background-color 0.2s',
-                    }}
-                    onMouseEnter={(e) => (e.target.style.backgroundColor = COLORS.secondaryBtnHover)}
-                    onMouseLeave={(e) => (e.target.style.backgroundColor = COLORS.secondaryBtn)}
-                  >
-                    Eliminar
-                  </button>
+                <td style={{ padding: '12px 32px', textAlign: 'center', width: '1%', whiteSpace: 'nowrap' }}>
+                  <div style={{ display: 'inline-flex', gap: '8px' }}>
+                    <button
+                      onClick={() => onEdit(area.nombre)}
+                      aria-label="Editar"
+                      title="Editar"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '8px 12px',
+                        backgroundColor: COLORS.primaryBtn,
+                        color: COLORS.white,
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        transition: 'background-color 0.2s',
+                      }}
+                      onMouseEnter={(e) => (e.target.style.backgroundColor = COLORS.primaryBtnHover)}
+                      onMouseLeave={(e) => (e.target.style.backgroundColor = COLORS.primaryBtn)}
+                    >
+                      <FaPencilAlt size={14} aria-hidden="true" focusable="false" />
+                    </button>
+                    <button
+                      onClick={() => onDelete(area)}
+                      aria-label="Eliminar"
+                      title="Eliminar"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '8px 12px',
+                        backgroundColor: COLORS.secondaryBtn,
+                        color: COLORS.white,
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        transition: 'background-color 0.2s',
+                      }}
+                      onMouseEnter={(e) => (e.target.style.backgroundColor = COLORS.secondaryBtnHover)}
+                      onMouseLeave={(e) => (e.target.style.backgroundColor = COLORS.secondaryBtn)}
+                    >
+                      <FaTrashAlt size={14} aria-hidden="true" focusable="false" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
