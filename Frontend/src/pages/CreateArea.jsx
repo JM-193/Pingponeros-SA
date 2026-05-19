@@ -114,7 +114,7 @@ export default function CreateArea() {
               onClick={() => navigate('/organizacion/areas/consultar')}
               disabled={loading}
             />
-            <FormButton label={loading ? 'Guardando...' : 'Crear Área'} type="submit" variant="primary" disabled={loading} />
+            <FormButton label={loading ? 'Guardando...' : 'Crear'} type="submit" variant="primary" disabled={loading} />
           </div>
         </FormContainer>
       </main>

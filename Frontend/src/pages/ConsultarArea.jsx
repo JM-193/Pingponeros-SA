@@ -407,7 +407,7 @@ export default function ConsultarArea() {
                 disabled={loading}
                 style={{
                   padding: '10px 32px',
-                  backgroundColor: loading ? COLORS.disabledBg : COLORS.primaryBtn,
+                  backgroundColor: loading ? COLORS.disabledBg : COLORS.secondaryBtn,
                   color: loading ? COLORS.disabledColor : COLORS.white,
                   border: 'none',
                   borderRadius: '4px',
@@ -417,8 +417,8 @@ export default function ConsultarArea() {
                   transition: 'background-color 0.3s ease',
                   whiteSpace: 'nowrap',
                 }}
-                onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = COLORS.primaryBtnHover)}
-                onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = COLORS.primaryBtn)}
+                onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = COLORS.secondaryBtnHover)}
+                onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = COLORS.secondaryBtn)}
               >
                 {loading ? 'Cargando...' : 'Buscar'}
               </button>
@@ -440,14 +440,16 @@ export default function ConsultarArea() {
                 onMouseEnter={(e) => (e.target.style.backgroundColor = COLORS.primaryBtnHover)}
                 onMouseLeave={(e) => (e.target.style.backgroundColor = COLORS.primaryBtn)}
               >
-                Crear área
+                Crear
               </button>
             </div>
           </form>
         </div>
 
         <div id="results-section">{renderResultsContent()}</div>
-        <FormButton label="Regresar" type="button" variant="secondary" onClick={() => navigate('/home')} />
+        <div style={{ marginTop: '16px' }}>
+          <FormButton label="Regresar" type="button" variant="secondary" onClick={() => navigate('/home')} />
+        </div>
       </main>
 
       <Footer />
