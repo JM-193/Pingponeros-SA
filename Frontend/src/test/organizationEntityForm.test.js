@@ -4,7 +4,7 @@ import {
   createOrganizationEntityInputChangeHandler,
   getOrganizationEntityFormError,
   getOrganizationEntityPayload,
-} from '../utils/OrganizationEntityForm'
+} from '../utils/organizationEntityForm'
 
 describe('OrganizationEntityForm utilities', () => {
   describe('createOrganizationEntityInputChangeHandler', () => {

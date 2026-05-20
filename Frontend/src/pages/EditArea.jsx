@@ -5,7 +5,7 @@ import OrganizationEntityFormFields from '../components/OrganizationEntityFormFi
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
 import PageLayout from '../components/PageLayout'
 import StateToggle from '../components/StateToggle'
-import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormError, getOrganizationEntityPayload } from '../utils/OrganizationEntityForm'
+import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormError, getOrganizationEntityPayload } from '../utils/organizationEntityForm'
 import { COLORS } from '../constants/colors'
 
 export default function EditArea() {

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { crearArea } from '../services/areaService'
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
-import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormError, getOrganizationEntityPayload } from '../utils/OrganizationEntityForm'
+import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormError, getOrganizationEntityPayload } from '../utils/organizationEntityForm'
 
 export default function CreateArea() {
   const navigate = useNavigate()

@@ -12,7 +12,7 @@ import {
   createOrganizationEntityInputChangeHandler,
   getOrganizationEntityFormError,
   getOrganizationEntityPayload,
-} from '../utils/OrganizationEntityForm'
+} from '../utils/organizationEntityForm'
 import { COLORS } from '../constants/colors'
 
 const parentTypeOptions = [
