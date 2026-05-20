@@ -1,4 +1,4 @@
-export function createOrganizationUnitInputChangeHandler(setFormData, clearFeedback) {
+export function createOrganizationEntityInputChangeHandler(setFormData, clearFeedback) {
   return (event) => {
     const { name, value } = event.target
     clearFeedback()
@@ -9,7 +9,7 @@ export function createOrganizationUnitInputChangeHandler(setFormData, clearFeedb
   }
 }
 
-export function getOrganizationUnitFormError(formData, options = {}) {
+export function getOrganizationEntityFormError(formData, options = {}) {
   const {
     entityLabel = 'área',
     nameArticle = 'del',
@@ -52,7 +52,7 @@ export function getOrganizationUnitFormError(formData, options = {}) {
   return ''
 }
 
-export function getOrganizationUnitPayload(formData, options = {}) {
+export function getOrganizationEntityPayload(formData, options = {}) {
   const {
     includeEstado = true,
     includeArea = false,
