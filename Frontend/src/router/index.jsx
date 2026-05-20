@@ -6,6 +6,9 @@ import CreateUser from '../pages/CreateUser'
 import CreateArea from '../pages/CreateArea'
 import EditArea from '../pages/EditArea'
 import ConsultarArea from '../pages/ConsultarArea'
+import CreateDepartamento from '../pages/CreateDepartamento'
+import EditDepartamento from '../pages/EditDepartamento'
+import ConsultarDepartamento from '../pages/ConsultarDepartamento'
 import ProtectedRoute from '../components/ProtectedRoute'
 
 export default function AppRouter() {
@@ -19,6 +22,9 @@ export default function AppRouter() {
         <Route path="/organizacion/areas/crear" element={<ProtectedRoute><CreateArea /></ProtectedRoute>} />
         <Route path="/organizacion/areas/editar/:nombre" element={<ProtectedRoute><EditArea /></ProtectedRoute>} />
         <Route path="/organizacion/areas/consultar" element={<ProtectedRoute><ConsultarArea /></ProtectedRoute>} />
+        <Route path="/organizacion/departamentos/crear" element={<ProtectedRoute><CreateDepartamento /></ProtectedRoute>} />
+        <Route path="/organizacion/departamentos/editar/:nombre" element={<ProtectedRoute><EditDepartamento /></ProtectedRoute>} />
+        <Route path="/organizacion/departamentos/consultar" element={<ProtectedRoute><ConsultarDepartamento /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   )

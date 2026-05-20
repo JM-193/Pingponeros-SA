@@ -22,10 +22,10 @@ const NAV_ITEMS = [
         label: 'Áreas',
         path: '/organizacion/areas/consultar',
       },
-      /*{
+      {
         label: 'Departamentos',
-        activeOn: '/organizacion/departamentos',
-      },*/
+        path: '/organizacion/departamentos/consultar',
+      },
       /*{
         label: 'Secciones',
         activeOn: '/organizacion/secciones',
