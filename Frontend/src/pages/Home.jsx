@@ -1,10 +1,4 @@
-import Header from '../components/Header'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
-
-const COLORS = {
-  bodyBg: '#e6e6e6',
-}
+import PageLayout from '../components/PageLayout'
 
 const DECLARATIONS = [
   { id: 12, date: '03/04/26' },
@@ -14,17 +8,8 @@ const DECLARATIONS = [
 
 export default function Home() {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: COLORS.bodyBg }}>
-
-      {/* Header */}
-      <Header />
-
-      <Navbar />
-
-      {/* Main content */}
-      <main style={{ flex: 1, padding: '40px 40px 60px', maxWidth: '1200px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
-
-        {/* Page title */}
+    <PageLayout>
+      {/* Page title */}
         <h1
           style={{
             fontWeight: 900,
@@ -159,9 +144,6 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+    </PageLayout>
   )
 }

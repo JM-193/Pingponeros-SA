@@ -84,6 +84,7 @@ describe('CreateArea Page', () => {
       expect(areaService.crearArea).toHaveBeenCalledWith({
         nombre: 'Administración',
         descripcion: 'Área de administración',
+        estado: 1,
       })
     })
   })
@@ -180,6 +181,7 @@ describe('CreateArea Page', () => {
       expect(areaService.crearArea).toHaveBeenCalledWith({
         nombre: 'Test',
         descripcion: 'Description',
+        estado: 1,
       })
     })
   })

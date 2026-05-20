@@ -39,7 +39,7 @@ export async function obtenerAreaPorNombre(nombre) {
 
 /**
  * Crea una nueva área en la base de datos.
- * @param {{ nombre: string, descripcion: string }} datos
+ * @param {{ nombre: string, descripcion: string, estado?: number }} datos
  * @returns {Promise<object>} El área creada.
  */
 export async function crearArea(datos) {
@@ -76,7 +76,7 @@ export async function eliminarArea(id) {
 /**
  * Actualiza un área existente por nombre.
  * @param {string} nombreOriginal - Nombre original del área
- * @param {{ nombre: string, descripcion: string }} datos - Nuevos datos
+ * @param {{ nombre: string, descripcion: string, estado?: number }} datos - Nuevos datos
  * @returns {Promise<object>} El área actualizada.
  */
 export async function actualizarArea(nombreOriginal, datos) {

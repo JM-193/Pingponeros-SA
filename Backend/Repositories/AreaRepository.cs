@@ -17,7 +17,7 @@ internal sealed class AreaRepository : IAreaRepository
     {
         return await _q.QueryAsync(connection =>
         {
-            var cmd = new OracleCommand("SELECT ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM AREAS WHERE ESTADO = 1 ORDER BY NOMBRE", connection)
+            var cmd = new OracleCommand("SELECT ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM AREAS ORDER BY NOMBRE", connection)
             {
                 BindByName = true,
             };
@@ -43,7 +43,7 @@ internal sealed class AreaRepository : IAreaRepository
     {
         var result = await _q.ExecuteScalarAsync(connection =>
         {
-            var cmd = new OracleCommand("SELECT COUNT(*) FROM AREAS WHERE LOWER(NOMBRE) = LOWER(:nombre) AND ESTADO = 1", connection)
+            var cmd = new OracleCommand("SELECT COUNT(*) FROM AREAS WHERE LOWER(NOMBRE) = LOWER(:nombre)", connection)
             {
                 BindByName = true,
             };
@@ -85,7 +85,7 @@ internal sealed class AreaRepository : IAreaRepository
     {
         return await _q.QueryAsync(connection =>
         {
-            var cmd = new OracleCommand("SELECT ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM AREAS WHERE LOWER(NOMBRE) = LOWER(:nombre) AND ESTADO = 1", connection)
+            var cmd = new OracleCommand("SELECT ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM AREAS WHERE LOWER(NOMBRE) = LOWER(:nombre)", connection)
             {
                 BindByName = true,
             };
@@ -114,7 +114,7 @@ internal sealed class AreaRepository : IAreaRepository
         const string query = """
             UPDATE AREAS
             SET NOMBRE = :nombre, DESCRIPCION = :descripcion, ESTADO = :estado
-            WHERE LOWER(NOMBRE) = LOWER(:nombreOriginal) AND ESTADO = 1
+            WHERE LOWER(NOMBRE) = LOWER(:nombreOriginal)
             """;
 
         var rows = await _q.ExecuteAsync(connection =>
