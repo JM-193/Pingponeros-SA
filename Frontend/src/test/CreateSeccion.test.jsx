@@ -1,5 +1,5 @@
 // CreateSeccion.test.jsx
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import CreateSeccion from '../pages/CreateSeccion'
 import * as areaService from '../services/areaService'
@@ -10,7 +10,7 @@ vi.mock('../services/areaService')
 describe('CreateSeccion Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    areaService.obtenerAreas.mockResolvedValueOnce([
+    areaService.obtenerAreas.mockResolvedValue([
       { id: 1, nombre: 'Administración', descripcion: 'Área' },
     ])
   })
@@ -33,6 +33,8 @@ describe('CreateSeccion Page', () => {
       </BrowserRouter>,
     )
 
-    expect(await screen.findByText('Página Principal')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Página Principal')).toBeInTheDocument()
+    })
   })
 })

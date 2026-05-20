@@ -1,5 +1,5 @@
 // CreateUnidad.test.jsx
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import CreateUnidad from '../pages/CreateUnidad'
 import * as areaService from '../services/areaService'
@@ -14,9 +14,9 @@ vi.mock('../services/seccionService')
 describe('CreateUnidad Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    areaService.obtenerAreas.mockResolvedValueOnce([{ id: 1, nombre: 'Administración' }])
-    departamentoService.obtenerDepartamentos.mockResolvedValueOnce([{ id: 1, nombre: 'Compras' }])
-    seccionService.obtenerSecciones.mockResolvedValueOnce([{ id: 1, nombre: 'Soporte' }])
+    areaService.obtenerAreas.mockResolvedValue([{ id: 1, nombre: 'Administración' }])
+    departamentoService.obtenerDepartamentos.mockResolvedValue([{ id: 1, nombre: 'Compras' }])
+    seccionService.obtenerSecciones.mockResolvedValue([{ id: 1, nombre: 'Soporte' }])
   })
 
   it('renderiza formulario de crear unidad', async () => {
@@ -37,6 +37,8 @@ describe('CreateUnidad Page', () => {
       </BrowserRouter>,
     )
 
-    expect(await screen.findByText('Página Principal')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Página Principal')).toBeInTheDocument()
+    })
   })
 })
