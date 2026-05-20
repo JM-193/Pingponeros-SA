@@ -12,6 +12,9 @@ import ConsultarDepartamento from '../pages/ConsultarDepartamento'
 import CreateSeccion from '../pages/CreateSeccion'
 import EditSeccion from '../pages/EditSeccion'
 import ConsultarSeccion from '../pages/ConsultarSeccion'
+import CreateUnidad from '../pages/CreateUnidad'
+import EditUnidad from '../pages/EditUnidad'
+import ConsultarUnidad from '../pages/ConsultarUnidad'
 import ProtectedRoute from '../components/ProtectedRoute'
 
 export default function AppRouter() {
@@ -31,6 +34,9 @@ export default function AppRouter() {
         <Route path="/organizacion/secciones/crear" element={<ProtectedRoute><CreateSeccion /></ProtectedRoute>} />
         <Route path="/organizacion/secciones/editar/:nombre" element={<ProtectedRoute><EditSeccion /></ProtectedRoute>} />
         <Route path="/organizacion/secciones/consultar" element={<ProtectedRoute><ConsultarSeccion /></ProtectedRoute>} />
+        <Route path="/organizacion/unidades/crear" element={<ProtectedRoute><CreateUnidad /></ProtectedRoute>} />
+        <Route path="/organizacion/unidades/editar/:nombre" element={<ProtectedRoute><EditUnidad /></ProtectedRoute>} />
+        <Route path="/organizacion/unidades/consultar" element={<ProtectedRoute><ConsultarUnidad /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   )

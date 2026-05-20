@@ -30,10 +30,10 @@ const NAV_ITEMS = [
         label: 'Secciones',
         path: '/organizacion/secciones/consultar',
       },
-      /*{
+      {
         label: 'Unidades',
-        activeOn: '/organizacion/unidades',
-      },*/
+        path: '/organizacion/unidades/consultar',
+      },
     ],
   },
   /*{
