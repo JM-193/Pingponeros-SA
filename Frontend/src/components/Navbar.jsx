@@ -26,10 +26,10 @@ const NAV_ITEMS = [
         label: 'Departamentos',
         path: '/organizacion/departamentos/consultar',
       },
-      /*{
+      {
         label: 'Secciones',
-        activeOn: '/organizacion/secciones',
-      },*/
+        path: '/organizacion/secciones/consultar',
+      },
       /*{
         label: 'Unidades',
         activeOn: '/organizacion/unidades',
