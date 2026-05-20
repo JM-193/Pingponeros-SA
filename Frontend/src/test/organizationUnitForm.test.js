@@ -165,6 +165,7 @@ describe('organizationUnitForm utilities', () => {
 
       expect(payload.nombre).toBe('Administración')
       expect(payload.descripcion).toBe('Descripción')
+      expect(payload.estado).toBe(1)
     })
 
     it('retorna estructura correcta', () => {
@@ -177,7 +178,8 @@ describe('organizationUnitForm utilities', () => {
 
       expect(payload).toHaveProperty('nombre')
       expect(payload).toHaveProperty('descripcion')
-      expect(Object.keys(payload)).toHaveLength(2)
+      expect(payload).toHaveProperty('estado')
+      expect(Object.keys(payload)).toHaveLength(3)
     })
 
     it('no incluye espacios en blanco', () => {
@@ -202,6 +204,44 @@ describe('organizationUnitForm utilities', () => {
 
       expect(payload.nombre).toBe('Ãrea de Operaciones')
       expect(payload.descripcion).toBe('Encargada de todas las operaciones')
+    })
+
+    it('incluye idArea cuando se solicita', () => {
+      const formData = {
+        nombre: 'Unidad A',
+        descripcion: 'Desc',
+        idArea: '5',
+      }
+
+      const payload = getOrganizationUnitPayload(formData, { includeArea: true })
+
+      expect(payload.idArea).toBe(5)
+    })
+
+    it('incluye idDepartamento cuando parentType es departamento', () => {
+      const formData = {
+        nombre: 'Unidad A',
+        descripcion: 'Desc',
+        idDepartamento: '7',
+      }
+
+      const payload = getOrganizationUnitPayload(formData, { parentType: 'departamento' })
+
+      expect(payload.idDepartamento).toBe(7)
+      expect(payload.idSeccion).toBeUndefined()
+    })
+
+    it('incluye idSeccion cuando parentType es seccion', () => {
+      const formData = {
+        nombre: 'Unidad B',
+        descripcion: 'Desc',
+        idSeccion: '9',
+      }
+
+      const payload = getOrganizationUnitPayload(formData, { parentType: 'seccion' })
+
+      expect(payload.idSeccion).toBe(9)
+      expect(payload.idDepartamento).toBeUndefined()
     })
   })
 })
