@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
@@ -7,96 +7,85 @@ import StateToggle from '../components/StateToggle'
 import { actualizarDepartamento, obtenerDepartamentoPorNombre } from '../services/departamentoService'
 import { obtenerAreas } from '../services/areaService'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
-import {
-  createOrganizationEntityInputChangeHandler,
-  getOrganizationEntityFormError,
-  getOrganizationEntityPayload,
-} from '../utils/organizationEntityForm'
 import { COLORS } from '../constants/colors'
+import { useOrganizationEntityForm } from '../hooks/useOrganizationEntityForm'
+
+const initialFormData = {
+  idArea: '',
+  nombre: '',
+  descripcion: '',
+  estado: 1,
+}
 
 export default function EditDepartamento() {
   const navigate = useNavigate()
   const { nombre } = useParams()
-  const [formData, setFormData] = useState({
-    idArea: '',
-    nombre: '',
-    descripcion: '',
-    estado: 1,
-  })
   const [areaOptions, setAreaOptions] = useState([])
   const [nombreOriginal, setNombreOriginal] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [successMsg, setSuccessMsg] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
+  const loadData = useCallback(async () => {
+    const [departamento, areas] = await Promise.all([
+      obtenerDepartamentoPorNombre(nombre),
+      obtenerAreas(),
+    ])
+    const valueKey = resolveOptionValueKey(areas, ['id', 'idArea'])
 
-  useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true)
-      setErrorMsg('')
-      try {
-        const [departamento, areas] = await Promise.all([
-          obtenerDepartamentoPorNombre(nombre),
-          obtenerAreas(),
-        ])
-        const valueKey = resolveOptionValueKey(areas, ['id', 'idArea'])
-        setAreaOptions(buildLabeledOptions(areas, { valueKey, labelPrefix: 'Área de ' }))
-        setFormData({
-          idArea: departamento.idArea ? String(departamento.idArea) : '',
-          nombre: departamento.nombre,
-          descripcion: departamento.descripcion,
-          estado: departamento.estado ?? 1,
-        })
-        setNombreOriginal(departamento.nombre)
-      } catch (err) {
-        setErrorMsg(err.message)
-        setTimeout(() => navigate('/organizacion/departamentos/consultar'), 2000)
-      } finally {
-        setIsLoading(false)
-      }
+    return {
+      formData: {
+        idArea: departamento.idArea ? String(departamento.idArea) : '',
+        nombre: departamento.nombre,
+        descripcion: departamento.descripcion,
+        estado: departamento.estado ?? 1,
+      },
+      areaOptions: buildLabeledOptions(areas, { valueKey, labelPrefix: 'Área de ' }),
+      nombreOriginal: departamento.nombre,
     }
+  }, [nombre])
 
-    if (nombre) {
-      loadData()
-    }
-  }, [nombre, navigate])
+  const handleLoadSuccess = useCallback((result) => {
+    setAreaOptions(result?.areaOptions ?? [])
+    setNombreOriginal(result?.nombreOriginal ?? '')
+  }, [])
 
-  const clearFeedback = () => {
-    setSuccessMsg('')
-    setErrorMsg('')
-  }
+  const handleLoadError = useCallback(() => {
+    setTimeout(() => navigate('/organizacion/departamentos/consultar'), 2000)
+  }, [navigate])
 
-  const handleInputChange = createOrganizationEntityInputChangeHandler(setFormData, clearFeedback)
+  const handleSuccess = useCallback(() => {
+    setTimeout(() => navigate('/organizacion/departamentos/consultar'), 1500)
+  }, [navigate])
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    clearFeedback()
+  const submitUpdate = useCallback(
+    (payload) => actualizarDepartamento(nombreOriginal, payload),
+    [nombreOriginal],
+  )
 
-    const validationError = getOrganizationEntityFormError(formData, {
+  const {
+    formData,
+    setFormData,
+    isLoading,
+    isSubmitting,
+    successMsg,
+    errorMsg,
+    clearFeedback,
+    handleInputChange,
+    handleSubmit,
+  } = useOrganizationEntityForm({
+    initialFormData,
+    loadData,
+    loadDeps: [nombre],
+    shouldLoad: Boolean(nombre),
+    onLoadSuccess: handleLoadSuccess,
+    onLoadError: handleLoadError,
+    getValidationOptions: {
       entityLabel: 'departamento',
       nameArticle: 'del',
       requireArea: true,
-    })
-    if (validationError) {
-      setErrorMsg(validationError)
-      setIsSubmitting(false)
-      return
-    }
-
-    try {
-      await actualizarDepartamento(
-        nombreOriginal,
-        getOrganizationEntityPayload(formData, { includeEstado: true, includeArea: true }),
-      )
-      setSuccessMsg('Departamento actualizado correctamente')
-      setTimeout(() => navigate('/organizacion/departamentos/consultar'), 1500)
-    } catch (err) {
-      setErrorMsg(err.message)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+    },
+    getPayloadOptions: { includeEstado: true, includeArea: true },
+    onSubmit: submitUpdate,
+    successMessage: 'Departamento actualizado correctamente',
+    onSuccess: handleSuccess,
+  })
 
   const handleStateChange = (newState) => {
     setFormData((prev) => ({ ...prev, estado: newState }))

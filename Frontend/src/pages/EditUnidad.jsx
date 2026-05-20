@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
@@ -9,144 +9,138 @@ import { obtenerAreas } from '../services/areaService'
 import { obtenerDepartamentos } from '../services/departamentoService'
 import { obtenerSecciones } from '../services/seccionService'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
-import {
-  createOrganizationEntityInputChangeHandler,
-  getOrganizationEntityFormError,
-  getOrganizationEntityPayload,
-} from '../utils/organizationEntityForm'
 import { COLORS } from '../constants/colors'
+import { useOrganizationEntityForm } from '../hooks/useOrganizationEntityForm'
 
 const parentTypeOptions = [
   { value: 'departamento', label: 'Departamento' },
   { value: 'seccion', label: 'Sección' },
 ]
 
+const initialFormData = {
+  idArea: '',
+  idDepartamento: '',
+  idSeccion: '',
+  nombre: '',
+  descripcion: '',
+  estado: 1,
+}
+
 export default function EditUnidad() {
   const navigate = useNavigate()
   const { nombre } = useParams()
-  const [formData, setFormData] = useState({
-    idArea: '',
-    idDepartamento: '',
-    idSeccion: '',
-    nombre: '',
-    descripcion: '',
-    estado: 1,
-  })
   const [parentType, setParentType] = useState('')
   const [areaOptions, setAreaOptions] = useState([])
   const [departmentOptions, setDepartmentOptions] = useState([])
   const [sectionOptions, setSectionOptions] = useState([])
   const [nombreOriginal, setNombreOriginal] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [successMsg, setSuccessMsg] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
+  const loadData = useCallback(async () => {
+    const [unidad, areas, departamentos, secciones] = await Promise.all([
+      obtenerUnidadPorNombre(nombre),
+      obtenerAreas(),
+      obtenerDepartamentos(),
+      obtenerSecciones(),
+    ])
 
-  useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true)
-      setErrorMsg('')
-      try {
-        const [unidad, areas, departamentos, secciones] = await Promise.all([
-          obtenerUnidadPorNombre(nombre),
-          obtenerAreas(),
-          obtenerDepartamentos(),
-          obtenerSecciones(),
-        ])
+    const areaValueKey = resolveOptionValueKey(areas, ['id', 'idArea'])
+    const departamentoValueKey = resolveOptionValueKey(departamentos, ['id', 'idDepartamento'])
+    const seccionValueKey = resolveOptionValueKey(secciones, ['id', 'idSeccion'])
 
-        const areaValueKey = resolveOptionValueKey(areas, ['id', 'idArea'])
-        const departamentoValueKey = resolveOptionValueKey(departamentos, ['id', 'idDepartamento'])
-        const seccionValueKey = resolveOptionValueKey(secciones, ['id', 'idSeccion'])
-
-        setAreaOptions(buildLabeledOptions(areas, { valueKey: areaValueKey, labelPrefix: 'Área de ' }))
-        setDepartmentOptions(
-          buildLabeledOptions(departamentos, { valueKey: departamentoValueKey, labelPrefix: 'Departamento de ' }),
-        )
-        setSectionOptions(buildLabeledOptions(secciones, { valueKey: seccionValueKey, labelPrefix: 'Sección de ' }))
-
-        let resolvedParentType = ''
-        if (unidad.idDepartamento) {
-          resolvedParentType = 'departamento'
-        } else if (unidad.idSeccion) {
-          resolvedParentType = 'seccion'
-        }
-
-        setParentType(resolvedParentType)
-        setFormData({
-          idArea: unidad.idArea ? String(unidad.idArea) : '',
-          idDepartamento: unidad.idDepartamento ? String(unidad.idDepartamento) : '',
-          idSeccion: unidad.idSeccion ? String(unidad.idSeccion) : '',
-          nombre: unidad.nombre,
-          descripcion: unidad.descripcion,
-          estado: unidad.estado ?? 1,
-        })
-        setNombreOriginal(unidad.nombre)
-      } catch (err) {
-        setErrorMsg(err.message)
-        setTimeout(() => navigate('/organizacion/unidades/consultar'), 2000)
-      } finally {
-        setIsLoading(false)
-      }
+    let resolvedParentType = ''
+    if (unidad.idDepartamento) {
+      resolvedParentType = 'departamento'
+    } else if (unidad.idSeccion) {
+      resolvedParentType = 'seccion'
     }
 
-    if (nombre) {
-      loadData()
+    return {
+      formData: {
+        idArea: unidad.idArea ? String(unidad.idArea) : '',
+        idDepartamento: unidad.idDepartamento ? String(unidad.idDepartamento) : '',
+        idSeccion: unidad.idSeccion ? String(unidad.idSeccion) : '',
+        nombre: unidad.nombre,
+        descripcion: unidad.descripcion,
+        estado: unidad.estado ?? 1,
+      },
+      areaOptions: buildLabeledOptions(areas, { valueKey: areaValueKey, labelPrefix: 'Área de ' }),
+      departmentOptions: buildLabeledOptions(departamentos, {
+        valueKey: departamentoValueKey,
+        labelPrefix: 'Departamento de ',
+      }),
+      sectionOptions: buildLabeledOptions(secciones, { valueKey: seccionValueKey, labelPrefix: 'Sección de ' }),
+      parentType: resolvedParentType,
+      nombreOriginal: unidad.nombre,
     }
-  }, [nombre, navigate])
+  }, [nombre])
 
-  const clearFeedback = () => {
-    setSuccessMsg('')
-    setErrorMsg('')
-  }
+  const handleLoadSuccess = useCallback((result) => {
+    setAreaOptions(result?.areaOptions ?? [])
+    setDepartmentOptions(result?.departmentOptions ?? [])
+    setSectionOptions(result?.sectionOptions ?? [])
+    setParentType(result?.parentType ?? '')
+    setNombreOriginal(result?.nombreOriginal ?? '')
+  }, [])
 
-  const handleInputChange = createOrganizationEntityInputChangeHandler(setFormData, clearFeedback)
+  const handleLoadError = useCallback(() => {
+    setTimeout(() => navigate('/organizacion/unidades/consultar'), 2000)
+  }, [navigate])
 
-  const handleParentTypeChange = (event) => {
-    const { value } = event.target
-    clearFeedback()
-    setParentType(value)
-    setFormData((prev) => ({
-      ...prev,
-      idDepartamento: value === 'departamento' ? prev.idDepartamento : '',
-      idSeccion: value === 'seccion' ? prev.idSeccion : '',
-    }))
-  }
+  const handleSuccess = useCallback(() => {
+    setTimeout(() => navigate('/organizacion/unidades/consultar'), 1500)
+  }, [navigate])
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    clearFeedback()
+  const submitUpdate = useCallback(
+    (payload) => actualizarUnidad(nombreOriginal, payload),
+    [nombreOriginal],
+  )
 
-    const validationError = getOrganizationEntityFormError(formData, {
+  const {
+    formData,
+    setFormData,
+    isLoading,
+    isSubmitting,
+    successMsg,
+    errorMsg,
+    clearFeedback,
+    handleInputChange,
+    handleSubmit,
+  } = useOrganizationEntityForm({
+    initialFormData,
+    loadData,
+    loadDeps: [nombre],
+    shouldLoad: Boolean(nombre),
+    onLoadSuccess: handleLoadSuccess,
+    onLoadError: handleLoadError,
+    getValidationOptions: () => ({
       entityLabel: 'unidad',
       nameArticle: 'de la',
       requireArea: true,
       requireParent: true,
       parentType,
-    })
-    if (validationError) {
-      setErrorMsg(validationError)
-      setIsSubmitting(false)
-      return
-    }
+    }),
+    getPayloadOptions: () => ({
+      includeEstado: true,
+      includeArea: true,
+      parentType,
+    }),
+    onSubmit: submitUpdate,
+    successMessage: 'Unidad actualizada correctamente',
+    onSuccess: handleSuccess,
+  })
 
-    try {
-      await actualizarUnidad(
-        nombreOriginal,
-        getOrganizationEntityPayload(formData, {
-          includeEstado: true,
-          includeArea: true,
-          parentType,
-        }),
-      )
-      setSuccessMsg('Unidad actualizada correctamente')
-      setTimeout(() => navigate('/organizacion/unidades/consultar'), 1500)
-    } catch (err) {
-      setErrorMsg(err.message)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+  const handleParentTypeChange = useCallback(
+    (event) => {
+      const { value } = event.target
+      clearFeedback()
+      setParentType(value)
+      setFormData((prev) => ({
+        ...prev,
+        idDepartamento: value === 'departamento' ? prev.idDepartamento : '',
+        idSeccion: value === 'seccion' ? prev.idSeccion : '',
+      }))
+    },
+    [clearFeedback, setFormData, setParentType],
+  )
 
   const handleStateChange = (newState) => {
     setFormData((prev) => ({ ...prev, estado: newState }))

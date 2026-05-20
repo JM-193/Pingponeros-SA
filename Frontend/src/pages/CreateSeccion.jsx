@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
@@ -6,88 +6,62 @@ import PageLayout from '../components/PageLayout'
 import { crearSeccion } from '../services/seccionService'
 import { obtenerAreas } from '../services/areaService'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
-import {
-  createOrganizationEntityInputChangeHandler,
-  getOrganizationEntityFormError,
-  getOrganizationEntityPayload,
-} from '../utils/organizationEntityForm'
 import { COLORS } from '../constants/colors'
+import { useOrganizationEntityForm } from '../hooks/useOrganizationEntityForm'
+
+const initialFormData = {
+  idArea: '',
+  nombre: '',
+  descripcion: '',
+  estado: 1,
+}
 
 export default function CreateSeccion() {
   const navigate = useNavigate()
-  const [formData, setFormData] = useState({
-    idArea: '',
-    nombre: '',
-    descripcion: '',
-    estado: 1,
-  })
   const [areaOptions, setAreaOptions] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [successMsg, setSuccessMsg] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
+  const loadAreas = useCallback(async () => {
+    const areas = await obtenerAreas()
+    const valueKey = resolveOptionValueKey(areas, ['id', 'idArea'])
 
-  useEffect(() => {
-    const loadAreas = async () => {
-      setIsLoading(true)
-      setErrorMsg('')
-      try {
-        const areas = await obtenerAreas()
-        const valueKey = resolveOptionValueKey(areas, ['id', 'idArea'])
-        setAreaOptions(buildLabeledOptions(areas, { valueKey, labelPrefix: 'Área de ' }))
-      } catch (err) {
-        setErrorMsg(err.message)
-      } finally {
-        setIsLoading(false)
-      }
+    return {
+      areaOptions: buildLabeledOptions(areas, { valueKey, labelPrefix: 'Área de ' }),
     }
-
-    loadAreas()
   }, [])
 
-  const clearFeedback = () => {
-    setSuccessMsg('')
-    setErrorMsg('')
-  }
+  const handleLoadSuccess = useCallback((result) => {
+    setAreaOptions(result?.areaOptions ?? [])
+  }, [])
 
-  const handleInputChange = createOrganizationEntityInputChangeHandler(setFormData, clearFeedback)
+  const handleSuccess = useCallback(
+    ({ resetFormData }) => {
+      resetFormData()
+      setTimeout(() => navigate('/organizacion/secciones/consultar'), 1500)
+    },
+    [navigate],
+  )
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    clearFeedback()
-
-    const validationError = getOrganizationEntityFormError(formData, {
+  const {
+    formData,
+    isLoading,
+    isSubmitting,
+    successMsg,
+    errorMsg,
+    handleInputChange,
+    handleSubmit,
+  } = useOrganizationEntityForm({
+    initialFormData,
+    loadData: loadAreas,
+    onLoadSuccess: handleLoadSuccess,
+    getValidationOptions: {
       entityLabel: 'sección',
       nameArticle: 'de la',
       requireArea: true,
-    })
-    if (validationError) {
-      setErrorMsg(validationError)
-      setIsSubmitting(false)
-      return
-    }
-
-    try {
-      await crearSeccion(getOrganizationEntityPayload(formData, { includeEstado: true, includeArea: true }))
-      setSuccessMsg('Sección creada correctamente')
-      handleReset()
-      setTimeout(() => navigate('/organizacion/secciones/consultar'), 1500)
-    } catch (err) {
-      setErrorMsg(err.message)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const handleReset = () => {
-    setFormData({
-      idArea: '',
-      nombre: '',
-      descripcion: '',
-      estado: 1,
-    })
-  }
+    },
+    getPayloadOptions: { includeEstado: true, includeArea: true },
+    onSubmit: crearSeccion,
+    successMessage: 'Sección creada correctamente',
+    onSuccess: handleSuccess,
+  })
 
   if (isLoading) {
     return (

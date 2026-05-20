@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
@@ -7,96 +7,85 @@ import StateToggle from '../components/StateToggle'
 import { actualizarSeccion, obtenerSeccionPorNombre } from '../services/seccionService'
 import { obtenerAreas } from '../services/areaService'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
-import {
-  createOrganizationEntityInputChangeHandler,
-  getOrganizationEntityFormError,
-  getOrganizationEntityPayload,
-} from '../utils/organizationEntityForm'
 import { COLORS } from '../constants/colors'
+import { useOrganizationEntityForm } from '../hooks/useOrganizationEntityForm'
+
+const initialFormData = {
+  idArea: '',
+  nombre: '',
+  descripcion: '',
+  estado: 1,
+}
 
 export default function EditSeccion() {
   const navigate = useNavigate()
   const { nombre } = useParams()
-  const [formData, setFormData] = useState({
-    idArea: '',
-    nombre: '',
-    descripcion: '',
-    estado: 1,
-  })
   const [areaOptions, setAreaOptions] = useState([])
   const [nombreOriginal, setNombreOriginal] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [successMsg, setSuccessMsg] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
+  const loadData = useCallback(async () => {
+    const [seccion, areas] = await Promise.all([
+      obtenerSeccionPorNombre(nombre),
+      obtenerAreas(),
+    ])
+    const valueKey = resolveOptionValueKey(areas, ['id', 'idArea'])
 
-  useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true)
-      setErrorMsg('')
-      try {
-        const [seccion, areas] = await Promise.all([
-          obtenerSeccionPorNombre(nombre),
-          obtenerAreas(),
-        ])
-        const valueKey = resolveOptionValueKey(areas, ['id', 'idArea'])
-        setAreaOptions(buildLabeledOptions(areas, { valueKey, labelPrefix: 'Área de ' }))
-        setFormData({
-          idArea: seccion.idArea ? String(seccion.idArea) : '',
-          nombre: seccion.nombre,
-          descripcion: seccion.descripcion,
-          estado: seccion.estado ?? 1,
-        })
-        setNombreOriginal(seccion.nombre)
-      } catch (err) {
-        setErrorMsg(err.message)
-        setTimeout(() => navigate('/organizacion/secciones/consultar'), 2000)
-      } finally {
-        setIsLoading(false)
-      }
+    return {
+      formData: {
+        idArea: seccion.idArea ? String(seccion.idArea) : '',
+        nombre: seccion.nombre,
+        descripcion: seccion.descripcion,
+        estado: seccion.estado ?? 1,
+      },
+      areaOptions: buildLabeledOptions(areas, { valueKey, labelPrefix: 'Área de ' }),
+      nombreOriginal: seccion.nombre,
     }
+  }, [nombre])
 
-    if (nombre) {
-      loadData()
-    }
-  }, [nombre, navigate])
+  const handleLoadSuccess = useCallback((result) => {
+    setAreaOptions(result?.areaOptions ?? [])
+    setNombreOriginal(result?.nombreOriginal ?? '')
+  }, [])
 
-  const clearFeedback = () => {
-    setSuccessMsg('')
-    setErrorMsg('')
-  }
+  const handleLoadError = useCallback(() => {
+    setTimeout(() => navigate('/organizacion/secciones/consultar'), 2000)
+  }, [navigate])
 
-  const handleInputChange = createOrganizationEntityInputChangeHandler(setFormData, clearFeedback)
+  const handleSuccess = useCallback(() => {
+    setTimeout(() => navigate('/organizacion/secciones/consultar'), 1500)
+  }, [navigate])
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    clearFeedback()
+  const submitUpdate = useCallback(
+    (payload) => actualizarSeccion(nombreOriginal, payload),
+    [nombreOriginal],
+  )
 
-    const validationError = getOrganizationEntityFormError(formData, {
+  const {
+    formData,
+    setFormData,
+    isLoading,
+    isSubmitting,
+    successMsg,
+    errorMsg,
+    clearFeedback,
+    handleInputChange,
+    handleSubmit,
+  } = useOrganizationEntityForm({
+    initialFormData,
+    loadData,
+    loadDeps: [nombre],
+    shouldLoad: Boolean(nombre),
+    onLoadSuccess: handleLoadSuccess,
+    onLoadError: handleLoadError,
+    getValidationOptions: {
       entityLabel: 'sección',
       nameArticle: 'de la',
       requireArea: true,
-    })
-    if (validationError) {
-      setErrorMsg(validationError)
-      setIsSubmitting(false)
-      return
-    }
-
-    try {
-      await actualizarSeccion(
-        nombreOriginal,
-        getOrganizationEntityPayload(formData, { includeEstado: true, includeArea: true }),
-      )
-      setSuccessMsg('Sección actualizada correctamente')
-      setTimeout(() => navigate('/organizacion/secciones/consultar'), 1500)
-    } catch (err) {
-      setErrorMsg(err.message)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+    },
+    getPayloadOptions: { includeEstado: true, includeArea: true },
+    onSubmit: submitUpdate,
+    successMessage: 'Sección actualizada correctamente',
+    onSuccess: handleSuccess,
+  })
 
   const handleStateChange = (newState) => {
     setFormData((prev) => ({ ...prev, estado: newState }))
