@@ -165,4 +165,24 @@ public sealed class AreasEndpointsTests : IClassFixture<TestWebApplicationFactor
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    [Fact]
+    public async Task CrearArea_Returns400ConEstadoInvalido()
+    {
+        var dto = new { Nombre = "Sistemas", Descripcion = "Descripción", Estado = 5 };
+
+        var response = await _client.PostAsJsonAsync("/areas", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ActualizarArea_Returns400ConEstadoInvalido()
+    {
+        var dto = new { Nombre = "sistemas", Descripcion = "Descripción", Estado = 3 };
+
+        var response = await _client.PutAsJsonAsync("/areas/sistemas", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
 }
