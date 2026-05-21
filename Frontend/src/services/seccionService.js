@@ -1,11 +1,34 @@
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5119'
 
 /**
- * Obtiene todas las áreas de la base de datos.
- * @returns {Promise<Array>} Lista de áreas.
+ * Obtiene todas las secciones.
+ * @returns {Promise<Array>} Lista de secciones.
  */
-export async function obtenerAreas() {
-  const response = await fetch(`${API_URL}/areas`, {
+export async function obtenerSecciones() {
+  const response = await fetch(`${API_URL}/secciones`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  })
+
+  if (response.status === 404) {
+    return []
+  }
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}))
+    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
+  }
+
+  return await response.json()
+}
+
+/**
+ * Obtiene una sección por nombre.
+ * @param {string} nombre - Nombre de la sección
+ * @returns {Promise<object>} La sección encontrada.
+ */
+export async function obtenerSeccionPorNombre(nombre) {
+  const response = await fetch(`${API_URL}/secciones/${encodeURIComponent(nombre)}`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   })
@@ -19,31 +42,12 @@ export async function obtenerAreas() {
 }
 
 /**
- * Obtiene un área por nombre.
- * @param {string} nombre - Nombre del área
- * @returns {Promise<object>} El área encontrada.
+ * Crea una nueva sección.
+ * @param {{ nombre: string, descripcion: string, idArea: number, estado?: number }} datos
+ * @returns {Promise<object>} La sección creada.
  */
-export async function obtenerAreaPorNombre(nombre) {
-  const response = await fetch(`${API_URL}/areas/${encodeURIComponent(nombre)}`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
-}
-
-/**
- * Crea una nueva área en la base de datos.
- * @param {{ nombre: string, descripcion: string, estado?: number }} datos
- * @returns {Promise<object>} El área creada.
- */
-export async function crearArea(datos) {
-  const response = await fetch(`${API_URL}/areas`, {
+export async function crearSeccion(datos) {
+  const response = await fetch(`${API_URL}/secciones`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(datos),
@@ -58,12 +62,12 @@ export async function crearArea(datos) {
 }
 
 /**
- * Elimina un área por ID.
- * @param {number} id - ID del área a eliminar
+ * Desactiva una sección por ID.
+ * @param {number} id - ID de la sección a desactivar
  * @returns {Promise<void>}
  */
-export async function eliminarArea(id) {
-  const response = await fetch(`${API_URL}/areas/${id}`, {
+export async function eliminarSeccion(id) {
+  const response = await fetch(`${API_URL}/secciones/${id}`, {
     method: 'DELETE',
   })
 
@@ -74,13 +78,13 @@ export async function eliminarArea(id) {
 }
 
 /**
- * Actualiza un área existente por nombre.
- * @param {string} nombreOriginal - Nombre original del área
- * @param {{ nombre: string, descripcion: string, estado?: number }} datos - Nuevos datos
- * @returns {Promise<object>} El área actualizada.
+ * Actualiza una sección existente por nombre.
+ * @param {string} nombreOriginal - Nombre original de la sección
+ * @param {{ nombre: string, descripcion: string, idArea: number, estado?: number }} datos - Nuevos datos
+ * @returns {Promise<object>} La sección actualizada.
  */
-export async function actualizarArea(nombreOriginal, datos) {
-  const response = await fetch(`${API_URL}/areas/${encodeURIComponent(nombreOriginal)}`, {
+export async function actualizarSeccion(nombreOriginal, datos) {
+  const response = await fetch(`${API_URL}/secciones/${encodeURIComponent(nombreOriginal)}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(datos),

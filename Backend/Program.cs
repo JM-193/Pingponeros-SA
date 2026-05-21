@@ -332,7 +332,7 @@ internal static class Program
             {
                 Nombre = NormalizarNombreArea(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
-                Estado = 1,
+                Estado = dto.Estado ?? 1,
             };
 
             return await InsertarAreaAsync(repo, area, isDev).ConfigureAwait(false);
@@ -403,7 +403,7 @@ internal static class Program
             {
                 Nombre = NormalizarNombreArea(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
-                Estado = 1,
+                Estado = dto.Estado ?? 1,
             };
 
             return await ActualizarAreaAsync(repo, nombreDescodificado, nombre, area, isDev).ConfigureAwait(false);
@@ -459,6 +459,9 @@ internal static class Program
 
         if (string.IsNullOrWhiteSpace(dto.Descripcion))
             return Results.BadRequest(new { mensaje = "La descripción es obligatoria." });
+
+        if (dto.Estado is not null && dto.Estado is not (0 or 1))
+            return Results.BadRequest(new { mensaje = "El estado debe ser 0 (Inactivo) o 1 (Activo)." });
 
         return null;
     }

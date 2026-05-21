@@ -8,9 +8,9 @@ vi.mock('../services/areaService')
 
 describe('ConsultarArea Page', () => {
   const mockAreas = [
-    { id: 1, nombre: 'Administración', descripcion: 'Ãrea de administración' },
-    { id: 2, nombre: 'Contabilidad', descripcion: 'Ãrea de contabilidad' },
-    { id: 3, nombre: 'Recursos Humanos', descripcion: 'Ãrea de RRHH' },
+    { id: 1, nombre: 'Administración', descripcion: 'Ãrea de administración', estado: 1 },
+    { id: 2, nombre: 'Contabilidad', descripcion: 'Ãrea de contabilidad', estado: 1 },
+    { id: 3, nombre: 'Recursos Humanos', descripcion: 'Ãrea de RRHH', estado: 0 },
   ]
 
   beforeEach(() => {

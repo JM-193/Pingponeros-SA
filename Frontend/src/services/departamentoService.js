@@ -1,11 +1,34 @@
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5119'
 
 /**
- * Obtiene todas las áreas de la base de datos.
- * @returns {Promise<Array>} Lista de áreas.
+ * Obtiene todos los departamentos.
+ * @returns {Promise<Array>} Lista de departamentos.
  */
-export async function obtenerAreas() {
-  const response = await fetch(`${API_URL}/areas`, {
+export async function obtenerDepartamentos() {
+  const response = await fetch(`${API_URL}/departamentos`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  })
+
+  if (response.status === 404) {
+    return []
+  }
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}))
+    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
+  }
+
+  return await response.json()
+}
+
+/**
+ * Obtiene un departamento por nombre.
+ * @param {string} nombre - Nombre del departamento
+ * @returns {Promise<object>} El departamento encontrado.
+ */
+export async function obtenerDepartamentoPorNombre(nombre) {
+  const response = await fetch(`${API_URL}/departamentos/${encodeURIComponent(nombre)}`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   })
@@ -19,31 +42,12 @@ export async function obtenerAreas() {
 }
 
 /**
- * Obtiene un área por nombre.
- * @param {string} nombre - Nombre del área
- * @returns {Promise<object>} El área encontrada.
+ * Crea un nuevo departamento.
+ * @param {{ nombre: string, descripcion: string, idArea: number, estado?: number }} datos
+ * @returns {Promise<object>} El departamento creado.
  */
-export async function obtenerAreaPorNombre(nombre) {
-  const response = await fetch(`${API_URL}/areas/${encodeURIComponent(nombre)}`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
-}
-
-/**
- * Crea una nueva área en la base de datos.
- * @param {{ nombre: string, descripcion: string, estado?: number }} datos
- * @returns {Promise<object>} El área creada.
- */
-export async function crearArea(datos) {
-  const response = await fetch(`${API_URL}/areas`, {
+export async function crearDepartamento(datos) {
+  const response = await fetch(`${API_URL}/departamentos`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(datos),
@@ -58,12 +62,12 @@ export async function crearArea(datos) {
 }
 
 /**
- * Elimina un área por ID.
- * @param {number} id - ID del área a eliminar
+ * Desactiva un departamento por ID.
+ * @param {number} id - ID del departamento a desactivar
  * @returns {Promise<void>}
  */
-export async function eliminarArea(id) {
-  const response = await fetch(`${API_URL}/areas/${id}`, {
+export async function eliminarDepartamento(id) {
+  const response = await fetch(`${API_URL}/departamentos/${id}`, {
     method: 'DELETE',
   })
 
@@ -74,13 +78,13 @@ export async function eliminarArea(id) {
 }
 
 /**
- * Actualiza un área existente por nombre.
- * @param {string} nombreOriginal - Nombre original del área
- * @param {{ nombre: string, descripcion: string, estado?: number }} datos - Nuevos datos
- * @returns {Promise<object>} El área actualizada.
+ * Actualiza un departamento existente por nombre.
+ * @param {string} nombreOriginal - Nombre original del departamento
+ * @param {{ nombre: string, descripcion: string, idArea: number, estado?: number }} datos - Nuevos datos
+ * @returns {Promise<object>} El departamento actualizado.
  */
-export async function actualizarArea(nombreOriginal, datos) {
-  const response = await fetch(`${API_URL}/areas/${encodeURIComponent(nombreOriginal)}`, {
+export async function actualizarDepartamento(nombreOriginal, datos) {
+  const response = await fetch(`${API_URL}/departamentos/${encodeURIComponent(nombreOriginal)}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(datos),
