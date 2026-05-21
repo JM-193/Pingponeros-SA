@@ -161,6 +161,59 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     }
 
     [Fact]
+    public async Task CrearUsuario_Returns400ConPrimerNombreConCaracteresInvalidos()
+    {
+        var dto = new { CorreoInstitucional = "juan.perez@ucr.ac.cr", PrimerNombre = "Juan123", PrimerApellido = "Perez", SegundoApellido = "Garcia", Rol = 0 };
+
+        var response = await _client.PostAsJsonAsync("/usuarios", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CrearUsuario_Returns400ConSegundoNombreConCaracteresInvalidos()
+    {
+        var dto = new { CorreoInstitucional = "juan.perez@ucr.ac.cr", PrimerNombre = "Juan", SegundoNombre = "Carl0s", PrimerApellido = "Perez", SegundoApellido = "Garcia", Rol = 0 };
+
+        var response = await _client.PostAsJsonAsync("/usuarios", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CrearUsuario_Returns400ConPrimerApellidoConCaracteresInvalidos()
+    {
+        var dto = new { CorreoInstitucional = "juan.perez@ucr.ac.cr", PrimerNombre = "Juan", PrimerApellido = "Per3z", SegundoApellido = "Garcia", Rol = 0 };
+
+        var response = await _client.PostAsJsonAsync("/usuarios", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CrearUsuario_Returns400ConSegundoApellidoConCaracteresInvalidos()
+    {
+        var dto = new { CorreoInstitucional = "juan.perez@ucr.ac.cr", PrimerNombre = "Juan", PrimerApellido = "Perez", SegundoApellido = "Garc!a", Rol = 0 };
+
+        var response = await _client.PostAsJsonAsync("/usuarios", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CrearUsuario_Returns201CuandoSegundoNombreEsValidoOpcional()
+    {
+        _factory.UsuarioRepo
+            .InsertarConContrasenaAsync(Arg.Any<Usuario>(), Arg.Any<string>())
+            .Returns(Task.CompletedTask);
+        var dto = new { CorreoInstitucional = "maria.garcia@ucr.ac.cr", PrimerNombre = "María", SegundoNombre = "José", PrimerApellido = "García", SegundoApellido = "López", Rol = 0 };
+
+        var response = await _client.PostAsJsonAsync("/usuarios", dto);
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+    }
+
+    [Fact]
     public async Task CrearUsuario_ConvierteSegundoNombreEnNullCuandoVacio()
     {
         Usuario? capturado = null;
