@@ -1,6 +1,7 @@
 // Program.cs
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using DotNetEnv;
 using Oracle.ManagedDataAccess.Client;
 using Scalar.AspNetCore;
@@ -138,6 +139,14 @@ internal static class Program
         });
     }
 
+    private static readonly Regex NombreRegex =
+        new(@"^[A-Za-záéíóúÁÉÍÓÚñÑüÜ]+$",
+            RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+
+    private static readonly Regex CorreoUcrRegex =
+        new(@"^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$",
+            RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+
     private static IResult? ValidarCrearUsuario(CrearUsuarioDto dto)
     {
         if (dto.Rol is not (0 or 1))
@@ -146,11 +155,30 @@ internal static class Program
         if (string.IsNullOrWhiteSpace(dto.CorreoInstitucional))
             return Results.BadRequest(new { mensaje = "El correo institucional es obligatorio." });
 
+        if (!CorreoUcrRegex.IsMatch(dto.CorreoInstitucional.Trim()))
+            return Results.BadRequest(new { mensaje = "El correo debe ser válido. Formato: nombre.apellido@ucr.ac.cr (solo letras antes de @)." });
+
         if (string.IsNullOrWhiteSpace(dto.PrimerNombre))
             return Results.BadRequest(new { mensaje = "El primer nombre es obligatorio." });
 
+        if (!NombreRegex.IsMatch(dto.PrimerNombre.Trim()))
+            return Results.BadRequest(new { mensaje = "El primer nombre solo debe contener letras." });
+
+        if (dto.SegundoNombre is not null && !string.IsNullOrWhiteSpace(dto.SegundoNombre)
+            && !NombreRegex.IsMatch(dto.SegundoNombre.Trim()))
+            return Results.BadRequest(new { mensaje = "El segundo nombre solo debe contener letras." });
+
         if (string.IsNullOrWhiteSpace(dto.PrimerApellido))
             return Results.BadRequest(new { mensaje = "El primer apellido es obligatorio." });
+
+        if (!NombreRegex.IsMatch(dto.PrimerApellido.Trim()))
+            return Results.BadRequest(new { mensaje = "El primer apellido solo debe contener letras." });
+            
+        if (string.IsNullOrWhiteSpace(dto.SegundoApellido))
+            return Results.BadRequest(new { mensaje = "El segundo apellido es obligatorio." });
+        
+        if (!NombreRegex.IsMatch(dto.SegundoApellido.Trim()))
+            return Results.BadRequest(new { mensaje = "El segundo apellido solo debe contener letras." });
 
         return null;
     }
@@ -170,7 +198,7 @@ internal static class Program
             PrimerNombre = Capitalizar(dto.PrimerNombre),
             SegundoNombre = string.IsNullOrWhiteSpace(dto.SegundoNombre) ? null : Capitalizar(dto.SegundoNombre),
             PrimerApellido = Capitalizar(dto.PrimerApellido),
-            SegundoApellido = string.IsNullOrWhiteSpace(dto.SegundoApellido) ? null : Capitalizar(dto.SegundoApellido),
+            SegundoApellido = Capitalizar(dto.SegundoApellido),
             Rol = dto.Rol,
             Estado = 1,
         };
