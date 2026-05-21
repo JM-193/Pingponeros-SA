@@ -19,8 +19,8 @@ describe('areaService', () => {
   describe('obtenerAreas', () => {
     it('obtiene todas las áreas', async () => {
       const mockAreas = [
-        { id: 1, nombre: 'Ãrea 1', descripcion: 'Descripción 1' },
-        { id: 2, nombre: 'Ãrea 2', descripcion: 'Descripción 2' },
+        { id: 1, nombre: 'Área 1', descripcion: 'Descripción 1' },
+        { id: 2, nombre: 'Área 2', descripcion: 'Descripción 2' },
       ]
 
       mockFetch.mockResolvedValueOnce({
@@ -72,7 +72,7 @@ describe('areaService', () => {
         json: async () => ({ id: 1 }),
       })
 
-      await obtenerAreaPorNombre('Ãrea Especial')
+      await obtenerAreaPorNombre('Área Especial')
 
       const url = mockFetch.mock.calls[0][0]
       // Verificar que la URL contiene el nombre codificado
@@ -84,18 +84,18 @@ describe('areaService', () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 404,
-        json: async () => ({ detail: 'Ãrea no encontrada' }),
+        json: async () => ({ detail: 'Área no encontrada' }),
       })
 
       await expect(obtenerAreaPorNombre('NoExiste')).rejects.toThrow(
-        'Ãrea no encontrada',
+        'Área no encontrada',
       )
     })
   })
 
   describe('crearArea', () => {
     it('crea una nueva área', async () => {
-      const newArea = { nombre: 'Nueva Ãrea', descripcion: 'Descripción' }
+      const newArea = { nombre: 'Nueva Área', descripcion: 'Descripción' }
       const createdArea = { id: 3, ...newArea }
 
       mockFetch.mockResolvedValueOnce({
@@ -120,12 +120,12 @@ describe('areaService', () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 400,
-        json: async () => ({ mensaje: 'Ãrea ya existe' }),
+        json: async () => ({ mensaje: 'Área ya existe' }),
       })
 
       await expect(
         crearArea({ nombre: 'Existe', descripcion: 'Desc' }),
-      ).rejects.toThrow('Ãrea ya existe')
+      ).rejects.toThrow('Área ya existe')
     })
   })
 
@@ -145,16 +145,16 @@ describe('areaService', () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 404,
-        json: async () => ({ mensaje: 'Ãrea no encontrada' }),
+        json: async () => ({ mensaje: 'Área no encontrada' }),
       })
 
-      await expect(eliminarArea(999)).rejects.toThrow('Ãrea no encontrada')
+      await expect(eliminarArea(999)).rejects.toThrow('Área no encontrada')
     })
   })
 
   describe('actualizarArea', () => {
     it('actualiza un área existente', async () => {
-      const updatedData = { nombre: 'Ãrea Actualizada', descripcion: 'Nueva desc' }
+      const updatedData = { nombre: 'Área Actualizada', descripcion: 'Nueva desc' }
       const response = { id: 1, ...updatedData }
 
       mockFetch.mockResolvedValueOnce({
@@ -162,7 +162,7 @@ describe('areaService', () => {
         json: async () => response,
       })
 
-      const result = await actualizarArea('Ãrea Original', updatedData)
+      const result = await actualizarArea('Área Original', updatedData)
 
       expect(result).toEqual(response)
       expect(mockFetch).toHaveBeenCalledWith(
