@@ -26,6 +26,7 @@ public sealed class RepositoriesTests
         q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<Area>>>>())
             .Returns(ci =>
             {
+                ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
                 var map = (Func<DbDataReader, Task<List<Area>>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
@@ -42,7 +43,12 @@ public sealed class RepositoriesTests
     public async Task AreaRepository_ExisteNombreAsync_ReturnsTrueWhenExists()
     {
         var q = Substitute.For<IQueryExecutor>();
-        q.ExecuteScalarAsync(Arg.Any<Func<OracleConnection, OracleCommand>>()).Returns(1);
+        q.ExecuteScalarAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
+            .Returns(ci =>
+            {
+                ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
+                return Task.FromResult<object?>(1);
+            });
 
         var repo = new AreaRepository(q);
         var exists = await repo.ExisteNombreAsync("Area A");
@@ -54,7 +60,12 @@ public sealed class RepositoriesTests
     public async Task AreaRepository_InsertarAsync_ReturnsInsertedId()
     {
         var q = Substitute.For<IQueryExecutor>();
-        q.ExecuteScalarAsync(Arg.Any<Func<OracleConnection, OracleCommand>>()).Returns(new OracleDecimal(42));
+        q.ExecuteScalarAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
+            .Returns(ci =>
+            {
+                ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
+                return Task.FromResult<object?>(new OracleDecimal(42));
+            });
 
         var repo = new AreaRepository(q);
         var id = await repo.InsertarAsync(new Area { Nombre = "X", Descripcion = "Y", Estado = 1 });
@@ -75,7 +86,12 @@ public sealed class RepositoriesTests
     public async Task AreaRepository_ExisteNombreAsync_ReturnsFalseWhenNotExists()
     {
         var q = Substitute.For<IQueryExecutor>();
-        q.ExecuteScalarAsync(Arg.Any<Func<OracleConnection, OracleCommand>>()).Returns(0);
+        q.ExecuteScalarAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
+            .Returns(ci =>
+            {
+                ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
+                return Task.FromResult<object?>(0);
+            });
 
         var repo = new AreaRepository(q);
         var exists = await repo.ExisteNombreAsync("NoExiste");
@@ -96,6 +112,7 @@ public sealed class RepositoriesTests
         q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<Area>>>>())
             .Returns(ci =>
             {
+                ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
                 var map = (Func<DbDataReader, Task<List<Area>>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
@@ -121,6 +138,7 @@ public sealed class RepositoriesTests
         q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Area?>>>())
             .Returns(ci =>
             {
+                ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
                 var map = (Func<DbDataReader, Task<Area?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
@@ -147,6 +165,7 @@ public sealed class RepositoriesTests
         q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Area?>>>())
             .Returns(ci =>
             {
+                ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
                 var map = (Func<DbDataReader, Task<Area?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
@@ -162,7 +181,12 @@ public sealed class RepositoriesTests
     public async Task AreaRepository_ActualizarAsync_ReturnsTrueWhenUpdated()
     {
         var q = Substitute.For<IQueryExecutor>();
-        q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>()).Returns(1);
+        q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
+            .Returns(ci =>
+            {
+                ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
+                return Task.FromResult(1);
+            });
 
         var repo = new AreaRepository(q);
         var updated = await repo.ActualizarAsync("Sistemas", new Area { Nombre = "Sistemas", Descripcion = "Nueva desc", Estado = 1 });
@@ -174,7 +198,12 @@ public sealed class RepositoriesTests
     public async Task AreaRepository_ActualizarAsync_ReturnsFalseWhenNotFound()
     {
         var q = Substitute.For<IQueryExecutor>();
-        q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>()).Returns(0);
+        q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
+            .Returns(ci =>
+            {
+                ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
+                return Task.FromResult(0);
+            });
 
         var repo = new AreaRepository(q);
         var updated = await repo.ActualizarAsync("NoExiste", new Area { Nombre = "NoExiste", Descripcion = "Desc", Estado = 1 });
@@ -195,7 +224,12 @@ public sealed class RepositoriesTests
     public async Task AreaRepository_DesactivarAsync_ReturnsTrueWhenDeactivated()
     {
         var q = Substitute.For<IQueryExecutor>();
-        q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>()).Returns(1);
+        q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
+            .Returns(ci =>
+            {
+                ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
+                return Task.FromResult(1);
+            });
 
         var repo = new AreaRepository(q);
         var result = await repo.DesactivarAsync(1);
@@ -207,7 +241,12 @@ public sealed class RepositoriesTests
     public async Task AreaRepository_DesactivarAsync_ReturnsFalseWhenNotFound()
     {
         var q = Substitute.For<IQueryExecutor>();
-        q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>()).Returns(0);
+        q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
+            .Returns(ci =>
+            {
+                ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
+                return Task.FromResult(0);
+            });
 
         var repo = new AreaRepository(q);
         var result = await repo.DesactivarAsync(99);
