@@ -93,23 +93,35 @@ internal sealed class UsuarioRepository : IUsuarioRepository
     // ------------------------------------------------------------------ //
     public async Task InsertarConContrasenaAsync(Usuario usuario, string contrasenaHash)
     {
-        // SQL for inserting a usuario (kept in comments as the operation is handled transactionally elsewhere)
+        // Insertar usuario
+        await InsertarAsync(usuario).ConfigureAwait(false);
 
-        // Transactional operations are performed using the query executor directly against the connection
-        await _q.QueryAsync(connection =>
+        // Insertar contraseña
+        await InsertarContrase\u00f1aAsync(usuario.CorreoInstitucional, contrasenaHash).ConfigureAwait(false);
+    }
+
+    // ------------------------------------------------------------------ //
+    // INSERT CONTRASEÑA (para usuario existente)                         //
+    // ------------------------------------------------------------------ //
+    public async Task InsertarContrase\u00f1aAsync(string correo, string contrasenaHash)
+    {
+        const string sql = """
+            INSERT INTO CONTRASENAS
+                (CORREO_INSTITUCIONAL, CONTRASENA_HASH, FECHA_CREACION, FECHA_EXPIRACION)
+            VALUES
+                (:correo, :hash, SYSDATE, SYSDATE + 2)
+            """;
+
+        await _q.ExecuteAsync(connection =>
         {
-            var cmd = new OracleCommand("BEGIN", connection)
+            var cmd = new OracleCommand(sql, connection)
             {
                 BindByName = true,
             };
+            cmd.Parameters.Add("correo", correo);
+            cmd.Parameters.Add("hash", contrasenaHash);
             return cmd;
-        }, async reader =>
-        {
-            // Use ExecuteAsync for transactional sequences; implementor may expose transaction helpers.
-            await Task.CompletedTask.ConfigureAwait(false);
-            return 0;
         }).ConfigureAwait(false);
-        // For tests we will exercise InsertarConContrasenaAsync via integration or through a higher-level test.
     }
 
     // ------------------------------------------------------------------ //
