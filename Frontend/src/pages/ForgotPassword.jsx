@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
+import { recuperarContrasena } from '../services/authService'
 import { COLORS } from '../constants/colors'
 
 export default function ForgotPassword() {
@@ -8,15 +9,16 @@ export default function ForgotPassword() {
   const [email, setEmail] = useState('')
   const [errors, setErrors] = useState({})
   const [sent, setSent] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     const newErrors = {}
 
     if (!email.trim()) {
       newErrors.email = 'El correo es requerido'
-    } else if (!email.endsWith('@ucr.ac.cr')) {
-      newErrors.email = 'El correo debe terminar en @ucr.ac.cr'
+    } else if (!/^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$/.test(email.trim())) {
+      newErrors.email = 'El correo debe ser válido. Formato: nombre.apellidos@ucr.ac.cr (solo letras antes de @)'
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -25,8 +27,16 @@ export default function ForgotPassword() {
     }
 
     setErrors({})
-    setSent(true)
-    // TODO: llamada al endpoint de recuperación de contraseña
+    setLoading(true)
+
+    try {
+      await recuperarContrasena(email.trim().toLowerCase())
+      setSent(true)
+    } catch (err) {
+      setErrors({ submit: err.message })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -50,7 +60,7 @@ export default function ForgotPassword() {
           lineHeight: 1.5,
         }}
       >
-        Se enviará un código a su correo institucional para ayudarle a restablecer su contraseña.
+        Se enviará la información necesaria para restablecer su contraseña al correo institucional proporcionado.
       </p>
 
       {sent ? (
@@ -65,7 +75,7 @@ export default function ForgotPassword() {
             marginBottom: '24px',
           }}
         >
-          Si su correo está registrado, recibirá las instrucciones en breve.
+          Si su correo está registrado, recibirá la información en breve.
         </div>
       ) : (
         <form
@@ -109,20 +119,28 @@ export default function ForgotPassword() {
 
           <button
             type="submit"
+            disabled={loading}
             style={{
               padding: '14px',
-              backgroundColor: COLORS.authBtn,
+              backgroundColor: loading ? COLORS.borderLight : COLORS.authBtn,
               color: COLORS.white,
               border: 'none',
               borderRadius: '4px',
               fontSize: '16px',
               fontWeight: 600,
-              cursor: 'pointer',
+              cursor: loading ? 'not-allowed' : 'pointer',
               letterSpacing: '0.01em',
+              opacity: loading ? 0.6 : 1,
             }}
           >
-            Restablecer Contraseña
+            {loading ? 'Enviando...' : 'Restablecer Contraseña'}
           </button>
+
+          {errors.submit && (
+            <div style={{ fontSize: '12px', color: COLORS.danger, marginTop: '8px' }}>
+              {errors.submit}
+            </div>
+          )}
         </form>
       )}
 
