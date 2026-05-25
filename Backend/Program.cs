@@ -7,6 +7,8 @@ using Oracle.ManagedDataAccess.Client;
 using Scalar.AspNetCore;
 using Backend.DTOs;
 using Backend.Repositories;
+using Backend.Services;
+using Backend.Helpers;
 
 namespace Backend;
 
@@ -55,6 +57,7 @@ internal static class Program
             new UsuarioRepository(sp.GetRequiredService<IQueryExecutor>()));
         builder.Services.AddScoped<IAreaRepository>(sp =>
             new AreaRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<IEmailService, EmailService>();
         builder.Services.AddOpenApi();
         builder.Services.AddCors(options =>
             options.AddPolicy("FrontendOrigin", policy =>
@@ -123,7 +126,7 @@ internal static class Program
     private static void MapUsuariosCreate(RouteGroupBuilder usuarios, bool isDev)
     {
         // POST /usuarios — Crea un nuevo usuario con contraseña temporal
-        usuarios.MapPost("/", async (CrearUsuarioDto dto, IUsuarioRepository repo) =>
+        usuarios.MapPost("/", async (CrearUsuarioDto dto, IUsuarioRepository repo, IEmailService emailService) =>
         {
             var validationResult = ValidarCrearUsuario(dto);
             if (validationResult is not null)
@@ -131,10 +134,10 @@ internal static class Program
 
             var usuario = CrearUsuarioDesdeDto(dto);
 
-            var contrasenaTemp = GenerarContrasenaTemporal();
+            var contrasenaTemp = EmailTemplateHelper.GenerarContrasenaTemporal();
             var hash = BCrypt.Net.BCrypt.HashPassword(contrasenaTemp);
 
-            return await CrearUsuarioAsync(repo, usuario, contrasenaTemp, hash, isDev)
+            return await CrearUsuarioAsync(repo, emailService, usuario, contrasenaTemp, hash, isDev)
                 .ConfigureAwait(false);
         });
     }
@@ -173,10 +176,10 @@ internal static class Program
 
         if (!NombreRegex.IsMatch(dto.PrimerApellido.Trim()))
             return Results.BadRequest(new { mensaje = "El primer apellido solo debe contener letras." });
-            
+
         if (string.IsNullOrWhiteSpace(dto.SegundoApellido))
             return Results.BadRequest(new { mensaje = "El segundo apellido es obligatorio." });
-        
+
         if (!NombreRegex.IsMatch(dto.SegundoApellido.Trim()))
             return Results.BadRequest(new { mensaje = "El segundo apellido solo debe contener letras." });
 
@@ -210,6 +213,7 @@ internal static class Program
 
     private static async Task<IResult> CrearUsuarioAsync(
         IUsuarioRepository repo,
+        IEmailService emailService,
         Backend.Models.Usuario usuario,
         string contrasenaTemp,
         string hash,
@@ -218,11 +222,20 @@ internal static class Program
         try
         {
             await repo.InsertarConContrasenaAsync(usuario, hash).ConfigureAwait(false);
+
+            // Enviar correo con contraseña temporal (en background, sin esperar)
+            var asunto = "Bienvenido a Pingponeros - Contraseña Temporal";
+            var apellidos = $"{usuario.PrimerApellido} {usuario.SegundoApellido}";
+            var cuerpo = EmailTemplateHelper.GenerarCuerpoCorreoBienvenida(usuario.PrimerNombre, apellidos, usuario.CorreoInstitucional, contrasenaTemp);
+            _ = emailService.EnviarAsync(usuario.CorreoInstitucional, asunto, cuerpo);
+
+            var respuestaMensaje = $"Usuario '{usuario.PrimerNombre} {usuario.PrimerApellido}' creado correctamente.";
+
             return Results.Created(
                 $"/usuarios/{Uri.EscapeDataString(usuario.CorreoInstitucional)}",
                 new
                 {
-                    mensaje = $"Usuario '{usuario.PrimerNombre} {usuario.PrimerApellido}' creado correctamente.",
+                    mensaje = respuestaMensaje,
                     contrasenaTemporal = contrasenaTemp,
                 });
         }
@@ -472,41 +485,92 @@ internal static class Program
     private static void MapAuth(WebApplication app, bool isDev)
     {
         app.MapPost("/auth/login", async (LoginDto dto, IUsuarioRepository repo) =>
+            await HandleAuthLogin(dto, repo, isDev).ConfigureAwait(false));
+
+        app.MapPost("/auth/recuperar-contrasena", async (RecuperarContraseñaDto dto, IUsuarioRepository repo, IEmailService emailService) =>
+            await HandleRecuperarContrasena(dto.CorreoInstitucional, repo, emailService, isDev).ConfigureAwait(false));
+    }
+
+    private static async Task<IResult> HandleAuthLogin(LoginDto dto, IUsuarioRepository repo, bool isDev)
+    {
+        if (string.IsNullOrWhiteSpace(dto.CorreoInstitucional) ||
+            string.IsNullOrWhiteSpace(dto.Contrasena))
+            return Results.BadRequest(new { mensaje = "Correo y contraseña son obligatorios." });
+
+        try
         {
-            if (string.IsNullOrWhiteSpace(dto.CorreoInstitucional) ||
-                string.IsNullOrWhiteSpace(dto.Contrasena))
-                return Results.BadRequest(new { mensaje = "Correo y contraseña son obligatorios." });
+            var hash = await repo.ObtenerHashMasRecienteAsync(dto.CorreoInstitucional.Trim())
+                                 .ConfigureAwait(false);
 
-            try
+            if (hash is null || !BCrypt.Net.BCrypt.Verify(dto.Contrasena, hash))
+                return Results.Json(new { mensaje = "Correo o contraseña incorrectos." }, statusCode: 401);
+
+            var usuario = await repo.ObtenerPorCorreoAsync(dto.CorreoInstitucional.Trim())
+                                    .ConfigureAwait(false);
+
+            return Results.Ok(new
             {
-                var hash = await repo.ObtenerHashMasRecienteAsync(dto.CorreoInstitucional.Trim())
-                                     .ConfigureAwait(false);
+                correoInstitucional = usuario!.CorreoInstitucional,
+                primerNombre = usuario.PrimerNombre,
+                segundoNombre = usuario.SegundoNombre,
+                primerApellido = usuario.PrimerApellido,
+                segundoApellido = usuario.SegundoApellido,
+                rol = usuario.Rol,
+                estado = usuario.Estado,
+            });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
 
-                if (hash is null || !BCrypt.Net.BCrypt.Verify(dto.Contrasena, hash))
-                    return Results.Json(new { mensaje = "Correo o contraseña incorrectos." }, statusCode: 401);
+    private static async Task<IResult> HandleRecuperarContrasena(
+        string correoInstitucional,
+        IUsuarioRepository repo,
+        IEmailService emailService,
+        bool isDev)
+    {
+        if (string.IsNullOrWhiteSpace(correoInstitucional))
+            return Results.BadRequest(new { mensaje = "El correo institucional es obligatorio." });
 
-                var usuario = await repo.ObtenerPorCorreoAsync(dto.CorreoInstitucional.Trim())
-                                        .ConfigureAwait(false);
+        try
+        {
+            var usuario = await repo.ObtenerPorCorreoAsync(correoInstitucional.Trim())
+                                    .ConfigureAwait(false);
 
-                return Results.Ok(new
-                {
-                    correoInstitucional = usuario!.CorreoInstitucional,
-                    primerNombre = usuario.PrimerNombre,
-                    segundoNombre = usuario.SegundoNombre,
-                    primerApellido = usuario.PrimerApellido,
-                    segundoApellido = usuario.SegundoApellido,
-                    rol = usuario.Rol,
-                    estado = usuario.Estado,
-                });
-            }
-            catch (OracleException ex)
-            {
-                var msg = isDev
-                    ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                    : TraducirErrorOracle(ex.Number);
-                return Results.Json(new { mensaje = msg }, statusCode: 500);
-            }
-        });
+            if (usuario is null)
+                // No revelar si el correo existe o no por seguridad
+                return Results.Ok(new { mensaje = "Si el correo existe en nuestro sistema, recibirás una nueva contraseña temporal." });
+
+            var contrasenaTemporal = EmailTemplateHelper.GenerarContrasenaTemporal();
+            var hash = BCrypt.Net.BCrypt.HashPassword(contrasenaTemporal);
+
+            await repo.InsertarContrase\u00f1aAsync(usuario.CorreoInstitucional, hash).ConfigureAwait(false);
+
+            // Enviar correo con contraseña temporal (en background, sin esperar)
+            EnviarCorreoRecuperacion(emailService, usuario, contrasenaTemporal);
+
+            return Results.Ok(new { mensaje = "Si el correo existe en nuestro sistema, recibirás una nueva contraseña temporal." });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
+
+    private static void EnviarCorreoRecuperacion(IEmailService emailService, Backend.Models.Usuario usuario, string contrasenaTemporal)
+    {
+        var asunto = "Recuperación de Contraseña - Pingponeros";
+        var apellidos = $"{usuario.PrimerApellido} {usuario.SegundoApellido}";
+        var cuerpo = EmailTemplateHelper.GenerarCuerpoCorreoRecuperacion(usuario.PrimerNombre, apellidos, contrasenaTemporal);
+        _ = emailService.EnviarAsync(usuario.CorreoInstitucional, asunto, cuerpo);
     }
 
     private static string TraducirErrorOracle(int numero) => numero switch
@@ -523,31 +587,7 @@ internal static class Program
         _ => "No se pudo completar la operación. Intente nuevamente.",
     };
 
-    private static string GenerarContrasenaTemporal()
-    {
-        const string upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        const string lower = "abcdefghijklmnopqrstuvwxyz";
-        const string digits = "0123456789";
-        const string special = "!@#$%&*";
-        const string all = upper + lower + digits + special;
 
-        var chars = new char[12];
-        chars[0] = upper[System.Security.Cryptography.RandomNumberGenerator.GetInt32(upper.Length)];
-        chars[1] = lower[System.Security.Cryptography.RandomNumberGenerator.GetInt32(lower.Length)];
-        chars[2] = digits[System.Security.Cryptography.RandomNumberGenerator.GetInt32(digits.Length)];
-        chars[3] = special[System.Security.Cryptography.RandomNumberGenerator.GetInt32(special.Length)];
-
-        for (var i = 4; i < chars.Length; i++)
-            chars[i] = all[System.Security.Cryptography.RandomNumberGenerator.GetInt32(all.Length)];
-
-        // Fisher-Yates shuffle usando RNG criptográfico
-        for (var i = chars.Length - 1; i > 0; i--)
-        {
-            var j = System.Security.Cryptography.RandomNumberGenerator.GetInt32(i + 1);
-            (chars[i], chars[j]) = (chars[j], chars[i]);
-        }
-
-        return new string(chars);
-    }
 }
+
 
