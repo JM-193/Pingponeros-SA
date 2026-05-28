@@ -59,4 +59,25 @@ public sealed class ProgramHelpersTests
             .GetMethod("GenerarContrasenaTemporal", BindingFlags.NonPublic | BindingFlags.Static);
         return (string)method!.Invoke(null, Array.Empty<object>())!;
     }
+
+    [Fact]
+    public void GenerarCuerpoCorreoBienvenida_ContieneNombreCorreoYContrasena()
+    {
+        var resultado = Backend.Helpers.EmailTemplateHelper.GenerarCuerpoCorreoBienvenida(
+            "Ana", "Pérez", "ana@ucr.ac.cr", "TempPass1!");
+
+        Assert.Contains("Ana Pérez", resultado);
+        Assert.Contains("ana@ucr.ac.cr", resultado);
+        Assert.Contains("TempPass1!", resultado);
+    }
+
+    [Fact]
+    public void GenerarCuerpoCorreoRecuperacion_ContieneNombreYContrasena()
+    {
+        var resultado = Backend.Helpers.EmailTemplateHelper.GenerarCuerpoCorreoRecuperacion(
+            "Carlos", "López", "TempPass2@");
+
+        Assert.Contains("Carlos López", resultado);
+        Assert.Contains("TempPass2@", resultado);
+    }
 }
