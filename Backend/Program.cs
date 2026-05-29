@@ -576,7 +576,7 @@ internal static class Program
         _ = emailService.EnviarAsync(usuario.CorreoInstitucional, asunto, cuerpo);
     }
 
-    private static IResult? ValidarComplejidadContrasena(string contrasena)
+    private static string? ValidarComplejidadContrasena(string contrasena)
     {
         var requisitos = new List<string>();
 
@@ -592,13 +592,16 @@ internal static class Program
         if (!contrasena.Any(char.IsDigit))
             requisitos.Add("un número");
 
-        if (!contrasena.Any(c => "!@#$%&*".Contains(c)))
+        if (!contrasena.Any(c => "!@#$%&*".Contains(c, StringComparison.Ordinal)))
             requisitos.Add("un carácter especial (!@#$%&*)");
 
-        if (requisitos.Count > 0)
-            return Results.BadRequest(new { mensaje = $"La contraseña debe contener: {string.Join(", ", requisitos)}" });
+        return requisitos.Count > 0 ? $"La contraseña debe contener: {string.Join(", ", requisitos)}" : null;
+    }
 
-        return null;
+    private static IResult? ValidarComplejidadContraseñaResult(string contrasena)
+    {
+        var error = ValidarComplejidadContrasena(contrasena);
+        return error is not null ? Results.BadRequest(new { mensaje = error }) : null;
     }
 
     private static async Task<IResult> HandleCambiarContrasena(
@@ -619,7 +622,7 @@ internal static class Program
         if (dto.ContraseñaNueva.Equals(dto.ContraseñaActual, StringComparison.Ordinal))
             return Results.BadRequest(new { mensaje = "La nueva contraseña debe ser diferente a la actual." });
 
-        var validacionContrasena = ValidarComplejidadContrasena(dto.ContraseñaNueva);
+        var validacionContrasena = ValidarComplejidadContraseñaResult(dto.ContraseñaNueva);
         if (validacionContrasena is not null)
             return validacionContrasena;
 

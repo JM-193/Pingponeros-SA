@@ -55,9 +55,16 @@ public sealed class ProgramHelpersTests
 
     private static string GenerarContrasenaTemporal()
     {
-        var method = typeof(Backend.Program)
-            .GetMethod("GenerarContrasenaTemporal", BindingFlags.NonPublic | BindingFlags.Static);
+        var method = typeof(Backend.Helpers.EmailTemplateHelper)
+            .GetMethod("GenerarContrasenaTemporal", BindingFlags.Public | BindingFlags.Static);
         return (string)method!.Invoke(null, Array.Empty<object>())!;
+    }
+
+    private static string? ValidarComplejidadContrasena(string contrasena)
+    {
+        var method = typeof(Backend.Program)
+            .GetMethod("ValidarComplejidadContrasena", BindingFlags.NonPublic | BindingFlags.Static);
+        return (string?)method!.Invoke(null, new object[] { contrasena });
     }
 
     [Fact]
@@ -79,5 +86,63 @@ public sealed class ProgramHelpersTests
 
         Assert.Contains("Carlos López", resultado);
         Assert.Contains("TempPass2@", resultado);
+    }
+
+    [Fact]
+    public void GenerarCuerpoCorreoCambioContrasena_ContieneNombreYMensaje()
+    {
+        var resultado = Backend.Helpers.EmailTemplateHelper.GenerarCuerpoCorreoCambioContrasena(
+            "Juan", "García");
+
+        Assert.Contains("Juan García", resultado);
+        Assert.Contains("Contraseña Actualizada", resultado);
+    }
+
+    [Fact]
+    public void ValidarComplejidadContrasena_AceptaContraseñaValida()
+    {
+        var resultado = ValidarComplejidadContrasena("ValidPass123!");
+        Assert.Null(resultado);
+    }
+
+    [Fact]
+    public void ValidarComplejidadContrasena_RechazaContraseñaSinMayuscula()
+    {
+        var resultado = ValidarComplejidadContrasena("validpass123!");
+        Assert.NotNull(resultado);
+        Assert.Contains("una mayúscula", resultado!);
+    }
+
+    [Fact]
+    public void ValidarComplejidadContrasena_RechazaContraseñaSinMinuscula()
+    {
+        var resultado = ValidarComplejidadContrasena("VALIDPASS123!");
+        Assert.NotNull(resultado);
+        Assert.Contains("una minúscula", resultado!);
+    }
+
+    [Fact]
+    public void ValidarComplejidadContrasena_RechazaContraseñaSinNumero()
+    {
+        var resultado = ValidarComplejidadContrasena("ValidPassword!");
+        Assert.NotNull(resultado);
+        Assert.Contains("un número", resultado!);
+    }
+
+    [Fact]
+    public void ValidarComplejidadContrasena_RechazaContraseñaSinCaracterEspecial()
+    {
+        var resultado = ValidarComplejidadContrasena("ValidPass123");
+        Assert.NotNull(resultado);
+        Assert.Contains("un carácter especial", resultado!);
+    }
+
+    [Fact]
+    public void ValidarComplejidadContrasena_RechazaContraseñaCortaSinRequisitos()
+    {
+        var resultado = ValidarComplejidadContrasena("short");
+        Assert.NotNull(resultado);
+        // Debe contener todos los requisitos faltantes
+        Assert.Contains("mínimo 12 caracteres", resultado!);
     }
 }
