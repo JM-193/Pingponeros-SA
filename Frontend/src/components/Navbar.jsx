@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { cerrarSesion } from '../services/session'
+import { cerrarSesion, obtenerSesion } from '../services/session'
 import { COLORS } from '../constants/colors'
 
 const NAV_ITEMS = [
@@ -59,11 +59,20 @@ const NAV_ITEMS = [
 export default function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
+  const sesion = obtenerSesion()
   const [menuOpen, setMenuOpen] = useState(false)
   const [openMenus, setOpenMenus] = useState({})
   const closeTimerRef = useRef(null)
   const profileMenuButtonRef = useRef(null)
   const profileMenuRef = useRef(null)
+  const nombreCompleto = [
+    sesion?.primerNombre,
+    sesion?.segundoNombre,
+    sesion?.primerApellido,
+    sesion?.segundoApellido,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   useEffect(() => {
     const handlePointerDown = (event) => {
@@ -367,7 +376,7 @@ export default function Navbar() {
               backgroundColor: COLORS.white,
               borderRadius: '6px',
               boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-              minWidth: '160px',
+              minWidth: '240px',
               zIndex: 100,
               overflow: 'hidden',
             }}
@@ -401,8 +410,11 @@ export default function Navbar() {
                 </svg>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                <span style={{ fontSize: '15px', fontWeight: 700, color: COLORS.textDark, lineHeight: 1.2 }}>
-                  Mi Perfil
+                <span style={{ fontSize: '15px', fontWeight: 700, color: COLORS.textDark, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {nombreCompleto || 'Mi Perfil'}
+                </span>
+                <span style={{ fontSize: '12px', color: COLORS.textDark, opacity: 0.8, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {sesion?.correoInstitucional ?? 'correo no disponible'}
                 </span>
               </div>
             </div>
