@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
@@ -13,7 +13,10 @@ import StatusMessage from '../components/StatusMessage'
 
 export default function ChangePassword() {
   const navigate = useNavigate()
-  const [userEmail, setUserEmail] = useState('')
+  const [userEmail] = useState(() => {
+    const sesion = obtenerSesion()
+    return sesion?.correoInstitucional ?? ''
+  })
   const [formData, setFormData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -22,13 +25,6 @@ export default function ChangePassword() {
   const [errors, setErrors] = useState({})
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    const sesion = obtenerSesion()
-    if (sesion && sesion.correoInstitucional) {
-      setUserEmail(sesion.correoInstitucional)
-    }
-  }, [])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target

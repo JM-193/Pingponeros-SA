@@ -75,7 +75,7 @@ export function useOrganizationEntityForm({
     return () => {
       isActive = false
     }
-  }, [loadData, shouldLoad, onLoadSuccess, onLoadError, ...loadDeps])
+  }, [loadData, shouldLoad, onLoadSuccess, onLoadError, loadDeps])
 
   const resolveOptions = useCallback((value) => {
     if (typeof value === 'function') {
