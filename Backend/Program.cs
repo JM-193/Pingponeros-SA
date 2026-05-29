@@ -489,6 +489,9 @@ internal static class Program
 
         app.MapPost("/auth/recuperar-contrasena", async (RecuperarContraseñaDto dto, IUsuarioRepository repo, IEmailService emailService) =>
             await HandleRecuperarContrasena(dto.CorreoInstitucional, repo, emailService, isDev).ConfigureAwait(false));
+
+        app.MapPost("/auth/cambiar-contrasena", async (CambiarContraseñaDto dto, IUsuarioRepository repo, IEmailService emailService) =>
+            await HandleCambiarContrasena(dto, repo, emailService, isDev).ConfigureAwait(false));
     }
 
     private static async Task<IResult> HandleAuthLogin(LoginDto dto, IUsuarioRepository repo, bool isDev)
@@ -570,6 +573,92 @@ internal static class Program
         var asunto = "Recuperación de Contraseña - Pingponeros";
         var apellidos = $"{usuario.PrimerApellido} {usuario.SegundoApellido}";
         var cuerpo = EmailTemplateHelper.GenerarCuerpoCorreoRecuperacion(usuario.PrimerNombre, apellidos, contrasenaTemporal);
+        _ = emailService.EnviarAsync(usuario.CorreoInstitucional, asunto, cuerpo);
+    }
+
+    private static IResult? ValidarComplejidadContrasena(string contrasena)
+    {
+        var requisitos = new List<string>();
+
+        if (contrasena.Length < 12)
+            requisitos.Add("mínimo 12 caracteres");
+
+        if (!contrasena.Any(char.IsUpper))
+            requisitos.Add("una mayúscula");
+
+        if (!contrasena.Any(char.IsLower))
+            requisitos.Add("una minúscula");
+
+        if (!contrasena.Any(char.IsDigit))
+            requisitos.Add("un número");
+
+        if (!contrasena.Any(c => "!@#$%&*".Contains(c)))
+            requisitos.Add("un carácter especial (!@#$%&*)");
+
+        if (requisitos.Count > 0)
+            return Results.BadRequest(new { mensaje = $"La contraseña debe contener: {string.Join(", ", requisitos)}" });
+
+        return null;
+    }
+
+    private static async Task<IResult> HandleCambiarContrasena(
+        CambiarContraseñaDto dto,
+        IUsuarioRepository repo,
+        IEmailService emailService,
+        bool isDev)
+    {
+        if (string.IsNullOrWhiteSpace(dto.CorreoInstitucional))
+            return Results.BadRequest(new { mensaje = "El correo institucional es obligatorio." });
+
+        if (string.IsNullOrWhiteSpace(dto.ContraseñaActual))
+            return Results.BadRequest(new { mensaje = "La contraseña actual es obligatoria." });
+
+        if (string.IsNullOrWhiteSpace(dto.ContraseñaNueva))
+            return Results.BadRequest(new { mensaje = "La nueva contraseña es obligatoria." });
+
+        if (dto.ContraseñaNueva.Equals(dto.ContraseñaActual, StringComparison.Ordinal))
+            return Results.BadRequest(new { mensaje = "La nueva contraseña debe ser diferente a la actual." });
+
+        var validacionContrasena = ValidarComplejidadContrasena(dto.ContraseñaNueva);
+        if (validacionContrasena is not null)
+            return validacionContrasena;
+
+        try
+        {
+            var usuario = await repo.ObtenerPorCorreoAsync(dto.CorreoInstitucional.Trim())
+                                    .ConfigureAwait(false);
+
+            if (usuario is null)
+                return Results.NotFound(new { mensaje = "El usuario no fue encontrado." });
+
+            var hashActual = await repo.ObtenerHashMasRecienteAsync(dto.CorreoInstitucional.Trim())
+                                       .ConfigureAwait(false);
+
+            if (hashActual is null || !BCrypt.Net.BCrypt.Verify(dto.ContraseñaActual, hashActual))
+                return Results.Json(new { mensaje = "La contraseña actual es incorrecta." }, statusCode: 401);
+
+            var hashNueva = BCrypt.Net.BCrypt.HashPassword(dto.ContraseñaNueva);
+            await repo.CambiarContraseñaAsync(usuario.CorreoInstitucional, hashNueva).ConfigureAwait(false);
+
+            // Enviar correo de confirmación (sin contraseña)
+            EnviarCorreoCambioContrasena(emailService, usuario);
+
+            return Results.Ok(new { mensaje = "La contraseña ha sido cambiada exitosamente." });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
+
+    private static void EnviarCorreoCambioContrasena(IEmailService emailService, Backend.Models.Usuario usuario)
+    {
+        var asunto = "Contraseña Actualizada - Pingponeros";
+        var apellidos = $"{usuario.PrimerApellido} {usuario.SegundoApellido}";
+        var cuerpo = EmailTemplateHelper.GenerarCuerpoCorreoCambioContrasena(usuario.PrimerNombre, apellidos);
         _ = emailService.EnviarAsync(usuario.CorreoInstitucional, asunto, cuerpo);
     }
 
