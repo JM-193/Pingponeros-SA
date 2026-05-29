@@ -372,21 +372,40 @@ export default function Navbar() {
               overflow: 'hidden',
             }}
           >
-            <button
+            <div
               style={{
-                display: 'block',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
                 width: '100%',
-                padding: '12px 16px',
-                textAlign: 'left',
-                border: 'none',
-                background: 'none',
-                fontSize: '13px',
-                color: COLORS.textDark,
-                cursor: 'pointer',
+                padding: '14px 16px',
+                borderBottom: '1px solid #eee',
+                backgroundColor: COLORS.white,
               }}
             >
-              Mi Perfil
-            </button>
+              <div
+                style={{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(0,0,0,0.05)',
+                  border: '1px solid rgba(0,0,0,0.12)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill={COLORS.textDark}>
+                  <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+                </svg>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <span style={{ fontSize: '15px', fontWeight: 700, color: COLORS.textDark, lineHeight: 1.2 }}>
+                  Mi Perfil
+                </span>
+              </div>
+            </div>
             <button
               onClick={() => navigate('/cambiar-contrasena')}
               style={{
@@ -411,7 +430,7 @@ export default function Navbar() {
                 padding: '12px 16px',
                 textAlign: 'left',
                 border: 'none',
-                borderTop: '1px solid #eee',
+                borderTop: '1px solid #fff',
                 background: 'none',
                 fontSize: '13px',
                 color: COLORS.danger,
