@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { FiKey, FiLogOut } from 'react-icons/fi'
 import { cerrarSesion, obtenerSesion } from '../services/session'
 import { COLORS } from '../constants/colors'
 
@@ -421,23 +422,28 @@ export default function Navbar() {
             <button
               onClick={() => navigate('/cambiar-contrasena')}
               style={{
-                display: 'block',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
                 width: '100%',
                 padding: '12px 16px',
                 textAlign: 'left',
                 border: 'none',
                 background: 'none',
                 fontSize: '13px',
-                color: COLORS.textDark,
+                color: COLORS.headerBg,
                 cursor: 'pointer',
               }}
             >
-              Cambiar Contraseña
+              <FiKey size={16} />
+              <span>Cambiar Contraseña</span>
             </button>
             <button
               onClick={() => { cerrarSesion(); navigate('/') }}
               style={{
-                display: 'block',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
                 width: '100%',
                 padding: '12px 16px',
                 textAlign: 'left',
@@ -449,7 +455,8 @@ export default function Navbar() {
                 cursor: 'pointer',
               }}
             >
-              Cerrar Sesión
+              <FiLogOut size={16} />
+              <span>Cerrar Sesión</span>
             </button>
           </div>
         )}
