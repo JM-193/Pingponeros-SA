@@ -1,11 +1,5 @@
 import PageLayout from '../components/PageLayout'
 
-const DECLARATIONS = [
-  { id: 12, date: '03/04/26' },
-  { id: 11, date: '03/04/26' },
-  { id: 10, date: '03/03/26' },
-]
-
 export default function Home() {
   return (
     <PageLayout>
@@ -94,54 +88,9 @@ export default function Home() {
 
           {/* Declaration cards */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {DECLARATIONS.map((decl) => (
-              <button
-                key={decl.id}
-                onClick={() => {}} // Handle click
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    // Handle card interaction
-                  }
-                }}
-                tabIndex={0}
-                style={{
-                  backgroundColor: '#fff',
-                  borderRadius: '6px',
-                  padding: '16px 20px',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-                  cursor: 'pointer',
-                }}
-              >
-                <p
-                  style={{
-                    fontWeight: 700,
-                    fontSize: '14px',
-                    margin: '0 0 6px',
-                    color: '#1a1a1a',
-                  }}
-                >
-                  Declaración #{decl.id}
-                </p>
-                <p
-                  style={{
-                    fontSize: '13px',
-                    margin: '0 0 4px',
-                    color: '#555',
-                  }}
-                >
-                  Fecha guardado: {decl.date}
-                </p>
-                <p
-                  style={{
-                    fontSize: '13px',
-                    margin: 0,
-                    color: '#888',
-                  }}
-                >
-                  ...
-                </p>
-              </button>
-            ))}
+            <p style={{ textAlign: 'center', color: '#555', fontStyle: 'italic' }}>
+              No hay declaraciones juradas guardadas.
+            </p>
           </div>
         </div>
     </PageLayout>
