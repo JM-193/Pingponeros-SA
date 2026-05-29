@@ -101,7 +101,7 @@ internal sealed class UsuarioRepository : IUsuarioRepository
     }
 
     // ------------------------------------------------------------------ //
-    // INSERT CONTRASEÑA (para usuario existente)                         //
+    // INSERT CONTRASEÑA (válida por 2 días)                              //
     // ------------------------------------------------------------------ //
     public async Task InsertarContrase\u00f1aAsync(string correo, string contrasenaHash)
     {
@@ -110,6 +110,30 @@ internal sealed class UsuarioRepository : IUsuarioRepository
                 (CORREO_INSTITUCIONAL, CONTRASENA_HASH, FECHA_CREACION, FECHA_EXPIRACION)
             VALUES
                 (:correo, :hash, SYSDATE, SYSDATE + 2)
+            """;
+
+        await _q.ExecuteAsync(connection =>
+        {
+            var cmd = new OracleCommand(sql, connection)
+            {
+                BindByName = true,
+            };
+            cmd.Parameters.Add("correo", correo);
+            cmd.Parameters.Add("hash", contrasenaHash);
+            return cmd;
+        }).ConfigureAwait(false);
+    }
+
+    // ------------------------------------------------------------------ //
+    // CAMBIAR CONTRASEÑA (válida por 90 días)                            //
+    // ------------------------------------------------------------------ //
+    public async Task CambiarContraseñaAsync(string correo, string contrasenaHash)
+    {
+        const string sql = """
+            INSERT INTO CONTRASENAS
+                (CORREO_INSTITUCIONAL, CONTRASENA_HASH, FECHA_CREACION, FECHA_EXPIRACION)
+            VALUES
+                (:correo, :hash, SYSDATE, SYSDATE + 90)
             """;
 
         await _q.ExecuteAsync(connection =>
