@@ -401,7 +401,7 @@ export default function Navbar() {
                 cursor: 'pointer',
               }}
             >
-              Seguridad
+              Cambiar Contraseña
             </button>
             <button
               onClick={() => { cerrarSesion(); navigate('/') }}
