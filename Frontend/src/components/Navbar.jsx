@@ -388,6 +388,22 @@ export default function Navbar() {
               Mi Perfil
             </button>
             <button
+              onClick={() => navigate('/cambiar-contrasena')}
+              style={{
+                display: 'block',
+                width: '100%',
+                padding: '12px 16px',
+                textAlign: 'left',
+                border: 'none',
+                background: 'none',
+                fontSize: '13px',
+                color: COLORS.textDark,
+                cursor: 'pointer',
+              }}
+            >
+              Seguridad
+            </button>
+            <button
               onClick={() => { cerrarSesion(); navigate('/') }}
               style={{
                 display: 'block',
