@@ -3,7 +3,7 @@ import { COLORS } from '../constants/colors'
 
 export default function PageTitle({ title }) {
   return (
-    <div style={{ marginBottom: '32px', textAlign: 'center' }}>
+    <div style={{ marginBottom: '32px', textAlign: 'left' }}>
       <h1
         style={{
           fontWeight: 900,
