@@ -146,4 +146,57 @@ internal static class EmailTemplateHelper
         </body>
         </html>";
     }
+
+    public static string GenerarCuerpoCorreoCambioContrasena(string nombre, string apellidos)
+    {
+        var nombreCompleto = $"{nombre} {apellidos}";
+        return $@"<!DOCTYPE html>
+        <html lang='es'>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }}
+                .header {{ background-color: #003366; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }}
+                .content {{ background-color: white; padding: 30px; border: 1px solid #ddd; border-radius: 0 0 5px 5px; }}
+                .footer {{ text-align: center; margin-top: 20px; font-size: 12px; color: #666; }}
+                .success {{ background-color: #f0f8f0; padding: 15px; border-left: 4px solid #5cb85c; margin: 20px 0; }}
+                .label {{ font-weight: bold; color: #003366; }}
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h2>Contraseña Actualizada</h2>
+                    <p>Pingponeros - Sistema de Gestión De Cargas De Trabajo</p>
+                </div>
+                <div class='content'>
+                    <p>Estimado/a <strong>{nombreCompleto}</strong>,</p>
+                    <p>Te confirmamos que tu contraseña ha sido cambiada exitosamente.</p>
+                    
+                    <div class='success'>
+                        <p>✓ Tu contraseña fue actualizada correctamente.</p>
+                        <p>La nueva contraseña será válida por 90 días.</p>
+                    </div>
+                    
+                    <p>Si no realizaste este cambio o tienes sospechas de que tu 
+                    cuenta ha sido comprometida, por favor contacta inmediatamente al 
+                    administrador del sistema o soporte.</p>
+                    
+                    <p>Para futuras transacciones, solo necesitarás tu correo y 
+                    tu nueva contraseña.</p>
+                    
+                    <p>Saludos cordiales,<br>
+                    <strong>Vicerrectoría de Administración</strong><br>
+                    Universidad de Costa Rica</p>
+                </div>
+                <div class='footer'>
+                    <p>Este es un correo automático. Por favor, no responder a 
+                    este mensaje.</p>
+                </div>
+            </div>
+        </body>
+        </html>";
+    }
 }
