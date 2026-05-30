@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { cerrarSesion } from '../services/session'
+import { FiKey, FiLogOut } from 'react-icons/fi'
+import { cerrarSesion, obtenerSesion } from '../services/session'
 import { COLORS } from '../constants/colors'
 
 const NAV_ITEMS = [
@@ -59,11 +60,20 @@ const NAV_ITEMS = [
 export default function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
+  const sesion = obtenerSesion()
   const [menuOpen, setMenuOpen] = useState(false)
   const [openMenus, setOpenMenus] = useState({})
   const closeTimerRef = useRef(null)
   const profileMenuButtonRef = useRef(null)
   const profileMenuRef = useRef(null)
+  const nombreCompleto = [
+    sesion?.primerNombre,
+    sesion?.segundoNombre,
+    sesion?.primerApellido,
+    sesion?.segundoApellido,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   useEffect(() => {
     const handlePointerDown = (event) => {
@@ -367,42 +377,102 @@ export default function Navbar() {
               backgroundColor: COLORS.white,
               borderRadius: '6px',
               boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-              minWidth: '160px',
+              minWidth: '240px',
               zIndex: 100,
               overflow: 'hidden',
             }}
           >
-            <button
+            <div
               style={{
-                display: 'block',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                width: '100%',
+                padding: '14px 16px',
+                borderBottom: '1px solid #eee',
+                backgroundColor: COLORS.white,
+              }}
+            >
+              <div
+                style={{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(0,0,0,0.05)',
+                  border: '1px solid rgba(0,0,0,0.12)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill={COLORS.textDark}>
+                  <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+                </svg>
+              </div>
+              <div style={{display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <span style={{
+                  fontSize: '15px',
+                  fontWeight: 700,
+                  color: COLORS.textDark,
+                  lineHeight: 1.2,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {nombreCompleto || 'Mi Perfil'}
+                </span>
+                <span style={{
+                  fontSize: '12px',
+                  color: COLORS.textDark,
+                  opacity: 0.8,
+                  lineHeight: 1.2,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {sesion?.correoInstitucional ?? 'correo no disponible'}
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/cambiar-contrasena')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
                 width: '100%',
                 padding: '12px 16px',
                 textAlign: 'left',
                 border: 'none',
                 background: 'none',
                 fontSize: '13px',
-                color: COLORS.textDark,
+                color: COLORS.headerBg,
                 cursor: 'pointer',
               }}
             >
-              Mi Perfil
+              <FiKey size={16} />
+              <span>Cambiar Contraseña</span>
             </button>
             <button
               onClick={() => { cerrarSesion(); navigate('/') }}
               style={{
-                display: 'block',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
                 width: '100%',
                 padding: '12px 16px',
                 textAlign: 'left',
                 border: 'none',
-                borderTop: '1px solid #eee',
+                borderTop: '1px solid #fff',
                 background: 'none',
                 fontSize: '13px',
                 color: COLORS.danger,
                 cursor: 'pointer',
               }}
             >
-              Cerrar Sesión
+              <FiLogOut size={16} />
+              <span>Cerrar Sesión</span>
             </button>
           </div>
         )}

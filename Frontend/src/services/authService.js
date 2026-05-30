@@ -21,3 +21,51 @@ export async function login(correoInstitucional, contrasena) {
 
   return data
 }
+
+/**
+ * Solicita recuperación de contraseña.
+ * @param {string} correoInstitucional
+ * @returns {Promise<object>} Respuesta del servidor.
+ */
+export async function recuperarContrasena(correoInstitucional) {
+  const response = await fetch(`${API_URL}/auth/recuperar-contrasena`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ correoInstitucional }),
+  })
+
+  const data = await response.json().catch(() => ({}))
+
+  if (!response.ok) {
+    throw new Error(data.mensaje ?? `Error inesperado (${response.status})`)
+  }
+
+  return data
+}
+
+/**
+ * Cambia la contraseña de un usuario autenticado.
+ * @param {string} correoInstitucional
+ * @param {string} contraseñaActual
+ * @param {string} contraseñaNueva
+ * @returns {Promise<object>} Respuesta del servidor.
+ */
+export async function cambiarContrasena(correoInstitucional, contraseñaActual, contraseñaNueva) {
+  const response = await fetch(`${API_URL}/auth/cambiar-contrasena`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      correoInstitucional,
+      contraseñaActual,
+      contraseñaNueva,
+    }),
+  })
+
+  const data = await response.json().catch(() => ({}))
+
+  if (!response.ok) {
+    throw new Error(data.mensaje ?? `Error inesperado (${response.status})`)
+  }
+
+  return data
+}

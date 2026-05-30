@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Login from '../pages/Login'
 import Home from '../pages/Home'
 import ForgotPassword from '../pages/ForgotPassword'
+import ChangePassword from '../pages/ChangePassword'
 import CreateUser from '../pages/CreateUser'
 import CreateArea from '../pages/CreateArea'
 import EditArea from '../pages/EditArea'
@@ -23,6 +24,7 @@ export default function AppRouter() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/recuperar-contrasena" element={<ForgotPassword />} />
+        <Route path="/cambiar-contrasena" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
         <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="/usuarios/crear" element={<ProtectedRoute><CreateUser /></ProtectedRoute>} />
         <Route path="/organizacion/areas/crear" element={<ProtectedRoute><CreateArea /></ProtectedRoute>} />
