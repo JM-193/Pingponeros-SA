@@ -1,5 +1,5 @@
 ﻿// EditArea.test.jsx
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
 import EditArea from '../pages/EditArea'
 import * as areaService from '../services/areaService'

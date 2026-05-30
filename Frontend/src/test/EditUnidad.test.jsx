@@ -1,5 +1,5 @@
 // EditUnidad.test.jsx
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
 import EditUnidad from '../pages/EditUnidad'
 import * as unidadService from '../services/unidadService'

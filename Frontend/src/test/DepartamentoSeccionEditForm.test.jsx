@@ -1,5 +1,5 @@
 // DepartamentoSeccionEditForm.test.jsx
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
 import DepartamentoSeccionEditForm from '../components/DepartamentoSeccionEditForm'
 import * as areaService from '../services/areaService'
