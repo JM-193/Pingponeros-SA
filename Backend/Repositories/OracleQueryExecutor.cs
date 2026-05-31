@@ -34,7 +34,21 @@ internal sealed class OracleQueryExecutor : IQueryExecutor
         return await _db.UsingConnectionAsync(async connection =>
         {
             using var cmd = createCommand(connection);
-            return await cmd.ExecuteScalarAsync().ConfigureAwait(false);
+            var scalar = await cmd.ExecuteScalarAsync().ConfigureAwait(false);
+
+            // Para DML con RETURNING INTO, ODP.NET no devuelve el valor a través de ExecuteScalar
+            // sino que lo deposita en el parámetro de salida. Si el escalar es nulo, se retorna
+            // el primer parámetro de tipo Output/ReturnValue que tenga valor.
+            if (scalar is null or DBNull)
+            {
+                foreach (OracleParameter p in cmd.Parameters)
+                {
+                    if (p.Direction is ParameterDirection.Output or ParameterDirection.ReturnValue)
+                        return p.Value;
+                }
+            }
+
+            return scalar;
         }).ConfigureAwait(false);
     }
 }
