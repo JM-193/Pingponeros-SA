@@ -16,7 +16,7 @@ export default function ConsultarSeccion() {
 
     return secciones.map((seccion) => {
       const areaId = seccion.idArea ?? seccion.areaId ?? seccion[areaValueKey]
-      const areaLabel = areaMap.get(String(areaId)) ?? 'Área no disponible'
+      const areaLabel = areaId ? (areaMap.get(String(areaId)) ?? 'Sin asignación') : 'Sin asignación'
 
       return { ...seccion, areaLabel }
     })

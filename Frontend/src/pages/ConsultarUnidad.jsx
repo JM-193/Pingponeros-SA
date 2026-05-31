@@ -28,15 +28,15 @@ export default function ConsultarUnidad() {
       const departamentoId = unidad.idDepartamento ?? unidad.departamentoId ?? unidad[departamentoValueKey]
       const seccionId = unidad.idSeccion ?? unidad.seccionId ?? unidad[seccionValueKey]
 
-      const areaLabel = areaMap.get(String(areaId)) ?? 'Área no disponible'
-      let dependenciaLabel = 'Sin dependencia'
+      const areaLabel = areaId ? (areaMap.get(String(areaId)) ?? 'Sin asignación') : 'Sin asignación'
+      let dependenciaLabel = 'Sin asignación'
 
       if (departamentoId) {
-        dependenciaLabel = departamentoMap.get(String(departamentoId)) ?? 'Departamento no disponible'
+        dependenciaLabel = departamentoMap.get(String(departamentoId)) ?? 'Sin asignación'
       }
 
       if (seccionId) {
-        dependenciaLabel = seccionMap.get(String(seccionId)) ?? 'Sección no disponible'
+        dependenciaLabel = seccionMap.get(String(seccionId)) ?? 'Sin asignación'
       }
 
       return { ...unidad, areaLabel, dependenciaLabel }
