@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
@@ -33,6 +33,9 @@ export default function EditUnidad() {
   const [areaOptions, setAreaOptions] = useState([])
   const [departmentOptions, setDepartmentOptions] = useState([])
   const [sectionOptions, setSectionOptions] = useState([])
+  const [rawDepartamentos, setRawDepartamentos] = useState([])
+  const [rawSecciones, setRawSecciones] = useState([])
+  const [conflictError, setConflictError] = useState('')
   const [nombreOriginal, setNombreOriginal] = useState('')
   const loadData = useCallback(async () => {
     const [unidad, areas, departamentos, secciones] = await Promise.all([
@@ -70,6 +73,8 @@ export default function EditUnidad() {
       sectionOptions: buildLabeledOptions(secciones, { valueKey: seccionValueKey, labelPrefix: 'Sección de ' }),
       parentType: resolvedParentType,
       nombreOriginal: unidad.nombre,
+      rawDepartamentos: departamentos,
+      rawSecciones: secciones,
     }
   }, [nombre])
 
@@ -77,6 +82,8 @@ export default function EditUnidad() {
     setAreaOptions(result?.areaOptions ?? [])
     setDepartmentOptions(result?.departmentOptions ?? [])
     setSectionOptions(result?.sectionOptions ?? [])
+    setRawDepartamentos(result?.rawDepartamentos ?? [])
+    setRawSecciones(result?.rawSecciones ?? [])
     setParentType(result?.parentType ?? '')
     setNombreOriginal(result?.nombreOriginal ?? '')
   }, [])
@@ -114,8 +121,7 @@ export default function EditUnidad() {
     getValidationOptions: () => ({
       entityLabel: 'unidad',
       nameArticle: 'de la',
-      requireArea: true,
-      requireParent: true,
+      requireArea: false,
       parentType,
     }),
     getPayloadOptions: () => ({
@@ -132,6 +138,7 @@ export default function EditUnidad() {
     (event) => {
       const { value } = event.target
       clearFeedback()
+      setConflictError('')
       setParentType(value)
       setFormData((prev) => ({
         ...prev,
@@ -140,6 +147,66 @@ export default function EditUnidad() {
       }))
     },
     [clearFeedback, setFormData, setParentType],
+  )
+
+  const filteredDepartmentOptions = useMemo(() => {
+    if (!formData.idArea) return departmentOptions
+    return rawDepartamentos
+      .filter((d) => String(d.idArea) === String(formData.idArea))
+      .map((d) => ({ value: String(d.id ?? d.idDepartamento), label: `Departamento de ${d.nombre}` }))
+  }, [formData.idArea, rawDepartamentos, departmentOptions])
+
+  const filteredSectionOptions = useMemo(() => {
+    if (!formData.idArea) return sectionOptions
+    return rawSecciones
+      .filter((s) => String(s.idArea) === String(formData.idArea))
+      .map((s) => ({ value: String(s.id ?? s.idSeccion), label: `Sección de ${s.nombre}` }))
+  }, [formData.idArea, rawSecciones, sectionOptions])
+
+  const handleAreaChange = useCallback(
+    (event) => {
+      const { value } = event.target
+      clearFeedback()
+      setConflictError('')
+      const newData = { ...formData, idArea: value }
+      if (value) {
+        if (parentType === 'departamento' && formData.idDepartamento) {
+          const dept = rawDepartamentos.find(
+            (d) => String(d.id ?? d.idDepartamento) === formData.idDepartamento,
+          )
+          if (dept?.idArea != null && String(dept.idArea) !== value) {
+            newData.idDepartamento = ''
+            setConflictError(
+              'El departamento seleccionado no pertenece al área elegida. Seleccione un departamento válido.',
+            )
+          }
+        }
+        if (parentType === 'seccion' && formData.idSeccion) {
+          const sec = rawSecciones.find(
+            (s) => String(s.id ?? s.idSeccion) === formData.idSeccion,
+          )
+          if (sec?.idArea != null && String(sec.idArea) !== value) {
+            newData.idSeccion = ''
+            setConflictError(
+              'La sección seleccionada no pertenece al área elegida. Seleccione una sección válida.',
+            )
+          }
+        }
+      }
+      setFormData(newData)
+    },
+    [clearFeedback, formData, setFormData, parentType, rawDepartamentos, rawSecciones],
+  )
+
+  const handleFieldChange = useCallback(
+    (event) => {
+      if (event.target.name === 'idArea') {
+        handleAreaChange(event)
+      } else {
+        handleInputChange(event)
+      }
+    },
+    [handleAreaChange, handleInputChange],
   )
 
   const handleStateChange = (newState) => {
@@ -169,25 +236,23 @@ export default function EditUnidad() {
       onCancel={() => navigate('/organizacion/unidades/consultar')}
       isBusy={isSubmitting}
       successMsg={successMsg}
-      errorMsg={errorMsg}
+      errorMsg={conflictError || errorMsg}
       primaryLabel="Actualizar"
     >
       <OrganizationEntityFormFields
         formData={formData}
-        onChange={handleInputChange}
+        onChange={handleFieldChange}
         namePrefix="Unidad de"
         namePlaceholder="Nombre de la unidad"
         descriptionPlaceholder="Ingrese la descripción de la unidad"
         areaOptions={areaOptions}
-        areaRequired
         parentType={parentType}
         parentTypeOptions={parentTypeOptions}
         onParentTypeChange={handleParentTypeChange}
-        parentTypeLabel="Departamento o sección"
-        parentTypeDefaultLabel="Seleccione una dependencia"
-        departmentOptions={departmentOptions}
-        sectionOptions={sectionOptions}
-        parentRequired
+        parentTypeLabel="Departamento o sección (opcional)"
+        parentTypeDefaultLabel="Seleccione una dependencia (opcional)"
+        departmentOptions={filteredDepartmentOptions}
+        sectionOptions={filteredSectionOptions}
       />
       <StateToggle
         currentState={formData.estado}
