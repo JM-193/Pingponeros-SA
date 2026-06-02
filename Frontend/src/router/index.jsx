@@ -4,6 +4,7 @@ import Home from '../pages/Home'
 import ForgotPassword from '../pages/ForgotPassword'
 import ChangePassword from '../pages/ChangePassword'
 import CreateUser from '../pages/CreateUser'
+import ConsultarUsuarios from '../pages/ConsultarUsuarios'
 import CreateArea from '../pages/CreateArea'
 import EditArea from '../pages/EditArea'
 import ConsultarArea from '../pages/ConsultarArea'
@@ -27,6 +28,7 @@ export default function AppRouter() {
         <Route path="/cambiar-contrasena" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
         <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="/usuarios/crear" element={<ProtectedRoute><CreateUser /></ProtectedRoute>} />
+        <Route path="/usuarios/consultar" element={<ProtectedRoute><ConsultarUsuarios /></ProtectedRoute>} />
         <Route path="/organizacion/areas/crear" element={<ProtectedRoute><CreateArea /></ProtectedRoute>} />
         <Route path="/organizacion/areas/editar/:nombre" element={<ProtectedRoute><EditArea /></ProtectedRoute>} />
         <Route path="/organizacion/areas/consultar" element={<ProtectedRoute><ConsultarArea /></ProtectedRoute>} />

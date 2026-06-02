@@ -10,9 +10,8 @@ const NAV_ITEMS = [
     label: 'Usuarios',
     activeOn: '/usuarios',
     submenu: [
-      { label: 'Crear usuario', path: '/usuarios/crear' },
-      /*{ label: 'Asignar N° de plaza', path: '/usuarios/asignar-plaza' },
-      { label: 'Consultar usuario', path: '/usuarios/consultar' },*/
+      { label: 'Consultar', path: '/usuarios/consultar' },
+      /*{ label: 'Asignar N° de plaza', path: '/usuarios/asignar-plaza' },*/
     ],
   },
   {

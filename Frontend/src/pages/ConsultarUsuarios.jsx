@@ -1,0 +1,66 @@
+// ConsultarUsuarios.jsx
+
+import EntityListPage from '../components/EntityListPage'
+import { obtenerUsuarios, eliminarUsuario } from '../services/usuarioService'
+
+export default function ConsultarUsuarios() {
+  const columns = [
+    {
+      key: 'primerNombre',
+      label: 'Nombre',
+      render: (usuario) => {
+        return [usuario.primerNombre, usuario.segundoNombre]
+          .filter(Boolean)
+          .join(' ')
+      },
+    },
+    {
+      key: 'primerApellido',
+      label: 'Apellido',
+      render: (usuario) => {
+        return [usuario.primerApellido, usuario.segundoApellido]
+          .filter(Boolean)
+          .join(' ')
+      },
+    },
+    {
+      key: 'correoInstitucional',
+      label: 'Correo',
+      render: (usuario) => usuario.correoInstitucional,
+    },
+  ]
+
+  const matchesSearch = (usuario, term) => {
+    if (!term.trim()) return true
+    const lowerTerm = term.toLowerCase()
+    const fullName = [
+      usuario.primerNombre,
+      usuario.segundoNombre,
+      usuario.primerApellido,
+      usuario.segundoApellido,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+    return (
+      fullName.includes(lowerTerm) ||
+      usuario.correoInstitucional.toLowerCase().includes(lowerTerm)
+    )
+  }
+
+  return (
+    <EntityListPage
+      title="Usuarios"
+      entityLabel="usuarios"
+      entityLabelSingular="el usuario"
+      createPath="/usuarios/crear"
+      fetchItems={obtenerUsuarios}
+      deactivateItem={eliminarUsuario}
+      columns={columns}
+      matchesSearch={matchesSearch}
+      getRowId={(usuario) => usuario.correoInstitucional}
+      isRowInactive={(usuario) => usuario.estado === 0}
+      searchPlaceholder="Ingrese el nombre, apellidos o correo del usuario"
+    />
+  )
+}

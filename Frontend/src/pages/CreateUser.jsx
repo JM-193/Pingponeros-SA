@@ -204,7 +204,7 @@ export default function CreateUser() {
               label="Regresar"
               type="button"
               variant="secondary"
-              onClick={() => navigate('/home')}
+              onClick={() => navigate('/usuarios/consultar')}
               disabled={loading}
             />
             <FormButton

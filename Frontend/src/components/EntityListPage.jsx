@@ -83,7 +83,9 @@ export default function EntityListPage({
   }
 
   const handleEdit = (item) => {
-    navigate(editPath(item))
+    if (editPath) {
+      navigate(editPath(item))
+    }
   }
 
   const handleDeleteClick = (item) => {
@@ -97,14 +99,16 @@ export default function EntityListPage({
   const handleConfirmDeactivate = async () => {
     if (!itemToDeactivate) return
     try {
-      await deactivateItem(resolveRowId(itemToDeactivate))
-      const updated = allItems.map((item) =>
-        resolveRowId(item) === resolveRowId(itemToDeactivate)
-          ? { ...item, estado: 0 }
-          : item
-      )
-      setAllItems(updated)
-      setResults(updated.filter((item) => matches(item, searchTerm)))
+      if (deactivateItem) {
+        await deactivateItem(resolveRowId(itemToDeactivate))
+        const updated = allItems.map((item) =>
+          resolveRowId(item) === resolveRowId(itemToDeactivate)
+            ? { ...item, estado: 0 }
+            : item
+        )
+        setAllItems(updated)
+        setResults(updated.filter((item) => matches(item, searchTerm)))
+      }
     } catch (err) {
       setErrorMsg(err.message)
     } finally {
@@ -136,8 +140,8 @@ export default function EntityListPage({
         <EntityResultsTable
           columns={columns}
           rows={currentResults}
-          onEdit={handleEdit}
-          onDelete={handleDeleteClick}
+          onEdit={editPath ? handleEdit : undefined}
+          onDelete={deactivateItem ? handleDeleteClick : undefined}
           getRowId={resolveRowId}
           isRowInactive={resolveInactive}
         />
@@ -280,7 +284,7 @@ export default function EntityListPage({
         title="Confirmar desactivación"
         message={
           itemToDeactivate
-            ? `¿Seguro que deseas desactivar ${entityLabelSingular} "${itemToDeactivate.nombre}"?`
+            ? `¿Seguro que deseas desactivar ${entityLabelSingular} "${itemToDeactivate.nombre || itemToDeactivate.correoInstitucional}"?`
             : ''
         }
         confirmLabel="Desactivar"
@@ -297,9 +301,9 @@ EntityListPage.propTypes = {
   entityLabel: PropTypes.string.isRequired,
   entityLabelSingular: PropTypes.string.isRequired,
   createPath: PropTypes.string.isRequired,
-  editPath: PropTypes.func.isRequired,
+  editPath: PropTypes.func,
   fetchItems: PropTypes.func.isRequired,
-  deactivateItem: PropTypes.func.isRequired,
+  deactivateItem: PropTypes.func,
   columns: PropTypes.arrayOf(
     PropTypes.shape({
       key: PropTypes.string.isRequired,
@@ -318,6 +322,8 @@ EntityListPage.propTypes = {
 }
 
 EntityListPage.defaultProps = {
+  editPath: null,
+  deactivateItem: null,
   matchesSearch: null,
   getRowId: null,
   isRowInactive: null,
