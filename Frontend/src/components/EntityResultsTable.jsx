@@ -28,6 +28,7 @@ export default function EntityResultsTable({
             width: '100%',
             borderCollapse: 'collapse',
             fontSize: '14px',
+            tableLayout: 'fixed',
           }}
         >
           <thead>
@@ -82,6 +83,7 @@ export default function EntityResultsTable({
                         padding: '12px 16px',
                         textAlign: getCellAlign(column.align),
                         color: COLORS.textDark,
+                        wordBreak: 'break-word',
                       }}
                     >
                       {column.render ? column.render(row) : row[column.key]}
