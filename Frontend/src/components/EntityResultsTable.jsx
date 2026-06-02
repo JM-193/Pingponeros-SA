@@ -54,6 +54,8 @@ export default function EntityResultsTable({
                     textAlign: 'right',
                     fontWeight: 600,
                     borderBottom: `1px solid ${COLORS.borderColor}`,
+                    width: '10%',
+                    whiteSpace: 'nowrap'
                   }}
                 />
               )}
@@ -90,7 +92,14 @@ export default function EntityResultsTable({
                     </td>
                   ))}
                   {hasActions && (
-                    <td style={{ padding: '12px 32px', textAlign: 'center', width: '1%', whiteSpace: 'nowrap' }}>
+                    <td
+                      style={{
+                      padding: '12px 32px',
+                        textAlign: 'center',
+                        width: '10%',
+                        whiteSpace: 'nowrap'
+                      }}
+                     >
                       <div style={{ display: 'inline-flex', gap: '8px' }}>
                         {onEdit && (
                           <button
