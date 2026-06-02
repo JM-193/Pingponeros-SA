@@ -13,6 +13,7 @@ export default function ConsultarUsuarios() {
           .filter(Boolean)
           .join(' ')
       },
+      width: '30%',
     },
     {
       key: 'primerApellido',
@@ -22,11 +23,13 @@ export default function ConsultarUsuarios() {
           .filter(Boolean)
           .join(' ')
       },
+      width: '30%',
     },
     {
       key: 'correoInstitucional',
       label: 'Correo',
       render: (usuario) => usuario.correoInstitucional,
+      width: '30%',
     },
   ]
 

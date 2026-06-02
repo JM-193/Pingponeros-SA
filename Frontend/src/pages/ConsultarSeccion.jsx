@@ -27,22 +27,26 @@ export default function ConsultarSeccion() {
       key: 'nombre',
       label: 'Nombre',
       render: (seccion) => seccion.nombre,
+      width: '20%',
     },
     {
       key: 'descripcion',
       label: 'Descripción',
       render: (seccion) => seccion.descripcion,
+      width: '40%',
     },
     {
       key: 'areaLabel',
       label: 'Área',
       render: (seccion) => seccion.areaLabel,
+      width: '20%',
     },
     {
       key: 'estado',
       label: 'Estado',
       align: 'center',
       render: (seccion) => formatStatusLabel(seccion.estado),
+      width: '10%',
     },
   ]
 

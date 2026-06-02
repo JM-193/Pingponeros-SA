@@ -27,22 +27,26 @@ export default function ConsultarDepartamento() {
       key: 'nombre',
       label: 'Nombre',
       render: (departamento) => departamento.nombre,
+      width: '20%',
     },
     {
       key: 'descripcion',
       label: 'Descripción',
       render: (departamento) => departamento.descripcion,
+      width: '40%',
     },
     {
       key: 'areaLabel',
       label: 'Área',
       render: (departamento) => departamento.areaLabel,
+      width: '20%',
     },
     {
       key: 'estado',
       label: 'Estado',
       align: 'center',
       render: (departamento) => formatStatusLabel(departamento.estado),
+      width: '10%',
     },
   ]
 

@@ -28,13 +28,27 @@ export default function ConsultarPlaza() {
     const seccionMap = buildNameMap(secciones, { valueKey: seccionKey, labelPrefix: 'Sección de ' })
     const areaMap = buildNameMap(areas, { valueKey: areaKey, labelPrefix: 'Área de ' })
 
-    return plazas.map((plaza) => ({
-      ...plaza,
-      unidadLabel:       plaza.idUnidad       ? (unidadMap.get(String(plaza.idUnidad))             ?? 'Sin asignación') : 'Sin asignación',
-      departamentoLabel: plaza.idDepartamento ? (departamentoMap.get(String(plaza.idDepartamento)) ?? 'Sin asignación') : 'Sin asignación',
-      seccionLabel:      plaza.idSeccion       ? (seccionMap.get(String(plaza.idSeccion))           ?? 'Sin asignación') : 'Sin asignación',
-      areaLabel:         plaza.idArea          ? (areaMap.get(String(plaza.idArea))                 ?? 'Sin asignación') : 'Sin asignación',
-    }))
+    return plazas.map((plaza) => {
+      const areaId = plaza.idArea ?? plaza.areaId ?? plaza[areaKey]
+      const departamentoId = plaza.idDepartamento ?? plaza.departamentoId ?? plaza[departamentoKey]
+      const seccionId = plaza.idSeccion ?? plaza.seccionId ?? plaza[seccionKey]
+      const unidadId = plaza.idUnidad ?? plaza.unidadId ?? plaza[unidadKey]
+
+      const areaLabel = areaId ? (areaMap.get(String(areaId)) ?? 'Sin asignación') : 'Sin asignación'
+      let dependenciaLabel = 'Sin asignación'
+
+      if (departamentoId) {
+        dependenciaLabel = departamentoMap.get(String(departamentoId)) ?? 'Sin asignación'
+      }
+
+      if (seccionId) {
+        dependenciaLabel = seccionMap.get(String(seccionId)) ?? 'Sin asignación'
+      }
+
+      const unidadLabel = unidadId ? (unidadMap.get(String(unidadId)) ?? 'Sin asignación') : 'Sin asignación'
+
+      return { ...plaza, unidadLabel, dependenciaLabel, areaLabel, }
+    })
   }, [])
 
   const columns = [
@@ -42,26 +56,25 @@ export default function ConsultarPlaza() {
       key: 'numeroPlaza',
       label: 'Número de Plaza',
       render: (plaza) => plaza.numeroPlaza,
+      width: '15%',
     },
     {
       key: 'unidadLabel',
       label: 'Unidad',
       render: (plaza) => plaza.unidadLabel,
+      width: '25%',
     },
     {
-      key: 'departamentoLabel',
-      label: 'Departamento',
-      render: (plaza) => plaza.departamentoLabel,
-    },
-    {
-      key: 'seccionLabel',
-      label: 'Sección',
-      render: (plaza) => plaza.seccionLabel,
+      key: 'dependenciaLabel',
+      label: 'Departamento/Sección',
+      render: (plaza) => plaza.dependenciaLabel,
+      width: '25%',
     },
     {
       key: 'areaLabel',
       label: 'Área',
       render: (plaza) => plaza.areaLabel,
+      width: '25%',
     },
   ]
 

@@ -48,27 +48,32 @@ export default function ConsultarUnidad() {
       key: 'nombre',
       label: 'Nombre',
       render: (unidad) => unidad.nombre,
+      width: '20%',
     },
     {
       key: 'descripcion',
       label: 'Descripción',
       render: (unidad) => unidad.descripcion,
+      width: '30%',
     },
     {
       key: 'areaLabel',
       label: 'Área',
       render: (unidad) => unidad.areaLabel,
+      width: '15%',
     },
     {
       key: 'dependenciaLabel',
       label: 'Departamento/Sección',
       render: (unidad) => unidad.dependenciaLabel,
+      width: '15%',
     },
     {
       key: 'estado',
       label: 'Estado',
       align: 'center',
       render: (unidad) => formatStatusLabel(unidad.estado),
+      width: '10%',
     },
   ]
 
