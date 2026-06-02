@@ -24,7 +24,6 @@ export default function CreateUser() {
   })
   const [loading, setLoading] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
-  const [setTempPassword] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
 
   const NAME_FIELDS = new Set(['firstName', 'secondName', 'firstName_surname', 'secondName_surname'])
@@ -34,7 +33,6 @@ export default function CreateUser() {
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setSuccessMsg('')
-    setTempPassword('')
     setErrorMsg('')
     const sanitizedValue = NAME_FIELDS.has(name) ? value.replace(NAME_REGEX, '') : value
     setFormData((prev) => ({
@@ -48,7 +46,6 @@ export default function CreateUser() {
     e.preventDefault()
     setLoading(true)
     setSuccessMsg('')
-    setTempPassword('')
     setErrorMsg('')
 
     // Validaciones
@@ -73,7 +70,6 @@ export default function CreateUser() {
         rol:                 Number.parseInt(formData.role, 10),
       })
       setSuccessMsg(data.mensaje ?? 'Usuario creado correctamente.')
-      setTempPassword(data.contrasenaTemporal ?? '')
       handleReset()
     } catch (err) {
       setErrorMsg(err.message)
@@ -184,8 +180,7 @@ export default function CreateUser() {
 
           {/* Mensajes de feedback */}
           {successMsg && (
-            <StatusMessage variant="success" message={successMsg}>
-            </StatusMessage>
+            <StatusMessage variant="success" message={successMsg} />
           )}
           {errorMsg && (
             <StatusMessage variant="error" message={errorMsg} />
