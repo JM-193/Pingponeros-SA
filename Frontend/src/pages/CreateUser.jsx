@@ -185,13 +185,6 @@ export default function CreateUser() {
           {/* Mensajes de feedback */}
           {successMsg && (
             <StatusMessage variant="success" message={successMsg}>
-              {tempPassword && (
-                <div style={{ padding: '10px 14px', backgroundColor: COLORS.white, borderRadius: '4px', border: '1px dashed #66bb6a' }}>
-                  <span style={{ fontWeight: 600 }}>Contraseña temporal: </span>
-                  <code style={{ fontSize: '15px', letterSpacing: '1px', color: COLORS.successStrong }}>{tempPassword}</code>
-                  <div style={{ marginTop: '4px', fontSize: '12px', color: '#388e3c' }}>Válida por 48 horas. Compártala con el usuario de forma segura.</div>
-                </div>
-              )}
             </StatusMessage>
           )}
           {errorMsg && (
@@ -199,7 +192,7 @@ export default function CreateUser() {
           )}
 
           {/* Botones */}
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '16px' }}>
             <FormButton
               label="Regresar"
               type="button"
