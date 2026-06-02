@@ -331,16 +331,17 @@ export default function EditPlaza() {
             defaultLabel="-- Sin asignación --"
           />
 
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '8px' }}>
             <FormButton
               type="button"
               variant="secondary"
-              label="Cancelar"
+              label="Regresar"
               onClick={() => navigate('/organizacion/plazas/consultar')}
             />
             <FormButton
               type="submit"
-              label={isSubmitting ? 'Guardando...' : 'Guardar cambios'}
+              label={isSubmitting ? 'Actualizando...' : 'Actualizar'}
+              variant="primary"
               disabled={isSubmitting}
             />
           </div>
