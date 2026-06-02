@@ -407,19 +407,13 @@ internal static class Program
 
             var nombreDescodificado = Uri.UnescapeDataString(nombre);
 
-            if (!dto.Nombre.Trim().Equals(nombreDescodificado, StringComparison.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
-                    if (existe)
-                        return Results.Conflict(new { mensaje = $"Ya existe un área con el nombre '{dto.Nombre}'." });
-                }
-                catch (OracleException ex)
-                {
-                    return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
-                }
-            }
+            var conflicto = await VerificarConflictoNombreAsync(
+                () => repo.ExisteNombreAsync(dto.Nombre),
+                dto.Nombre,
+                nombreDescodificado,
+                $"Ya existe un área con el nombre '{dto.Nombre}'.").ConfigureAwait(false);
+            if (conflicto is not null)
+                return conflicto;
 
             var area = new Backend.Models.Area
             {
@@ -428,31 +422,12 @@ internal static class Program
                 Estado = dto.Estado ?? 1,
             };
 
-            return await ActualizarAreaAsync(repo, nombreDescodificado, nombre, area, isDev).ConfigureAwait(false);
+            return await EjecutarActualizacionAsync(
+                () => repo.ActualizarAsync(nombreDescodificado, area),
+                $"Área '{area.Nombre}' actualizada correctamente.",
+                $"No se encontró el área '{nombre}'.",
+                isDev).ConfigureAwait(false);
         });
-    }
-
-    private static async Task<IResult> ActualizarAreaAsync(
-        IAreaRepository repo,
-        string nombreDescodificado,
-        string nombreOriginal,
-        Backend.Models.Area area,
-        bool isDev)
-    {
-        try
-        {
-            var actualizado = await repo.ActualizarAsync(nombreDescodificado, area).ConfigureAwait(false);
-            return actualizado
-                ? Results.Ok(new { mensaje = $"Área '{area.Nombre}' actualizada correctamente." })
-                : Results.NotFound(new { mensaje = $"No se encontró el área '{nombreOriginal}'." });
-        }
-        catch (OracleException ex)
-        {
-            var msg = isDev
-                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                : TraducirErrorOracle(ex.Number);
-            return Results.Json(new { mensaje = msg }, statusCode: 500);
-        }
     }
 
     private static void MapAreasDelete(RouteGroupBuilder areas)
@@ -486,6 +461,62 @@ internal static class Program
             return Results.BadRequest(new { mensaje = "El estado debe ser 0 (Inactivo) o 1 (Activo)." });
 
         return null;
+    }
+
+    // ---------------------------------------------------------------- //
+    // Helpers de actualización compartidos                              //
+    // ---------------------------------------------------------------- //
+
+    /// <summary>
+    /// Verifica si ya existe otra entidad con el mismo nombre cuando éste cambia.
+    /// Devuelve un IResult de conflicto o error, o null si no hay problema.
+    /// </summary>
+    private static async Task<IResult?> VerificarConflictoNombreAsync(
+        Func<Task<bool>> existeAsync,
+        string nombreNuevo,
+        string nombreDescodificado,
+        string mensajeConflicto)
+    {
+        if (nombreNuevo.Trim().Equals(nombreDescodificado, StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        try
+        {
+            var existe = await existeAsync().ConfigureAwait(false);
+            if (existe)
+                return Results.Conflict(new { mensaje = mensajeConflicto });
+        }
+        catch (OracleException ex)
+        {
+            return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Ejecuta la actualización delegada y devuelve Ok, NotFound o 500 según el resultado.
+    /// </summary>
+    private static async Task<IResult> EjecutarActualizacionAsync(
+        Func<Task<bool>> actualizarAsync,
+        string mensajeOk,
+        string mensajeNoEncontrado,
+        bool isDev)
+    {
+        try
+        {
+            var actualizado = await actualizarAsync().ConfigureAwait(false);
+            return actualizado
+                ? Results.Ok(new { mensaje = mensajeOk })
+                : Results.NotFound(new { mensaje = mensajeNoEncontrado });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
     }
 
     // ---------------------------------------------------------------- //
@@ -614,19 +645,13 @@ internal static class Program
 
             var nombreDescodificado = Uri.UnescapeDataString(nombre);
 
-            if (!dto.Nombre.Trim().Equals(nombreDescodificado, StringComparison.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
-                    if (existe)
-                        return Results.Conflict(new { mensaje = $"Ya existe un departamento con el nombre '{dto.Nombre}'." });
-                }
-                catch (OracleException ex)
-                {
-                    return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
-                }
-            }
+            var conflicto = await VerificarConflictoNombreAsync(
+                () => repo.ExisteNombreAsync(dto.Nombre),
+                dto.Nombre,
+                nombreDescodificado,
+                $"Ya existe un departamento con el nombre '{dto.Nombre}'.").ConfigureAwait(false);
+            if (conflicto is not null)
+                return conflicto;
 
             var departamento = new Backend.Models.Departamento
             {
@@ -636,31 +661,12 @@ internal static class Program
                 Estado = dto.Estado ?? 1,
             };
 
-            return await ActualizarDepartamentoAsync(repo, nombreDescodificado, nombre, departamento, isDev).ConfigureAwait(false);
+            return await EjecutarActualizacionAsync(
+                () => repo.ActualizarAsync(nombreDescodificado, departamento),
+                $"Departamento '{departamento.Nombre}' actualizado correctamente.",
+                $"No se encontró el departamento '{nombre}'.",
+                isDev).ConfigureAwait(false);
         });
-    }
-
-    private static async Task<IResult> ActualizarDepartamentoAsync(
-        IDepartamentoRepository repo,
-        string nombreDescodificado,
-        string nombreOriginal,
-        Backend.Models.Departamento departamento,
-        bool isDev)
-    {
-        try
-        {
-            var actualizado = await repo.ActualizarAsync(nombreDescodificado, departamento).ConfigureAwait(false);
-            return actualizado
-                ? Results.Ok(new { mensaje = $"Departamento '{departamento.Nombre}' actualizado correctamente." })
-                : Results.NotFound(new { mensaje = $"No se encontró el departamento '{nombreOriginal}'." });
-        }
-        catch (OracleException ex)
-        {
-            var msg = isDev
-                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                : TraducirErrorOracle(ex.Number);
-            return Results.Json(new { mensaje = msg }, statusCode: 500);
-        }
     }
 
     private static void MapDepartamentosDelete(RouteGroupBuilder departamentos)
@@ -791,19 +797,13 @@ internal static class Program
 
             var nombreDescodificado = Uri.UnescapeDataString(nombre);
 
-            if (!dto.Nombre.Trim().Equals(nombreDescodificado, StringComparison.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
-                    if (existe)
-                        return Results.Conflict(new { mensaje = $"Ya existe una sección con el nombre '{dto.Nombre}'." });
-                }
-                catch (OracleException ex)
-                {
-                    return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
-                }
-            }
+            var conflicto = await VerificarConflictoNombreAsync(
+                () => repo.ExisteNombreAsync(dto.Nombre),
+                dto.Nombre,
+                nombreDescodificado,
+                $"Ya existe una sección con el nombre '{dto.Nombre}'.").ConfigureAwait(false);
+            if (conflicto is not null)
+                return conflicto;
 
             var seccion = new Backend.Models.Seccion
             {
@@ -813,31 +813,12 @@ internal static class Program
                 Estado = dto.Estado ?? 1,
             };
 
-            return await ActualizarSeccionAsync(repo, nombreDescodificado, nombre, seccion, isDev).ConfigureAwait(false);
+            return await EjecutarActualizacionAsync(
+                () => repo.ActualizarAsync(nombreDescodificado, seccion),
+                $"Sección '{seccion.Nombre}' actualizada correctamente.",
+                $"No se encontró la sección '{nombre}'.",
+                isDev).ConfigureAwait(false);
         });
-    }
-
-    private static async Task<IResult> ActualizarSeccionAsync(
-        ISeccionRepository repo,
-        string nombreDescodificado,
-        string nombreOriginal,
-        Backend.Models.Seccion seccion,
-        bool isDev)
-    {
-        try
-        {
-            var actualizado = await repo.ActualizarAsync(nombreDescodificado, seccion).ConfigureAwait(false);
-            return actualizado
-                ? Results.Ok(new { mensaje = $"Sección '{seccion.Nombre}' actualizada correctamente." })
-                : Results.NotFound(new { mensaje = $"No se encontró la sección '{nombreOriginal}'." });
-        }
-        catch (OracleException ex)
-        {
-            var msg = isDev
-                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                : TraducirErrorOracle(ex.Number);
-            return Results.Json(new { mensaje = msg }, statusCode: 500);
-        }
     }
 
     private static void MapSeccionesDelete(RouteGroupBuilder secciones)
@@ -976,19 +957,13 @@ internal static class Program
 
             var nombreDescodificado = Uri.UnescapeDataString(nombre);
 
-            if (!dto.Nombre.Trim().Equals(nombreDescodificado, StringComparison.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
-                    if (existe)
-                        return Results.Conflict(new { mensaje = $"Ya existe una unidad con el nombre '{dto.Nombre}'." });
-                }
-                catch (OracleException ex)
-                {
-                    return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
-                }
-            }
+            var conflicto = await VerificarConflictoNombreAsync(
+                () => repo.ExisteNombreAsync(dto.Nombre),
+                dto.Nombre,
+                nombreDescodificado,
+                $"Ya existe una unidad con el nombre '{dto.Nombre}'.").ConfigureAwait(false);
+            if (conflicto is not null)
+                return conflicto;
 
             var unidad = new Backend.Models.Unidad
             {
@@ -1000,31 +975,12 @@ internal static class Program
                 Estado = dto.Estado ?? 1,
             };
 
-            return await ActualizarUnidadAsync(repo, nombreDescodificado, nombre, unidad, isDev).ConfigureAwait(false);
+            return await EjecutarActualizacionAsync(
+                () => repo.ActualizarAsync(nombreDescodificado, unidad),
+                $"Unidad '{unidad.Nombre}' actualizada correctamente.",
+                $"No se encontró la unidad '{nombre}'.",
+                isDev).ConfigureAwait(false);
         });
-    }
-
-    private static async Task<IResult> ActualizarUnidadAsync(
-        IUnidadRepository repo,
-        string nombreDescodificado,
-        string nombreOriginal,
-        Backend.Models.Unidad unidad,
-        bool isDev)
-    {
-        try
-        {
-            var actualizado = await repo.ActualizarAsync(nombreDescodificado, unidad).ConfigureAwait(false);
-            return actualizado
-                ? Results.Ok(new { mensaje = $"Unidad '{unidad.Nombre}' actualizada correctamente." })
-                : Results.NotFound(new { mensaje = $"No se encontró la unidad '{nombreOriginal}'." });
-        }
-        catch (OracleException ex)
-        {
-            var msg = isDev
-                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                : TraducirErrorOracle(ex.Number);
-            return Results.Json(new { mensaje = msg }, statusCode: 500);
-        }
     }
 
     private static void MapUnidadesDelete(RouteGroupBuilder unidades)
