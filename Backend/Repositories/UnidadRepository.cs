@@ -73,9 +73,9 @@ internal sealed class UnidadRepository : IUnidadRepository
         var result = await _q.ExecuteScalarAsync(connection =>
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
-            AddNullableIntParam(cmd, ":idArea", unidad.IdArea);
-            AddNullableIntParam(cmd, ":idDepartamento", unidad.IdDepartamento);
-            AddNullableIntParam(cmd, ":idSeccion", unidad.IdSeccion);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", unidad.IdArea);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idDepartamento", unidad.IdDepartamento);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idSeccion", unidad.IdSeccion);
             cmd.Parameters.Add(ParamNombre, unidad.Nombre);
             cmd.Parameters.Add(":descripcion", unidad.Descripcion);
             cmd.Parameters.Add(":estado", unidad.Estado);
@@ -131,9 +131,9 @@ internal sealed class UnidadRepository : IUnidadRepository
         var rows = await _q.ExecuteAsync(connection =>
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
-            AddNullableIntParam(cmd, ":idArea", unidad.IdArea);
-            AddNullableIntParam(cmd, ":idDepartamento", unidad.IdDepartamento);
-            AddNullableIntParam(cmd, ":idSeccion", unidad.IdSeccion);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", unidad.IdArea);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idDepartamento", unidad.IdDepartamento);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idSeccion", unidad.IdSeccion);
             cmd.Parameters.Add(ParamNombre, unidad.Nombre);
             cmd.Parameters.Add(":descripcion", unidad.Descripcion);
             cmd.Parameters.Add(":estado", unidad.Estado);
@@ -158,12 +158,5 @@ internal sealed class UnidadRepository : IUnidadRepository
             return cmd;
         }).ConfigureAwait(false);
         return rows > 0;
-    }
-
-    private static void AddNullableIntParam(OracleCommand cmd, string paramName, int? value)
-    {
-        var param = new OracleParameter(paramName, OracleDbType.Int32);
-        param.Value = value.HasValue ? (object)value.Value : DBNull.Value;
-        cmd.Parameters.Add(param);
     }
 }

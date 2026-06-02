@@ -71,7 +71,7 @@ internal sealed class DepartamentoRepository : IDepartamentoRepository
         var result = await _q.ExecuteScalarAsync(connection =>
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
-            AddNullableIntParam(cmd, ":idArea", departamento.IdArea);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", departamento.IdArea);
             cmd.Parameters.Add(ParamNombre, departamento.Nombre);
             cmd.Parameters.Add(":descripcion", departamento.Descripcion);
             cmd.Parameters.Add(":estado", departamento.Estado);
@@ -124,7 +124,7 @@ internal sealed class DepartamentoRepository : IDepartamentoRepository
         var rows = await _q.ExecuteAsync(connection =>
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
-            AddNullableIntParam(cmd, ":idArea", departamento.IdArea);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", departamento.IdArea);
             cmd.Parameters.Add(ParamNombre, departamento.Nombre);
             cmd.Parameters.Add(":descripcion", departamento.Descripcion);
             cmd.Parameters.Add(":estado", departamento.Estado);
@@ -149,12 +149,5 @@ internal sealed class DepartamentoRepository : IDepartamentoRepository
             return cmd;
         }).ConfigureAwait(false);
         return rows > 0;
-    }
-
-    private static void AddNullableIntParam(OracleCommand cmd, string paramName, int? value)
-    {
-        var param = new OracleParameter(paramName, OracleDbType.Int32);
-        param.Value = value.HasValue ? (object)value.Value : DBNull.Value;
-        cmd.Parameters.Add(param);
     }
 }
