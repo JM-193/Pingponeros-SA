@@ -32,6 +32,7 @@ internal static class Program
         MapDepartamentoRoutes(app, isDev);
         MapSeccionRoutes(app, isDev);
         MapUnidadRoutes(app, isDev);
+        MapPlazaRoutes(app, isDev);
         MapAuth(app, isDev);
 
         app.Run();
@@ -66,6 +67,8 @@ internal static class Program
             new SeccionRepository(sp.GetRequiredService<IQueryExecutor>()));
         builder.Services.AddScoped<IUnidadRepository>(sp =>
             new UnidadRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<IPlazaRepository>(sp =>
+            new PlazaRepository(sp.GetRequiredService<IQueryExecutor>()));
         builder.Services.AddScoped<IEmailService, EmailService>();
         builder.Services.AddOpenApi();
         builder.Services.AddCors(options =>
@@ -1000,6 +1003,82 @@ internal static class Program
                 return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
             }
         });
+    }
+
+    // ---------------------------------------------------------------- //
+    // Rutas de Plazas                                                  //
+    // ---------------------------------------------------------------- //
+    private static void MapPlazaRoutes(WebApplication app, bool isDev)
+    {
+        var plazas = app.MapGroup("/plazas");
+
+        MapPlazasGetAll(plazas);
+        MapPlazasCreate(plazas, isDev);
+    }
+
+    private static void MapPlazasGetAll(RouteGroupBuilder plazas)
+    {
+        // GET /plazas — Lista todas las plazas
+        plazas.MapGet("/", async (IPlazaRepository repo) =>
+        {
+            try
+            {
+                var lista = await repo.ObtenerTodasAsync().ConfigureAwait(false);
+                return Results.Ok(lista);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+    }
+
+    private static void MapPlazasCreate(RouteGroupBuilder plazas, bool isDev)
+    {
+        // POST /plazas — Crea una nueva plaza
+        plazas.MapPost("/", async (CrearPlazaDto dto, IPlazaRepository repo) =>
+        {
+            if (dto.NumeroPlaza <= 0)
+                return Results.BadRequest(new { mensaje = "El número de plaza debe ser un entero positivo." });
+
+            try
+            {
+                var existe = await repo.ExisteNumeroPlazaAsync(dto.NumeroPlaza).ConfigureAwait(false);
+                if (existe)
+                    return Results.Conflict(new { mensaje = $"Ya existe una plaza con el número '{dto.NumeroPlaza}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+
+            var plaza = new Backend.Models.Plaza
+            {
+                NumeroPlaza    = dto.NumeroPlaza,
+                IdUnidad       = dto.IdUnidad,
+                IdDepartamento = dto.IdDepartamento,
+                IdSeccion      = dto.IdSeccion,
+                IdArea         = dto.IdArea,
+            };
+
+            return await InsertarPlazaAsync(repo, plaza, isDev).ConfigureAwait(false);
+        });
+    }
+
+    private static async Task<IResult> InsertarPlazaAsync(IPlazaRepository repo, Backend.Models.Plaza plaza, bool isDev)
+    {
+        try
+        {
+            await repo.InsertarAsync(plaza).ConfigureAwait(false);
+            return Results.Created($"/plazas/{plaza.NumeroPlaza}", new { mensaje = $"Plaza '{plaza.NumeroPlaza}' creada correctamente." });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
     }
 
     // ---------------------------------------------------------------- //

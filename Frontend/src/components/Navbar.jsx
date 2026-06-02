@@ -36,6 +36,13 @@ const NAV_ITEMS = [
       },
     ],
   },
+  {
+    label: 'Plazas',
+    activeOn: '/plazas',
+    submenu: [
+      { label: 'Consultar', path: '/plazas/consultar' },
+    ],
+  },
   /*{
     label: 'Consultas',
     activeOn: '/consultas',
