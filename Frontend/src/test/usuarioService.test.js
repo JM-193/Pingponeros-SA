@@ -1,6 +1,6 @@
 ﻿// usuarioService.test.js
 import { describe, it, expect, beforeEach } from 'vitest'
-import { crearUsuario } from '../services/usuarioService'
+import { crearUsuario, obtenerUsuarios, eliminarUsuario } from '../services/usuarioService'
 
 describe('usuarioService', () => {
   const mockFetch = vi.fn()
@@ -178,6 +178,57 @@ describe('usuarioService', () => {
       expect(result).toBeDefined()
       expect(result.primerNombre).toBe('John')
       expect(result.primerApellido).toBe('Doe')
+    })
+  })
+
+  describe('obtenerUsuarios', () => {
+    it('obtiene la lista de todos los usuarios', async () => {
+      const resp = [
+        { correoInstitucional: 'juan.perez@ucr.ac.cr', primerNombre: 'Juan', primerApellido: 'Pérez', rol: 1 },
+      ]
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => resp,
+      })
+
+      const result = await obtenerUsuarios()
+      expect(result).toEqual(resp)
+      expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/usuarios'))
+    })
+
+    it('lanza error cuando la respuesta no es ok', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({ mensaje: 'Error al obtener usuarios' }),
+      })
+
+      await expect(obtenerUsuarios()).rejects.toThrow('Error al obtener usuarios')
+    })
+  })
+
+  describe('eliminarUsuario', () => {
+    it('elimina un usuario por su correo', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+      })
+
+      await eliminarUsuario('juan.perez@ucr.ac.cr')
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/usuarios/juan.perez%40ucr.ac.cr'),
+        expect.objectContaining({ method: 'DELETE' })
+      )
+    })
+
+    it('lanza error cuando la respuesta no es ok', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: async () => ({ mensaje: 'No se encontró el usuario' }),
+      })
+
+      await expect(eliminarUsuario('inexistente@ucr.ac.cr')).rejects.toThrow('No se encontró el usuario')
     })
   })
 })
