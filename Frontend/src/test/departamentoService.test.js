@@ -89,6 +89,54 @@ describe('departamentoService', () => {
         }),
       )
     })
+
+    it('lanza error cuando falla la creación', async () => {
+      const newItem = { nombre: 'Nómina', descripcion: 'Descripción', idArea: 1 }
+
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        json: async () => ({ mensaje: 'El nombre ya existe' }),
+      })
+
+      await expect(crearDepartamento(newItem)).rejects.toThrow('El nombre ya existe')
+    })
+
+    it('usa error detail cuando mensaje no existe', async () => {
+      const newItem = { nombre: 'Nómina', descripcion: 'Descripción', idArea: 1 }
+
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        json: async () => ({ detail: 'Error de validación' }),
+      })
+
+      await expect(crearDepartamento(newItem)).rejects.toThrow('Error de validación')
+    })
+
+    it('usa error title cuando mensaje y detail no existen', async () => {
+      const newItem = { nombre: 'Nómina', descripcion: 'Descripción', idArea: 1 }
+
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        json: async () => ({ title: 'Error de solicitud' }),
+      })
+
+      await expect(crearDepartamento(newItem)).rejects.toThrow('Error de solicitud')
+    })
+
+    it('usa código de error genérico cuando ningún campo existe', async () => {
+      const newItem = { nombre: 'Nómina', descripcion: 'Descripción', idArea: 1 }
+
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({}),
+      })
+
+      await expect(crearDepartamento(newItem)).rejects.toThrow('Error inesperado (500)')
+    })
   })
 
   describe('eliminarDepartamento', () => {
@@ -101,6 +149,28 @@ describe('departamentoService', () => {
         expect.stringContaining('/departamentos/1'),
         expect.objectContaining({ method: 'DELETE' }),
       )
+    })
+
+    it('lanza error cuando falla la eliminación', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: async () => ({ mensaje: 'Departamento no encontrado' }),
+      })
+
+      await expect(eliminarDepartamento(999)).rejects.toThrow('Departamento no encontrado')
+    })
+
+    it('usa código de error genérico cuando json falla', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => {
+          throw new Error('JSON error')
+        },
+      })
+
+      await expect(eliminarDepartamento(1)).rejects.toThrow('Error inesperado (500)')
     })
   })
 
@@ -124,6 +194,36 @@ describe('departamentoService', () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(updated),
         }),
+      )
+    })
+
+    it('lanza error cuando falla la actualización', async () => {
+      const updated = { nombre: 'Nuevo', descripcion: 'Desc', idArea: 2 }
+
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: async () => ({ mensaje: 'Departamento no encontrado' }),
+      })
+
+      await expect(actualizarDepartamento('Inexistente', updated)).rejects.toThrow(
+        'Departamento no encontrado',
+      )
+    })
+
+    it('usa código de error genérico cuando json falla en actualización', async () => {
+      const updated = { nombre: 'Nuevo', descripcion: 'Desc', idArea: 2 }
+
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        json: async () => {
+          throw new Error('JSON error')
+        },
+      })
+
+      await expect(actualizarDepartamento('Original', updated)).rejects.toThrow(
+        'Error inesperado (400)',
       )
     })
   })

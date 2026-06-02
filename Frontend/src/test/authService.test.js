@@ -1,6 +1,6 @@
 ﻿// authService.test.js
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { login, recuperarContrasena } from '../services/authService'
+import { login, recuperarContrasena, cambiarContrasena } from '../services/authService'
 
 describe('authService', () => {
   const mockFetch = vi.fn()
@@ -157,6 +157,81 @@ describe('authService', () => {
       await expect(recuperarContrasena('test@ucr.ac.cr')).rejects.toThrow(
         'Error inesperado (500)',
       )
+    })
+  })
+
+  describe('cambiarContrasena', () => {
+    it('cambia contraseña correctamente', async () => {
+      const mockResponse = { mensaje: 'Contraseña cambiada exitosamente' }
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      })
+
+      const result = await cambiarContrasena('test@ucr.ac.cr', 'oldPass123', 'newPass123')
+
+      expect(result).toEqual(mockResponse)
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/auth/cambiar-contrasena'),
+        expect.objectContaining({
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      )
+    })
+
+    it('envía correo, contraseña actual y nueva en el body', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({}),
+      })
+
+      await cambiarContrasena('usuario@ucr.ac.cr', 'oldPass', 'newPass')
+
+      const body = JSON.parse(mockFetch.mock.calls[0][1].body)
+      expect(body).toEqual({
+        correoInstitucional: 'usuario@ucr.ac.cr',
+        contraseñaActual: 'oldPass',
+        contraseñaNueva: 'newPass',
+      })
+    })
+
+    it('lanza error con mensaje del backend cuando no es ok', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: async () => ({ mensaje: 'Contraseña actual incorrecta' }),
+      })
+
+      await expect(
+        cambiarContrasena('test@ucr.ac.cr', 'wrongPass', 'newPass'),
+      ).rejects.toThrow('Contraseña actual incorrecta')
+    })
+
+    it('lanza error genérico cuando la respuesta no incluye campo mensaje', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({}),
+      })
+
+      await expect(
+        cambiarContrasena('test@ucr.ac.cr', 'oldPass', 'newPass'),
+      ).rejects.toThrow('Error inesperado (500)')
+    })
+
+    it('maneja error cuando json falla', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        json: async () => {
+          throw new Error('JSON parse error')
+        },
+      })
+
+      await expect(
+        cambiarContrasena('test@ucr.ac.cr', 'oldPass', 'newPass'),
+      ).rejects.toThrow('Error inesperado (400)')
     })
   })
 })

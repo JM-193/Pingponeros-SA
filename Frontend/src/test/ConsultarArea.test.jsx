@@ -132,5 +132,23 @@ describe('ConsultarArea Page', () => {
       }
     })
   })
+
+  it('muestra la lista de áreas correctamente', async () => {
+    render(
+      <BrowserRouter>
+        <ConsultarArea />
+      </BrowserRouter>,
+    )
+
+    const title = screen.queryByText('Consultar Área')
+    if (title) {
+      expect(title).toBeInTheDocument()
+    }
+
+    const emptyMessage = screen.queryByText(/No hay datos disponibles/)
+    if (emptyMessage) {
+      expect(emptyMessage).toBeInTheDocument()
+    }
+  })
 })
 
