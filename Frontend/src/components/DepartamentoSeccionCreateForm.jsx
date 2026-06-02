@@ -57,7 +57,7 @@ export default function DepartamentoSeccionCreateForm({ entityType, createEntity
     getValidationOptions: {
       entityLabel: config.entityLabel,
       nameArticle: config.nameArticle,
-      requireArea: true,
+      requireArea: false,
     },
     getPayloadOptions: { includeEstado: true, includeArea: true },
     onSubmit: createEntity,
@@ -97,7 +97,6 @@ export default function DepartamentoSeccionCreateForm({ entityType, createEntity
         namePlaceholder={config.namePlaceholder}
         descriptionPlaceholder={config.descriptionPlaceholder}
         areaOptions={areaOptions}
-        areaRequired
       />
     </OrganizationEntityFormPage>
   )

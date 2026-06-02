@@ -11,6 +11,7 @@ import { obtenerSecciones } from '../services/seccionService'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
 import { COLORS } from '../constants/colors'
 import { useOrganizationEntityForm } from '../hooks/useOrganizationEntityForm'
+import { useUnidadAreaFilters } from '../hooks/useUnidadAreaFilters'
 
 const parentTypeOptions = [
   { value: 'departamento', label: 'Departamento' },
@@ -33,6 +34,8 @@ export default function EditUnidad() {
   const [areaOptions, setAreaOptions] = useState([])
   const [departmentOptions, setDepartmentOptions] = useState([])
   const [sectionOptions, setSectionOptions] = useState([])
+  const [rawDepartamentos, setRawDepartamentos] = useState([])
+  const [rawSecciones, setRawSecciones] = useState([])
   const [nombreOriginal, setNombreOriginal] = useState('')
   const loadData = useCallback(async () => {
     const [unidad, areas, departamentos, secciones] = await Promise.all([
@@ -70,6 +73,8 @@ export default function EditUnidad() {
       sectionOptions: buildLabeledOptions(secciones, { valueKey: seccionValueKey, labelPrefix: 'Sección de ' }),
       parentType: resolvedParentType,
       nombreOriginal: unidad.nombre,
+      rawDepartamentos: departamentos,
+      rawSecciones: secciones,
     }
   }, [nombre])
 
@@ -77,6 +82,8 @@ export default function EditUnidad() {
     setAreaOptions(result?.areaOptions ?? [])
     setDepartmentOptions(result?.departmentOptions ?? [])
     setSectionOptions(result?.sectionOptions ?? [])
+    setRawDepartamentos(result?.rawDepartamentos ?? [])
+    setRawSecciones(result?.rawSecciones ?? [])
     setParentType(result?.parentType ?? '')
     setNombreOriginal(result?.nombreOriginal ?? '')
   }, [])
@@ -114,8 +121,7 @@ export default function EditUnidad() {
     getValidationOptions: () => ({
       entityLabel: 'unidad',
       nameArticle: 'de la',
-      requireArea: true,
-      requireParent: true,
+      requireArea: false,
       parentType,
     }),
     getPayloadOptions: () => ({
@@ -128,19 +134,19 @@ export default function EditUnidad() {
     onSuccess: handleSuccess,
   })
 
-  const handleParentTypeChange = useCallback(
-    (event) => {
-      const { value } = event.target
-      clearFeedback()
-      setParentType(value)
-      setFormData((prev) => ({
-        ...prev,
-        idDepartamento: value === 'departamento' ? prev.idDepartamento : '',
-        idSeccion: value === 'seccion' ? prev.idSeccion : '',
-      }))
-    },
-    [clearFeedback, setFormData, setParentType],
-  )
+  const { filteredDepartmentOptions, filteredSectionOptions, handleFieldChange, handleParentTypeChange, conflictError } =
+    useUnidadAreaFilters({
+      formData,
+      setFormData,
+      parentType,
+      setParentType,
+      departmentOptions,
+      sectionOptions,
+      rawDepartamentos,
+      rawSecciones,
+      clearFeedback,
+      handleInputChange,
+    })
 
   const handleStateChange = (newState) => {
     setFormData((prev) => ({ ...prev, estado: newState }))
@@ -169,25 +175,23 @@ export default function EditUnidad() {
       onCancel={() => navigate('/organizacion/unidades/consultar')}
       isBusy={isSubmitting}
       successMsg={successMsg}
-      errorMsg={errorMsg}
+      errorMsg={conflictError || errorMsg}
       primaryLabel="Actualizar"
     >
       <OrganizationEntityFormFields
         formData={formData}
-        onChange={handleInputChange}
+        onChange={handleFieldChange}
         namePrefix="Unidad de"
         namePlaceholder="Nombre de la unidad"
         descriptionPlaceholder="Ingrese la descripción de la unidad"
         areaOptions={areaOptions}
-        areaRequired
         parentType={parentType}
         parentTypeOptions={parentTypeOptions}
         onParentTypeChange={handleParentTypeChange}
-        parentTypeLabel="Departamento o sección"
-        parentTypeDefaultLabel="Seleccione una dependencia"
-        departmentOptions={departmentOptions}
-        sectionOptions={sectionOptions}
-        parentRequired
+        parentTypeLabel="Departamento o sección (opcional)"
+        parentTypeDefaultLabel="Seleccione una dependencia (opcional)"
+        departmentOptions={filteredDepartmentOptions}
+        sectionOptions={filteredSectionOptions}
       />
       <StateToggle
         currentState={formData.estado}

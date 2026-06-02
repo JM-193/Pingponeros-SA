@@ -29,6 +29,9 @@ internal static class Program
         ConfigureMiddleware(app);
         MapUsuarioRoutes(app, isDev);
         MapAreaRoutes(app, isDev);
+        MapDepartamentoRoutes(app, isDev);
+        MapSeccionRoutes(app, isDev);
+        MapUnidadRoutes(app, isDev);
         MapAuth(app, isDev);
 
         app.Run();
@@ -57,6 +60,12 @@ internal static class Program
             new UsuarioRepository(sp.GetRequiredService<IQueryExecutor>()));
         builder.Services.AddScoped<IAreaRepository>(sp =>
             new AreaRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<IDepartamentoRepository>(sp =>
+            new DepartamentoRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<ISeccionRepository>(sp =>
+            new SeccionRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<IUnidadRepository>(sp =>
+            new UnidadRepository(sp.GetRequiredService<IQueryExecutor>()));
         builder.Services.AddScoped<IEmailService, EmailService>();
         builder.Services.AddOpenApi();
         builder.Services.AddCors(options =>
@@ -208,8 +217,8 @@ internal static class Program
     }
 
     [SuppressMessage("Globalization", "CA1308:NormalizeStringsToUppercase",
-        Justification = "Los nombres de área se normalizan a minúsculas por requisito de negocio.")]
-    private static string NormalizarNombreArea(string nombre) => nombre.Trim().ToLowerInvariant();
+        Justification = "Los nombres de entidades organizacionales se normalizan a minúsculas por requisito de negocio.")]
+    private static string NormalizarNombre(string nombre) => nombre.Trim().ToLowerInvariant();
 
     private static async Task<IResult> CrearUsuarioAsync(
         IUsuarioRepository repo,
@@ -343,7 +352,7 @@ internal static class Program
 
             var area = new Backend.Models.Area
             {
-                Nombre = NormalizarNombreArea(dto.Nombre),
+                Nombre = NormalizarNombre(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
                 Estado = dto.Estado ?? 1,
             };
@@ -398,52 +407,27 @@ internal static class Program
 
             var nombreDescodificado = Uri.UnescapeDataString(nombre);
 
-            if (!dto.Nombre.Trim().Equals(nombreDescodificado, StringComparison.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
-                    if (existe)
-                        return Results.Conflict(new { mensaje = $"Ya existe un área con el nombre '{dto.Nombre}'." });
-                }
-                catch (OracleException ex)
-                {
-                    return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
-                }
-            }
+            var conflicto = await VerificarConflictoNombreAsync(
+                () => repo.ExisteNombreAsync(dto.Nombre),
+                dto.Nombre,
+                nombreDescodificado,
+                $"Ya existe un área con el nombre '{dto.Nombre}'.").ConfigureAwait(false);
+            if (conflicto is not null)
+                return conflicto;
 
             var area = new Backend.Models.Area
             {
-                Nombre = NormalizarNombreArea(dto.Nombre),
+                Nombre = NormalizarNombre(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
                 Estado = dto.Estado ?? 1,
             };
 
-            return await ActualizarAreaAsync(repo, nombreDescodificado, nombre, area, isDev).ConfigureAwait(false);
+            return await EjecutarActualizacionAsync(
+                () => repo.ActualizarAsync(nombreDescodificado, area),
+                $"Área '{area.Nombre}' actualizada correctamente.",
+                $"No se encontró el área '{nombre}'.",
+                isDev).ConfigureAwait(false);
         });
-    }
-
-    private static async Task<IResult> ActualizarAreaAsync(
-        IAreaRepository repo,
-        string nombreDescodificado,
-        string nombreOriginal,
-        Backend.Models.Area area,
-        bool isDev)
-    {
-        try
-        {
-            var actualizado = await repo.ActualizarAsync(nombreDescodificado, area).ConfigureAwait(false);
-            return actualizado
-                ? Results.Ok(new { mensaje = $"Área '{area.Nombre}' actualizada correctamente." })
-                : Results.NotFound(new { mensaje = $"No se encontró el área '{nombreOriginal}'." });
-        }
-        catch (OracleException ex)
-        {
-            var msg = isDev
-                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                : TraducirErrorOracle(ex.Number);
-            return Results.Json(new { mensaje = msg }, statusCode: 500);
-        }
     }
 
     private static void MapAreasDelete(RouteGroupBuilder areas)
@@ -477,6 +461,545 @@ internal static class Program
             return Results.BadRequest(new { mensaje = "El estado debe ser 0 (Inactivo) o 1 (Activo)." });
 
         return null;
+    }
+
+    // ---------------------------------------------------------------- //
+    // Helpers de actualización compartidos                              //
+    // ---------------------------------------------------------------- //
+
+    /// <summary>
+    /// Verifica si ya existe otra entidad con el mismo nombre cuando éste cambia.
+    /// Devuelve un IResult de conflicto o error, o null si no hay problema.
+    /// </summary>
+    private static async Task<IResult?> VerificarConflictoNombreAsync(
+        Func<Task<bool>> existeAsync,
+        string nombreNuevo,
+        string nombreDescodificado,
+        string mensajeConflicto)
+    {
+        if (nombreNuevo.Trim().Equals(nombreDescodificado, StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        try
+        {
+            var existe = await existeAsync().ConfigureAwait(false);
+            if (existe)
+                return Results.Conflict(new { mensaje = mensajeConflicto });
+        }
+        catch (OracleException ex)
+        {
+            return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Ejecuta la actualización delegada y devuelve Ok, NotFound o 500 según el resultado.
+    /// </summary>
+    private static async Task<IResult> EjecutarActualizacionAsync(
+        Func<Task<bool>> actualizarAsync,
+        string mensajeOk,
+        string mensajeNoEncontrado,
+        bool isDev)
+    {
+        try
+        {
+            var actualizado = await actualizarAsync().ConfigureAwait(false);
+            return actualizado
+                ? Results.Ok(new { mensaje = mensajeOk })
+                : Results.NotFound(new { mensaje = mensajeNoEncontrado });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
+
+    // ---------------------------------------------------------------- //
+    // Helpers de validación compartidos                                 //
+    // ---------------------------------------------------------------- //
+    private static IResult? ValidarEntidadBase(string? nombre, string? descripcion, int? estado, string articulo, string entidad)
+    {
+        if (string.IsNullOrWhiteSpace(nombre))
+            return Results.BadRequest(new { mensaje = $"El nombre {articulo} {entidad} es obligatorio." });
+
+        if (string.IsNullOrWhiteSpace(descripcion))
+            return Results.BadRequest(new { mensaje = "La descripción es obligatoria." });
+
+        if (estado is not null && estado is not (0 or 1))
+            return Results.BadRequest(new { mensaje = "El estado debe ser 0 (Inactivo) o 1 (Activo)." });
+
+        return null;
+    }
+
+    // ---------------------------------------------------------------- //
+    // Rutas de Departamentos                                            //
+    // ---------------------------------------------------------------- //
+    private static void MapDepartamentoRoutes(WebApplication app, bool isDev)
+    {
+        var departamentos = app.MapGroup("/departamentos");
+
+        MapDepartamentosGetAll(departamentos);
+        MapDepartamentosCreate(departamentos, isDev);
+        MapDepartamentosGetByNombre(departamentos);
+        MapDepartamentosUpdate(departamentos, isDev);
+        MapDepartamentosDelete(departamentos);
+    }
+
+    private static void MapDepartamentosGetAll(RouteGroupBuilder departamentos)
+    {
+        // GET /departamentos — Lista todos los departamentos
+        departamentos.MapGet("/", async (IDepartamentoRepository repo) =>
+        {
+            try
+            {
+                var lista = await repo.ObtenerTodosAsync().ConfigureAwait(false);
+                return Results.Ok(lista);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+    }
+
+    private static void MapDepartamentosCreate(RouteGroupBuilder departamentos, bool isDev)
+    {
+        // POST /departamentos — Crea un nuevo departamento
+        departamentos.MapPost("/", async (CrearDepartamentoDto dto, IDepartamentoRepository repo) =>
+        {
+            var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "del", "departamento");
+            if (validationResult is not null)
+                return validationResult;
+
+            try
+            {
+                var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
+                if (existe)
+                    return Results.Conflict(new { mensaje = $"Ya existe un departamento con el nombre '{dto.Nombre}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+
+            var departamento = new Backend.Models.Departamento
+            {
+                Nombre = NormalizarNombre(dto.Nombre),
+                Descripcion = dto.Descripcion.Trim(),
+                IdArea = dto.IdArea,
+                Estado = dto.Estado ?? 1,
+            };
+
+            return await InsertarDepartamentoAsync(repo, departamento, isDev).ConfigureAwait(false);
+        });
+    }
+
+    private static async Task<IResult> InsertarDepartamentoAsync(IDepartamentoRepository repo, Backend.Models.Departamento departamento, bool isDev)
+    {
+        try
+        {
+            var id = await repo.InsertarAsync(departamento).ConfigureAwait(false);
+            return Results.Created($"/departamentos/{id}", new { mensaje = $"Departamento '{departamento.Nombre}' creado correctamente." });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
+
+    private static void MapDepartamentosGetByNombre(RouteGroupBuilder departamentos)
+    {
+        // GET /departamentos/{nombre} — Obtiene un departamento por nombre
+        departamentos.MapGet("/{nombre}", async (string nombre, IDepartamentoRepository repo) =>
+        {
+            try
+            {
+                var departamento = await repo.ObtenerPorNombreAsync(Uri.UnescapeDataString(nombre)).ConfigureAwait(false);
+                return departamento is null
+                    ? Results.NotFound(new { mensaje = $"No se encontró el departamento '{nombre}'." })
+                    : Results.Ok(departamento);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+    }
+
+    private static void MapDepartamentosUpdate(RouteGroupBuilder departamentos, bool isDev)
+    {
+        // PUT /departamentos/{nombre} — Actualiza un departamento
+        departamentos.MapPut("/{nombre}", async (string nombre, CrearDepartamentoDto dto, IDepartamentoRepository repo) =>
+        {
+            var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "del", "departamento");
+            if (validationResult is not null)
+                return validationResult;
+
+            var nombreDescodificado = Uri.UnescapeDataString(nombre);
+
+            var conflicto = await VerificarConflictoNombreAsync(
+                () => repo.ExisteNombreAsync(dto.Nombre),
+                dto.Nombre,
+                nombreDescodificado,
+                $"Ya existe un departamento con el nombre '{dto.Nombre}'.").ConfigureAwait(false);
+            if (conflicto is not null)
+                return conflicto;
+
+            var departamento = new Backend.Models.Departamento
+            {
+                Nombre = NormalizarNombre(dto.Nombre),
+                Descripcion = dto.Descripcion.Trim(),
+                IdArea = dto.IdArea,
+                Estado = dto.Estado ?? 1,
+            };
+
+            return await EjecutarActualizacionAsync(
+                () => repo.ActualizarAsync(nombreDescodificado, departamento),
+                $"Departamento '{departamento.Nombre}' actualizado correctamente.",
+                $"No se encontró el departamento '{nombre}'.",
+                isDev).ConfigureAwait(false);
+        });
+    }
+
+    private static void MapDepartamentosDelete(RouteGroupBuilder departamentos)
+    {
+        // DELETE /departamentos/{id} — Borrado lógico: pasa ESTADO de 1 a 0
+        departamentos.MapDelete("/{id:int}", async (int id, IDepartamentoRepository repo) =>
+        {
+            try
+            {
+                var desactivado = await repo.DesactivarAsync(id).ConfigureAwait(false);
+                return desactivado
+                    ? Results.NoContent()
+                    : Results.NotFound(new { mensaje = $"No se encontró el departamento activo con ID '{id}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+        });
+    }
+
+    // ---------------------------------------------------------------- //
+    // Rutas de Secciones                                                //
+    // ---------------------------------------------------------------- //
+    private static void MapSeccionRoutes(WebApplication app, bool isDev)
+    {
+        var secciones = app.MapGroup("/secciones");
+
+        MapSeccionesGetAll(secciones);
+        MapSeccionesCreate(secciones, isDev);
+        MapSeccionesGetByNombre(secciones);
+        MapSeccionesUpdate(secciones, isDev);
+        MapSeccionesDelete(secciones);
+    }
+
+    private static void MapSeccionesGetAll(RouteGroupBuilder secciones)
+    {
+        // GET /secciones — Lista todas las secciones
+        secciones.MapGet("/", async (ISeccionRepository repo) =>
+        {
+            try
+            {
+                var lista = await repo.ObtenerTodasAsync().ConfigureAwait(false);
+                return Results.Ok(lista);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+    }
+
+    private static void MapSeccionesCreate(RouteGroupBuilder secciones, bool isDev)
+    {
+        // POST /secciones — Crea una nueva sección
+        secciones.MapPost("/", async (CrearSeccionDto dto, ISeccionRepository repo) =>
+        {
+            var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "sección");
+            if (validationResult is not null)
+                return validationResult;
+
+            try
+            {
+                var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
+                if (existe)
+                    return Results.Conflict(new { mensaje = $"Ya existe una sección con el nombre '{dto.Nombre}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+
+            var seccion = new Backend.Models.Seccion
+            {
+                Nombre = NormalizarNombre(dto.Nombre),
+                Descripcion = dto.Descripcion.Trim(),
+                IdArea = dto.IdArea,
+                Estado = dto.Estado ?? 1,
+            };
+
+            return await InsertarSeccionAsync(repo, seccion, isDev).ConfigureAwait(false);
+        });
+    }
+
+    private static async Task<IResult> InsertarSeccionAsync(ISeccionRepository repo, Backend.Models.Seccion seccion, bool isDev)
+    {
+        try
+        {
+            var id = await repo.InsertarAsync(seccion).ConfigureAwait(false);
+            return Results.Created($"/secciones/{id}", new { mensaje = $"Sección '{seccion.Nombre}' creada correctamente." });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
+
+    private static void MapSeccionesGetByNombre(RouteGroupBuilder secciones)
+    {
+        // GET /secciones/{nombre} — Obtiene una sección por nombre
+        secciones.MapGet("/{nombre}", async (string nombre, ISeccionRepository repo) =>
+        {
+            try
+            {
+                var seccion = await repo.ObtenerPorNombreAsync(Uri.UnescapeDataString(nombre)).ConfigureAwait(false);
+                return seccion is null
+                    ? Results.NotFound(new { mensaje = $"No se encontró la sección '{nombre}'." })
+                    : Results.Ok(seccion);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+    }
+
+    private static void MapSeccionesUpdate(RouteGroupBuilder secciones, bool isDev)
+    {
+        // PUT /secciones/{nombre} — Actualiza una sección
+        secciones.MapPut("/{nombre}", async (string nombre, CrearSeccionDto dto, ISeccionRepository repo) =>
+        {
+            var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "sección");
+            if (validationResult is not null)
+                return validationResult;
+
+            var nombreDescodificado = Uri.UnescapeDataString(nombre);
+
+            var conflicto = await VerificarConflictoNombreAsync(
+                () => repo.ExisteNombreAsync(dto.Nombre),
+                dto.Nombre,
+                nombreDescodificado,
+                $"Ya existe una sección con el nombre '{dto.Nombre}'.").ConfigureAwait(false);
+            if (conflicto is not null)
+                return conflicto;
+
+            var seccion = new Backend.Models.Seccion
+            {
+                Nombre = NormalizarNombre(dto.Nombre),
+                Descripcion = dto.Descripcion.Trim(),
+                IdArea = dto.IdArea,
+                Estado = dto.Estado ?? 1,
+            };
+
+            return await EjecutarActualizacionAsync(
+                () => repo.ActualizarAsync(nombreDescodificado, seccion),
+                $"Sección '{seccion.Nombre}' actualizada correctamente.",
+                $"No se encontró la sección '{nombre}'.",
+                isDev).ConfigureAwait(false);
+        });
+    }
+
+    private static void MapSeccionesDelete(RouteGroupBuilder secciones)
+    {
+        // DELETE /secciones/{id} — Borrado lógico: pasa ESTADO de 1 a 0
+        secciones.MapDelete("/{id:int}", async (int id, ISeccionRepository repo) =>
+        {
+            try
+            {
+                var desactivado = await repo.DesactivarAsync(id).ConfigureAwait(false);
+                return desactivado
+                    ? Results.NoContent()
+                    : Results.NotFound(new { mensaje = $"No se encontró la sección activa con ID '{id}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+        });
+    }
+
+    // ---------------------------------------------------------------- //
+    // Rutas de Unidades                                                 //
+    // ---------------------------------------------------------------- //
+    private static void MapUnidadRoutes(WebApplication app, bool isDev)
+    {
+        var unidades = app.MapGroup("/unidades");
+
+        MapUnidadesGetAll(unidades);
+        MapUnidadesCreate(unidades, isDev);
+        MapUnidadesGetByNombre(unidades);
+        MapUnidadesUpdate(unidades, isDev);
+        MapUnidadesDelete(unidades);
+    }
+
+    private static void MapUnidadesGetAll(RouteGroupBuilder unidades)
+    {
+        // GET /unidades — Lista todas las unidades
+        unidades.MapGet("/", async (IUnidadRepository repo) =>
+        {
+            try
+            {
+                var lista = await repo.ObtenerTodasAsync().ConfigureAwait(false);
+                return Results.Ok(lista);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+    }
+
+    private static void MapUnidadesCreate(RouteGroupBuilder unidades, bool isDev)
+    {
+        // POST /unidades — Crea una nueva unidad
+        unidades.MapPost("/", async (CrearUnidadDto dto, IUnidadRepository repo) =>
+        {
+            var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "unidad");
+            if (validationResult is not null)
+                return validationResult;
+
+            if (dto.IdDepartamento is not null && dto.IdSeccion is not null)
+                return Results.BadRequest(new { mensaje = "Una unidad no puede pertenecer a un departamento y a una sección al mismo tiempo." });
+
+            try
+            {
+                var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
+                if (existe)
+                    return Results.Conflict(new { mensaje = $"Ya existe una unidad con el nombre '{dto.Nombre}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+
+            var unidad = new Backend.Models.Unidad
+            {
+                Nombre = NormalizarNombre(dto.Nombre),
+                Descripcion = dto.Descripcion.Trim(),
+                IdArea = dto.IdArea,
+                IdDepartamento = dto.IdDepartamento,
+                IdSeccion = dto.IdSeccion,
+                Estado = dto.Estado ?? 1,
+            };
+
+            return await InsertarUnidadAsync(repo, unidad, isDev).ConfigureAwait(false);
+        });
+    }
+
+    private static async Task<IResult> InsertarUnidadAsync(IUnidadRepository repo, Backend.Models.Unidad unidad, bool isDev)
+    {
+        try
+        {
+            var id = await repo.InsertarAsync(unidad).ConfigureAwait(false);
+            return Results.Created($"/unidades/{id}", new { mensaje = $"Unidad '{unidad.Nombre}' creada correctamente." });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
+
+    private static void MapUnidadesGetByNombre(RouteGroupBuilder unidades)
+    {
+        // GET /unidades/{nombre} — Obtiene una unidad por nombre
+        unidades.MapGet("/{nombre}", async (string nombre, IUnidadRepository repo) =>
+        {
+            try
+            {
+                var unidad = await repo.ObtenerPorNombreAsync(Uri.UnescapeDataString(nombre)).ConfigureAwait(false);
+                return unidad is null
+                    ? Results.NotFound(new { mensaje = $"No se encontró la unidad '{nombre}'." })
+                    : Results.Ok(unidad);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+    }
+
+    private static void MapUnidadesUpdate(RouteGroupBuilder unidades, bool isDev)
+    {
+        // PUT /unidades/{nombre} — Actualiza una unidad
+        unidades.MapPut("/{nombre}", async (string nombre, CrearUnidadDto dto, IUnidadRepository repo) =>
+        {
+            var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "unidad");
+            if (validationResult is not null)
+                return validationResult;
+
+            if (dto.IdDepartamento is not null && dto.IdSeccion is not null)
+                return Results.BadRequest(new { mensaje = "Una unidad no puede pertenecer a un departamento y a una sección al mismo tiempo." });
+
+            var nombreDescodificado = Uri.UnescapeDataString(nombre);
+
+            var conflicto = await VerificarConflictoNombreAsync(
+                () => repo.ExisteNombreAsync(dto.Nombre),
+                dto.Nombre,
+                nombreDescodificado,
+                $"Ya existe una unidad con el nombre '{dto.Nombre}'.").ConfigureAwait(false);
+            if (conflicto is not null)
+                return conflicto;
+
+            var unidad = new Backend.Models.Unidad
+            {
+                Nombre = NormalizarNombre(dto.Nombre),
+                Descripcion = dto.Descripcion.Trim(),
+                IdArea = dto.IdArea,
+                IdDepartamento = dto.IdDepartamento,
+                IdSeccion = dto.IdSeccion,
+                Estado = dto.Estado ?? 1,
+            };
+
+            return await EjecutarActualizacionAsync(
+                () => repo.ActualizarAsync(nombreDescodificado, unidad),
+                $"Unidad '{unidad.Nombre}' actualizada correctamente.",
+                $"No se encontró la unidad '{nombre}'.",
+                isDev).ConfigureAwait(false);
+        });
+    }
+
+    private static void MapUnidadesDelete(RouteGroupBuilder unidades)
+    {
+        // DELETE /unidades/{id} — Borrado lógico: pasa ESTADO de 1 a 0
+        unidades.MapDelete("/{id:int}", async (int id, IUnidadRepository repo) =>
+        {
+            try
+            {
+                var desactivado = await repo.DesactivarAsync(id).ConfigureAwait(false);
+                return desactivado
+                    ? Results.NoContent()
+                    : Results.NotFound(new { mensaje = $"No se encontró la unidad activa con ID '{id}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+        });
     }
 
     // ---------------------------------------------------------------- //

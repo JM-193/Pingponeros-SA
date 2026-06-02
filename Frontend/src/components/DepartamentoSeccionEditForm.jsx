@@ -84,7 +84,7 @@ export default function DepartamentoSeccionEditForm({
     getValidationOptions: {
       entityLabel: config.entityLabel,
       nameArticle: config.nameArticle,
-      requireArea: true,
+      requireArea: false,
     },
     getPayloadOptions: { includeEstado: true, includeArea: true },
     onSubmit: submitUpdate,
@@ -129,7 +129,6 @@ export default function DepartamentoSeccionEditForm({
         namePlaceholder={config.namePlaceholder}
         descriptionPlaceholder={config.descriptionPlaceholder}
         areaOptions={areaOptions}
-        areaRequired
       />
       <StateToggle
         currentState={formData.estado}

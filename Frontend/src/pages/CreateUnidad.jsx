@@ -10,6 +10,7 @@ import { obtenerSecciones } from '../services/seccionService'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
 import { COLORS } from '../constants/colors'
 import { useOrganizationEntityForm } from '../hooks/useOrganizationEntityForm'
+import { useUnidadAreaFilters } from '../hooks/useUnidadAreaFilters'
 
 const parentTypeOptions = [
   { value: 'departamento', label: 'Departamento' },
@@ -31,6 +32,8 @@ export default function CreateUnidad() {
   const [areaOptions, setAreaOptions] = useState([])
   const [departmentOptions, setDepartmentOptions] = useState([])
   const [sectionOptions, setSectionOptions] = useState([])
+  const [rawDepartamentos, setRawDepartamentos] = useState([])
+  const [rawSecciones, setRawSecciones] = useState([])
   const loadOptions = useCallback(async () => {
     const [areas, departamentos, secciones] = await Promise.all([
       obtenerAreas(),
@@ -49,6 +52,8 @@ export default function CreateUnidad() {
         labelPrefix: 'Departamento de ',
       }),
       sectionOptions: buildLabeledOptions(secciones, { valueKey: seccionValueKey, labelPrefix: 'Sección de ' }),
+      rawDepartamentos: departamentos,
+      rawSecciones: secciones,
     }
   }, [])
 
@@ -56,6 +61,8 @@ export default function CreateUnidad() {
     setAreaOptions(result?.areaOptions ?? [])
     setDepartmentOptions(result?.departmentOptions ?? [])
     setSectionOptions(result?.sectionOptions ?? [])
+    setRawDepartamentos(result?.rawDepartamentos ?? [])
+    setRawSecciones(result?.rawSecciones ?? [])
   }, [])
 
   const handleSuccess = useCallback(
@@ -84,8 +91,7 @@ export default function CreateUnidad() {
     getValidationOptions: () => ({
       entityLabel: 'unidad',
       nameArticle: 'de la',
-      requireArea: true,
-      requireParent: true,
+      requireArea: false,
       parentType,
     }),
     getPayloadOptions: () => ({
@@ -98,19 +104,19 @@ export default function CreateUnidad() {
     onSuccess: handleSuccess,
   })
 
-  const handleParentTypeChange = useCallback(
-    (event) => {
-      const { value } = event.target
-      clearFeedback()
-      setParentType(value)
-      setFormData((prev) => ({
-        ...prev,
-        idDepartamento: value === 'departamento' ? prev.idDepartamento : '',
-        idSeccion: value === 'seccion' ? prev.idSeccion : '',
-      }))
-    },
-    [clearFeedback, setFormData, setParentType],
-  )
+  const { filteredDepartmentOptions, filteredSectionOptions, handleFieldChange, handleParentTypeChange, conflictError } =
+    useUnidadAreaFilters({
+      formData,
+      setFormData,
+      parentType,
+      setParentType,
+      departmentOptions,
+      sectionOptions,
+      rawDepartamentos,
+      rawSecciones,
+      clearFeedback,
+      handleInputChange,
+    })
 
   if (isLoading) {
     return (
@@ -134,25 +140,23 @@ export default function CreateUnidad() {
       onCancel={() => navigate('/organizacion/unidades/consultar')}
       isBusy={isSubmitting}
       successMsg={successMsg}
-      errorMsg={errorMsg}
+      errorMsg={conflictError || errorMsg}
       primaryLabel="Crear"
     >
       <OrganizationEntityFormFields
         formData={formData}
-        onChange={handleInputChange}
+        onChange={handleFieldChange}
         namePrefix="Unidad de"
         namePlaceholder="Nombre de la unidad"
         descriptionPlaceholder="Ingrese la descripción de la unidad"
         areaOptions={areaOptions}
-        areaRequired
         parentType={parentType}
         parentTypeOptions={parentTypeOptions}
         onParentTypeChange={handleParentTypeChange}
         parentTypeLabel="Tipo de dependencia"
-        parentTypeDefaultLabel="Seleccione un tipo de dependencia"
-        departmentOptions={departmentOptions}
-        sectionOptions={sectionOptions}
-        parentRequired
+        parentTypeDefaultLabel="Seleccione un tipo de dependencia (opcional)"
+        departmentOptions={filteredDepartmentOptions}
+        sectionOptions={filteredSectionOptions}
       />
     </OrganizationEntityFormPage>
   )

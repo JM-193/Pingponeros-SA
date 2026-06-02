@@ -75,7 +75,8 @@ export function useOrganizationEntityForm({
     return () => {
       isActive = false
     }
-  }, [loadData, shouldLoad, onLoadSuccess, onLoadError, loadDeps])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadData, shouldLoad, onLoadSuccess, onLoadError, ...loadDeps])
 
   const resolveOptions = useCallback((value) => {
     if (typeof value === 'function') {

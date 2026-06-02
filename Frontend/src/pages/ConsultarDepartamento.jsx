@@ -16,7 +16,7 @@ export default function ConsultarDepartamento() {
 
     return departamentos.map((departamento) => {
       const areaId = departamento.idArea ?? departamento.areaId ?? departamento[areaValueKey]
-      const areaLabel = areaMap.get(String(areaId)) ?? 'Área no disponible'
+      const areaLabel = areaId ? (areaMap.get(String(areaId)) ?? 'Sin asignación') : 'Sin asignación'
 
       return { ...departamento, areaLabel }
     })
