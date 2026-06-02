@@ -46,7 +46,7 @@ export default function CreateUnidad() {
     const seccionValueKey = resolveOptionValueKey(secciones, ['id', 'idSeccion'])
 
     return {
-      areaOptions: buildLabeledOptions(areas, { valueKey: areaValueKey }),
+      areaOptions: buildLabeledOptions(areas, { valueKey: areaValueKey, labelPrefix: 'Área de ' }),
       departmentOptions: buildLabeledOptions(departamentos, {
         valueKey: departamentoValueKey,
         labelPrefix: 'Departamento de ',

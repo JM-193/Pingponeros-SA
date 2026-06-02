@@ -5,7 +5,7 @@ import { cerrarSesion, obtenerSesion } from '../services/session'
 import { COLORS } from '../constants/colors'
 
 const NAV_ITEMS = [
-  { label: 'P\u00e1gina Principal', path: '/home', activeOn: '/home' },
+  { label: 'Página Principal', path: '/home', activeOn: '/home' },
   {
     label: 'Usuarios',
     activeOn: '/usuarios',

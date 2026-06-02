@@ -14,7 +14,7 @@ import {
 } from '../utils/departamentoSeccionFormConfig'
 import { COLORS } from '../constants/colors'
 
-const subtitle = 'Formulario de Actualizaci\u00f3n'
+const subtitle = 'Formulario de Actualización'
 
 export default function DepartamentoSeccionEditForm({
   entityType,
@@ -41,7 +41,7 @@ export default function DepartamentoSeccionEditForm({
         descripcion: entity.descripcion,
         estado: entity.estado ?? 1,
       },
-      areaOptions: buildLabeledOptions(areas, { valueKey }),
+      areaOptions: buildLabeledOptions(areas, { valueKey, labelPrefix: 'Área de '}),
       nombreOriginal: entity.nombre,
     }
   }, [fetchByName, nombre])

@@ -13,7 +13,7 @@ import {
 } from '../utils/departamentoSeccionFormConfig'
 import { COLORS } from '../constants/colors'
 
-const loadingLabel = 'Cargando \u00e1reas...'
+const loadingLabel = 'Cargando áreas...'
 const subtitle = 'Formulario de Registro'
 
 export default function DepartamentoSeccionCreateForm({ entityType, createEntity }) {
@@ -26,7 +26,7 @@ export default function DepartamentoSeccionCreateForm({ entityType, createEntity
     const valueKey = resolveOptionValueKey(areas, ['id', 'idArea'])
 
     return {
-      areaOptions: buildLabeledOptions(areas, { valueKey}),
+      areaOptions: buildLabeledOptions(areas, { valueKey, labelPrefix: 'Área de ' }),
     }
   }, [])
 
