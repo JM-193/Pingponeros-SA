@@ -191,13 +191,31 @@ export default function EditPlaza() {
       const { value } = e.target
       clearFeedback()
       setParentType(value)
+
+      let conflict = ''
+      let clearUnidad = false
+
+      if (formData.idUnidad) {
+        const unidad = rawUnidades.find((u) => String(u.id ?? u.idUnidad) === formData.idUnidad)
+        if (value === 'seccion' && formData.idDepartamento && unidad?.idDepartamento != null) {
+          clearUnidad = true
+          conflict = 'La unidad seleccionada no es compatible con el tipo de dependencia elegido. Seleccione una unidad válida.'
+        }
+        if (value === 'departamento' && formData.idSeccion && unidad?.idSeccion != null) {
+          clearUnidad = true
+          conflict = 'La unidad seleccionada no es compatible con el tipo de dependencia elegido. Seleccione una unidad válida.'
+        }
+      }
+
+      if (conflict) setConflictError(conflict)
       setFormData((prev) => ({
         ...prev,
         idDepartamento: value === 'departamento' ? prev.idDepartamento : '',
         idSeccion:      value === 'seccion'      ? prev.idSeccion      : '',
+        idUnidad:       clearUnidad              ? ''                  : prev.idUnidad,
       }))
     },
-    [clearFeedback],
+    [clearFeedback, formData, rawUnidades],
   )
 
   const handleFieldChange = useCallback(
@@ -207,9 +225,24 @@ export default function EditPlaza() {
         return
       }
       clearFeedback()
-      setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+      const { name, value } = e.target
+      const newData = { ...formData, [name]: value }
+
+      if (value && formData.idUnidad) {
+        const unidad = rawUnidades.find((u) => String(u.id ?? u.idUnidad) === formData.idUnidad)
+        if (name === 'idDepartamento' && unidad?.idDepartamento != null && String(unidad.idDepartamento) !== value) {
+          newData.idUnidad = ''
+          setConflictError('La unidad seleccionada no pertenece al departamento elegido. Seleccione una unidad válida.')
+        }
+        if (name === 'idSeccion' && unidad?.idSeccion != null && String(unidad.idSeccion) !== value) {
+          newData.idUnidad = ''
+          setConflictError('La unidad seleccionada no pertenece a la sección elegida. Seleccione una unidad válida.')
+        }
+      }
+
+      setFormData(newData)
     },
-    [handleAreaChange, clearFeedback],
+    [handleAreaChange, clearFeedback, formData, rawUnidades],
   )
 
   const handleSubmit = async (e) => {
@@ -290,8 +323,6 @@ export default function EditPlaza() {
           </p>
 
           {loadError && <StatusMessage variant="error" message={`Error al cargar datos: ${loadError}`} />}
-          {successMsg && <StatusMessage variant="success" message={successMsg} />}
-          {(conflictError || errorMsg) && <StatusMessage variant="error" message={conflictError || errorMsg} />}
 
           <FormSelect
             label="Área"
@@ -346,6 +377,9 @@ export default function EditPlaza() {
             options={filteredUnidadOptions}
             defaultLabel="-- Sin asignación --"
           />
+
+          {successMsg && <StatusMessage variant="success" message={successMsg} style={{ marginBottom: '20px' }} />}
+          {(conflictError || errorMsg) && <StatusMessage variant="error" message={conflictError || errorMsg} style={{ marginBottom: '20px' }} />}
 
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '8px' }}>
             <FormButton
