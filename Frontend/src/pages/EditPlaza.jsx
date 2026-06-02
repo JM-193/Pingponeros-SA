@@ -29,6 +29,24 @@ const initialFormData = {
   idUnidad: '',
 }
 
+function resolveConflicts(checks, value, newData) {
+  let conflict = ''
+
+  for (const { condition, rawList, idField, message } of checks) {
+    if (!condition) continue
+
+    const entity = rawList.find(
+      (item) => String(item.id ?? item[idField]) === newData[idField]
+    )
+    if (entity?.idArea != null && String(entity.idArea) !== value) {
+      newData[idField] = ''
+      if (!conflict) conflict = message
+    }
+  }
+
+  return conflict
+}
+
 export default function EditPlaza() {
   const navigate = useNavigate()
   const { numeroPlaza } = useParams()
@@ -127,43 +145,41 @@ export default function EditPlaza() {
     setConflictError('')
   }, [])
 
+  // Inside your component:
   const handleAreaChange = useCallback(
     (e) => {
       const { value } = e.target
       clearFeedback()
-      const newData = { ...formData, idArea: value }
-      let conflict = ''
 
-      if (value) {
-        if (parentType === 'departamento' && formData.idDepartamento) {
-          const dept = rawDepartamentos.find(
-            (d) => String(d.id ?? d.idDepartamento) === formData.idDepartamento,
-          )
-          if (dept?.idArea != null && String(dept.idArea) !== value) {
-            newData.idDepartamento = ''
-            conflict = 'El departamento seleccionado no pertenece al área elegida. Seleccione un departamento válido.'
-          }
-        }
-        if (parentType === 'seccion' && formData.idSeccion) {
-          const sec = rawSecciones.find(
-            (s) => String(s.id ?? s.idSeccion) === formData.idSeccion,
-          )
-          if (sec?.idArea != null && String(sec.idArea) !== value) {
-            newData.idSeccion = ''
-            if (!conflict) conflict = 'La sección seleccionada no pertenece al área elegida. Seleccione una sección válida.'
-          }
-        }
-        if (formData.idUnidad) {
-          const unidad = rawUnidades.find(
-            (u) => String(u.id ?? u.idUnidad) === formData.idUnidad,
-          )
-          if (unidad?.idArea != null && String(unidad.idArea) !== value) {
-            newData.idUnidad = ''
-            if (!conflict) conflict = 'La unidad seleccionada no pertenece al área elegida. Seleccione una unidad válida.'
-          }
-        }
+      const newData = { ...formData, idArea: value }
+
+      if (!value) {
+        setFormData(newData)
+        return
       }
 
+      const conflictChecks = [
+        {
+          condition: parentType === 'departamento' && formData.idDepartamento,
+          rawList: rawDepartamentos,
+          idField: 'idDepartamento',
+          message: 'El departamento seleccionado no pertenece al área elegida. Seleccione un departamento válido.',
+        },
+        {
+          condition: parentType === 'seccion' && formData.idSeccion,
+          rawList: rawSecciones,
+          idField: 'idSeccion',
+          message: 'La sección seleccionada no pertenece al área elegida. Seleccione una sección válida.',
+        },
+        {
+          condition: formData.idUnidad,
+          rawList: rawUnidades,
+          idField: 'idUnidad',
+          message: 'La unidad seleccionada no pertenece al área elegida. Seleccione una unidad válida.',
+        },
+      ]
+
+      const conflict = resolveConflicts(conflictChecks, value, newData)
       if (conflict) setConflictError(conflict)
       setFormData(newData)
     },
