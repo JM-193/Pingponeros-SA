@@ -12,19 +12,19 @@ export default function OrganizationEntityFormFields({
   areaOptions,
   areaLabel = 'Área',
   areaRequired = false,
-  areaDefaultLabel = 'Seleccione un área',
+  areaDefaultLabel = '-- Sin asignación --',
   parentType = '',
   parentTypeOptions,
   onParentTypeChange = () => {},
   parentTypeLabel = 'Tipo de dependencia',
-  parentTypeDefaultLabel = 'Seleccione un tipo',
+  parentTypeDefaultLabel = '-- Sin asignación --',
   departmentOptions = [],
   sectionOptions = [],
   parentRequired = false,
   departmentLabel = 'Departamento',
   sectionLabel = 'Sección',
-  departmentDefaultLabel = 'Seleccione un departamento',
-  sectionDefaultLabel = 'Seleccione una sección',
+  departmentDefaultLabel = '-- Sin asignación --',
+  sectionDefaultLabel = '-- Sin asignación --',
 }) {
   const shouldShowArea = Array.isArray(areaOptions)
   const shouldShowParentType = Array.isArray(parentTypeOptions)

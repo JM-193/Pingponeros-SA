@@ -174,7 +174,7 @@ export default function CreateUser() {
               { value: '0', label: 'Funcionario' },
               { value: '1', label: 'Administrador' },
             ]}
-            defaultLabel="Seleccione un rol"
+            defaultLabel="-- Sin asignación --"
             required
           />
 
