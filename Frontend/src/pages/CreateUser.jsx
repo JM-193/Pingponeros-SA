@@ -24,7 +24,7 @@ export default function CreateUser() {
   })
   const [loading, setLoading] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
-  const [tempPassword, setTempPassword] = useState('')
+  const [setTempPassword] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
 
   const NAME_FIELDS = new Set(['firstName', 'secondName', 'firstName_surname', 'secondName_surname'])
