@@ -54,6 +54,7 @@ export default function ConsultarUsuarios() {
       entityLabel="usuarios"
       entityLabelSingular="el usuario"
       createPath="/usuarios/crear"
+      editPath={(usuario) => `/usuarios/editar/${encodeURIComponent(usuario.correoInstitucional)}`}
       fetchItems={obtenerUsuarios}
       deactivateItem={eliminarUsuario}
       columns={columns}
