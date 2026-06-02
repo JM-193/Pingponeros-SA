@@ -34,13 +34,10 @@ const NAV_ITEMS = [
         label: 'Unidades',
         path: '/organizacion/unidades/consultar',
       },
-    ],
-  },
-  {
-    label: 'Plazas',
-    activeOn: '/plazas',
-    submenu: [
-      { label: 'Consultar', path: '/plazas/consultar' },
+      {
+        label: 'Plazas',
+        path: '/organizacion/plazas/consultar',
+      },
     ],
   },
   /*{

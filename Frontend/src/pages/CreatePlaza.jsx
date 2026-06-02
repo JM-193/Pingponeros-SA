@@ -107,7 +107,7 @@ export default function CreatePlaza() {
       await crearPlaza(payload)
       setSuccessMsg(`Plaza '${numero}' creada correctamente.`)
       setFormData(initialFormData)
-      setTimeout(() => navigate('/plazas/consultar'), 1500)
+      setTimeout(() => navigate('/organizacion/plazas/consultar'), 1500)
     } catch (err) {
       setErrorMsg(err.message)
     } finally {

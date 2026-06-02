@@ -1013,7 +1013,9 @@ internal static class Program
         var plazas = app.MapGroup("/plazas");
 
         MapPlazasGetAll(plazas);
+        MapPlazasGetByNumero(plazas);
         MapPlazasCreate(plazas, isDev);
+        MapPlazasUpdate(plazas, isDev);
     }
 
     private static void MapPlazasGetAll(RouteGroupBuilder plazas)
@@ -1079,6 +1081,58 @@ internal static class Program
                 : TraducirErrorOracle(ex.Number);
             return Results.Json(new { mensaje = msg }, statusCode: 500);
         }
+    }
+
+    private static void MapPlazasGetByNumero(RouteGroupBuilder plazas)
+    {
+        // GET /plazas/{numeroPlaza} — Obtiene una plaza por número
+        plazas.MapGet("/{numeroPlaza:long}", async (long numeroPlaza, IPlazaRepository repo) =>
+        {
+            try
+            {
+                var plaza = await repo.ObtenerPorNumeroAsync(numeroPlaza).ConfigureAwait(false);
+                return plaza is null
+                    ? Results.NotFound(new { mensaje = $"No se encontró la plaza '{numeroPlaza}'." })
+                    : Results.Ok(plaza);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+    }
+
+    private static void MapPlazasUpdate(RouteGroupBuilder plazas, bool isDev)
+    {
+        // PUT /plazas/{numeroPlaza} — Actualiza las asignaciones de una plaza existente
+        plazas.MapPut("/{numeroPlaza:long}", async (long numeroPlaza, CrearPlazaDto dto, IPlazaRepository repo) =>
+        {
+            try
+            {
+                var existe = await repo.ExisteNumeroPlazaAsync(numeroPlaza).ConfigureAwait(false);
+                if (!existe)
+                    return Results.NotFound(new { mensaje = $"No se encontró la plaza '{numeroPlaza}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+
+            var plaza = new Backend.Models.Plaza
+            {
+                NumeroPlaza    = numeroPlaza,
+                IdUnidad       = dto.IdUnidad,
+                IdDepartamento = dto.IdDepartamento,
+                IdSeccion      = dto.IdSeccion,
+                IdArea         = dto.IdArea,
+            };
+
+            return await EjecutarActualizacionAsync(
+                () => repo.ActualizarAsync(numeroPlaza, plaza),
+                $"Plaza '{numeroPlaza}' actualizada correctamente.",
+                $"No se encontró la plaza '{numeroPlaza}'.",
+                isDev).ConfigureAwait(false);
+        });
     }
 
     // ---------------------------------------------------------------- //

@@ -81,7 +81,8 @@ export default function ConsultarPlaza() {
     <EntityListPage
       title="Plazas"
       entityLabel="plazas"
-      createPath="/plazas/crear"
+      createPath="/organizacion/plazas/crear"
+      editPath={(plaza) => `/organizacion/plazas/editar/${plaza.numeroPlaza}`}
       fetchItems={fetchItems}
       columns={columns}
       matchesSearch={matchesSearch}

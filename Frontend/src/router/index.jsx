@@ -19,6 +19,7 @@ import CreateUnidad from '../pages/CreateUnidad'
 import EditUnidad from '../pages/EditUnidad'
 import ConsultarUnidad from '../pages/ConsultarUnidad'
 import CreatePlaza from '../pages/CreatePlaza'
+import EditPlaza from '../pages/EditPlaza'
 import ConsultarPlaza from '../pages/ConsultarPlaza'
 import ProtectedRoute from '../components/ProtectedRoute'
 
@@ -45,8 +46,9 @@ export default function AppRouter() {
         <Route path="/organizacion/unidades/crear" element={<ProtectedRoute><CreateUnidad /></ProtectedRoute>} />
         <Route path="/organizacion/unidades/editar/:nombre" element={<ProtectedRoute><EditUnidad /></ProtectedRoute>} />
         <Route path="/organizacion/unidades/consultar" element={<ProtectedRoute><ConsultarUnidad /></ProtectedRoute>} />
-        <Route path="/plazas/crear" element={<ProtectedRoute><CreatePlaza /></ProtectedRoute>} />
-        <Route path="/plazas/consultar" element={<ProtectedRoute><ConsultarPlaza /></ProtectedRoute>} />
+        <Route path="/organizacion/plazas/crear" element={<ProtectedRoute><CreatePlaza /></ProtectedRoute>} />
+        <Route path="/organizacion/plazas/editar/:numeroPlaza" element={<ProtectedRoute><EditPlaza /></ProtectedRoute>} />
+        <Route path="/organizacion/plazas/consultar" element={<ProtectedRoute><ConsultarPlaza /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   )
