@@ -134,11 +134,12 @@ export default function EditUnidad() {
     onSuccess: handleSuccess,
   })
 
-  const { filteredDepartmentOptions, filteredSectionOptions, handleFieldChange, conflictError, clearConflictError } =
+  const { filteredDepartmentOptions, filteredSectionOptions, handleFieldChange, handleParentTypeChange, conflictError } =
     useUnidadAreaFilters({
       formData,
       setFormData,
       parentType,
+      setParentType,
       departmentOptions,
       sectionOptions,
       rawDepartamentos,
@@ -146,21 +147,6 @@ export default function EditUnidad() {
       clearFeedback,
       handleInputChange,
     })
-
-  const handleParentTypeChange = useCallback(
-    (event) => {
-      const { value } = event.target
-      clearFeedback()
-      clearConflictError()
-      setParentType(value)
-      setFormData((prev) => ({
-        ...prev,
-        idDepartamento: value === 'departamento' ? prev.idDepartamento : '',
-        idSeccion: value === 'seccion' ? prev.idSeccion : '',
-      }))
-    },
-    [clearConflictError, clearFeedback, setFormData, setParentType],
-  )
 
   const handleStateChange = (newState) => {
     setFormData((prev) => ({ ...prev, estado: newState }))

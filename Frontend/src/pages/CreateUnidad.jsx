@@ -69,7 +69,6 @@ export default function CreateUnidad() {
     ({ resetFormData }) => {
       resetFormData()
       setParentType('')
-      setConflictError('')
       setTimeout(() => navigate('/organizacion/unidades/consultar'), 1500)
     },
     [navigate, setParentType],
@@ -105,11 +104,12 @@ export default function CreateUnidad() {
     onSuccess: handleSuccess,
   })
 
-  const { filteredDepartmentOptions, filteredSectionOptions, handleFieldChange, conflictError, clearConflictError } =
+  const { filteredDepartmentOptions, filteredSectionOptions, handleFieldChange, handleParentTypeChange, conflictError } =
     useUnidadAreaFilters({
       formData,
       setFormData,
       parentType,
+      setParentType,
       departmentOptions,
       sectionOptions,
       rawDepartamentos,
@@ -117,21 +117,6 @@ export default function CreateUnidad() {
       clearFeedback,
       handleInputChange,
     })
-
-  const handleParentTypeChange = useCallback(
-    (event) => {
-      const { value } = event.target
-      clearFeedback()
-      clearConflictError()
-      setParentType(value)
-      setFormData((prev) => ({
-        ...prev,
-        idDepartamento: value === 'departamento' ? prev.idDepartamento : '',
-        idSeccion: value === 'seccion' ? prev.idSeccion : '',
-      }))
-    },
-    [clearConflictError, clearFeedback, setFormData, setParentType],
-  )
 
   if (isLoading) {
     return (

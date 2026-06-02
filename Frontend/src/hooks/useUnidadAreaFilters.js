@@ -4,6 +4,7 @@ export function useUnidadAreaFilters({
   formData,
   setFormData,
   parentType,
+  setParentType,
   departmentOptions,
   sectionOptions,
   rawDepartamentos,
@@ -75,10 +76,26 @@ export function useUnidadAreaFilters({
     [handleAreaChange, handleInputChange],
   )
 
+  const handleParentTypeChange = useCallback(
+    (event) => {
+      const { value } = event.target
+      clearFeedback()
+      setConflictError('')
+      setParentType(value)
+      setFormData((prev) => ({
+        ...prev,
+        idDepartamento: value === 'departamento' ? prev.idDepartamento : '',
+        idSeccion: value === 'seccion' ? prev.idSeccion : '',
+      }))
+    },
+    [clearFeedback, setFormData, setParentType],
+  )
+
   return {
     filteredDepartmentOptions,
     filteredSectionOptions,
     handleFieldChange,
+    handleParentTypeChange,
     conflictError,
     clearConflictError,
   }
