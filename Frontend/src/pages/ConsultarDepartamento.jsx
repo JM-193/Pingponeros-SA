@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import EntityListPage from '../components/EntityListPage'
-import { obtenerDepartamentos, eliminarDepartamento } from '../services/departamentoService'
+import { obtenerDepartamentos } from '../services/departamentoService'
 import { obtenerAreas } from '../services/areaService'
 import { buildNameMap, formatStatusLabel, resolveOptionValueKey } from '../utils/organizationOptions'
 
@@ -60,11 +60,9 @@ export default function ConsultarDepartamento() {
     <EntityListPage
       title="Departamentos"
       entityLabel="departamentos"
-      entityLabelSingular="el departamento"
       createPath="/organizacion/departamentos/crear"
       editPath={(departamento) => `/organizacion/departamentos/editar/${encodeURIComponent(departamento.nombre)}`}
       fetchItems={fetchItems}
-      deactivateItem={eliminarDepartamento}
       columns={columns}
       matchesSearch={matchesSearch}
       getRowId={(departamento) => departamento.id ?? departamento.idDepartamento}

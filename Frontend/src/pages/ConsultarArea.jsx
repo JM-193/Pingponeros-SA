@@ -1,5 +1,5 @@
 import EntityListPage from '../components/EntityListPage'
-import { obtenerAreas, eliminarArea } from '../services/areaService'
+import { obtenerAreas } from '../services/areaService'
 import { formatStatusLabel } from '../utils/organizationOptions'
 
 export default function ConsultarArea() {
@@ -35,11 +35,9 @@ export default function ConsultarArea() {
     <EntityListPage
       title="Áreas"
       entityLabel="áreas"
-      entityLabelSingular="el área"
       createPath="/organizacion/areas/crear"
       editPath={(area) => `/organizacion/areas/editar/${encodeURIComponent(area.nombre)}`}
       fetchItems={obtenerAreas}
-      deactivateItem={eliminarArea}
       columns={columns}
       matchesSearch={matchesSearch}
       getRowId={(area) => area.id}

@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import EntityListPage from '../components/EntityListPage'
-import { obtenerSecciones, eliminarSeccion } from '../services/seccionService'
+import { obtenerSecciones } from '../services/seccionService'
 import { obtenerAreas } from '../services/areaService'
 import { buildNameMap, formatStatusLabel, resolveOptionValueKey } from '../utils/organizationOptions'
 
@@ -60,11 +60,9 @@ export default function ConsultarSeccion() {
     <EntityListPage
       title="Secciones"
       entityLabel="secciones"
-      entityLabelSingular="la sección"
       createPath="/organizacion/secciones/crear"
       editPath={(seccion) => `/organizacion/secciones/editar/${encodeURIComponent(seccion.nombre)}`}
       fetchItems={fetchItems}
-      deactivateItem={eliminarSeccion}
       columns={columns}
       matchesSearch={matchesSearch}
       getRowId={(seccion) => seccion.id ?? seccion.idSeccion}

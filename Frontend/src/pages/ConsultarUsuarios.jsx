@@ -1,7 +1,7 @@
 // ConsultarUsuarios.jsx
 
 import EntityListPage from '../components/EntityListPage'
-import { obtenerUsuarios, eliminarUsuario } from '../services/usuarioService'
+import { obtenerUsuarios } from '../services/usuarioService'
 
 export default function ConsultarUsuarios() {
   const columns = [
@@ -52,11 +52,9 @@ export default function ConsultarUsuarios() {
     <EntityListPage
       title="Usuarios"
       entityLabel="usuarios"
-      entityLabelSingular="el usuario"
       createPath="/usuarios/crear"
       editPath={(usuario) => `/usuarios/editar/${encodeURIComponent(usuario.correoInstitucional)}`}
       fetchItems={obtenerUsuarios}
-      deactivateItem={eliminarUsuario}
       columns={columns}
       matchesSearch={matchesSearch}
       getRowId={(usuario) => usuario.correoInstitucional}

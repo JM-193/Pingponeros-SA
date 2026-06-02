@@ -9,7 +9,6 @@ import * as seccionService from '../services/seccionService'
 
 vi.mock('../services/unidadService', () => ({
   obtenerUnidades: vi.fn(),
-  eliminarUnidad: vi.fn(),
 }))
 vi.mock('../services/areaService', () => ({
   obtenerAreas: vi.fn(),

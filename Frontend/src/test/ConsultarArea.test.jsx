@@ -46,7 +46,7 @@ describe('ConsultarArea Page', () => {
     })
   })
 
-  it('renderiza botones de editar y eliminar', async () => {
+  it('renderiza botones de editar', async () => {
     render(
       <BrowserRouter>
         <ConsultarArea />
@@ -55,9 +55,7 @@ describe('ConsultarArea Page', () => {
 
     await waitFor(() => {
       const editButtons = screen.getAllByRole('button', { name: /Editar/i })
-      const deleteButtons = screen.getAllByRole('button', { name: /Eliminar/i })
       expect(editButtons.length).toBeGreaterThan(0)
-      expect(deleteButtons.length).toBeGreaterThan(0)
     })
   })
 

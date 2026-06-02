@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
+import { FaPencilAlt } from 'react-icons/fa'
 import { COLORS } from '../constants/colors'
 
 const getCellAlign = (align) => align ?? 'left'
@@ -8,11 +8,9 @@ export default function EntityResultsTable({
   columns,
   rows,
   onEdit,
-  onDelete,
   getRowId,
-  isRowInactive,
 }) {
-  const hasActions = Boolean(onEdit || onDelete)
+  const hasActions = Boolean(onEdit)
 
   return (
     <div
@@ -63,7 +61,6 @@ export default function EntityResultsTable({
           <tbody>
             {rows.map((row, index) => {
               const rowId = getRowId(row)
-              const inactive = isRowInactive?.(row)
 
               return (
                 <tr
@@ -118,36 +115,6 @@ export default function EntityResultsTable({
                             <FaPencilAlt size={14} aria-hidden="true" focusable="false" />
                           </button>
                         )}
-                        {onDelete && (
-                          <button
-                            onClick={() => !inactive && onDelete(row)}
-                            aria-label="Eliminar"
-                            title={inactive ? 'Inactivo' : 'Eliminar'}
-                            disabled={inactive}
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              padding: '8px 12px',
-                              backgroundColor: inactive ? COLORS.disabledBg : COLORS.secondaryBtn,
-                              color: inactive ? COLORS.disabledColor : COLORS.white,
-                              border: 'none',
-                              borderRadius: '4px',
-                              cursor: inactive ? 'not-allowed' : 'pointer',
-                              fontSize: '12px',
-                              fontWeight: 600,
-                              transition: 'background-color 0.2s',
-                            }}
-                            onMouseEnter={(e) =>
-                              !inactive && (e.currentTarget.style.backgroundColor = COLORS.secondaryBtnHover)
-                            }
-                            onMouseLeave={(e) =>
-                              !inactive && (e.currentTarget.style.backgroundColor = COLORS.secondaryBtn)
-                            }
-                          >
-                            <FaTrashAlt size={14} aria-hidden="true" focusable="false" />
-                          </button>
-                        )}
                       </div>
                     </td>
                   )}
@@ -173,13 +140,9 @@ EntityResultsTable.propTypes = {
   ).isRequired,
   rows: PropTypes.arrayOf(PropTypes.object).isRequired,
   onEdit: PropTypes.func,
-  onDelete: PropTypes.func,
   getRowId: PropTypes.func.isRequired,
-  isRowInactive: PropTypes.func,
 }
 
 EntityResultsTable.defaultProps = {
   onEdit: null,
-  onDelete: null,
-  isRowInactive: null,
 }
