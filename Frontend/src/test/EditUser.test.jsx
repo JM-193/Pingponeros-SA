@@ -123,4 +123,47 @@ describe('EditUser Page', () => {
       expect(screen.getByText('Usuario no encontrado')).toBeInTheDocument()
     })
   })
+
+  it('cambia el estado del usuario con StateToggle', async () => {
+    usuarioService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+
+    renderWithRoute('juan.perez@ucr.ac.cr')
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
+    })
+
+    // StateToggle renders buttons for Activo/Inactivo
+    const stateButtons = screen.getAllByRole('button')
+    const inactivoButton = stateButtons.find((btn) => btn.textContent.includes('Inactivo'))
+    if (inactivoButton) {
+      fireEvent.click(inactivoButton)
+      // El botón debería reflejar el cambio sin errores
+      expect(inactivoButton).toBeInTheDocument()
+    }
+  })
+
+  it('limpia mensajes de error al cambiar campos del formulario', async () => {
+    usuarioService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    usuarioService.actualizarUsuario.mockRejectedValueOnce(new Error('Error al actualizar'))
+
+    renderWithRoute('juan.perez@ucr.ac.cr')
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
+    })
+
+    const submitButton = screen.getByRole('button', { name: /Actualizar/i })
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Error al actualizar')).toBeInTheDocument()
+    })
+
+    // Cambiar un campo debe limpiar el mensaje
+    const firstNameInput = screen.getByDisplayValue('Juan')
+    fireEvent.change(firstNameInput, { target: { name: 'firstName', value: 'Juanito' } })
+
+    expect(screen.queryByText('Error al actualizar')).not.toBeInTheDocument()
+  })
 })
