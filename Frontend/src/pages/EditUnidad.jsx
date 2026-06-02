@@ -65,7 +65,7 @@ export default function EditUnidad() {
         descripcion: unidad.descripcion,
         estado: unidad.estado ?? 1,
       },
-      areaOptions: buildLabeledOptions(areas, { valueKey: areaValueKey, labelPrefix: 'Área de ' }),
+      areaOptions: buildLabeledOptions(areas, { valueKey: areaValueKey }),
       departmentOptions: buildLabeledOptions(departamentos, {
         valueKey: departamentoValueKey,
         labelPrefix: 'Departamento de ',

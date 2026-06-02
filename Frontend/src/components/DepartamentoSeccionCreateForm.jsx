@@ -26,7 +26,7 @@ export default function DepartamentoSeccionCreateForm({ entityType, createEntity
     const valueKey = resolveOptionValueKey(areas, ['id', 'idArea'])
 
     return {
-      areaOptions: buildLabeledOptions(areas, { valueKey, labelPrefix: '\u00c1rea de ' }),
+      areaOptions: buildLabeledOptions(areas, { valueKey}),
     }
   }, [])
 

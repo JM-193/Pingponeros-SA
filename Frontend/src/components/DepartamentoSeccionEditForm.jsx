@@ -41,7 +41,7 @@ export default function DepartamentoSeccionEditForm({
         descripcion: entity.descripcion,
         estado: entity.estado ?? 1,
       },
-      areaOptions: buildLabeledOptions(areas, { valueKey, labelPrefix: '\u00c1rea de ' }),
+      areaOptions: buildLabeledOptions(areas, { valueKey }),
       nombreOriginal: entity.nombre,
     }
   }, [fetchByName, nombre])
