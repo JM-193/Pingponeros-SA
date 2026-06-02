@@ -208,19 +208,7 @@ internal sealed class UsuarioRepository : IUsuarioRepository
     // ------------------------------------------------------------------ //
     public async Task<bool> EliminarAsync(string correo)
     {
-        const string sqlContrasena = "DELETE FROM CONTRASENAS WHERE CORREO_INSTITUCIONAL = :correo";
-        const string sqlUsuario = "DELETE FROM USUARIOS    WHERE CORREO_INSTITUCIONAL = :correo";
-
-        // Implement as a sequence of executor calls; for now call ExecuteAsync twice
-        await _q.ExecuteAsync(connection =>
-        {
-            var cmd = new OracleCommand(sqlContrasena, connection)
-            {
-                BindByName = true,
-            };
-            cmd.Parameters.Add("correo", correo);
-            return cmd;
-        }).ConfigureAwait(false);
+        const string sqlUsuario = "UPDATE USUARIOS SET ESTADO = 0 WHERE CORREO_INSTITUCIONAL = :correo";
 
         var filas = await _q.ExecuteAsync(connection =>
         {
