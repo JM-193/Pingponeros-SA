@@ -41,7 +41,7 @@ describe('OrganizationEntityFormFields', () => {
       />,
     )
 
-    expect(screen.getByLabelText('Área *')).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: /^Área/ })).toBeInTheDocument()
   })
 
   it('renderiza select de departamento cuando aplica', () => {
@@ -59,6 +59,6 @@ describe('OrganizationEntityFormFields', () => {
       />,
     )
 
-    expect(screen.getByLabelText('Departamento *')).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: /^Departamento/ })).toBeInTheDocument()
   })
 })
