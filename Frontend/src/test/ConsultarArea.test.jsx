@@ -1,5 +1,5 @@
 ﻿// ConsultarArea.test.jsx
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import ConsultarArea from '../pages/ConsultarArea'
 import * as areaService from '../services/areaService'
@@ -15,7 +15,7 @@ describe('ConsultarArea Page', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
+    areaService.obtenerAreas.mockResolvedValue(mockAreas)
   })
 
   it('carga y renderiza áreas', async () => {
@@ -44,6 +44,33 @@ describe('ConsultarArea Page', () => {
       const table = document.querySelector('table')
       expect(table).toBeInTheDocument()
     })
+  })
+
+  it('ordena áreas al hacer clic en el encabezado Nombre', async () => {
+    areaService.obtenerAreas.mockResolvedValueOnce([
+      { id: 1, nombre: 'Recursos Humanos', descripcion: 'Área de RRHH', estado: 0 },
+      { id: 2, nombre: 'Administración', descripcion: 'Área de administración', estado: 1 },
+      { id: 3, nombre: 'Contabilidad', descripcion: 'Área de contabilidad', estado: 1 },
+    ])
+
+    render(
+      <BrowserRouter>
+        <ConsultarArea />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Recursos Humanos')).toBeInTheDocument()
+    })
+
+    const getFirstColumnValues = () =>
+      Array.from(document.querySelectorAll('tbody tr')).map((row) => row.querySelector('td')?.textContent)
+
+    fireEvent.click(screen.getByRole('button', { name: /Ordenar por Nombre ascendente/i }))
+    expect(getFirstColumnValues()).toEqual(['Administración', 'Contabilidad', 'Recursos Humanos'])
+
+    fireEvent.click(screen.getByRole('button', { name: /Ordenar por Nombre descendente/i }))
+    expect(getFirstColumnValues()).toEqual(['Recursos Humanos', 'Contabilidad', 'Administración'])
   })
 
   it('renderiza botones de editar', async () => {
@@ -149,4 +176,3 @@ describe('ConsultarArea Page', () => {
     }
   })
 })
-

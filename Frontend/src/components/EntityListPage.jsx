@@ -19,6 +19,52 @@ const defaultSearch = (item, term) => {
   )
 }
 
+const sortCollator = new Intl.Collator('es', {
+  numeric: true,
+  sensitivity: 'base',
+})
+
+const getColumnSortValue = (column, row) => {
+  if (column.sortValue) return column.sortValue(row)
+
+  const renderedValue = column.render?.(row)
+  if (['string', 'number', 'boolean'].includes(typeof renderedValue)) {
+    return renderedValue
+  }
+
+  return row[column.key]
+}
+
+const compareSortValues = (leftValue, rightValue) => {
+  if (typeof leftValue === 'number' && typeof rightValue === 'number') {
+    return leftValue - rightValue
+  }
+
+  return sortCollator.compare(String(leftValue), String(rightValue))
+}
+
+const sortRowsByColumn = (rows, columns, sortConfig) => {
+  if (!sortConfig?.key) return rows
+
+  const column = columns.find((currentColumn) => currentColumn.key === sortConfig.key)
+  if (!column) return rows
+
+  const direction = sortConfig.direction === 'desc' ? -1 : 1
+
+  return [...rows].sort((leftRow, rightRow) => {
+    const leftValue = getColumnSortValue(column, leftRow)
+    const rightValue = getColumnSortValue(column, rightRow)
+    const isLeftEmpty = leftValue === null || leftValue === undefined || leftValue === ''
+    const isRightEmpty = rightValue === null || rightValue === undefined || rightValue === ''
+
+    if (isLeftEmpty && isRightEmpty) return 0
+    if (isLeftEmpty) return 1
+    if (isRightEmpty) return -1
+
+    return compareSortValues(leftValue, rightValue) * direction
+  })
+}
+
 export default function EntityListPage({
   title,
   entityLabel,
@@ -39,9 +85,14 @@ export default function EntityListPage({
   const [loading, setLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+  const [sortConfig, setSortConfig] = useState(null)
 
   const matches = matchesSearch ?? defaultSearch
   const resolveRowId = useMemo(() => getRowId ?? ((item) => item.id), [getRowId])
+  const sortedResults = useMemo(
+    () => sortRowsByColumn(results, columns, sortConfig),
+    [results, columns, sortConfig]
+  )
 
   useEffect(() => {
     const loadItems = async () => {
@@ -79,11 +130,19 @@ export default function EntityListPage({
     }
   }
 
-  const totalPages = Math.ceil(results.length / resultsPerPage)
-  const hasResults = results.length > 0
+  const handleSort = (columnKey) => {
+    setSortConfig((currentSort) => ({
+      key: columnKey,
+      direction: currentSort?.key === columnKey && currentSort.direction === 'asc' ? 'desc' : 'asc',
+    }))
+    setCurrentPage(1)
+  }
+
+  const totalPages = Math.ceil(sortedResults.length / resultsPerPage)
+  const hasResults = sortedResults.length > 0
   const startIndex = hasResults ? (currentPage - 1) * resultsPerPage : 0
   const endIndex = hasResults ? startIndex + resultsPerPage : 0
-  const currentResults = hasResults ? results.slice(startIndex, endIndex) : []
+  const currentResults = hasResults ? sortedResults.slice(startIndex, endIndex) : []
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -105,11 +164,13 @@ export default function EntityListPage({
           rows={currentResults}
           onEdit={editPath ? handleEdit : undefined}
           getRowId={resolveRowId}
+          sortConfig={sortConfig}
+          onSort={handleSort}
         />
         {hasResults ? (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
             <p style={{ margin: 0, color: COLORS.textSubtle, fontSize: '14px' }}>
-              Mostrando {startIndex + 1} a {Math.min(endIndex, results.length)} de {results.length} resultados
+              Mostrando {startIndex + 1} a {Math.min(endIndex, sortedResults.length)} de {sortedResults.length} resultados
             </p>
             <PaginationControls
               currentPage={currentPage}
@@ -254,6 +315,7 @@ EntityListPage.propTypes = {
       key: PropTypes.string.isRequired,
       label: PropTypes.string.isRequired,
       render: PropTypes.func,
+      sortValue: PropTypes.func,
       align: PropTypes.oneOf(['left', 'center', 'right']),
       width: PropTypes.string,
     })

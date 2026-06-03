@@ -1,16 +1,30 @@
 import PropTypes from 'prop-types'
-import { FaPencilAlt } from 'react-icons/fa'
+import { FaPencilAlt, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa'
 import { COLORS } from '../constants/colors'
 
 const getCellAlign = (align) => align ?? 'left'
+const getHeaderJustifyContent = (align) => {
+  if (align === 'center') return 'center'
+  if (align === 'right') return 'flex-end'
+  return 'flex-start'
+}
+
+const getSortIcon = (isSorted, direction) => {
+  if (!isSorted) return <FaSort size={12} aria-hidden="true" focusable="false" />
+  if (direction === 'asc') return <FaSortUp size={12} aria-hidden="true" focusable="false" />
+  return <FaSortDown size={12} aria-hidden="true" focusable="false" />
+}
 
 export default function EntityResultsTable({
   columns,
   rows,
   onEdit,
   getRowId,
+  sortConfig,
+  onSort,
 }) {
   const hasActions = Boolean(onEdit)
+  const canSort = Boolean(onSort)
 
   return (
     <div
@@ -33,20 +47,54 @@ export default function EntityResultsTable({
         >
           <thead>
             <tr style={{ backgroundColor: COLORS.primaryBtn, color: COLORS.white }}>
-              {columns.map((column) => (
-                <th
-                  key={column.key}
-                  style={{
-                    padding: '12px 16px',
-                    textAlign: getCellAlign(column.align),
-                    fontWeight: 600,
-                    borderBottom: `1px solid ${COLORS.borderColor}`,
-                    width: column.width,
-                  }}
-                >
-                  {column.label}
-                </th>
-              ))}
+              {columns.map((column) => {
+                const isSorted = sortConfig?.key === column.key
+                const nextDirection = isSorted && sortConfig.direction === 'asc' ? 'descendente' : 'ascendente'
+
+                return (
+                  <th
+                    key={column.key}
+                    aria-sort={isSorted ? (sortConfig.direction === 'asc' ? 'ascending' : 'descending') : 'none'}
+                    style={{
+                      padding: '12px 16px',
+                      textAlign: getCellAlign(column.align),
+                      fontWeight: 600,
+                      borderBottom: `1px solid ${COLORS.borderColor}`,
+                      width: column.width,
+                    }}
+                  >
+                    {canSort ? (
+                      <button
+                        type="button"
+                        onClick={() => onSort(column.key)}
+                        aria-label={`Ordenar por ${column.label} ${nextDirection}`}
+                        title={`Ordenar ${nextDirection}`}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: getHeaderJustifyContent(column.align),
+                          gap: '6px',
+                          width: '100%',
+                          minHeight: '20px',
+                          padding: 0,
+                          border: 'none',
+                          background: 'transparent',
+                          color: 'inherit',
+                          cursor: 'pointer',
+                          font: 'inherit',
+                          fontWeight: 600,
+                          textAlign: getCellAlign(column.align),
+                        }}
+                      >
+                        <span>{column.label}</span>
+                        {getSortIcon(isSorted, sortConfig?.direction)}
+                      </button>
+                    ) : (
+                      column.label
+                    )}
+                  </th>
+                )
+              })}
               {hasActions && (
                 <th
                   style={{
@@ -55,7 +103,7 @@ export default function EntityResultsTable({
                     fontWeight: 600,
                     borderBottom: `1px solid ${COLORS.borderColor}`,
                     width: '10%',
-                    whiteSpace: 'nowrap'
+                    whiteSpace: 'nowrap',
                   }}
                 />
               )}
@@ -94,12 +142,12 @@ export default function EntityResultsTable({
                   {hasActions && (
                     <td
                       style={{
-                      padding: '12px 32px',
+                        padding: '12px 32px',
                         textAlign: 'center',
                         width: '10%',
-                        whiteSpace: 'nowrap'
+                        whiteSpace: 'nowrap',
                       }}
-                     >
+                    >
                       <div style={{ display: 'inline-flex', gap: '8px' }}>
                         {onEdit && (
                           <button
@@ -145,6 +193,7 @@ EntityResultsTable.propTypes = {
       key: PropTypes.string.isRequired,
       label: PropTypes.string.isRequired,
       render: PropTypes.func,
+      sortValue: PropTypes.func,
       align: PropTypes.oneOf(['left', 'center', 'right']),
       width: PropTypes.string,
     })
@@ -152,8 +201,15 @@ EntityResultsTable.propTypes = {
   rows: PropTypes.arrayOf(PropTypes.object).isRequired,
   onEdit: PropTypes.func,
   getRowId: PropTypes.func.isRequired,
+  sortConfig: PropTypes.shape({
+    key: PropTypes.string,
+    direction: PropTypes.oneOf(['asc', 'desc']),
+  }),
+  onSort: PropTypes.func,
 }
 
 EntityResultsTable.defaultProps = {
   onEdit: null,
+  sortConfig: null,
+  onSort: null,
 }
