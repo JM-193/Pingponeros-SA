@@ -174,6 +174,37 @@ describe('CreatePlaza Page', () => {
     )
   })
 
+  it('mantiene la unidad seleccionada cuando el area se infiere desde su departamento', async () => {
+    unidadService.obtenerUnidades.mockResolvedValueOnce([
+      { id: 1, nombre: 'Portal', idDepartamento: 1 },
+    ])
+    departamentoService.obtenerDepartamentos.mockResolvedValueOnce([
+      { id: 1, nombre: 'ITI', idArea: 1 },
+    ])
+
+    render(
+      <BrowserRouter>
+        <CreatePlaza />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Crear Plaza/i })).toBeInTheDocument()
+    })
+
+    const unidadSelect = document.querySelector('select[name="idUnidad"]')
+    const departamentoSelect = document.querySelector('select[name="idDepartamento"]')
+    const areaSelect = document.querySelector('select[name="idArea"]')
+
+    fireEvent.change(unidadSelect, { target: { value: '1' } })
+
+    await waitFor(() => {
+      expect(unidadSelect.value).toBe('1')
+      expect(departamentoSelect.value).toBe('1')
+      expect(areaSelect.value).toBe('1')
+    })
+  })
+
   it('envía null en campos opcionales no seleccionados', async () => {
     plazaService.crearPlaza.mockResolvedValueOnce({ numeroPlaza: 8 })
 
