@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { FiKey, FiLogOut } from 'react-icons/fi'
+import { FiKey, FiLogOut, FiMenu, FiX } from 'react-icons/fi'
 import { cerrarSesion, obtenerSesion } from '../services/session'
 import { COLORS } from '../constants/colors'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 
 const NAV_ITEMS = [
   { label: 'Página Principal', path: '/home', activeOn: '/home' },
@@ -64,7 +65,9 @@ export default function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
   const sesion = obtenerSesion()
+  const isMobile = useMediaQuery('(max-width: 768px)')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [openMenus, setOpenMenus] = useState({})
   const closeTimerRef = useRef(null)
   const profileMenuButtonRef = useRef(null)
@@ -132,7 +135,15 @@ export default function Navbar() {
       clearCloseTimer()
       navigate(path)
       setOpenMenus({})
+      setMobileMenuOpen(false)
     }
+  }
+
+  const handleMobileMenuToggle = () => {
+    clearCloseTimer()
+    if (mobileMenuOpen) setOpenMenus({})
+    setMobileMenuOpen(!mobileMenuOpen)
+    setMenuOpen(false)
   }
 
   const handleMenuButtonKeyDown = (e, menuId, hasSubmenu, isOpen, path) => {
@@ -165,7 +176,7 @@ export default function Navbar() {
     },
     onKeyDown: (e) =>
       handleMenuButtonKeyDown(e, menuId, hasSubmenu, isOpen, path),
-    onFocus: () => hasSubmenu && !isOpen && toggleSubmenu(menuId),
+    onFocus: () => !isMobile && hasSubmenu && !isOpen && toggleSubmenu(menuId),
   })
 
   const topLevelButtonBaseStyle = {
@@ -180,6 +191,7 @@ export default function Navbar() {
     transition: 'background-color 0.15s',
     display: 'flex',
     alignItems: 'center',
+    justifyContent: isMobile ? 'center' : 'flex-start',
     gap: '6px',
     lineHeight: 1,
     whiteSpace: 'nowrap',
@@ -212,7 +224,13 @@ export default function Navbar() {
     return (
       <div
         key={menuId}
-        style={{ position: 'relative', display: 'flex', alignItems: 'stretch' }}
+        style={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'stretch',
+          flexDirection: isMobile ? 'column' : 'row',
+          width: isMobile ? '100%' : 'auto',
+        }}
         data-menu-root={menuId}
       >
         <button
@@ -220,13 +238,17 @@ export default function Navbar() {
           style={{
             ...topLevelButtonBaseStyle,
             backgroundColor: buttonBgColor,
+            borderTop: isMobile ? '1px solid rgba(255,255,255,0.35)' : 'none',
+            minHeight: isMobile ? '56px' : 'auto',
           }}
         onMouseEnter={(e) => {
+          if (isMobile) return
           clearCloseTimer()
           if (hasSubmenu && !isOpen) toggleSubmenu(menuId)
           if (!isActive && !isOpen) e.currentTarget.style.backgroundColor = 'rgba(0,174,239,0.25)'
         }}
         onMouseLeave={(e) => {
+          if (isMobile) return
           if (hasSubmenu) {
             const isInRoot = isTargetWithinMenu(e.relatedTarget, 'data-menu-root', menuId)
             if (!isInRoot) scheduleCloseAll()
@@ -242,17 +264,18 @@ export default function Navbar() {
           <div
             id={`${menuId}-menu`}
             style={{
-              position: 'absolute',
-              top: '100%',
-              left: '50%',
-              transform: 'translateX(-50%)',
+              position: isMobile ? 'static' : 'absolute',
+              top: isMobile ? 'auto' : '100%',
+              left: isMobile ? 'auto' : '50%',
+              transform: isMobile ? 'none' : 'translateX(-50%)',
               backgroundColor: COLORS.submenuBg,
-              borderRadius: '0 0 6px 6px',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-              minWidth: '100%',
+              borderRadius: isMobile ? 0 : '0 0 6px 6px',
+              boxShadow: isMobile ? 'none' : '0 4px 16px rgba(0,0,0,0.15)',
+              minWidth: isMobile ? 'auto' : '100%',
+              width: isMobile ? '100%' : 'auto',
               zIndex: 100,
               overflow: 'visible',
-              marginTop: '-1px',
+              marginTop: isMobile ? 0 : '-1px',
               padding: '6px 0',
             }}
           >
@@ -276,12 +299,17 @@ export default function Navbar() {
         style={{
           ...topLevelButtonBaseStyle,
           backgroundColor: 'transparent',
+          justifyContent: 'flex-start',
+          padding: isMobile ? '14px 24px' : topLevelButtonBaseStyle.padding,
+          minHeight: isMobile ? '48px' : 'auto',
         }}
         onMouseEnter={(e) => {
+          if (isMobile) return
           clearCloseTimer()
           e.currentTarget.style.backgroundColor = COLORS.primaryBtn
         }}
         onMouseLeave={(e) => {
+          if (isMobile) return
           const isInRoot = isTargetWithinMenu(e.relatedTarget, 'data-menu-root', rootMenuId)
           if (!isInRoot) {
             scheduleCloseAll()
@@ -315,67 +343,115 @@ export default function Navbar() {
     <nav
       style={{
         backgroundColor: COLORS.navBg,
-        padding: '0 24px',
+        padding: isMobile ? '0 16px' : '0 24px',
         display: 'flex',
-        alignItems: 'stretch',
+        alignItems: isMobile ? 'center' : 'stretch',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
         gap: 0,
+        minHeight: isMobile ? '50px' : 'auto',
       }}
     >
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 0, alignItems: 'stretch' }}>
+      {isMobile && (
+        <button
+          type="button"
+          onClick={handleMobileMenuToggle}
+          style={{
+            width: '40px',
+            height: '40px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: 'none',
+            borderRadius: '4px',
+            background: 'transparent',
+            color: COLORS.white,
+            cursor: 'pointer',
+            order: 0,
+          }}
+          aria-label={mobileMenuOpen ? 'Cerrar menú principal' : 'Abrir menú principal'}
+          aria-controls="main-navigation-menu"
+          aria-expanded={mobileMenuOpen}
+        >
+          {mobileMenuOpen ? <FiX size={28} /> : <FiMenu size={28} />}
+        </button>
+      )}
+
+      <div
+        id="main-navigation-menu"
+        style={{
+          display: isMobile && !mobileMenuOpen ? 'none' : 'flex',
+          flexWrap: isMobile ? 'nowrap' : 'wrap',
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: 0,
+          alignItems: 'stretch',
+          order: isMobile ? 2 : 0,
+          width: isMobile ? 'calc(100% + 32px)' : 'auto',
+          margin: isMobile ? '0 -16px' : 0,
+        }}
+      >
         {renderMenuItems(NAV_ITEMS)}
       </div>
 
-      <button
-        ref={profileMenuButtonRef}
+      <div
         style={{
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
-          gap: '4px',
-          cursor: 'pointer',
-          background: 'none',
-          border: 'none',
-          padding: 0,
+          order: isMobile ? 1 : 0,
+          minHeight: isMobile ? '50px' : 'auto',
         }}
-        onClick={() => setMenuOpen(!menuOpen)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            setMenuOpen(!menuOpen)
-          }
-        }}
-        aria-label="User menu"
-        aria-haspopup="true"
-        aria-expanded={menuOpen}
       >
-        <div
+        <button
+          ref={profileMenuButtonRef}
           style={{
-            width: '34px',
-            height: '34px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(255,255,255,0.2)',
-            border: '2px solid rgba(255,255,255,0.7)',
+            position: 'relative',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            gap: '4px',
+            cursor: 'pointer',
+            background: 'none',
+            border: 'none',
+            padding: isMobile ? 0 : '0 0 0 12px',
           }}
+          onClick={() => setMenuOpen(!menuOpen)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              setMenuOpen(!menuOpen)
+            }
+          }}
+          aria-label="User menu"
+          aria-haspopup="true"
+          aria-expanded={menuOpen}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill={COLORS.white}>
-            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+          <div
+            style={{
+              width: '34px',
+              height: '34px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255,255,255,0.2)',
+              border: '2px solid rgba(255,255,255,0.7)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill={COLORS.white}>
+              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+            </svg>
+          </div>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill={COLORS.white}>
+            <path d="M7 10l5 5 5-5z" />
           </svg>
-        </div>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill={COLORS.white}>
-          <path d="M7 10l5 5 5-5z" />
-        </svg>
+        </button>
 
         {menuOpen && (
           <div
             ref={profileMenuRef}
             style={{
               position: 'absolute',
-              top: '52px',
+              top: isMobile ? '48px' : '52px',
               right: 0,
               backgroundColor: COLORS.white,
               borderRadius: '6px',
@@ -479,7 +555,7 @@ export default function Navbar() {
             </button>
           </div>
         )}
-      </button>
+      </div>
     </nav>
   )
 }
