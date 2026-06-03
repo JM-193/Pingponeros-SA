@@ -223,6 +223,10 @@ internal static class Program
         Justification = "Los nombres de entidades organizacionales se normalizan a minúsculas por requisito de negocio.")]
     private static string NormalizarNombre(string nombre) => nombre.Trim().ToLowerInvariant();
 
+    [SuppressMessage("Globalization", "CA1308:NormalizeStringsToUppercase",
+        Justification = "Los correos se normalizan a minúsculas por requisito de negocio.")]
+    private static string NormalizarCorreo(string correo) => correo.Trim().ToLowerInvariant();
+
     private static async Task<IResult> CrearUsuarioAsync(
         IUsuarioRepository repo,
         IEmailService emailService,
@@ -1138,6 +1142,9 @@ internal static class Program
     // ---------------------------------------------------------------- //
     // Auth                                                              //
     // ---------------------------------------------------------------- //
+    private const string MensajeContrasenaTemporalExpirada =
+        "La contraseña temporal ha expirado. Contacte al equipo de soporte para recuperar el acceso.";
+
     private static void MapAuth(WebApplication app, bool isDev)
     {
         app.MapPost("/auth/login", async (LoginDto dto, IUsuarioRepository repo) =>
@@ -1156,26 +1163,42 @@ internal static class Program
             string.IsNullOrWhiteSpace(dto.Contrasena))
             return Results.BadRequest(new { mensaje = "Correo y contraseña son obligatorios." });
 
+        var correo = NormalizarCorreo(dto.CorreoInstitucional);
+
         try
         {
-            var hash = await repo.ObtenerHashMasRecienteAsync(dto.CorreoInstitucional.Trim())
-                                 .ConfigureAwait(false);
+            var contrasena = await repo.ObtenerContrasenaMasRecienteAsync(correo)
+                                       .ConfigureAwait(false);
 
-            if (hash is null || !BCrypt.Net.BCrypt.Verify(dto.Contrasena, hash))
+            if (contrasena is null || !BCrypt.Net.BCrypt.Verify(dto.Contrasena, contrasena.Hash))
                 return Results.Json(new { mensaje = "Correo o contraseña incorrectos." }, statusCode: 401);
 
-            var usuario = await repo.ObtenerPorCorreoAsync(dto.CorreoInstitucional.Trim())
-                                    .ConfigureAwait(false);
+            var usuario = await repo.ObtenerPorCorreoAsync(correo).ConfigureAwait(false);
+
+            if (usuario is null)
+                return Results.Json(new { mensaje = "Correo o contraseña incorrectos." }, statusCode: 401);
+
+            if (ContrasenaTemporalExpirada(contrasena))
+            {
+                await repo.DesactivarPorContrasenaTemporalExpiradaAsync(usuario.CorreoInstitucional)
+                          .ConfigureAwait(false);
+                return RespuestaContrasenaTemporalExpirada();
+            }
+
+            if (usuario.Estado != 1)
+                return Results.Json(new { mensaje = "La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
 
             return Results.Ok(new
             {
-                correoInstitucional = usuario!.CorreoInstitucional,
+                correoInstitucional = usuario.CorreoInstitucional,
                 primerNombre = usuario.PrimerNombre,
                 segundoNombre = usuario.SegundoNombre,
                 primerApellido = usuario.PrimerApellido,
                 segundoApellido = usuario.SegundoApellido,
                 rol = usuario.Rol,
                 estado = usuario.Estado,
+                contrasenaTemporal = contrasena.EsTemporal,
+                fechaExpiracionContrasena = contrasena.FechaExpiracion,
             });
         }
         catch (OracleException ex)
@@ -1196,19 +1219,33 @@ internal static class Program
         if (string.IsNullOrWhiteSpace(correoInstitucional))
             return Results.BadRequest(new { mensaje = "El correo institucional es obligatorio." });
 
+        var correo = NormalizarCorreo(correoInstitucional);
+
         try
         {
-            var usuario = await repo.ObtenerPorCorreoAsync(correoInstitucional.Trim())
-                                    .ConfigureAwait(false);
+            var usuario = await repo.ObtenerPorCorreoAsync(correo).ConfigureAwait(false);
 
             if (usuario is null)
                 // No revelar si el correo existe o no por seguridad
                 return Results.Ok(new { mensaje = "Si el correo existe en nuestro sistema, recibirás una nueva contraseña temporal." });
 
+            var contrasenaActual = await repo.ObtenerContrasenaMasRecienteAsync(usuario.CorreoInstitucional)
+                                             .ConfigureAwait(false);
+
+            if (contrasenaActual is not null && ContrasenaTemporalExpirada(contrasenaActual))
+            {
+                await repo.DesactivarPorContrasenaTemporalExpiradaAsync(usuario.CorreoInstitucional)
+                          .ConfigureAwait(false);
+                return RespuestaContrasenaTemporalExpirada();
+            }
+
+            if (usuario.Estado != 1)
+                return Results.Json(new { mensaje = "La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
+
             var contrasenaTemporal = EmailTemplateHelper.GenerarContrasenaTemporal();
             var hash = BCrypt.Net.BCrypt.HashPassword(contrasenaTemporal);
 
-            await repo.InsertarContrase\u00f1aAsync(usuario.CorreoInstitucional, hash).ConfigureAwait(false);
+            await repo.InsertarContraseñaAsync(usuario.CorreoInstitucional, hash).ConfigureAwait(false);
 
             // Enviar correo con contraseña temporal (en background, sin esperar)
             EnviarCorreoRecuperacion(emailService, usuario, contrasenaTemporal);
@@ -1260,6 +1297,18 @@ internal static class Program
         return error is not null ? Results.BadRequest(new { mensaje = error }) : null;
     }
 
+    private static bool ContrasenaTemporalExpirada(Backend.Models.Contrasena contrasena) =>
+        contrasena.EsTemporal && contrasena.FechaExpiracion <= DateTime.Now;
+
+    private static IResult RespuestaContrasenaTemporalExpirada() =>
+        Results.Json(
+            new
+            {
+                codigo = "TEMP_PASSWORD_EXPIRED",
+                mensaje = MensajeContrasenaTemporalExpirada,
+            },
+            statusCode: 403);
+
     private static async Task<IResult> HandleCambiarContrasena(
         CambiarContraseñaDto dto,
         IUsuarioRepository repo,
@@ -1282,19 +1331,30 @@ internal static class Program
         if (validacionContrasena is not null)
             return validacionContrasena;
 
+        var correo = NormalizarCorreo(dto.CorreoInstitucional);
+
         try
         {
-            var usuario = await repo.ObtenerPorCorreoAsync(dto.CorreoInstitucional.Trim())
-                                    .ConfigureAwait(false);
+            var usuario = await repo.ObtenerPorCorreoAsync(correo).ConfigureAwait(false);
 
             if (usuario is null)
                 return Results.NotFound(new { mensaje = "El usuario no fue encontrado." });
 
-            var hashActual = await repo.ObtenerHashMasRecienteAsync(dto.CorreoInstitucional.Trim())
-                                       .ConfigureAwait(false);
+            var contrasenaActual = await repo.ObtenerContrasenaMasRecienteAsync(correo)
+                                             .ConfigureAwait(false);
 
-            if (hashActual is null || !BCrypt.Net.BCrypt.Verify(dto.ContraseñaActual, hashActual))
+            if (contrasenaActual is null || !BCrypt.Net.BCrypt.Verify(dto.ContraseñaActual, contrasenaActual.Hash))
                 return Results.Json(new { mensaje = "La contraseña actual es incorrecta." }, statusCode: 401);
+
+            if (ContrasenaTemporalExpirada(contrasenaActual))
+            {
+                await repo.DesactivarPorContrasenaTemporalExpiradaAsync(usuario.CorreoInstitucional)
+                          .ConfigureAwait(false);
+                return RespuestaContrasenaTemporalExpirada();
+            }
+
+            if (usuario.Estado != 1)
+                return Results.Json(new { mensaje = "La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
 
             var hashNueva = BCrypt.Net.BCrypt.HashPassword(dto.ContraseñaNueva);
             await repo.CambiarContraseñaAsync(usuario.CorreoInstitucional, hashNueva).ConfigureAwait(false);
@@ -1337,5 +1397,3 @@ internal static class Program
 
 
 }
-
-
