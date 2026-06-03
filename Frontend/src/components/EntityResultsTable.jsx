@@ -146,7 +146,7 @@ export default function EntityResultsTable({
               {columns.map((column) => {
                 const isSorted = sortConfig?.key === column.key
                 const nextDirection = isSorted && sortConfig.direction === 'asc' ? 'descendente' : 'ascendente'
-                const sortIcon = sortConfig.direction === 'asc' ? 'ascending' : 'descending'
+                const sortIcon = sortConfig?.direction === 'asc' ? 'ascending' : 'descending'
 
                 return (
                   <th
