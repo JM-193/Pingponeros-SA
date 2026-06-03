@@ -43,7 +43,7 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
     [Fact]
     public async Task Login_Returns401ConCredencialesInvalidas()
     {
-        _factory.UsuarioRepo.ObtenerHashMasRecienteAsync(Arg.Any<string>()).Returns((string?)null);
+        _factory.UsuarioRepo.ObtenerContrasenaMasRecienteAsync(Arg.Any<string>()).Returns((Contrasena?)null);
 
         var dto = new { CorreoInstitucional = "test@ucr.ac.cr", Contrasena = "WrongPassword123!" };
 
@@ -69,7 +69,8 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
             Estado = 1
         };
 
-        _factory.UsuarioRepo.ObtenerHashMasRecienteAsync(correo).Returns(hash);
+        _factory.UsuarioRepo.ObtenerContrasenaMasRecienteAsync(correo)
+            .Returns(new Contrasena { Hash = hash, EsTemporal = false, FechaExpiracion = DateTime.Now.AddDays(30) });
         _factory.UsuarioRepo.ObtenerPorCorreoAsync(correo).Returns(usuario);
 
         var dto = new { CorreoInstitucional = correo, Contrasena = contrasena };
@@ -85,7 +86,8 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
         var correo = "test@ucr.ac.cr";
         var hash = BCrypt.Net.BCrypt.HashPassword("CorrectPassword123!");
 
-        _factory.UsuarioRepo.ObtenerHashMasRecienteAsync(correo).Returns(hash);
+        _factory.UsuarioRepo.ObtenerContrasenaMasRecienteAsync(correo)
+            .Returns(new Contrasena { Hash = hash, EsTemporal = false, FechaExpiracion = DateTime.Now.AddDays(30) });
 
         var dto = new { CorreoInstitucional = correo, Contrasena = "WrongPassword123!" };
 
@@ -260,7 +262,8 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
         var hashIncorrecto = BCrypt.Net.BCrypt.HashPassword("DifferentPassword123!Xyz");
 
         _factory.UsuarioRepo.ObtenerPorCorreoAsync("test@ucr.ac.cr").Returns(usuario);
-        _factory.UsuarioRepo.ObtenerHashMasRecienteAsync("test@ucr.ac.cr").Returns(hashIncorrecto);
+        _factory.UsuarioRepo.ObtenerContrasenaMasRecienteAsync("test@ucr.ac.cr")
+            .Returns(new Contrasena { Hash = hashIncorrecto, EsTemporal = false, FechaExpiracion = DateTime.Now.AddDays(30) });
 
         var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContraseñaActual = "Wrong123!Aa", ContraseñaNueva = "New123!Bbbbbb" };
 
@@ -286,7 +289,8 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
         var hashActual = BCrypt.Net.BCrypt.HashPassword("Old123!Aa");
 
         _factory.UsuarioRepo.ObtenerPorCorreoAsync(correo).Returns(usuario);
-        _factory.UsuarioRepo.ObtenerHashMasRecienteAsync(correo).Returns(hashActual);
+        _factory.UsuarioRepo.ObtenerContrasenaMasRecienteAsync(correo)
+            .Returns(new Contrasena { Hash = hashActual, EsTemporal = false, FechaExpiracion = DateTime.Now.AddDays(30) });
         _factory.UsuarioRepo.CambiarContraseñaAsync(correo, Arg.Any<string>()).Returns(Task.CompletedTask);
 
         var dto = new { CorreoInstitucional = correo, ContraseñaActual = "Old123!Aa", ContraseñaNueva = "New123!Bbbbbb" };
