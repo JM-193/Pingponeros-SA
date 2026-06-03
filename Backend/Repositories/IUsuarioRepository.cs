@@ -10,7 +10,9 @@ internal interface IUsuarioRepository
     Task InsertarConContrasenaAsync(Usuario usuario, string contrasenaHash);
     Task InsertarContraseñaAsync(string correo, string contrasenaHash);
     Task CambiarContraseñaAsync(string correo, string contrasenaHash);
+    Task<Contrasena?> ObtenerContrasenaMasRecienteAsync(string correo);
     Task<string?> ObtenerHashMasRecienteAsync(string correo);
     Task<bool> ActualizarAsync(string correo, Usuario usuario);
     Task<bool> EliminarAsync(string correo);
+    Task<bool> DesactivarPorContrasenaTemporalExpiradaAsync(string correo);
 }

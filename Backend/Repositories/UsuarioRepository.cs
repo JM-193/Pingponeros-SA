@@ -97,19 +97,19 @@ internal sealed class UsuarioRepository : IUsuarioRepository
         await InsertarAsync(usuario).ConfigureAwait(false);
 
         // Insertar contraseña
-        await InsertarContrase\u00f1aAsync(usuario.CorreoInstitucional, contrasenaHash).ConfigureAwait(false);
+        await InsertarContraseñaAsync(usuario.CorreoInstitucional, contrasenaHash).ConfigureAwait(false);
     }
 
     // ------------------------------------------------------------------ //
-    // INSERT CONTRASEÑA (válida por 2 días)                              //
+    // INSERT CONTRASEÑA TEMPORAL (válida por 2 días)                     //
     // ------------------------------------------------------------------ //
-    public async Task InsertarContrase\u00f1aAsync(string correo, string contrasenaHash)
+    public async Task InsertarContraseñaAsync(string correo, string contrasenaHash)
     {
         const string sql = """
             INSERT INTO CONTRASENAS
-                (CORREO_INSTITUCIONAL, CONTRASENA_HASH, FECHA_CREACION, FECHA_EXPIRACION)
+                (CORREO_INSTITUCIONAL, CONTRASENA_HASH, FECHA_CREACION, FECHA_EXPIRACION, ES_TEMPORAL)
             VALUES
-                (:correo, :hash, SYSDATE, SYSDATE + 2)
+                (:correo, :hash, SYSDATE, SYSDATE + 2, 1)
             """;
 
         await _q.ExecuteAsync(connection =>
@@ -131,9 +131,9 @@ internal sealed class UsuarioRepository : IUsuarioRepository
     {
         const string sql = """
             INSERT INTO CONTRASENAS
-                (CORREO_INSTITUCIONAL, CONTRASENA_HASH, FECHA_CREACION, FECHA_EXPIRACION)
+                (CORREO_INSTITUCIONAL, CONTRASENA_HASH, FECHA_CREACION, FECHA_EXPIRACION, ES_TEMPORAL)
             VALUES
-                (:correo, :hash, SYSDATE, SYSDATE + 90)
+                (:correo, :hash, SYSDATE, SYSDATE + 90, 0)
             """;
 
         await _q.ExecuteAsync(connection =>
@@ -151,17 +151,17 @@ internal sealed class UsuarioRepository : IUsuarioRepository
     // ------------------------------------------------------------------ //
     // GET HASH MÁS RECIENTE                                               //
     // ------------------------------------------------------------------ //
-    public async Task<string?> ObtenerHashMasRecienteAsync(string correo)
+    public async Task<Contrasena?> ObtenerContrasenaMasRecienteAsync(string correo)
     {
         const string sql = """
-            SELECT CONTRASENA_HASH
+            SELECT CONTRASENA_HASH, FECHA_EXPIRACION, ES_TEMPORAL
             FROM   CONTRASENAS
             WHERE  CORREO_INSTITUCIONAL = :correo
             ORDER BY FECHA_CREACION DESC
             FETCH FIRST 1 ROWS ONLY
             """;
 
-        var result = await _q.ExecuteScalarAsync(connection =>
+        return await _q.QueryAsync(connection =>
         {
             var cmd = new OracleCommand(sql, connection)
             {
@@ -169,8 +169,24 @@ internal sealed class UsuarioRepository : IUsuarioRepository
             };
             cmd.Parameters.Add("correo", correo);
             return cmd;
+        }, async reader =>
+        {
+            if (!await reader.ReadAsync().ConfigureAwait(false))
+                return null;
+
+            return new Contrasena
+            {
+                Hash = reader.GetString(0),
+                FechaExpiracion = reader.GetDateTime(1),
+                EsTemporal = reader.GetInt32(2) == 1,
+            };
         }).ConfigureAwait(false);
-        return result is DBNull or null ? null : (string)result;
+    }
+
+    public async Task<string?> ObtenerHashMasRecienteAsync(string correo)
+    {
+        var contrasena = await ObtenerContrasenaMasRecienteAsync(correo).ConfigureAwait(false);
+        return contrasena?.Hash;
     }
 
     // ------------------------------------------------------------------ //
@@ -209,6 +225,22 @@ internal sealed class UsuarioRepository : IUsuarioRepository
     public async Task<bool> EliminarAsync(string correo)
     {
         const string sqlUsuario = "UPDATE USUARIOS SET ESTADO = 0 WHERE CORREO_INSTITUCIONAL = :correo";
+
+        var filas = await _q.ExecuteAsync(connection =>
+        {
+            var cmd = new OracleCommand(sqlUsuario, connection)
+            {
+                BindByName = true,
+            };
+            cmd.Parameters.Add("correo", correo);
+            return cmd;
+        }).ConfigureAwait(false);
+        return filas > 0;
+    }
+
+    public async Task<bool> DesactivarPorContrasenaTemporalExpiradaAsync(string correo)
+    {
+        const string sqlUsuario = "UPDATE USUARIOS SET ESTADO = 0 WHERE CORREO_INSTITUCIONAL = :correo AND ESTADO = 1";
 
         var filas = await _q.ExecuteAsync(connection =>
         {
