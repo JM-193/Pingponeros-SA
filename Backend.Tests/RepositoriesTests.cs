@@ -283,16 +283,32 @@ public sealed class RepositoriesTests
         Assert.Equal("u@test.com", usuario!.CorreoInstitucional);
     }
 
-  [Fact]
-    public async Task UsuarioRepository_ObtenerHashMasRecienteAsync_ReturnsHash()
+    [Fact]
+    public async Task UsuarioRepository_ObtenerContrasenaMasRecienteAsync_ReturnsContrasena()
     {
+        var vencimiento = DateTime.Now.AddDays(2);
+        var table = new DataTable();
+        table.Columns.Add("CONTRASENA_HASH", typeof(string));
+        table.Columns.Add("FECHA_EXPIRACION", typeof(DateTime));
+        table.Columns.Add("ES_TEMPORAL", typeof(int));
+        table.Rows.Add("hashvalue", vencimiento, 1);
+
         var q = Substitute.For<IQueryExecutor>();
-        q.ExecuteScalarAsync(Arg.Any<Func<OracleConnection, OracleCommand>>()).Returns("hashvalue");
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Contrasena?>>>() )
+            .Returns(ci =>
+            {
+                var map = (Func<DbDataReader, Task<Contrasena?>>)ci[1]!;
+                using var reader = table.CreateDataReader();
+                return map(reader);
+            });
 
         var repo = new UsuarioRepository(q);
-        var hash = await repo.ObtenerHashMasRecienteAsync("u@test.com");
+        var contrasena = await repo.ObtenerContrasenaMasRecienteAsync("u@test.com");
 
-        Assert.Equal("hashvalue", hash);
+        Assert.NotNull(contrasena);
+        Assert.Equal("hashvalue", contrasena!.Hash);
+        Assert.True(contrasena.EsTemporal);
+        Assert.Equal(vencimiento, contrasena.FechaExpiracion);
     }
 
     [Fact]
