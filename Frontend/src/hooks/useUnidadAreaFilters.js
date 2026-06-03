@@ -1,4 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
+import {
+  clearAreaConflicts,
+  resolveUnidadDependencyChange,
+} from '../utils/organizationHierarchy'
 
 export function useUnidadAreaFilters({
   formData,
@@ -35,45 +39,49 @@ export function useUnidadAreaFilters({
       const { value } = event.target
       clearFeedback()
       setConflictError('')
-      const newData = { ...formData, idArea: value }
-      if (value) {
-        if (parentType === 'departamento' && formData.idDepartamento) {
-          const dept = rawDepartamentos.find(
-            (d) => String(d.id ?? d.idDepartamento) === formData.idDepartamento,
-          )
-          if (dept?.idArea != null && String(dept.idArea) !== value) {
-            newData.idDepartamento = ''
-            setConflictError(
-              'El departamento seleccionado no pertenece al área elegida. Seleccione un departamento válido.',
-            )
-          }
-        }
-        if (parentType === 'seccion' && formData.idSeccion) {
-          const sec = rawSecciones.find(
-            (s) => String(s.id ?? s.idSeccion) === formData.idSeccion,
-          )
-          if (sec?.idArea != null && String(sec.idArea) !== value) {
-            newData.idSeccion = ''
-            setConflictError(
-              'La sección seleccionada no pertenece al área elegida. Seleccione una sección válida.',
-            )
-          }
-        }
+
+      const result = clearAreaConflicts({
+        formData: { ...formData, idArea: value },
+        areaValue: value,
+        rawDepartamentos,
+        rawSecciones,
+      })
+
+      if (result.conflict) {
+        setConflictError(result.conflict)
       }
-      setFormData(newData)
+      setFormData(result.formData)
     },
-    [clearFeedback, formData, setFormData, parentType, rawDepartamentos, rawSecciones],
+    [clearFeedback, formData, setFormData, rawDepartamentos, rawSecciones],
   )
 
   const handleFieldChange = useCallback(
     (event) => {
       if (event.target.name === 'idArea') {
         handleAreaChange(event)
-      } else {
-        handleInputChange(event)
+        return
       }
+
+      const { name, value } = event.target
+      if (name === 'idDepartamento' || name === 'idSeccion') {
+        clearFeedback()
+        setConflictError('')
+        setFormData((prev) =>
+          resolveUnidadDependencyChange({
+            formData: prev,
+            parentType,
+            name,
+            value,
+            rawDepartamentos,
+            rawSecciones,
+          }),
+        )
+        return
+      }
+
+      handleInputChange(event)
     },
-    [handleAreaChange, handleInputChange],
+    [clearFeedback, handleAreaChange, handleInputChange, parentType, rawDepartamentos, rawSecciones, setFormData],
   )
 
   const handleParentTypeChange = useCallback(
