@@ -79,6 +79,23 @@ describe('authService', () => {
     )
   })
 
+  it('conserva status y código del error del backend', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 403,
+      json: async () => ({
+        codigo: 'TEMP_PASSWORD_EXPIRED',
+        mensaje: 'La contraseña temporal ha expirado',
+      }),
+    })
+
+    await expect(login('test@ucr.ac.cr', 'Temporal123!')).rejects.toMatchObject({
+      message: 'La contraseña temporal ha expirado',
+      status: 403,
+      codigo: 'TEMP_PASSWORD_EXPIRED',
+    })
+  })
+
   it('lanza error genérico cuando la respuesta no incluye campo mensaje', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
@@ -235,4 +252,3 @@ describe('authService', () => {
     })
   })
 })
-
