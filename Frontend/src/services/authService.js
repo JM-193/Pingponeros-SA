@@ -1,5 +1,12 @@
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5119'
 
+function crearErrorApi(response, data) {
+  const error = new Error(data.mensaje ?? `Error inesperado (${response.status})`)
+  error.status = response.status
+  error.codigo = data.codigo
+  return error
+}
+
 /**
  * Envía las credenciales al backend y devuelve los datos del usuario.
  * @param {string} correoInstitucional
@@ -16,7 +23,7 @@ export async function login(correoInstitucional, contrasena) {
   const data = await response.json().catch(() => ({}))
 
   if (!response.ok) {
-    throw new Error(data.mensaje ?? `Error inesperado (${response.status})`)
+    throw crearErrorApi(response, data)
   }
 
   return data
@@ -37,7 +44,7 @@ export async function recuperarContrasena(correoInstitucional) {
   const data = await response.json().catch(() => ({}))
 
   if (!response.ok) {
-    throw new Error(data.mensaje ?? `Error inesperado (${response.status})`)
+    throw crearErrorApi(response, data)
   }
 
   return data
@@ -64,7 +71,7 @@ export async function cambiarContrasena(correoInstitucional, contraseñaActual, 
   const data = await response.json().catch(() => ({}))
 
   if (!response.ok) {
-    throw new Error(data.mensaje ?? `Error inesperado (${response.status})`)
+    throw crearErrorApi(response, data)
   }
 
   return data
