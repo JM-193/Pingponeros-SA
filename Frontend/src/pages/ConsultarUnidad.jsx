@@ -54,7 +54,7 @@ export default function ConsultarUnidad() {
       key: 'descripcion',
       label: 'Descripción',
       render: (unidad) => unidad.descripcion,
-      width: '30%',
+      width: '25%',
     },
     {
       key: 'areaLabel',
@@ -66,7 +66,7 @@ export default function ConsultarUnidad() {
       key: 'dependenciaLabel',
       label: 'Departamento/Sección',
       render: (unidad) => unidad.dependenciaLabel,
-      width: '15%',
+      width: '20%',
     },
     {
       key: 'estado',
