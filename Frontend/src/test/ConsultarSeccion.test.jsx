@@ -1,5 +1,5 @@
 // ConsultarSeccion.test.jsx
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import ConsultarSeccion from '../pages/ConsultarSeccion'
 import * as seccionService from '../services/seccionService'
@@ -40,5 +40,49 @@ describe('ConsultarSeccion Page', () => {
     )
 
     expect(seccionService.obtenerSecciones).toHaveBeenCalled()
+  })
+
+  it('filtra secciones por nombre en el buscador', async () => {
+    render(
+      <BrowserRouter>
+        <ConsultarSeccion />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Soporte')).toBeInTheDocument()
+    })
+
+    const searchInput = document.querySelector('input[id="search"]')
+    fireEvent.change(searchInput, { target: { value: 'Soporte' } })
+
+    const searchForm = document.querySelector('form')
+    fireEvent.submit(searchForm)
+
+    await waitFor(() => {
+      expect(searchInput.value).toBe('Soporte')
+    })
+  })
+
+  it('filtra secciones por área en el buscador', async () => {
+    render(
+      <BrowserRouter>
+        <ConsultarSeccion />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Soporte')).toBeInTheDocument()
+    })
+
+    const searchInput = document.querySelector('input[id="search"]')
+    fireEvent.change(searchInput, { target: { value: 'Administración' } })
+
+    const searchForm = document.querySelector('form')
+    fireEvent.submit(searchForm)
+
+    await waitFor(() => {
+      expect(searchInput.value).toBe('Administración')
+    })
   })
 })

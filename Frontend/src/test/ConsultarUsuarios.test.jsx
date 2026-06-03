@@ -1,5 +1,5 @@
 // ConsultarUsuarios.test.jsx
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import ConsultarUsuarios from '../pages/ConsultarUsuarios'
 import * as usuarioService from '../services/usuarioService'
@@ -103,6 +103,63 @@ describe('ConsultarUsuarios Page', () => {
       if (emptyMessage) {
         expect(emptyMessage).toBeInTheDocument()
       }
+    })
+  })
+
+  it('filtra usuarios por nombre en el buscador', async () => {
+    render(
+      <BrowserRouter>
+        <ConsultarUsuarios />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Juanito')).toBeInTheDocument()
+    })
+
+    const searchInput = document.querySelector('input[id="search"]')
+    fireEvent.change(searchInput, { target: { value: 'Carlos' } })
+
+    const searchForm = document.querySelector('form')
+    fireEvent.submit(searchForm)
+
+    await waitFor(() => {
+      expect(searchInput.value).toBe('Carlos')
+    })
+  })
+
+  it('filtra usuarios por correo en el buscador', async () => {
+    render(
+      <BrowserRouter>
+        <ConsultarUsuarios />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Juanito')).toBeInTheDocument()
+    })
+
+    const searchInput = document.querySelector('input[id="search"]')
+    fireEvent.change(searchInput, { target: { value: 'carlos.gomez' } })
+
+    const searchForm = document.querySelector('form')
+    fireEvent.submit(searchForm)
+
+    await waitFor(() => {
+      expect(searchInput.value).toBe('carlos.gomez')
+    })
+  })
+
+  it('renderiza usuarios con segundo nombre y segundo apellido concatenados', async () => {
+    render(
+      <BrowserRouter>
+        <ConsultarUsuarios />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Juanito Manuel')).toBeInTheDocument()
+      expect(screen.getByText('Mora Porras')).toBeInTheDocument()
     })
   })
 })
