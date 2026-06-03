@@ -149,6 +149,8 @@ export default function CreateUnidad() {
         namePrefix="Unidad de"
         namePlaceholder="Nombre de la unidad"
         descriptionPlaceholder="Ingrese la descripción de la unidad"
+        nameLabel="Nombre de la Unidad"
+        descriptionLabel="Descripción de la Unidad"
         areaOptions={areaOptions}
         parentType={parentType}
         parentTypeOptions={parentTypeOptions}

@@ -198,6 +198,7 @@ export default function CreatePlaza() {
           onSubmit={handleSubmit}
           title="Crear Plaza"
           subtitle="Formulario de Registro"
+          requiredNote
         >
           {loadError && (
             <StatusMessage variant="error" message={`Error al cargar opciones: ${loadError}`} />

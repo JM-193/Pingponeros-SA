@@ -9,6 +9,8 @@ export default function OrganizationEntityFormFields({
   namePrefix,
   namePlaceholder,
   descriptionPlaceholder,
+  nameLabel,
+  descriptionLabel = 'Descripción',
   areaOptions,
   areaLabel = 'Área',
   areaRequired = false,
@@ -28,6 +30,7 @@ export default function OrganizationEntityFormFields({
 }) {
   const shouldShowArea = Array.isArray(areaOptions)
   const shouldShowParentType = Array.isArray(parentTypeOptions)
+  const resolvedNameLabel = nameLabel ?? namePrefix
 
   const areaSelect = shouldShowArea ? (
     <FormSelect
@@ -99,29 +102,37 @@ export default function OrganizationEntityFormFields({
       )}
 
       <div style={{ marginBottom: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontWeight: 600, color: COLORS.labelColor, fontSize: '14px', whiteSpace: 'nowrap' }}>
-            {namePrefix}
-          </span>
-          <input
-            id="nombre"
-            name="nombre"
-            value={formData.nombre}
-            onChange={onChange}
-            required
-            placeholder={namePlaceholder}
-            style={{
-              flex: 1,
-              padding: '10px',
-              border: `1px solid ${COLORS.borderColor}`,
-              borderRadius: '4px',
-              fontSize: '14px',
-              boxSizing: 'border-box',
-              backgroundColor: COLORS.inputBg,
-              color: COLORS.black,
-            }}
-          />
-        </div>
+        <label
+          htmlFor="nombre"
+          style={{
+            display: 'block',
+            marginBottom: '8px',
+            fontWeight: 600,
+            color: COLORS.labelColor,
+            fontSize: '14px',
+          }}
+        >
+          {resolvedNameLabel}
+          <span style={{ color: COLORS.danger, marginLeft: '2px' }} aria-hidden="true">*</span>
+        </label>
+        <input
+          id="nombre"
+          name="nombre"
+          value={formData.nombre}
+          onChange={onChange}
+          required
+          placeholder={namePlaceholder}
+          style={{
+            width: '100%',
+            padding: '10px',
+            border: `1px solid ${COLORS.borderColor}`,
+            borderRadius: '4px',
+            fontSize: '14px',
+            boxSizing: 'border-box',
+            backgroundColor: COLORS.inputBg,
+            color: COLORS.black,
+          }}
+        />
       </div>
 
       <div style={{ marginBottom: '20px' }}>
@@ -135,7 +146,8 @@ export default function OrganizationEntityFormFields({
             fontSize: '14px',
           }}
         >
-          Descripción *
+          {descriptionLabel}
+          <span style={{ color: COLORS.danger, marginLeft: '2px' }} aria-hidden="true">*</span>
         </label>
         <textarea
           id="descripcion"
@@ -175,6 +187,8 @@ OrganizationEntityFormFields.propTypes = {
   namePrefix: PropTypes.string.isRequired,
   namePlaceholder: PropTypes.string.isRequired,
   descriptionPlaceholder: PropTypes.string.isRequired,
+  nameLabel: PropTypes.string,
+  descriptionLabel: PropTypes.string,
   areaOptions: PropTypes.arrayOf(
     PropTypes.shape({
       value: PropTypes.string.isRequired,
@@ -216,4 +230,6 @@ OrganizationEntityFormFields.propTypes = {
 OrganizationEntityFormFields.defaultProps = {
   areaOptions: null,
   parentTypeOptions: null,
+  nameLabel: undefined,
+  descriptionLabel: 'Descripción',
 }

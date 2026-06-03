@@ -24,7 +24,7 @@ function FormSelect({
         }}
       >
         {label}
-        {required && ' *'}
+        {required && <span style={{ color: COLORS.danger, marginLeft: '2px' }} aria-hidden="true">*</span>}
       </label>
       <select
         id={id}

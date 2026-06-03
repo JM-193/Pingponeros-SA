@@ -150,6 +150,7 @@ export default function EditUser() {
           onSubmit={handleSubmit}
           title="Editar Usuario"
           subtitle="Formulario de Actualización"
+          requiredNote
         >
           {/* Fila 1: Primer nombre y Segundo nombre */}
           <FormRow columns={2}>

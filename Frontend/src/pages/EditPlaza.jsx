@@ -263,6 +263,7 @@ export default function EditPlaza() {
           onSubmit={handleSubmit}
           title="Editar Plaza"
           subtitle="Modificar asignaciones de la plaza"
+          requiredNote
         >
           <p
             style={{

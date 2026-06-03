@@ -112,6 +112,7 @@ export default function CreateUser() {
           onSubmit={handleSubmit}
           title="Crear Usuario"
           subtitle="Formulario de Registro"
+          requiredNote
         >
           {/* Fila 1: Primer nombre y Segundo nombre */}
           <FormRow columns={2}>

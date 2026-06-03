@@ -128,6 +128,8 @@ export default function DepartamentoSeccionEditForm({
         namePrefix={config.namePrefix}
         namePlaceholder={config.namePlaceholder}
         descriptionPlaceholder={config.descriptionPlaceholder}
+        nameLabel={config.nameLabel}
+        descriptionLabel={config.descriptionLabel}
         areaOptions={areaOptions}
       />
       <StateToggle

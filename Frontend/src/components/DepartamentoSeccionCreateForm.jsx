@@ -96,6 +96,8 @@ export default function DepartamentoSeccionCreateForm({ entityType, createEntity
         namePrefix={config.namePrefix}
         namePlaceholder={config.namePlaceholder}
         descriptionPlaceholder={config.descriptionPlaceholder}
+        nameLabel={config.nameLabel}
+        descriptionLabel={config.descriptionLabel}
         areaOptions={areaOptions}
       />
     </OrganizationEntityFormPage>

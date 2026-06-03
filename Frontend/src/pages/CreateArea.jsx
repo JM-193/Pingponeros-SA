@@ -80,6 +80,8 @@ export default function CreateArea() {
         namePrefix="Área de"
         namePlaceholder="Nombre del área"
         descriptionPlaceholder="Ingrese la descripción del área"
+        nameLabel="Nombre del Área"
+        descriptionLabel="Descripción del Área"
       />
     </OrganizationEntityFormPage>
   )
