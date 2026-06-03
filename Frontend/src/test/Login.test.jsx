@@ -114,6 +114,91 @@ describe('Login Page', () => {
     })
   })
 
+  it('permite login con contraseña temporal vigente', async () => {
+    const mockUser = {
+      correoInstitucional: 'test.user@ucr.ac.cr',
+      estado: 1,
+      contrasenaTemporal: true,
+      fechaExpiracionContrasena: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    }
+    authService.login.mockResolvedValueOnce(mockUser)
+    sessionService.guardarSesion.mockImplementation(() => {})
+
+    render(
+      <BrowserRouter>
+        <Login />
+      </BrowserRouter>,
+    )
+
+    fireEvent.change(screen.getByLabelText('Correo Institucional'), {
+      target: { value: 'test.user@ucr.ac.cr' },
+    })
+    fireEvent.change(screen.getByLabelText('Contraseña'), {
+      target: { value: 'Temporal123!' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /Iniciar Sesión/i }))
+
+    await waitFor(() => {
+      expect(sessionService.guardarSesion).toHaveBeenCalledWith(mockUser)
+    })
+  })
+
+  it('bloquea sesión cuando la contraseña temporal está vencida', async () => {
+    authService.login.mockResolvedValueOnce({
+      correoInstitucional: 'test.user@ucr.ac.cr',
+      estado: 1,
+      contrasenaTemporal: true,
+      fechaExpiracionContrasena: new Date(Date.now() - 60 * 1000).toISOString(),
+    })
+    sessionService.guardarSesion.mockImplementation(() => {})
+
+    render(
+      <BrowserRouter>
+        <Login />
+      </BrowserRouter>,
+    )
+
+    fireEvent.change(screen.getByLabelText('Correo Institucional'), {
+      target: { value: 'test.user@ucr.ac.cr' },
+    })
+    fireEvent.change(screen.getByLabelText('Contraseña'), {
+      target: { value: 'Temporal123!' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /Iniciar Sesión/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText(/contraseña temporal ha expirado/i)).toBeInTheDocument()
+      expect(sessionService.guardarSesion).not.toHaveBeenCalled()
+    })
+  })
+
+  it('bloquea sesión cuando la cuenta está inactiva', async () => {
+    authService.login.mockResolvedValueOnce({
+      correoInstitucional: 'test.user@ucr.ac.cr',
+      estado: 0,
+    })
+    sessionService.guardarSesion.mockImplementation(() => {})
+
+    render(
+      <BrowserRouter>
+        <Login />
+      </BrowserRouter>,
+    )
+
+    fireEvent.change(screen.getByLabelText('Correo Institucional'), {
+      target: { value: 'test.user@ucr.ac.cr' },
+    })
+    fireEvent.change(screen.getByLabelText('Contraseña'), {
+      target: { value: 'password123' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /Iniciar Sesión/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText(/cuenta de usuario se encuentra inactiva/i)).toBeInTheDocument()
+      expect(sessionService.guardarSesion).not.toHaveBeenCalled()
+    })
+  })
+
   it('muestra error del servidor', async () => {
     authService.login.mockRejectedValueOnce(new Error('Usuario no encontrado'))
 
@@ -187,4 +272,3 @@ describe('Login Page', () => {
     })
   })
 })
-

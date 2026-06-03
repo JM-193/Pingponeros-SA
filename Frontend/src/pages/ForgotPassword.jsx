@@ -1,25 +1,24 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
-
-const COLORS = {
-  btnBg: '#1D4F91',
-}
+import { recuperarContrasena } from '../services/authService'
+import { COLORS } from '../constants/colors'
 
 export default function ForgotPassword() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [errors, setErrors] = useState({})
   const [sent, setSent] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     const newErrors = {}
 
     if (!email.trim()) {
       newErrors.email = 'El correo es requerido'
-    } else if (!email.endsWith('@ucr.ac.cr')) {
-      newErrors.email = 'El correo debe terminar en @ucr.ac.cr'
+    } else if (!/^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$/.test(email.trim())) {
+      newErrors.email = 'El correo debe ser válido. Formato: nombre.apellidos@ucr.ac.cr (solo letras antes de @)'
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -28,8 +27,16 @@ export default function ForgotPassword() {
     }
 
     setErrors({})
-    setSent(true)
-    // TODO: llamada al endpoint de recuperación de contraseña
+    setLoading(true)
+
+    try {
+      await recuperarContrasena(email.trim().toLowerCase())
+      setSent(true)
+    } catch (err) {
+      setErrors({ submit: err.message })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -39,7 +46,7 @@ export default function ForgotPassword() {
           fontWeight: 900,
           fontSize: 'clamp(20px, 3vw, 28px)',
           margin: '0 0 12px',
-          color: '#1a1a1a',
+          color: COLORS.labelColor,
         }}
       >
         ¿Olvidó su contraseña?
@@ -48,12 +55,12 @@ export default function ForgotPassword() {
       <p
         style={{
           fontSize: '14px',
-          color: '#555',
+          color: COLORS.textMuted,
           margin: '0 0 32px',
           lineHeight: 1.5,
         }}
       >
-        Se enviará un código a su correo institucional para ayudarle a restablecer su contraseña.
+        Se enviará la información necesaria para restablecer su contraseña al correo institucional proporcionado.
       </p>
 
       {sent ? (
@@ -68,7 +75,7 @@ export default function ForgotPassword() {
             marginBottom: '24px',
           }}
         >
-          Si su correo está registrado, recibirá las instrucciones en breve.
+          Si su correo está registrado, recibirá la información en breve.
         </div>
       ) : (
         <form
@@ -81,7 +88,7 @@ export default function ForgotPassword() {
               style={{
                 fontSize: '14px',
                 fontWeight: 600,
-                color: '#777',
+                color: COLORS.textLabel,
               }}
             >
               Correo Institucional
@@ -94,17 +101,17 @@ export default function ForgotPassword() {
               placeholder="Ingrese su correo institucional"
               style={{
                 padding: '14px 18px',
-                border: errors.email ? '2px solid #d10f0f' : '1px solid #d0d0d0',
+                border: errors.email ? `2px solid ${COLORS.danger}` : `1px solid ${COLORS.borderLight}`,
                 borderRadius: '4px',
                 fontSize: '15px',
-                backgroundColor: '#fff',
+                backgroundColor: COLORS.white,
                 outline: 'none',
-                color: '#333',
+                color: COLORS.textDark,
                 transition: 'border-color 0.2s',
               }}
             />
             {errors.email && (
-              <span style={{ fontSize: '12px', color: '#d10f0f' }}>
+              <span style={{ fontSize: '12px', color: COLORS.danger }}>
                 {errors.email}
               </span>
             )}
@@ -112,20 +119,28 @@ export default function ForgotPassword() {
 
           <button
             type="submit"
+            disabled={loading}
             style={{
               padding: '14px',
-              backgroundColor: COLORS.btnBg,
-              color: '#fff',
+              backgroundColor: loading ? COLORS.borderLight : COLORS.authBtn,
+              color: COLORS.white,
               border: 'none',
               borderRadius: '4px',
               fontSize: '16px',
               fontWeight: 600,
-              cursor: 'pointer',
+              cursor: loading ? 'not-allowed' : 'pointer',
               letterSpacing: '0.01em',
+              opacity: loading ? 0.6 : 1,
             }}
           >
-            Restablecer Contraseña
+            {loading ? 'Enviando...' : 'Restablecer Contraseña'}
           </button>
+
+          {errors.submit && (
+            <div style={{ fontSize: '12px', color: COLORS.danger, marginTop: '8px' }}>
+              {errors.submit}
+            </div>
+          )}
         </form>
       )}
 
@@ -135,7 +150,7 @@ export default function ForgotPassword() {
           style={{
             background: 'none',
             border: 'none',
-            color: COLORS.btnBg,
+            color: COLORS.authBtn,
             fontSize: '14px',
             cursor: 'pointer',
             textDecoration: 'underline',
@@ -147,7 +162,7 @@ export default function ForgotPassword() {
         <p
           style={{
             fontSize: '12px',
-            color: '#777',
+            color: COLORS.textLabel,
             margin: '10px 0 0',
           }}
         >

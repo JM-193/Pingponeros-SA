@@ -1,11 +1,14 @@
 // Program.cs
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using DotNetEnv;
 using Oracle.ManagedDataAccess.Client;
 using Scalar.AspNetCore;
 using Backend.DTOs;
 using Backend.Repositories;
+using Backend.Services;
+using Backend.Helpers;
 
 namespace Backend;
 
@@ -26,6 +29,10 @@ internal static class Program
         ConfigureMiddleware(app);
         MapUsuarioRoutes(app, isDev);
         MapAreaRoutes(app, isDev);
+        MapDepartamentoRoutes(app, isDev);
+        MapSeccionRoutes(app, isDev);
+        MapUnidadRoutes(app, isDev);
+        MapPlazaRoutes(app, isDev);
         MapAuth(app, isDev);
 
         app.Run();
@@ -54,6 +61,15 @@ internal static class Program
             new UsuarioRepository(sp.GetRequiredService<IQueryExecutor>()));
         builder.Services.AddScoped<IAreaRepository>(sp =>
             new AreaRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<IDepartamentoRepository>(sp =>
+            new DepartamentoRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<ISeccionRepository>(sp =>
+            new SeccionRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<IUnidadRepository>(sp =>
+            new UnidadRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<IPlazaRepository>(sp =>
+            new PlazaRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<IEmailService, EmailService>();
         builder.Services.AddOpenApi();
         builder.Services.AddCors(options =>
             options.AddPolicy("FrontendOrigin", policy =>
@@ -122,7 +138,7 @@ internal static class Program
     private static void MapUsuariosCreate(RouteGroupBuilder usuarios, bool isDev)
     {
         // POST /usuarios — Crea un nuevo usuario con contraseña temporal
-        usuarios.MapPost("/", async (CrearUsuarioDto dto, IUsuarioRepository repo) =>
+        usuarios.MapPost("/", async (CrearUsuarioDto dto, IUsuarioRepository repo, IEmailService emailService) =>
         {
             var validationResult = ValidarCrearUsuario(dto);
             if (validationResult is not null)
@@ -130,13 +146,21 @@ internal static class Program
 
             var usuario = CrearUsuarioDesdeDto(dto);
 
-            var contrasenaTemp = GenerarContrasenaTemporal();
+            var contrasenaTemp = EmailTemplateHelper.GenerarContrasenaTemporal();
             var hash = BCrypt.Net.BCrypt.HashPassword(contrasenaTemp);
 
-            return await CrearUsuarioAsync(repo, usuario, contrasenaTemp, hash, isDev)
+            return await CrearUsuarioAsync(repo, emailService, usuario, contrasenaTemp, hash, isDev)
                 .ConfigureAwait(false);
         });
     }
+
+    private static readonly Regex NombreRegex =
+        new(@"^[A-Za-záéíóúÁÉÍÓÚñÑüÜ]+$",
+            RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+
+    private static readonly Regex CorreoUcrRegex =
+        new(@"^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$",
+            RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
 
     private static IResult? ValidarCrearUsuario(CrearUsuarioDto dto)
     {
@@ -146,11 +170,30 @@ internal static class Program
         if (string.IsNullOrWhiteSpace(dto.CorreoInstitucional))
             return Results.BadRequest(new { mensaje = "El correo institucional es obligatorio." });
 
+        if (!CorreoUcrRegex.IsMatch(dto.CorreoInstitucional.Trim()))
+            return Results.BadRequest(new { mensaje = "El correo debe ser válido. Formato: nombre.apellido@ucr.ac.cr (solo letras antes de @)." });
+
         if (string.IsNullOrWhiteSpace(dto.PrimerNombre))
             return Results.BadRequest(new { mensaje = "El primer nombre es obligatorio." });
 
+        if (!NombreRegex.IsMatch(dto.PrimerNombre.Trim()))
+            return Results.BadRequest(new { mensaje = "El primer nombre solo debe contener letras." });
+
+        if (dto.SegundoNombre is not null && !string.IsNullOrWhiteSpace(dto.SegundoNombre)
+            && !NombreRegex.IsMatch(dto.SegundoNombre.Trim()))
+            return Results.BadRequest(new { mensaje = "El segundo nombre solo debe contener letras." });
+
         if (string.IsNullOrWhiteSpace(dto.PrimerApellido))
             return Results.BadRequest(new { mensaje = "El primer apellido es obligatorio." });
+
+        if (!NombreRegex.IsMatch(dto.PrimerApellido.Trim()))
+            return Results.BadRequest(new { mensaje = "El primer apellido solo debe contener letras." });
+
+        if (string.IsNullOrWhiteSpace(dto.SegundoApellido))
+            return Results.BadRequest(new { mensaje = "El segundo apellido es obligatorio." });
+
+        if (!NombreRegex.IsMatch(dto.SegundoApellido.Trim()))
+            return Results.BadRequest(new { mensaje = "El segundo apellido solo debe contener letras." });
 
         return null;
     }
@@ -170,18 +213,23 @@ internal static class Program
             PrimerNombre = Capitalizar(dto.PrimerNombre),
             SegundoNombre = string.IsNullOrWhiteSpace(dto.SegundoNombre) ? null : Capitalizar(dto.SegundoNombre),
             PrimerApellido = Capitalizar(dto.PrimerApellido),
-            SegundoApellido = string.IsNullOrWhiteSpace(dto.SegundoApellido) ? null : Capitalizar(dto.SegundoApellido),
+            SegundoApellido = Capitalizar(dto.SegundoApellido),
             Rol = dto.Rol,
             Estado = 1,
         };
     }
 
     [SuppressMessage("Globalization", "CA1308:NormalizeStringsToUppercase",
-        Justification = "Los nombres de área se normalizan a minúsculas por requisito de negocio.")]
-    private static string NormalizarNombreArea(string nombre) => nombre.Trim().ToLowerInvariant();
+        Justification = "Los nombres de entidades organizacionales se normalizan a minúsculas por requisito de negocio.")]
+    private static string NormalizarNombre(string nombre) => nombre.Trim().ToLowerInvariant();
+
+    [SuppressMessage("Globalization", "CA1308:NormalizeStringsToUppercase",
+        Justification = "Los correos se normalizan a minúsculas por requisito de negocio.")]
+    private static string NormalizarCorreo(string correo) => correo.Trim().ToLowerInvariant();
 
     private static async Task<IResult> CrearUsuarioAsync(
         IUsuarioRepository repo,
+        IEmailService emailService,
         Backend.Models.Usuario usuario,
         string contrasenaTemp,
         string hash,
@@ -190,11 +238,20 @@ internal static class Program
         try
         {
             await repo.InsertarConContrasenaAsync(usuario, hash).ConfigureAwait(false);
+
+            // Enviar correo con contraseña temporal (en background, sin esperar)
+            var asunto = "Bienvenido a Pingponeros - Contraseña Temporal";
+            var apellidos = $"{usuario.PrimerApellido} {usuario.SegundoApellido}";
+            var cuerpo = EmailTemplateHelper.GenerarCuerpoCorreoBienvenida(usuario.PrimerNombre, apellidos, usuario.CorreoInstitucional, contrasenaTemp);
+            _ = emailService.EnviarAsync(usuario.CorreoInstitucional, asunto, cuerpo);
+
+            var respuestaMensaje = $"Usuario '{usuario.PrimerNombre} {usuario.PrimerApellido}' creado correctamente.";
+
             return Results.Created(
                 $"/usuarios/{Uri.EscapeDataString(usuario.CorreoInstitucional)}",
                 new
                 {
-                    mensaje = $"Usuario '{usuario.PrimerNombre} {usuario.PrimerApellido}' creado correctamente.",
+                    mensaje = respuestaMensaje,
                     contrasenaTemporal = contrasenaTemp,
                 });
         }
@@ -302,9 +359,9 @@ internal static class Program
 
             var area = new Backend.Models.Area
             {
-                Nombre = NormalizarNombreArea(dto.Nombre),
+                Nombre = NormalizarNombre(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
-                Estado = 1,
+                Estado = dto.Estado ?? 1,
             };
 
             return await InsertarAreaAsync(repo, area, isDev).ConfigureAwait(false);
@@ -357,52 +414,27 @@ internal static class Program
 
             var nombreDescodificado = Uri.UnescapeDataString(nombre);
 
-            if (!dto.Nombre.Trim().Equals(nombreDescodificado, StringComparison.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
-                    if (existe)
-                        return Results.Conflict(new { mensaje = $"Ya existe un área con el nombre '{dto.Nombre}'." });
-                }
-                catch (OracleException ex)
-                {
-                    return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
-                }
-            }
+            var conflicto = await VerificarConflictoNombreAsync(
+                () => repo.ExisteNombreAsync(dto.Nombre),
+                dto.Nombre,
+                nombreDescodificado,
+                $"Ya existe un área con el nombre '{dto.Nombre}'.").ConfigureAwait(false);
+            if (conflicto is not null)
+                return conflicto;
 
             var area = new Backend.Models.Area
             {
-                Nombre = NormalizarNombreArea(dto.Nombre),
+                Nombre = NormalizarNombre(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
-                Estado = 1,
+                Estado = dto.Estado ?? 1,
             };
 
-            return await ActualizarAreaAsync(repo, nombreDescodificado, nombre, area, isDev).ConfigureAwait(false);
+            return await EjecutarActualizacionAsync(
+                () => repo.ActualizarAsync(nombreDescodificado, area),
+                $"Área '{area.Nombre}' actualizada correctamente.",
+                $"No se encontró el área '{nombre}'.",
+                isDev).ConfigureAwait(false);
         });
-    }
-
-    private static async Task<IResult> ActualizarAreaAsync(
-        IAreaRepository repo,
-        string nombreDescodificado,
-        string nombreOriginal,
-        Backend.Models.Area area,
-        bool isDev)
-    {
-        try
-        {
-            var actualizado = await repo.ActualizarAsync(nombreDescodificado, area).ConfigureAwait(false);
-            return actualizado
-                ? Results.Ok(new { mensaje = $"Área '{area.Nombre}' actualizada correctamente." })
-                : Results.NotFound(new { mensaje = $"No se encontró el área '{nombreOriginal}'." });
-        }
-        catch (OracleException ex)
-        {
-            var msg = isDev
-                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                : TraducirErrorOracle(ex.Number);
-            return Results.Json(new { mensaje = msg }, statusCode: 500);
-        }
     }
 
     private static void MapAreasDelete(RouteGroupBuilder areas)
@@ -432,50 +464,921 @@ internal static class Program
         if (string.IsNullOrWhiteSpace(dto.Descripcion))
             return Results.BadRequest(new { mensaje = "La descripción es obligatoria." });
 
+        if (dto.Estado is not null && dto.Estado is not (0 or 1))
+            return Results.BadRequest(new { mensaje = "El estado debe ser 0 (Inactivo) o 1 (Activo)." });
+
         return null;
+    }
+
+    // ---------------------------------------------------------------- //
+    // Helpers de actualización compartidos                              //
+    // ---------------------------------------------------------------- //
+
+    /// <summary>
+    /// Verifica si ya existe otra entidad con el mismo nombre cuando éste cambia.
+    /// Devuelve un IResult de conflicto o error, o null si no hay problema.
+    /// </summary>
+    private static async Task<IResult?> VerificarConflictoNombreAsync(
+        Func<Task<bool>> existeAsync,
+        string nombreNuevo,
+        string nombreDescodificado,
+        string mensajeConflicto)
+    {
+        if (nombreNuevo.Trim().Equals(nombreDescodificado, StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        try
+        {
+            var existe = await existeAsync().ConfigureAwait(false);
+            if (existe)
+                return Results.Conflict(new { mensaje = mensajeConflicto });
+        }
+        catch (OracleException ex)
+        {
+            return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Ejecuta la actualización delegada y devuelve Ok, NotFound o 500 según el resultado.
+    /// </summary>
+    private static async Task<IResult> EjecutarActualizacionAsync(
+        Func<Task<bool>> actualizarAsync,
+        string mensajeOk,
+        string mensajeNoEncontrado,
+        bool isDev)
+    {
+        try
+        {
+            var actualizado = await actualizarAsync().ConfigureAwait(false);
+            return actualizado
+                ? Results.Ok(new { mensaje = mensajeOk })
+                : Results.NotFound(new { mensaje = mensajeNoEncontrado });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
+
+    // ---------------------------------------------------------------- //
+    // Helpers de validación compartidos                                 //
+    // ---------------------------------------------------------------- //
+    private static IResult? ValidarEntidadBase(string? nombre, string? descripcion, int? estado, string articulo, string entidad)
+    {
+        if (string.IsNullOrWhiteSpace(nombre))
+            return Results.BadRequest(new { mensaje = $"El nombre {articulo} {entidad} es obligatorio." });
+
+        if (string.IsNullOrWhiteSpace(descripcion))
+            return Results.BadRequest(new { mensaje = "La descripción es obligatoria." });
+
+        if (estado is not null && estado is not (0 or 1))
+            return Results.BadRequest(new { mensaje = "El estado debe ser 0 (Inactivo) o 1 (Activo)." });
+
+        return null;
+    }
+
+    // ---------------------------------------------------------------- //
+    // Rutas de Departamentos                                            //
+    // ---------------------------------------------------------------- //
+    private static void MapDepartamentoRoutes(WebApplication app, bool isDev)
+    {
+        var departamentos = app.MapGroup("/departamentos");
+
+        MapDepartamentosGetAll(departamentos);
+        MapDepartamentosCreate(departamentos, isDev);
+        MapDepartamentosGetByNombre(departamentos);
+        MapDepartamentosUpdate(departamentos, isDev);
+        MapDepartamentosDelete(departamentos);
+    }
+
+    private static void MapDepartamentosGetAll(RouteGroupBuilder departamentos)
+    {
+        // GET /departamentos — Lista todos los departamentos
+        departamentos.MapGet("/", async (IDepartamentoRepository repo) =>
+        {
+            try
+            {
+                var lista = await repo.ObtenerTodosAsync().ConfigureAwait(false);
+                return Results.Ok(lista);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+    }
+
+    private static void MapDepartamentosCreate(RouteGroupBuilder departamentos, bool isDev)
+    {
+        // POST /departamentos — Crea un nuevo departamento
+        departamentos.MapPost("/", async (CrearDepartamentoDto dto, IDepartamentoRepository repo) =>
+        {
+            var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "del", "departamento");
+            if (validationResult is not null)
+                return validationResult;
+
+            try
+            {
+                var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
+                if (existe)
+                    return Results.Conflict(new { mensaje = $"Ya existe un departamento con el nombre '{dto.Nombre}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+
+            var departamento = new Backend.Models.Departamento
+            {
+                Nombre = NormalizarNombre(dto.Nombre),
+                Descripcion = dto.Descripcion.Trim(),
+                IdArea = dto.IdArea,
+                Estado = dto.Estado ?? 1,
+            };
+
+            return await InsertarDepartamentoAsync(repo, departamento, isDev).ConfigureAwait(false);
+        });
+    }
+
+    private static async Task<IResult> InsertarDepartamentoAsync(IDepartamentoRepository repo, Backend.Models.Departamento departamento, bool isDev)
+    {
+        try
+        {
+            var id = await repo.InsertarAsync(departamento).ConfigureAwait(false);
+            return Results.Created($"/departamentos/{id}", new { mensaje = $"Departamento '{departamento.Nombre}' creado correctamente." });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
+
+    private static void MapDepartamentosGetByNombre(RouteGroupBuilder departamentos)
+    {
+        // GET /departamentos/{nombre} — Obtiene un departamento por nombre
+        departamentos.MapGet("/{nombre}", async (string nombre, IDepartamentoRepository repo) =>
+        {
+            try
+            {
+                var departamento = await repo.ObtenerPorNombreAsync(Uri.UnescapeDataString(nombre)).ConfigureAwait(false);
+                return departamento is null
+                    ? Results.NotFound(new { mensaje = $"No se encontró el departamento '{nombre}'." })
+                    : Results.Ok(departamento);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+    }
+
+    private static void MapDepartamentosUpdate(RouteGroupBuilder departamentos, bool isDev)
+    {
+        // PUT /departamentos/{nombre} — Actualiza un departamento
+        departamentos.MapPut("/{nombre}", async (string nombre, CrearDepartamentoDto dto, IDepartamentoRepository repo) =>
+        {
+            var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "del", "departamento");
+            if (validationResult is not null)
+                return validationResult;
+
+            var nombreDescodificado = Uri.UnescapeDataString(nombre);
+
+            var conflicto = await VerificarConflictoNombreAsync(
+                () => repo.ExisteNombreAsync(dto.Nombre),
+                dto.Nombre,
+                nombreDescodificado,
+                $"Ya existe un departamento con el nombre '{dto.Nombre}'.").ConfigureAwait(false);
+            if (conflicto is not null)
+                return conflicto;
+
+            var departamento = new Backend.Models.Departamento
+            {
+                Nombre = NormalizarNombre(dto.Nombre),
+                Descripcion = dto.Descripcion.Trim(),
+                IdArea = dto.IdArea,
+                Estado = dto.Estado ?? 1,
+            };
+
+            return await EjecutarActualizacionAsync(
+                () => repo.ActualizarAsync(nombreDescodificado, departamento),
+                $"Departamento '{departamento.Nombre}' actualizado correctamente.",
+                $"No se encontró el departamento '{nombre}'.",
+                isDev).ConfigureAwait(false);
+        });
+    }
+
+    private static void MapDepartamentosDelete(RouteGroupBuilder departamentos)
+    {
+        // DELETE /departamentos/{id} — Borrado lógico: pasa ESTADO de 1 a 0
+        departamentos.MapDelete("/{id:int}", async (int id, IDepartamentoRepository repo) =>
+        {
+            try
+            {
+                var desactivado = await repo.DesactivarAsync(id).ConfigureAwait(false);
+                return desactivado
+                    ? Results.NoContent()
+                    : Results.NotFound(new { mensaje = $"No se encontró el departamento activo con ID '{id}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+        });
+    }
+
+    // ---------------------------------------------------------------- //
+    // Rutas de Secciones                                                //
+    // ---------------------------------------------------------------- //
+    private static void MapSeccionRoutes(WebApplication app, bool isDev)
+    {
+        var secciones = app.MapGroup("/secciones");
+
+        MapSeccionesGetAll(secciones);
+        MapSeccionesCreate(secciones, isDev);
+        MapSeccionesGetByNombre(secciones);
+        MapSeccionesUpdate(secciones, isDev);
+        MapSeccionesDelete(secciones);
+    }
+
+    private static void MapSeccionesGetAll(RouteGroupBuilder secciones)
+    {
+        // GET /secciones — Lista todas las secciones
+        secciones.MapGet("/", async (ISeccionRepository repo) =>
+        {
+            try
+            {
+                var lista = await repo.ObtenerTodasAsync().ConfigureAwait(false);
+                return Results.Ok(lista);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+    }
+
+    private static void MapSeccionesCreate(RouteGroupBuilder secciones, bool isDev)
+    {
+        // POST /secciones — Crea una nueva sección
+        secciones.MapPost("/", async (CrearSeccionDto dto, ISeccionRepository repo) =>
+        {
+            var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "sección");
+            if (validationResult is not null)
+                return validationResult;
+
+            try
+            {
+                var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
+                if (existe)
+                    return Results.Conflict(new { mensaje = $"Ya existe una sección con el nombre '{dto.Nombre}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+
+            var seccion = new Backend.Models.Seccion
+            {
+                Nombre = NormalizarNombre(dto.Nombre),
+                Descripcion = dto.Descripcion.Trim(),
+                IdArea = dto.IdArea,
+                Estado = dto.Estado ?? 1,
+            };
+
+            return await InsertarSeccionAsync(repo, seccion, isDev).ConfigureAwait(false);
+        });
+    }
+
+    private static async Task<IResult> InsertarSeccionAsync(ISeccionRepository repo, Backend.Models.Seccion seccion, bool isDev)
+    {
+        try
+        {
+            var id = await repo.InsertarAsync(seccion).ConfigureAwait(false);
+            return Results.Created($"/secciones/{id}", new { mensaje = $"Sección '{seccion.Nombre}' creada correctamente." });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
+
+    private static void MapSeccionesGetByNombre(RouteGroupBuilder secciones)
+    {
+        // GET /secciones/{nombre} — Obtiene una sección por nombre
+        secciones.MapGet("/{nombre}", async (string nombre, ISeccionRepository repo) =>
+        {
+            try
+            {
+                var seccion = await repo.ObtenerPorNombreAsync(Uri.UnescapeDataString(nombre)).ConfigureAwait(false);
+                return seccion is null
+                    ? Results.NotFound(new { mensaje = $"No se encontró la sección '{nombre}'." })
+                    : Results.Ok(seccion);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+    }
+
+    private static void MapSeccionesUpdate(RouteGroupBuilder secciones, bool isDev)
+    {
+        // PUT /secciones/{nombre} — Actualiza una sección
+        secciones.MapPut("/{nombre}", async (string nombre, CrearSeccionDto dto, ISeccionRepository repo) =>
+        {
+            var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "sección");
+            if (validationResult is not null)
+                return validationResult;
+
+            var nombreDescodificado = Uri.UnescapeDataString(nombre);
+
+            var conflicto = await VerificarConflictoNombreAsync(
+                () => repo.ExisteNombreAsync(dto.Nombre),
+                dto.Nombre,
+                nombreDescodificado,
+                $"Ya existe una sección con el nombre '{dto.Nombre}'.").ConfigureAwait(false);
+            if (conflicto is not null)
+                return conflicto;
+
+            var seccion = new Backend.Models.Seccion
+            {
+                Nombre = NormalizarNombre(dto.Nombre),
+                Descripcion = dto.Descripcion.Trim(),
+                IdArea = dto.IdArea,
+                Estado = dto.Estado ?? 1,
+            };
+
+            return await EjecutarActualizacionAsync(
+                () => repo.ActualizarAsync(nombreDescodificado, seccion),
+                $"Sección '{seccion.Nombre}' actualizada correctamente.",
+                $"No se encontró la sección '{nombre}'.",
+                isDev).ConfigureAwait(false);
+        });
+    }
+
+    private static void MapSeccionesDelete(RouteGroupBuilder secciones)
+    {
+        // DELETE /secciones/{id} — Borrado lógico: pasa ESTADO de 1 a 0
+        secciones.MapDelete("/{id:int}", async (int id, ISeccionRepository repo) =>
+        {
+            try
+            {
+                var desactivado = await repo.DesactivarAsync(id).ConfigureAwait(false);
+                return desactivado
+                    ? Results.NoContent()
+                    : Results.NotFound(new { mensaje = $"No se encontró la sección activa con ID '{id}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+        });
+    }
+
+    // ---------------------------------------------------------------- //
+    // Rutas de Unidades                                                 //
+    // ---------------------------------------------------------------- //
+    private static void MapUnidadRoutes(WebApplication app, bool isDev)
+    {
+        var unidades = app.MapGroup("/unidades");
+
+        MapUnidadesGetAll(unidades);
+        MapUnidadesCreate(unidades, isDev);
+        MapUnidadesGetByNombre(unidades);
+        MapUnidadesUpdate(unidades, isDev);
+        MapUnidadesDelete(unidades);
+    }
+
+    private static void MapUnidadesGetAll(RouteGroupBuilder unidades)
+    {
+        // GET /unidades — Lista todas las unidades
+        unidades.MapGet("/", async (IUnidadRepository repo) =>
+        {
+            try
+            {
+                var lista = await repo.ObtenerTodasAsync().ConfigureAwait(false);
+                return Results.Ok(lista);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+    }
+
+    private static void MapUnidadesCreate(RouteGroupBuilder unidades, bool isDev)
+    {
+        // POST /unidades — Crea una nueva unidad
+        unidades.MapPost("/", async (CrearUnidadDto dto, IUnidadRepository repo) =>
+        {
+            var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "unidad");
+            if (validationResult is not null)
+                return validationResult;
+
+            if (dto.IdDepartamento is not null && dto.IdSeccion is not null)
+                return Results.BadRequest(new { mensaje = "Una unidad no puede pertenecer a un departamento y a una sección al mismo tiempo." });
+
+            try
+            {
+                var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
+                if (existe)
+                    return Results.Conflict(new { mensaje = $"Ya existe una unidad con el nombre '{dto.Nombre}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+
+            var unidad = new Backend.Models.Unidad
+            {
+                Nombre = NormalizarNombre(dto.Nombre),
+                Descripcion = dto.Descripcion.Trim(),
+                IdArea = dto.IdArea,
+                IdDepartamento = dto.IdDepartamento,
+                IdSeccion = dto.IdSeccion,
+                Estado = dto.Estado ?? 1,
+            };
+
+            return await InsertarUnidadAsync(repo, unidad, isDev).ConfigureAwait(false);
+        });
+    }
+
+    private static async Task<IResult> InsertarUnidadAsync(IUnidadRepository repo, Backend.Models.Unidad unidad, bool isDev)
+    {
+        try
+        {
+            var id = await repo.InsertarAsync(unidad).ConfigureAwait(false);
+            return Results.Created($"/unidades/{id}", new { mensaje = $"Unidad '{unidad.Nombre}' creada correctamente." });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
+
+    private static void MapUnidadesGetByNombre(RouteGroupBuilder unidades)
+    {
+        // GET /unidades/{nombre} — Obtiene una unidad por nombre
+        unidades.MapGet("/{nombre}", async (string nombre, IUnidadRepository repo) =>
+        {
+            try
+            {
+                var unidad = await repo.ObtenerPorNombreAsync(Uri.UnescapeDataString(nombre)).ConfigureAwait(false);
+                return unidad is null
+                    ? Results.NotFound(new { mensaje = $"No se encontró la unidad '{nombre}'." })
+                    : Results.Ok(unidad);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+    }
+
+    private static void MapUnidadesUpdate(RouteGroupBuilder unidades, bool isDev)
+    {
+        // PUT /unidades/{nombre} — Actualiza una unidad
+        unidades.MapPut("/{nombre}", async (string nombre, CrearUnidadDto dto, IUnidadRepository repo) =>
+        {
+            var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "unidad");
+            if (validationResult is not null)
+                return validationResult;
+
+            if (dto.IdDepartamento is not null && dto.IdSeccion is not null)
+                return Results.BadRequest(new { mensaje = "Una unidad no puede pertenecer a un departamento y a una sección al mismo tiempo." });
+
+            var nombreDescodificado = Uri.UnescapeDataString(nombre);
+
+            var conflicto = await VerificarConflictoNombreAsync(
+                () => repo.ExisteNombreAsync(dto.Nombre),
+                dto.Nombre,
+                nombreDescodificado,
+                $"Ya existe una unidad con el nombre '{dto.Nombre}'.").ConfigureAwait(false);
+            if (conflicto is not null)
+                return conflicto;
+
+            var unidad = new Backend.Models.Unidad
+            {
+                Nombre = NormalizarNombre(dto.Nombre),
+                Descripcion = dto.Descripcion.Trim(),
+                IdArea = dto.IdArea,
+                IdDepartamento = dto.IdDepartamento,
+                IdSeccion = dto.IdSeccion,
+                Estado = dto.Estado ?? 1,
+            };
+
+            return await EjecutarActualizacionAsync(
+                () => repo.ActualizarAsync(nombreDescodificado, unidad),
+                $"Unidad '{unidad.Nombre}' actualizada correctamente.",
+                $"No se encontró la unidad '{nombre}'.",
+                isDev).ConfigureAwait(false);
+        });
+    }
+
+    private static void MapUnidadesDelete(RouteGroupBuilder unidades)
+    {
+        // DELETE /unidades/{id} — Borrado lógico: pasa ESTADO de 1 a 0
+        unidades.MapDelete("/{id:int}", async (int id, IUnidadRepository repo) =>
+        {
+            try
+            {
+                var desactivado = await repo.DesactivarAsync(id).ConfigureAwait(false);
+                return desactivado
+                    ? Results.NoContent()
+                    : Results.NotFound(new { mensaje = $"No se encontró la unidad activa con ID '{id}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+        });
+    }
+
+    // ---------------------------------------------------------------- //
+    // Rutas de Plazas                                                  //
+    // ---------------------------------------------------------------- //
+    private static void MapPlazaRoutes(WebApplication app, bool isDev)
+    {
+        var plazas = app.MapGroup("/plazas");
+
+        MapPlazasGetAll(plazas);
+        MapPlazasGetByNumero(plazas);
+        MapPlazasCreate(plazas, isDev);
+        MapPlazasUpdate(plazas, isDev);
+    }
+
+    private static void MapPlazasGetAll(RouteGroupBuilder plazas)
+    {
+        // GET /plazas — Lista todas las plazas
+        plazas.MapGet("/", async (IPlazaRepository repo) =>
+        {
+            try
+            {
+                var lista = await repo.ObtenerTodasAsync().ConfigureAwait(false);
+                return Results.Ok(lista);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+    }
+
+    private static void MapPlazasCreate(RouteGroupBuilder plazas, bool isDev)
+    {
+        // POST /plazas — Crea una nueva plaza
+        plazas.MapPost("/", async (CrearPlazaDto dto, IPlazaRepository repo) =>
+        {
+            if (dto.NumeroPlaza <= 0)
+                return Results.BadRequest(new { mensaje = "El número de plaza debe ser un entero positivo." });
+
+            try
+            {
+                var existe = await repo.ExisteNumeroPlazaAsync(dto.NumeroPlaza).ConfigureAwait(false);
+                if (existe)
+                    return Results.Conflict(new { mensaje = $"Ya existe una plaza con el número '{dto.NumeroPlaza}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+
+            var plaza = new Backend.Models.Plaza
+            {
+                NumeroPlaza = dto.NumeroPlaza,
+                IdUnidad = dto.IdUnidad,
+                IdDepartamento = dto.IdDepartamento,
+                IdSeccion = dto.IdSeccion,
+                IdArea = dto.IdArea,
+            };
+
+            return await InsertarPlazaAsync(repo, plaza, isDev).ConfigureAwait(false);
+        });
+    }
+
+    private static async Task<IResult> InsertarPlazaAsync(IPlazaRepository repo, Backend.Models.Plaza plaza, bool isDev)
+    {
+        try
+        {
+            await repo.InsertarAsync(plaza).ConfigureAwait(false);
+            return Results.Created($"/plazas/{plaza.NumeroPlaza}", new { mensaje = $"Plaza '{plaza.NumeroPlaza}' creada correctamente." });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
+
+    private static void MapPlazasGetByNumero(RouteGroupBuilder plazas)
+    {
+        // GET /plazas/{numeroPlaza} — Obtiene una plaza por número
+        plazas.MapGet("/{numeroPlaza:long}", async (long numeroPlaza, IPlazaRepository repo) =>
+        {
+            try
+            {
+                var plaza = await repo.ObtenerPorNumeroAsync(numeroPlaza).ConfigureAwait(false);
+                return plaza is null
+                    ? Results.NotFound(new { mensaje = $"No se encontró la plaza '{numeroPlaza}'." })
+                    : Results.Ok(plaza);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+    }
+
+    private static void MapPlazasUpdate(RouteGroupBuilder plazas, bool isDev)
+    {
+        // PUT /plazas/{numeroPlaza} — Actualiza las asignaciones de una plaza existente
+        plazas.MapPut("/{numeroPlaza:long}", async (long numeroPlaza, CrearPlazaDto dto, IPlazaRepository repo) =>
+        {
+            try
+            {
+                var existe = await repo.ExisteNumeroPlazaAsync(numeroPlaza).ConfigureAwait(false);
+                if (!existe)
+                    return Results.NotFound(new { mensaje = $"No se encontró la plaza '{numeroPlaza}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+
+            var plaza = new Backend.Models.Plaza
+            {
+                NumeroPlaza = numeroPlaza,
+                IdUnidad = dto.IdUnidad,
+                IdDepartamento = dto.IdDepartamento,
+                IdSeccion = dto.IdSeccion,
+                IdArea = dto.IdArea,
+            };
+
+            return await EjecutarActualizacionAsync(
+                () => repo.ActualizarAsync(numeroPlaza, plaza),
+                $"Plaza '{numeroPlaza}' actualizada correctamente.",
+                $"No se encontró la plaza '{numeroPlaza}'.",
+                isDev).ConfigureAwait(false);
+        });
     }
 
     // ---------------------------------------------------------------- //
     // Auth                                                              //
     // ---------------------------------------------------------------- //
+    private const string MensajeContrasenaTemporalExpirada =
+        "La contraseña temporal ha expirado. Contacte al equipo de soporte para recuperar el acceso.";
+
     private static void MapAuth(WebApplication app, bool isDev)
     {
         app.MapPost("/auth/login", async (LoginDto dto, IUsuarioRepository repo) =>
+            await HandleAuthLogin(dto, repo, isDev).ConfigureAwait(false));
+
+        app.MapPost("/auth/recuperar-contrasena", async (RecuperarContraseñaDto dto, IUsuarioRepository repo, IEmailService emailService) =>
+            await HandleRecuperarContrasena(dto.CorreoInstitucional, repo, emailService, isDev).ConfigureAwait(false));
+
+        app.MapPost("/auth/cambiar-contrasena", async (CambiarContraseñaDto dto, IUsuarioRepository repo, IEmailService emailService) =>
+            await HandleCambiarContrasena(dto, repo, emailService, isDev).ConfigureAwait(false));
+    }
+
+    private static async Task<IResult> HandleAuthLogin(LoginDto dto, IUsuarioRepository repo, bool isDev)
+    {
+        if (string.IsNullOrWhiteSpace(dto.CorreoInstitucional) ||
+            string.IsNullOrWhiteSpace(dto.Contrasena))
+            return Results.BadRequest(new { mensaje = "Correo y contraseña son obligatorios." });
+
+        var correo = NormalizarCorreo(dto.CorreoInstitucional);
+
+        try
         {
-            if (string.IsNullOrWhiteSpace(dto.CorreoInstitucional) ||
-                string.IsNullOrWhiteSpace(dto.Contrasena))
-                return Results.BadRequest(new { mensaje = "Correo y contraseña son obligatorios." });
+            var contrasena = await repo.ObtenerContrasenaMasRecienteAsync(correo)
+                                       .ConfigureAwait(false);
 
-            try
+            if (contrasena is null || !BCrypt.Net.BCrypt.Verify(dto.Contrasena, contrasena.Hash))
+                return Results.Json(new { mensaje = "Correo o contraseña incorrectos." }, statusCode: 401);
+
+            var usuario = await repo.ObtenerPorCorreoAsync(correo).ConfigureAwait(false);
+
+            if (usuario is null)
+                return Results.Json(new { mensaje = "Correo o contraseña incorrectos." }, statusCode: 401);
+
+            if (ContrasenaTemporalExpirada(contrasena))
             {
-                var hash = await repo.ObtenerHashMasRecienteAsync(dto.CorreoInstitucional.Trim())
-                                     .ConfigureAwait(false);
-
-                if (hash is null || !BCrypt.Net.BCrypt.Verify(dto.Contrasena, hash))
-                    return Results.Json(new { mensaje = "Correo o contraseña incorrectos." }, statusCode: 401);
-
-                var usuario = await repo.ObtenerPorCorreoAsync(dto.CorreoInstitucional.Trim())
-                                        .ConfigureAwait(false);
-
-                return Results.Ok(new
-                {
-                    correoInstitucional = usuario!.CorreoInstitucional,
-                    primerNombre = usuario.PrimerNombre,
-                    segundoNombre = usuario.SegundoNombre,
-                    primerApellido = usuario.PrimerApellido,
-                    segundoApellido = usuario.SegundoApellido,
-                    rol = usuario.Rol,
-                    estado = usuario.Estado,
-                });
+                await repo.DesactivarPorContrasenaTemporalExpiradaAsync(usuario.CorreoInstitucional)
+                          .ConfigureAwait(false);
+                return RespuestaContrasenaTemporalExpirada();
             }
-            catch (OracleException ex)
+
+            if (usuario.Estado != 1)
+                return Results.Json(new { mensaje = "La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
+
+            return Results.Ok(new
             {
-                var msg = isDev
-                    ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                    : TraducirErrorOracle(ex.Number);
-                return Results.Json(new { mensaje = msg }, statusCode: 500);
+                correoInstitucional = usuario.CorreoInstitucional,
+                primerNombre = usuario.PrimerNombre,
+                segundoNombre = usuario.SegundoNombre,
+                primerApellido = usuario.PrimerApellido,
+                segundoApellido = usuario.SegundoApellido,
+                rol = usuario.Rol,
+                estado = usuario.Estado,
+                contrasenaTemporal = contrasena.EsTemporal,
+                fechaExpiracionContrasena = contrasena.FechaExpiracion,
+            });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
+
+    private static async Task<IResult> HandleRecuperarContrasena(
+        string correoInstitucional,
+        IUsuarioRepository repo,
+        IEmailService emailService,
+        bool isDev)
+    {
+        if (string.IsNullOrWhiteSpace(correoInstitucional))
+            return Results.BadRequest(new { mensaje = "El correo institucional es obligatorio." });
+
+        var correo = NormalizarCorreo(correoInstitucional);
+
+        try
+        {
+            var usuario = await repo.ObtenerPorCorreoAsync(correo).ConfigureAwait(false);
+
+            if (usuario is null)
+                // No revelar si el correo existe o no por seguridad
+                return Results.Ok(new { mensaje = "Si el correo existe en nuestro sistema, recibirás una nueva contraseña temporal." });
+
+            var contrasenaActual = await repo.ObtenerContrasenaMasRecienteAsync(usuario.CorreoInstitucional)
+                                             .ConfigureAwait(false);
+
+            if (contrasenaActual is not null && ContrasenaTemporalExpirada(contrasenaActual))
+            {
+                await repo.DesactivarPorContrasenaTemporalExpiradaAsync(usuario.CorreoInstitucional)
+                          .ConfigureAwait(false);
+                return RespuestaContrasenaTemporalExpirada();
             }
-        });
+
+            if (usuario.Estado != 1)
+                return Results.Json(new { mensaje = "La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
+
+            var contrasenaTemporal = EmailTemplateHelper.GenerarContrasenaTemporal();
+            var hash = BCrypt.Net.BCrypt.HashPassword(contrasenaTemporal);
+
+            await repo.InsertarContraseñaAsync(usuario.CorreoInstitucional, hash).ConfigureAwait(false);
+
+            // Enviar correo con contraseña temporal (en background, sin esperar)
+            EnviarCorreoRecuperacion(emailService, usuario, contrasenaTemporal);
+
+            return Results.Ok(new { mensaje = "Si el correo existe en nuestro sistema, recibirás una nueva contraseña temporal." });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
+
+    private static void EnviarCorreoRecuperacion(IEmailService emailService, Backend.Models.Usuario usuario, string contrasenaTemporal)
+    {
+        var asunto = "Recuperación de Contraseña - Pingponeros";
+        var apellidos = $"{usuario.PrimerApellido} {usuario.SegundoApellido}";
+        var cuerpo = EmailTemplateHelper.GenerarCuerpoCorreoRecuperacion(usuario.PrimerNombre, apellidos, contrasenaTemporal);
+        _ = emailService.EnviarAsync(usuario.CorreoInstitucional, asunto, cuerpo);
+    }
+
+    private static string? ValidarComplejidadContrasena(string contrasena)
+    {
+        var requisitos = new List<string>();
+
+        if (contrasena.Length < 12)
+            requisitos.Add("mínimo 12 caracteres");
+
+        if (!contrasena.Any(char.IsUpper))
+            requisitos.Add("una mayúscula");
+
+        if (!contrasena.Any(char.IsLower))
+            requisitos.Add("una minúscula");
+
+        if (!contrasena.Any(char.IsDigit))
+            requisitos.Add("un número");
+
+        if (!contrasena.Any(c => "!@#$%&*".Contains(c, StringComparison.Ordinal)))
+            requisitos.Add("un carácter especial (!@#$%&*)");
+
+        return requisitos.Count > 0 ? $"La contraseña debe contener: {string.Join(", ", requisitos)}" : null;
+    }
+
+    private static IResult? ValidarComplejidadContraseñaResult(string contrasena)
+    {
+        var error = ValidarComplejidadContrasena(contrasena);
+        return error is not null ? Results.BadRequest(new { mensaje = error }) : null;
+    }
+
+    private static bool ContrasenaTemporalExpirada(Backend.Models.Contrasena contrasena) =>
+        contrasena.EsTemporal && contrasena.FechaExpiracion <= DateTime.Now;
+
+    private static IResult RespuestaContrasenaTemporalExpirada() =>
+        Results.Json(
+            new
+            {
+                codigo = "TEMP_PASSWORD_EXPIRED",
+                mensaje = MensajeContrasenaTemporalExpirada,
+            },
+            statusCode: 403);
+
+    private static async Task<IResult> HandleCambiarContrasena(
+        CambiarContraseñaDto dto,
+        IUsuarioRepository repo,
+        IEmailService emailService,
+        bool isDev)
+    {
+        if (string.IsNullOrWhiteSpace(dto.CorreoInstitucional))
+            return Results.BadRequest(new { mensaje = "El correo institucional es obligatorio." });
+
+        if (string.IsNullOrWhiteSpace(dto.ContraseñaActual))
+            return Results.BadRequest(new { mensaje = "La contraseña actual es obligatoria." });
+
+        if (string.IsNullOrWhiteSpace(dto.ContraseñaNueva))
+            return Results.BadRequest(new { mensaje = "La nueva contraseña es obligatoria." });
+
+        if (dto.ContraseñaNueva.Equals(dto.ContraseñaActual, StringComparison.Ordinal))
+            return Results.BadRequest(new { mensaje = "La nueva contraseña debe ser diferente a la actual." });
+
+        var validacionContrasena = ValidarComplejidadContraseñaResult(dto.ContraseñaNueva);
+        if (validacionContrasena is not null)
+            return validacionContrasena;
+
+        var correo = NormalizarCorreo(dto.CorreoInstitucional);
+
+        try
+        {
+            var usuario = await repo.ObtenerPorCorreoAsync(correo).ConfigureAwait(false);
+
+            if (usuario is null)
+                return Results.NotFound(new { mensaje = "El usuario no fue encontrado." });
+
+            var contrasenaActual = await repo.ObtenerContrasenaMasRecienteAsync(correo)
+                                             .ConfigureAwait(false);
+
+            if (contrasenaActual is null || !BCrypt.Net.BCrypt.Verify(dto.ContraseñaActual, contrasenaActual.Hash))
+                return Results.Json(new { mensaje = "La contraseña actual es incorrecta." }, statusCode: 401);
+
+            if (ContrasenaTemporalExpirada(contrasenaActual))
+            {
+                await repo.DesactivarPorContrasenaTemporalExpiradaAsync(usuario.CorreoInstitucional)
+                          .ConfigureAwait(false);
+                return RespuestaContrasenaTemporalExpirada();
+            }
+
+            if (usuario.Estado != 1)
+                return Results.Json(new { mensaje = "La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
+
+            var hashNueva = BCrypt.Net.BCrypt.HashPassword(dto.ContraseñaNueva);
+            await repo.CambiarContraseñaAsync(usuario.CorreoInstitucional, hashNueva).ConfigureAwait(false);
+
+            // Enviar correo de confirmación (sin contraseña)
+            EnviarCorreoCambioContrasena(emailService, usuario);
+
+            return Results.Ok(new { mensaje = "La contraseña ha sido cambiada exitosamente." });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
+
+    private static void EnviarCorreoCambioContrasena(IEmailService emailService, Backend.Models.Usuario usuario)
+    {
+        var asunto = "Contraseña Actualizada - Pingponeros";
+        var apellidos = $"{usuario.PrimerApellido} {usuario.SegundoApellido}";
+        var cuerpo = EmailTemplateHelper.GenerarCuerpoCorreoCambioContrasena(usuario.PrimerNombre, apellidos);
+        _ = emailService.EnviarAsync(usuario.CorreoInstitucional, asunto, cuerpo);
     }
 
     private static string TraducirErrorOracle(int numero) => numero switch
@@ -492,31 +1395,5 @@ internal static class Program
         _ => "No se pudo completar la operación. Intente nuevamente.",
     };
 
-    private static string GenerarContrasenaTemporal()
-    {
-        const string upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        const string lower = "abcdefghijklmnopqrstuvwxyz";
-        const string digits = "0123456789";
-        const string special = "!@#$%&*";
-        const string all = upper + lower + digits + special;
 
-        var chars = new char[12];
-        chars[0] = upper[System.Security.Cryptography.RandomNumberGenerator.GetInt32(upper.Length)];
-        chars[1] = lower[System.Security.Cryptography.RandomNumberGenerator.GetInt32(lower.Length)];
-        chars[2] = digits[System.Security.Cryptography.RandomNumberGenerator.GetInt32(digits.Length)];
-        chars[3] = special[System.Security.Cryptography.RandomNumberGenerator.GetInt32(special.Length)];
-
-        for (var i = 4; i < chars.Length; i++)
-            chars[i] = all[System.Security.Cryptography.RandomNumberGenerator.GetInt32(all.Length)];
-
-        // Fisher-Yates shuffle usando RNG criptográfico
-        for (var i = chars.Length - 1; i > 0; i--)
-        {
-            var j = System.Security.Cryptography.RandomNumberGenerator.GetInt32(i + 1);
-            (chars[i], chars[j]) = (chars[j], chars[i]);
-        }
-
-        return new string(chars);
-    }
 }
-

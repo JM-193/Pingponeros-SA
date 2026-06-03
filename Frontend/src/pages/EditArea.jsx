@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { actualizarArea, obtenerAreaPorNombre } from '../services/areaService'
-import Header from '../components/Header'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
-import FormContainer from '../components/FormContainer'
-import FormButton from '../components/FormButton'
-import OrganizationUnitFormFields from '../components/OrganizationUnitFormFields'
-import StatusMessage from '../components/StatusMessage'
-import { createOrganizationUnitInputChangeHandler, getOrganizationUnitFormError, getOrganizationUnitPayload } from '../utils/organizationUnitForm'
+import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
+import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
+import PageLayout from '../components/PageLayout'
+import StateToggle from '../components/StateToggle'
+import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormError, getOrganizationEntityPayload } from '../utils/organizationEntityForm'
 import { COLORS } from '../constants/colors'
 
 export default function EditArea() {
@@ -17,29 +14,32 @@ export default function EditArea() {
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
+    estado: 1,
   })
   const [nombreOriginal, setNombreOriginal] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
 
   // Cargar el área al montar el componente
   useEffect(() => {
     const cargarArea = async () => {
-      setLoading(true)
+      setIsLoading(true)
       setErrorMsg('')
       try {
         const area = await obtenerAreaPorNombre(nombre)
         setFormData({
           nombre: area.nombre,
           descripcion: area.descripcion,
+          estado: area.estado ?? 1,
         })
         setNombreOriginal(area.nombre)
       } catch (err) {
         setErrorMsg(err.message)
         setTimeout(() => navigate('/organizacion/areas/consultar'), 2000)
       } finally {
-        setLoading(false)
+        setIsLoading(false)
       }
     }
 
@@ -54,23 +54,26 @@ export default function EditArea() {
   }
 
   // Manage changes in the fields
-  const handleInputChange = createOrganizationUnitInputChangeHandler(setFormData, clearFeedback)
+  const handleInputChange = createOrganizationEntityInputChangeHandler(setFormData, clearFeedback)
 
   // Manage form submission
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
+    setIsSubmitting(true)
     clearFeedback()
 
-    const validationError = getOrganizationUnitFormError(formData)
+    const validationError = getOrganizationEntityFormError(formData, {
+      entityLabel: 'área',
+      nameArticle: 'del',
+    })
     if (validationError) {
       setErrorMsg(validationError)
-      setLoading(false)
+      setIsSubmitting(false)
       return
     }
 
     try {
-      await actualizarArea(nombreOriginal, getOrganizationUnitPayload(formData))
+      await actualizarArea(nombreOriginal, getOrganizationEntityPayload(formData, { includeEstado: true }))
 
       setSuccessMsg('Área actualizada correctamente')
       // Redirigir después de 1.5 segundos
@@ -78,91 +81,54 @@ export default function EditArea() {
     } catch (err) {
       setErrorMsg(err.message)
     } finally {
-      setLoading(false)
+      setIsSubmitting(false)
     }
   }
 
-  if (loading && !formData.nombre) {
+  const handleStateChange = (newState) => {
+    setFormData((prev) => ({ ...prev, estado: newState }))
+    clearFeedback()
+  }
+
+  if (isLoading && !formData.nombre) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: COLORS.bodyBg }}>
-        <Header />
-        <Navbar />
-        <main
-          style={{
-            flex: 1,
-            padding: '40px 40px 60px',
-            maxWidth: '1200px',
-            width: '100%',
-            margin: '0 auto',
-            boxSizing: 'border-box',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <p style={{ color: '#666' }}>Cargando área...</p>
-        </main>
-        <Footer />
-      </div>
+      <PageLayout
+        mainStyle={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <p style={{ color: COLORS.textSubtle }}>Cargando área...</p>
+      </PageLayout>
     )
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: COLORS.bodyBg }}>
-      {/* Header */}
-      <Header />
-
-      <Navbar />
-
-      {/* Main content */}
-      <main
-        style={{
-          flex: 1,
-          padding: '40px 40px 60px',
-          maxWidth: '1200px',
-          width: '100%',
-          margin: '0 auto',
-          boxSizing: 'border-box',
-        }}
-      >
-        <FormContainer
-          onSubmit={handleSubmit}
-          title="Editar Área"
-          subtitle="Formulario de Actualización"
-        >
-          <OrganizationUnitFormFields formData={formData} onChange={handleInputChange} />
-
-          {/* Mensajes de feedback */}
-          {successMsg && (
-            <StatusMessage
-              variant="success"
-              message={successMsg}
-              style={{ marginBottom: '20px' }}
-            />
-          )}
-          {errorMsg && (
-            <StatusMessage
-              variant="error"
-              message={errorMsg}
-              style={{ marginBottom: '20px' }}
-            />
-          )}
-
-          {/* Botones */}
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-            <FormButton
-              label="Regresar"
-              type="button"
-              variant="secondary"
-              onClick={() => navigate('/organizacion/areas/consultar')}
-              disabled={loading}
-            />
-            <FormButton label={loading ? 'Guardando...' : 'Actualizar Área'} type="submit" variant="primary" disabled={loading} />
-          </div>
-        </FormContainer>
-      </main>
-
-      <Footer />
-    </div>
+    <OrganizationEntityFormPage
+      title="Editar Área"
+      subtitle="Formulario de Actualización"
+      onSubmit={handleSubmit}
+      onCancel={() => navigate('/organizacion/areas/consultar')}
+      isBusy={isSubmitting}
+      successMsg={successMsg}
+      errorMsg={errorMsg}
+      primaryLabel="Actualizar"
+    >
+      <OrganizationEntityFormFields
+        formData={formData}
+        onChange={handleInputChange}
+        namePrefix="Área de"
+        namePlaceholder="Nombre del área"
+        descriptionPlaceholder="Ingrese la descripción del área"
+        nameLabel="Nombre del Área"
+        descriptionLabel="Descripción del Área"
+      />
+      <StateToggle
+        currentState={formData.estado}
+        onStateChange={handleStateChange}
+        disabled={isSubmitting}
+      />
+    </OrganizationEntityFormPage>
   )
 }

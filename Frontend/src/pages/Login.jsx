@@ -3,16 +3,23 @@ import { useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
 import { login } from '../services/authService'
 import { guardarSesion } from '../services/session'
+import { COLORS } from '../constants/colors'
 
 /* UCR brand palette
    Azul UCR  #00AEEF  (Pantone 299 C)
    Azul oscuro institucional  #1D4F91
    Footer   #2D2F34
-   Fondo     #e9e9e9
+   Fondo     #e6e6e6
    */
 
-const COLORS = {
-  btnBg: '#1D4F91',
+const TEMP_PASSWORD_EXPIRED_MESSAGE =
+  'La contraseña temporal ha expirado. Contacte al equipo de soporte para recuperar el acceso.'
+
+function temporalPasswordExpired(usuario) {
+  if (!usuario?.contrasenaTemporal || !usuario?.fechaExpiracionContrasena) return false
+
+  const expirationTime = new Date(usuario.fechaExpiracionContrasena).getTime()
+  return Number.isFinite(expirationTime) && expirationTime <= Date.now()
 }
 
 export default function Login() {
@@ -48,6 +55,14 @@ export default function Login() {
 
     try {
       const usuario = await login(email.trim().toLowerCase(), password)
+      if (usuario.estado !== undefined && usuario.estado !== 1) {
+        setServerError('La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte.')
+        return
+      }
+      if (temporalPasswordExpired(usuario)) {
+        setServerError(TEMP_PASSWORD_EXPIRED_MESSAGE)
+        return
+      }
       guardarSesion(usuario)
       navigate('/home')
     } catch (err) {
@@ -66,7 +81,7 @@ export default function Login() {
           textTransform: 'uppercase',
           letterSpacing: '0.02em',
           margin: '0 0 10px',
-          color: '#1a1a1a',
+          color: COLORS.labelColor,
         }}
       >
         Vicerrectoría de Administración
@@ -78,7 +93,7 @@ export default function Login() {
           textTransform: 'uppercase',
           letterSpacing: '0.02em',
           margin: '0 0 40px',
-          color: '#1a1a1a',
+          color: COLORS.labelColor,
         }}
       >
         Aplicación de Cargas de Trabajo
@@ -94,7 +109,7 @@ export default function Login() {
             style={{
               fontSize: '14px',
               fontWeight: 600,
-              color: '#777',
+              color: COLORS.textLabel,
             }}
           >
             Correo Institucional
@@ -107,17 +122,17 @@ export default function Login() {
             placeholder=""
             style={{
               padding: '14px 18px',
-              border: errors.email ? '2px solid #d10f0f' : '1px solid #d0d0d0',
+              border: errors.email ? `2px solid ${COLORS.danger}` : `1px solid ${COLORS.borderLight}`,
               borderRadius: '4px',
               fontSize: '15px',
-              backgroundColor: '#fff',
+              backgroundColor: COLORS.white,
               outline: 'none',
-              color: '#333',
+              color: COLORS.textDark,
               transition: 'border-color 0.2s',
             }}
           />
           {errors.email && (
-            <span style={{ fontSize: '12px', color: '#d10f0f' }}>
+            <span style={{ fontSize: '12px', color: COLORS.danger }}>
               {errors.email}
             </span>
           )}
@@ -129,7 +144,7 @@ export default function Login() {
             style={{
               fontSize: '14px',
               fontWeight: 600,
-              color: '#777',
+              color: COLORS.textLabel,
             }}
           >
             Contraseña
@@ -142,17 +157,17 @@ export default function Login() {
             placeholder=""
             style={{
               padding: '14px 18px',
-              border: errors.password ? '2px solid #d10f0f' : '1px solid #d0d0d0',
+              border: errors.password ? `2px solid ${COLORS.danger}` : `1px solid ${COLORS.borderLight}`,
               borderRadius: '4px',
               fontSize: '15px',
-              backgroundColor: '#fff',
+              backgroundColor: COLORS.white,
               outline: 'none',
-              color: '#333',
+              color: COLORS.textDark,
               transition: 'border-color 0.2s',
             }}
           />
           {errors.password && (
-            <span style={{ fontSize: '12px', color: '#d10f0f' }}>
+            <span style={{ fontSize: '12px', color: COLORS.danger }}>
               {errors.password}
             </span>
           )}
@@ -163,8 +178,8 @@ export default function Login() {
           disabled={loading}
           style={{
             padding: '14px',
-            backgroundColor: loading ? '#5a7db5' : COLORS.btnBg,
-            color: '#fff',
+            backgroundColor: loading ? '#5a7db5' : COLORS.authBtn,
+            color: COLORS.white,
             border: 'none',
             borderRadius: '4px',
             fontSize: '16px',
@@ -177,7 +192,7 @@ export default function Login() {
         </button>
 
         {serverError && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#b71c1c', backgroundColor: '#ffebee', padding: '10px 14px', borderRadius: '6px', border: '1px solid #ef9a9a', fontSize: '14px', fontWeight: 600 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: COLORS.errorStrong, backgroundColor: COLORS.errorSoftBg, padding: '10px 14px', borderRadius: '6px', border: `1px solid ${COLORS.errorSoftBorder}`, fontSize: '14px', fontWeight: 600 }}>
             <span>&#9888;</span>
             <span>{serverError}</span>
           </div>
@@ -188,7 +203,7 @@ export default function Login() {
         <a
           href="/recuperar-contrasena"
           style={{
-            color: COLORS.btnBg,
+            color: COLORS.authBtn,
             fontSize: '14px',
             textDecoration: 'underline',
           }}
@@ -198,7 +213,7 @@ export default function Login() {
         <p
           style={{
             fontSize: '12px',
-            color: '#777',
+            color: COLORS.textLabel,
             margin: '10px 0 0',
           }}
         >

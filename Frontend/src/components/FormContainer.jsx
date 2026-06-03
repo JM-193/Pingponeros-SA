@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import { COLORS } from '../constants/colors'
 
-function FormContainer({ children, onSubmit, title, subtitle }) {
+function FormContainer({ children, onSubmit, title, subtitle, requiredNote }) {
   return (
     <form
       onSubmit={onSubmit}
@@ -46,6 +46,19 @@ function FormContainer({ children, onSubmit, title, subtitle }) {
         </h2>
       )}
 
+      {requiredNote && (
+        <p
+          style={{
+            fontSize: '13px',
+            color: COLORS.textMuted,
+            textAlign: 'left',
+            margin: subtitle ? '-16px 0 24px' : '0 0 24px',
+          }}
+        >
+          <span style={{ color: COLORS.danger, fontWeight: 700 }}>*</span> Campos obligatorios
+        </p>
+      )}
+
       {children}
     </form>
   )
@@ -56,11 +69,13 @@ FormContainer.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   title: PropTypes.string,
   subtitle: PropTypes.string,
+  requiredNote: PropTypes.bool,
 }
 
 FormContainer.defaultProps = {
   title: '',
   subtitle: '',
+  requiredNote: false,
 }
 
 export default FormContainer

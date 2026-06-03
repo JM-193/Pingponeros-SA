@@ -1,13 +1,13 @@
-﻿// organizationUnitForm.test.js
+﻿// OrganizationEntityForm.test.js
 import { describe, it, expect } from 'vitest'
 import {
-  createOrganizationUnitInputChangeHandler,
-  getOrganizationUnitFormError,
-  getOrganizationUnitPayload,
-} from '../utils/organizationUnitForm'
+  createOrganizationEntityInputChangeHandler,
+  getOrganizationEntityFormError,
+  getOrganizationEntityPayload,
+} from '../utils/organizationEntityForm'
 
-describe('organizationUnitForm utilities', () => {
-  describe('createOrganizationUnitInputChangeHandler', () => {
+describe('OrganizationEntityForm utilities', () => {
+  describe('createOrganizationEntityInputChangeHandler', () => {
     it('actualiza formData correctamente', () => {
       const formData = { nombre: '', descripcion: '' }
       const setFormData = vi.fn((fn) => {
@@ -15,7 +15,7 @@ describe('organizationUnitForm utilities', () => {
       })
       const clearFeedback = vi.fn()
 
-      const handler = createOrganizationUnitInputChangeHandler(
+      const handler = createOrganizationEntityInputChangeHandler(
         setFormData,
         clearFeedback,
       )
@@ -34,7 +34,7 @@ describe('organizationUnitForm utilities', () => {
       const clearFeedback = vi.fn()
       const setFormData = vi.fn()
 
-      const handler = createOrganizationUnitInputChangeHandler(
+      const handler = createOrganizationEntityInputChangeHandler(
         setFormData,
         clearFeedback,
       )
@@ -51,7 +51,7 @@ describe('organizationUnitForm utilities', () => {
         updates.push(result)
       })
 
-      const handler = createOrganizationUnitInputChangeHandler(
+      const handler = createOrganizationEntityInputChangeHandler(
         setFormData,
         () => {},
       )
@@ -68,7 +68,7 @@ describe('organizationUnitForm utilities', () => {
         updates.push(result)
       })
 
-      const handler = createOrganizationUnitInputChangeHandler(
+      const handler = createOrganizationEntityInputChangeHandler(
         setFormData,
         () => {},
       )
@@ -84,7 +84,7 @@ describe('organizationUnitForm utilities', () => {
         return fn(initialData)
       })
 
-      const handler = createOrganizationUnitInputChangeHandler(
+      const handler = createOrganizationEntityInputChangeHandler(
         setFormData,
         () => {},
       )
@@ -98,11 +98,11 @@ describe('organizationUnitForm utilities', () => {
     })
   })
 
-  describe('getOrganizationUnitFormError', () => {
+  describe('getOrganizationEntityFormError', () => {
     it('retorna error cuando nombre está vacÃ­o', () => {
       const formData = { nombre: '', descripcion: 'Descripción' }
 
-      const error = getOrganizationUnitFormError(formData)
+      const error = getOrganizationEntityFormError(formData)
 
       expect(error).toBe('El nombre del área es requerido')
     })
@@ -110,7 +110,7 @@ describe('organizationUnitForm utilities', () => {
     it('retorna error cuando nombre solo tiene espacios', () => {
       const formData = { nombre: '   ', descripcion: 'Descripción' }
 
-      const error = getOrganizationUnitFormError(formData)
+      const error = getOrganizationEntityFormError(formData)
 
       expect(error).toBe('El nombre del área es requerido')
     })
@@ -118,7 +118,7 @@ describe('organizationUnitForm utilities', () => {
     it('retorna error cuando descripción está vacÃ­a', () => {
       const formData = { nombre: 'Administración', descripcion: '' }
 
-      const error = getOrganizationUnitFormError(formData)
+      const error = getOrganizationEntityFormError(formData)
 
       expect(error).toBe('La descripción es requerida')
     })
@@ -126,7 +126,7 @@ describe('organizationUnitForm utilities', () => {
     it('retorna error cuando descripción solo tiene espacios', () => {
       const formData = { nombre: 'Administración', descripcion: '   ' }
 
-      const error = getOrganizationUnitFormError(formData)
+      const error = getOrganizationEntityFormError(formData)
 
       expect(error).toBe('La descripción es requerida')
     })
@@ -137,7 +137,7 @@ describe('organizationUnitForm utilities', () => {
         descripcion: 'Ãrea de administración',
       }
 
-      const error = getOrganizationUnitFormError(formData)
+      const error = getOrganizationEntityFormError(formData)
 
       expect(error).toBe('')
     })
@@ -148,23 +148,24 @@ describe('organizationUnitForm utilities', () => {
         descripcion: 'Encargada de procesos contables',
       }
 
-      const error = getOrganizationUnitFormError(formData)
+      const error = getOrganizationEntityFormError(formData)
 
       expect(error).toBe('')
     })
   })
 
-  describe('getOrganizationUnitPayload', () => {
+  describe('getOrganizationEntityPayload', () => {
     it('retorna nombre y descripción trimmed', () => {
       const formData = {
         nombre: '  Administración  ',
         descripcion: '  Descripción  ',
       }
 
-      const payload = getOrganizationUnitPayload(formData)
+      const payload = getOrganizationEntityPayload(formData)
 
       expect(payload.nombre).toBe('Administración')
       expect(payload.descripcion).toBe('Descripción')
+      expect(payload.estado).toBe(1)
     })
 
     it('retorna estructura correcta', () => {
@@ -173,11 +174,12 @@ describe('organizationUnitForm utilities', () => {
         descripcion: 'Test Description',
       }
 
-      const payload = getOrganizationUnitPayload(formData)
+      const payload = getOrganizationEntityPayload(formData)
 
       expect(payload).toHaveProperty('nombre')
       expect(payload).toHaveProperty('descripcion')
-      expect(Object.keys(payload)).toHaveLength(2)
+      expect(payload).toHaveProperty('estado')
+      expect(Object.keys(payload)).toHaveLength(3)
     })
 
     it('no incluye espacios en blanco', () => {
@@ -186,7 +188,7 @@ describe('organizationUnitForm utilities', () => {
         descripcion: '  Desc  ',
       }
 
-      const payload = getOrganizationUnitPayload(formData)
+      const payload = getOrganizationEntityPayload(formData)
 
       expect(payload.nombre).not.toContain('  ')
       expect(payload.descripcion).not.toContain('  ')
@@ -198,10 +200,48 @@ describe('organizationUnitForm utilities', () => {
         descripcion: 'Encargada de todas las operaciones',
       }
 
-      const payload = getOrganizationUnitPayload(formData)
+      const payload = getOrganizationEntityPayload(formData)
 
       expect(payload.nombre).toBe('Ãrea de Operaciones')
       expect(payload.descripcion).toBe('Encargada de todas las operaciones')
+    })
+
+    it('incluye idArea cuando se solicita', () => {
+      const formData = {
+        nombre: 'Unidad A',
+        descripcion: 'Desc',
+        idArea: '5',
+      }
+
+      const payload = getOrganizationEntityPayload(formData, { includeArea: true })
+
+      expect(payload.idArea).toBe(5)
+    })
+
+    it('incluye idDepartamento cuando parentType es departamento', () => {
+      const formData = {
+        nombre: 'Unidad A',
+        descripcion: 'Desc',
+        idDepartamento: '7',
+      }
+
+      const payload = getOrganizationEntityPayload(formData, { parentType: 'departamento' })
+
+      expect(payload.idDepartamento).toBe(7)
+      expect(payload.idSeccion).toBeUndefined()
+    })
+
+    it('incluye idSeccion cuando parentType es seccion', () => {
+      const formData = {
+        nombre: 'Unidad B',
+        descripcion: 'Desc',
+        idSeccion: '9',
+      }
+
+      const payload = getOrganizationEntityPayload(formData, { parentType: 'seccion' })
+
+      expect(payload.idSeccion).toBe(9)
+      expect(payload.idDepartamento).toBeUndefined()
     })
   })
 })

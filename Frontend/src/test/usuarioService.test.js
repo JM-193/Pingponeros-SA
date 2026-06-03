@@ -1,6 +1,6 @@
 ﻿// usuarioService.test.js
 import { describe, it, expect, beforeEach } from 'vitest'
-import { crearUsuario } from '../services/usuarioService'
+import { crearUsuario, obtenerUsuarios, eliminarUsuario, obtenerUsuarioPorCorreo, actualizarUsuario } from '../services/usuarioService'
 
 describe('usuarioService', () => {
   const mockFetch = vi.fn()
@@ -178,6 +178,162 @@ describe('usuarioService', () => {
       expect(result).toBeDefined()
       expect(result.primerNombre).toBe('John')
       expect(result.primerApellido).toBe('Doe')
+    })
+  })
+
+  describe('obtenerUsuarios', () => {
+    it('obtiene la lista de todos los usuarios', async () => {
+      const resp = [
+        { correoInstitucional: 'juan.perez@ucr.ac.cr', primerNombre: 'Juan', primerApellido: 'Pérez', rol: 1 },
+      ]
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => resp,
+      })
+
+      const result = await obtenerUsuarios()
+      expect(result).toEqual(resp)
+      expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/usuarios'))
+    })
+
+    it('lanza error cuando la respuesta no es ok', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({ mensaje: 'Error al obtener usuarios' }),
+      })
+
+      await expect(obtenerUsuarios()).rejects.toThrow('Error al obtener usuarios')
+    })
+  })
+
+  describe('eliminarUsuario', () => {
+    it('elimina un usuario por su correo', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+      })
+
+      await eliminarUsuario('juan.perez@ucr.ac.cr')
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/usuarios/juan.perez%40ucr.ac.cr'),
+        expect.objectContaining({ method: 'DELETE' })
+      )
+    })
+
+    it('lanza error cuando la respuesta no es ok', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: async () => ({ mensaje: 'No se encontró el usuario' }),
+      })
+
+      await expect(eliminarUsuario('inexistente@ucr.ac.cr')).rejects.toThrow('No se encontró el usuario')
+    })
+  })
+
+  describe('obtenerUsuarioPorCorreo', () => {
+    it('obtiene un usuario por su correo', async () => {
+      const mockUser = {
+        correoInstitucional: 'juan.perez@ucr.ac.cr',
+        primerNombre: 'Juan',
+        primerApellido: 'Pérez',
+        rol: 1,
+        estado: 1,
+      }
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockUser,
+      })
+
+      const result = await obtenerUsuarioPorCorreo('juan.perez@ucr.ac.cr')
+
+      expect(result).toEqual(mockUser)
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/usuarios/juan.perez%40ucr.ac.cr'),
+        expect.objectContaining({ method: 'GET' }),
+      )
+    })
+
+    it('lanza error cuando el usuario no existe', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: async () => ({ detail: 'Usuario no encontrado' }),
+      })
+
+      await expect(obtenerUsuarioPorCorreo('noexiste@ucr.ac.cr')).rejects.toThrow('Usuario no encontrado')
+    })
+
+    it('genera error genérico cuando JSON falla al obtener usuario', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => { throw new Error('Invalid JSON') },
+      })
+
+      await expect(obtenerUsuarioPorCorreo('test@ucr.ac.cr')).rejects.toThrow('Error inesperado (500)')
+    })
+  })
+
+  describe('actualizarUsuario', () => {
+    it('actualiza un usuario existente', async () => {
+      const datos = {
+        correoInstitucional: 'juan.nuevo@ucr.ac.cr',
+        primerNombre: 'Juan',
+        primerApellido: 'Pérez',
+        rol: 1,
+        estado: 1,
+      }
+      const respuesta = { ...datos }
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => respuesta,
+      })
+
+      const result = await actualizarUsuario('juan.perez@ucr.ac.cr', datos)
+
+      expect(result).toEqual(respuesta)
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/usuarios/juan.perez%40ucr.ac.cr'),
+        expect.objectContaining({
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(datos),
+        }),
+      )
+    })
+
+    it('lanza error cuando la actualización falla', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        json: async () => ({ mensaje: 'Correo ya en uso' }),
+      })
+
+      await expect(actualizarUsuario('test@ucr.ac.cr', {})).rejects.toThrow('Correo ya en uso')
+    })
+
+    it('usa detail si mensaje no existe al actualizar', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 422,
+        json: async () => ({ detail: 'Datos inválidos' }),
+      })
+
+      await expect(actualizarUsuario('test@ucr.ac.cr', {})).rejects.toThrow('Datos inválidos')
+    })
+
+    it('genera error genérico cuando JSON falla al actualizar', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => { throw new Error('Invalid JSON') },
+      })
+
+      await expect(actualizarUsuario('test@ucr.ac.cr', {})).rejects.toThrow('Error inesperado (500)')
     })
   })
 })

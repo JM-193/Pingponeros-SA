@@ -104,5 +104,55 @@ describe('ConfirmModal', () => {
     // Tenemos 3: backdrop button + confirm + cancel
     expect(buttons.length).toBeGreaterThanOrEqual(2)
   })
+
+  it('llama a onCancel cuando se hace clic en el backdrop', () => {
+    const onCancel = vi.fn()
+    render(
+      <ConfirmModal
+        isOpen={true}
+        title="Confirmar"
+        message="¿Estás seguro?"
+        confirmLabel="Sí"
+        cancelLabel="No"
+        onConfirm={() => {}}
+        onCancel={onCancel}
+      />,
+    )
+
+    const backdrop = screen.getByRole('button', { name: 'Cerrar' })
+    fireEvent.click(backdrop)
+    expect(onCancel).toHaveBeenCalled()
+  })
+
+  it('cambia estilos en hover de los botones de acción', () => {
+    render(
+      <ConfirmModal
+        isOpen={true}
+        title="Confirmar"
+        message="¿Estás seguro?"
+        confirmLabel="Sí"
+        cancelLabel="No"
+        onConfirm={() => {}}
+        onCancel={() => {}}
+      />,
+    )
+
+    const confirmBtn = screen.getByRole('button', { name: 'Sí' })
+    const cancelBtn = screen.getByRole('button', { name: 'No' })
+
+    // Hover confirm: background should change then revert
+    const beforeConfirm = confirmBtn.style.backgroundColor
+    fireEvent.mouseEnter(confirmBtn)
+    expect(confirmBtn.style.backgroundColor).not.toBe(beforeConfirm)
+    fireEvent.mouseLeave(confirmBtn)
+    expect(confirmBtn.style.backgroundColor).toBe(beforeConfirm)
+
+    // Hover cancel: background should change then revert
+    const beforeCancel = cancelBtn.style.backgroundColor
+    fireEvent.mouseEnter(cancelBtn)
+    expect(cancelBtn.style.backgroundColor).not.toBe(beforeCancel)
+    fireEvent.mouseLeave(cancelBtn)
+    expect(cancelBtn.style.backgroundColor).toBe(beforeCancel)
+  })
 })
 

@@ -37,7 +37,7 @@ describe('FormSelect', () => {
       />,
     )
 
-    expect(screen.getByText('Seleccione *')).toBeInTheDocument()
+    expect(screen.getByText('*')).toBeInTheDocument()
   })
 
   it('renderiza todas las opciones', () => {
