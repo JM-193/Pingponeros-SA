@@ -26,7 +26,7 @@ export default function ConsultarUnidad() {
     return unidades.map((unidad) => {
       const areaId = unidad.idArea ?? unidad.areaId ?? unidad[areaValueKey]
       const departamentoId = unidad.idDepartamento ?? unidad.departamentoId ?? unidad[departamentoValueKey]
-      const seccionId = unidad.idSeccion ?? unidad.seccionId ?? unidad[seccionValueKey]
+      const seccionId = unidad.idSeccion ?? unidad.seccionId
 
       const areaLabel = areaId ? (areaMap.get(String(areaId)) ?? 'Sin asignación') : 'Sin asignación'
       let dependenciaLabel = 'Sin asignación'
