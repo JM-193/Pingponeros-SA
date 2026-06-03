@@ -15,6 +15,7 @@ import FormButton from '../components/FormButton'
 import StatusMessage from '../components/StatusMessage'
 import PageLayout from '../components/PageLayout'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
+import { isUnidadInArea, resolvePlazaFieldChange } from '../utils/organizationHierarchy'
 import { COLORS } from '../constants/colors'
 
 const PARENT_TYPE_OPTIONS = [
@@ -27,24 +28,6 @@ const initialFormData = {
   idDepartamento: '',
   idSeccion: '',
   idUnidad: '',
-}
-
-function resolveConflicts(checks, value, newData) {
-  let conflict = ''
-
-  for (const { condition, rawList, idField, message } of checks) {
-    if (!condition) continue
-
-    const entity = rawList.find(
-      (item) => String(item.id ?? item[idField]) === newData[idField]
-    )
-    if (entity?.idArea != null && String(entity.idArea) !== value) {
-      newData[idField] = ''
-      if (!conflict) conflict = message
-    }
-  }
-
-  return conflict
 }
 
 export default function EditPlaza() {
@@ -134,9 +117,15 @@ export default function EditPlaza() {
   const filteredUnidadOptions = useMemo(() => {
     if (!formData.idArea) return allUnidadOptions
     return rawUnidades
-      .filter((u) => String(u.idArea) === String(formData.idArea))
+      .filter((u) => {
+        const unidadId = String(u.id ?? u.idUnidad)
+        return (
+          unidadId === formData.idUnidad ||
+          isUnidadInArea(u, formData.idArea, { rawDepartamentos, rawSecciones })
+        )
+      })
       .map((u) => ({ value: String(u.id ?? u.idUnidad), label: `Unidad de ${u.nombre}` }))
-  }, [formData.idArea, rawUnidades, allUnidadOptions])
+  }, [formData.idArea, formData.idUnidad, rawDepartamentos, rawSecciones, rawUnidades, allUnidadOptions])
 
   // --- Handlers ---
   const clearFeedback = useCallback(() => {
@@ -145,45 +134,34 @@ export default function EditPlaza() {
     setConflictError('')
   }, [])
 
-  // Inside your component:
+  const applyHierarchyChange = useCallback(
+    (name, value) => {
+      clearFeedback()
+      const resolved = resolvePlazaFieldChange({
+        formData,
+        name,
+        value,
+        rawDepartamentos,
+        rawSecciones,
+        rawUnidades,
+      })
+
+      if (resolved.conflict) {
+        setConflictError(resolved.conflict)
+      }
+      if (resolved.parentType !== undefined) {
+        setParentType(resolved.parentType)
+      }
+      setFormData(resolved.formData)
+    },
+    [clearFeedback, formData, rawDepartamentos, rawSecciones, rawUnidades],
+  )
+
   const handleAreaChange = useCallback(
     (e) => {
-      const { value } = e.target
-      clearFeedback()
-
-      const newData = { ...formData, idArea: value }
-
-      if (!value) {
-        setFormData(newData)
-        return
-      }
-
-      const conflictChecks = [
-        {
-          condition: parentType === 'departamento' && formData.idDepartamento,
-          rawList: rawDepartamentos,
-          idField: 'idDepartamento',
-          message: 'El departamento seleccionado no pertenece al área elegida. Seleccione un departamento válido.',
-        },
-        {
-          condition: parentType === 'seccion' && formData.idSeccion,
-          rawList: rawSecciones,
-          idField: 'idSeccion',
-          message: 'La sección seleccionada no pertenece al área elegida. Seleccione una sección válida.',
-        },
-        {
-          condition: formData.idUnidad,
-          rawList: rawUnidades,
-          idField: 'idUnidad',
-          message: 'La unidad seleccionada no pertenece al área elegida. Seleccione una unidad válida.',
-        },
-      ]
-
-      const conflict = resolveConflicts(conflictChecks, value, newData)
-      if (conflict) setConflictError(conflict)
-      setFormData(newData)
+      applyHierarchyChange('idArea', e.target.value)
     },
-    [clearFeedback, formData, parentType, rawDepartamentos, rawSecciones, rawUnidades],
+    [applyHierarchyChange],
   )
 
   const handleParentTypeChange = useCallback(
@@ -220,29 +198,15 @@ export default function EditPlaza() {
 
   const handleFieldChange = useCallback(
     (e) => {
-      if (e.target.name === 'idArea') {
+      const { name, value } = e.target
+      if (name === 'idArea') {
         handleAreaChange(e)
         return
       }
-      clearFeedback()
-      const { name, value } = e.target
-      const newData = { ...formData, [name]: value }
 
-      if (value && formData.idUnidad) {
-        const unidad = rawUnidades.find((u) => String(u.id ?? u.idUnidad) === formData.idUnidad)
-        if (name === 'idDepartamento' && unidad?.idDepartamento != null && String(unidad.idDepartamento) !== value) {
-          newData.idUnidad = ''
-          setConflictError('La unidad seleccionada no pertenece al departamento elegido. Seleccione una unidad válida.')
-        }
-        if (name === 'idSeccion' && unidad?.idSeccion != null && String(unidad.idSeccion) !== value) {
-          newData.idUnidad = ''
-          setConflictError('La unidad seleccionada no pertenece a la sección elegida. Seleccione una unidad válida.')
-        }
-      }
-
-      setFormData(newData)
+      applyHierarchyChange(name, value)
     },
-    [handleAreaChange, clearFeedback, formData, rawUnidades],
+    [applyHierarchyChange, handleAreaChange],
   )
 
   const handleSubmit = async (e) => {

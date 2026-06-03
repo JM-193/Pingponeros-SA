@@ -1,5 +1,5 @@
 // CreatePlaza.jsx
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { crearPlaza } from '../services/plazaService'
 import { obtenerUnidades } from '../services/unidadService'
@@ -16,6 +16,7 @@ import FormButton from '../components/FormButton'
 import StatusMessage from '../components/StatusMessage'
 import PageLayout from '../components/PageLayout'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
+import { isUnidadInArea, resolvePlazaFieldChange } from '../utils/organizationHierarchy'
 import { COLORS } from '../constants/colors'
 
 const initialFormData = {
@@ -26,7 +27,7 @@ const initialFormData = {
   idArea: '',
 }
 
-const NUMERO_REGEX = /[^0-9]/g
+const NUMERO_REGEX = /\D/g
 
 export default function CreatePlaza() {
   const navigate = useNavigate()
@@ -39,6 +40,9 @@ export default function CreatePlaza() {
   const [departamentoOptions, setDepartamentoOptions] = useState([])
   const [seccionOptions, setSeccionOptions] = useState([])
   const [areaOptions, setAreaOptions] = useState([])
+  const [rawUnidades, setRawUnidades] = useState([])
+  const [rawDepartamentos, setRawDepartamentos] = useState([])
+  const [rawSecciones, setRawSecciones] = useState([])
   const [loadError, setLoadError] = useState('')
 
   useEffect(() => {
@@ -58,6 +62,9 @@ export default function CreatePlaza() {
         const seccionKey = resolveOptionValueKey(secciones, ['id', 'idSeccion'])
         const areaKey = resolveOptionValueKey(areas, ['id', 'idArea'])
 
+        setRawUnidades(unidades)
+        setRawDepartamentos(departamentos)
+        setRawSecciones(secciones)
         setUnidadOptions(buildLabeledOptions(unidades, { valueKey: unidadKey, labelPrefix: 'Unidad de ' }))
         setDepartamentoOptions(buildLabeledOptions(departamentos, { valueKey: departamentoKey, labelPrefix: 'Departamento de ' }))
         setSeccionOptions(buildLabeledOptions(secciones, { valueKey: seccionKey, labelPrefix: 'Sección de ' }))
@@ -72,12 +79,56 @@ export default function CreatePlaza() {
     cargarOpciones()
   }, [])
 
+  const filteredUnidadOptions = useMemo(() => {
+    if (!formData.idArea) return unidadOptions
+    return rawUnidades
+      .filter((u) => {
+        const unidadId = String(u.id ?? u.idUnidad)
+        return (
+          unidadId === formData.idUnidad ||
+          isUnidadInArea(u, formData.idArea, { rawDepartamentos, rawSecciones })
+        )
+      })
+      .map((u) => ({ value: String(u.id ?? u.idUnidad), label: `Unidad de ${u.nombre}` }))
+  }, [formData.idArea, formData.idUnidad, rawDepartamentos, rawSecciones, rawUnidades, unidadOptions])
+
+  const filteredDepartamentoOptions = useMemo(() => {
+    if (!formData.idArea) return departamentoOptions
+    return rawDepartamentos
+      .filter((d) => String(d.idArea) === String(formData.idArea))
+      .map((d) => ({ value: String(d.id ?? d.idDepartamento), label: `Departamento de ${d.nombre}` }))
+  }, [formData.idArea, rawDepartamentos, departamentoOptions])
+
+  const filteredSeccionOptions = useMemo(() => {
+    if (!formData.idArea) return seccionOptions
+    return rawSecciones
+      .filter((s) => String(s.idArea) === String(formData.idArea))
+      .map((s) => ({ value: String(s.id ?? s.idSeccion), label: `Sección de ${s.nombre}` }))
+  }, [formData.idArea, rawSecciones, seccionOptions])
+
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setSuccessMsg('')
     setErrorMsg('')
-    const sanitizedValue = name === 'numeroPlaza' ? value.replace(NUMERO_REGEX, '') : value
-    setFormData((prev) => ({ ...prev, [name]: sanitizedValue }))
+
+    if (name === 'numeroPlaza') {
+      setFormData((prev) => ({ ...prev, numeroPlaza: value.replace(NUMERO_REGEX, '') }))
+      return
+    }
+
+    const resolved = resolvePlazaFieldChange({
+      formData,
+      name,
+      value,
+      rawDepartamentos,
+      rawSecciones,
+      rawUnidades,
+    })
+
+    if (resolved.conflict) {
+      setErrorMsg(resolved.conflict)
+    }
+    setFormData(resolved.formData)
   }
 
   const handleSubmit = async (e) => {
@@ -169,7 +220,7 @@ export default function CreatePlaza() {
             name="idUnidad"
             value={formData.idUnidad}
             onChange={handleInputChange}
-            options={unidadOptions}
+            options={filteredUnidadOptions}
             defaultLabel="-- Sin asignación --"
           />
 
@@ -179,7 +230,7 @@ export default function CreatePlaza() {
             name="idDepartamento"
             value={formData.idDepartamento}
             onChange={handleInputChange}
-            options={departamentoOptions}
+            options={filteredDepartamentoOptions}
             defaultLabel="-- Sin asignación --"
           />
 
@@ -189,7 +240,7 @@ export default function CreatePlaza() {
             name="idSeccion"
             value={formData.idSeccion}
             onChange={handleInputChange}
-            options={seccionOptions}
+            options={filteredSeccionOptions}
             defaultLabel="-- Sin asignación --"
           />
 
