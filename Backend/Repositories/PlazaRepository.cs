@@ -29,11 +29,11 @@ internal sealed class PlazaRepository : IPlazaRepository
             {
                 plazas.Add(new Plaza
                 {
-                    NumeroPlaza    = Convert.ToInt64(reader["NUMERO_PLAZA"], CultureInfo.InvariantCulture),
-                    IdUnidad       = reader["ID_UNIDAD"]       is DBNull ? null : Convert.ToInt32(reader["ID_UNIDAD"],       CultureInfo.InvariantCulture),
+                    NumeroPlaza = Convert.ToInt64(reader["NUMERO_PLAZA"], CultureInfo.InvariantCulture),
+                    IdUnidad = reader["ID_UNIDAD"] is DBNull ? null : Convert.ToInt32(reader["ID_UNIDAD"], CultureInfo.InvariantCulture),
                     IdDepartamento = reader["ID_DEPARTAMENTO"] is DBNull ? null : Convert.ToInt32(reader["ID_DEPARTAMENTO"], CultureInfo.InvariantCulture),
-                    IdSeccion      = reader["ID_SECCION"]      is DBNull ? null : Convert.ToInt32(reader["ID_SECCION"],      CultureInfo.InvariantCulture),
-                    IdArea         = reader["ID_AREA"]         is DBNull ? null : Convert.ToInt32(reader["ID_AREA"],         CultureInfo.InvariantCulture),
+                    IdSeccion = reader["ID_SECCION"] is DBNull ? null : Convert.ToInt32(reader["ID_SECCION"], CultureInfo.InvariantCulture),
+                    IdArea = reader["ID_AREA"] is DBNull ? null : Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
                 });
             }
             return plazas;
@@ -69,10 +69,10 @@ internal sealed class PlazaRepository : IPlazaRepository
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
             cmd.Parameters.Add(":numeroPlaza", OracleDbType.Int64).Value = plaza.NumeroPlaza;
-            OracleCommandHelpers.AddNullableIntParam(cmd, ":idUnidad",       plaza.IdUnidad);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idUnidad", plaza.IdUnidad);
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idDepartamento", plaza.IdDepartamento);
-            OracleCommandHelpers.AddNullableIntParam(cmd, ":idSeccion",      plaza.IdSeccion);
-            OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea",         plaza.IdArea);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idSeccion", plaza.IdSeccion);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", plaza.IdArea);
             return cmd;
         }).ConfigureAwait(false);
     }
@@ -95,11 +95,11 @@ internal sealed class PlazaRepository : IPlazaRepository
             {
                 return new Plaza
                 {
-                    NumeroPlaza    = Convert.ToInt64(reader["NUMERO_PLAZA"], CultureInfo.InvariantCulture),
-                    IdUnidad       = reader["ID_UNIDAD"]       is DBNull ? null : Convert.ToInt32(reader["ID_UNIDAD"],       CultureInfo.InvariantCulture),
+                    NumeroPlaza = Convert.ToInt64(reader["NUMERO_PLAZA"], CultureInfo.InvariantCulture),
+                    IdUnidad = reader["ID_UNIDAD"] is DBNull ? null : Convert.ToInt32(reader["ID_UNIDAD"], CultureInfo.InvariantCulture),
                     IdDepartamento = reader["ID_DEPARTAMENTO"] is DBNull ? null : Convert.ToInt32(reader["ID_DEPARTAMENTO"], CultureInfo.InvariantCulture),
-                    IdSeccion      = reader["ID_SECCION"]      is DBNull ? null : Convert.ToInt32(reader["ID_SECCION"],      CultureInfo.InvariantCulture),
-                    IdArea         = reader["ID_AREA"]         is DBNull ? null : Convert.ToInt32(reader["ID_AREA"],         CultureInfo.InvariantCulture),
+                    IdSeccion = reader["ID_SECCION"] is DBNull ? null : Convert.ToInt32(reader["ID_SECCION"], CultureInfo.InvariantCulture),
+                    IdArea = reader["ID_AREA"] is DBNull ? null : Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
                 };
             }
             return null;
@@ -120,10 +120,10 @@ internal sealed class PlazaRepository : IPlazaRepository
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
             cmd.Parameters.Add(":numeroPlaza", OracleDbType.Int64).Value = numeroPlaza;
-            OracleCommandHelpers.AddNullableIntParam(cmd, ":idUnidad",       plaza.IdUnidad);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idUnidad", plaza.IdUnidad);
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idDepartamento", plaza.IdDepartamento);
-            OracleCommandHelpers.AddNullableIntParam(cmd, ":idSeccion",      plaza.IdSeccion);
-            OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea",         plaza.IdArea);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idSeccion", plaza.IdSeccion);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", plaza.IdArea);
             return cmd;
         }).ConfigureAwait(false);
 

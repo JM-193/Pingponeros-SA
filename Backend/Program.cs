@@ -1060,11 +1060,11 @@ internal static class Program
 
             var plaza = new Backend.Models.Plaza
             {
-                NumeroPlaza    = dto.NumeroPlaza,
-                IdUnidad       = dto.IdUnidad,
+                NumeroPlaza = dto.NumeroPlaza,
+                IdUnidad = dto.IdUnidad,
                 IdDepartamento = dto.IdDepartamento,
-                IdSeccion      = dto.IdSeccion,
-                IdArea         = dto.IdArea,
+                IdSeccion = dto.IdSeccion,
+                IdArea = dto.IdArea,
             };
 
             return await InsertarPlazaAsync(repo, plaza, isDev).ConfigureAwait(false);
@@ -1124,11 +1124,11 @@ internal static class Program
 
             var plaza = new Backend.Models.Plaza
             {
-                NumeroPlaza    = numeroPlaza,
-                IdUnidad       = dto.IdUnidad,
+                NumeroPlaza = numeroPlaza,
+                IdUnidad = dto.IdUnidad,
                 IdDepartamento = dto.IdDepartamento,
-                IdSeccion      = dto.IdSeccion,
-                IdArea         = dto.IdArea,
+                IdSeccion = dto.IdSeccion,
+                IdArea = dto.IdArea,
             };
 
             return await EjecutarActualizacionAsync(
