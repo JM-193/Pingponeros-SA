@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useNavigate } from 'react-router-dom'
 import { FaSearch } from 'react-icons/fa'
-import ConfirmModal from './ConfirmModal'
 import FormButton from './FormButton'
 import StatusMessage from './StatusMessage'
 import PageLayout from './PageLayout'
@@ -20,18 +19,61 @@ const defaultSearch = (item, term) => {
   )
 }
 
+const sortCollator = new Intl.Collator('es', {
+  numeric: true,
+  sensitivity: 'base',
+})
+
+const getColumnSortValue = (column, row) => {
+  if (column.sortValue) return column.sortValue(row)
+
+  const renderedValue = column.render?.(row)
+  if (['string', 'number', 'boolean'].includes(typeof renderedValue)) {
+    return renderedValue
+  }
+
+  return row[column.key]
+}
+
+const compareSortValues = (leftValue, rightValue) => {
+  if (typeof leftValue === 'number' && typeof rightValue === 'number') {
+    return leftValue - rightValue
+  }
+
+  return sortCollator.compare(String(leftValue), String(rightValue))
+}
+
+const sortRowsByColumn = (rows, columns, sortConfig) => {
+  if (!sortConfig?.key) return rows
+
+  const column = columns.find((currentColumn) => currentColumn.key === sortConfig.key)
+  if (!column) return rows
+
+  const direction = sortConfig.direction === 'desc' ? -1 : 1
+
+  return [...rows].sort((leftRow, rightRow) => {
+    const leftValue = getColumnSortValue(column, leftRow)
+    const rightValue = getColumnSortValue(column, rightRow)
+    const isLeftEmpty = leftValue === null || leftValue === undefined || leftValue === ''
+    const isRightEmpty = rightValue === null || rightValue === undefined || rightValue === ''
+
+    if (isLeftEmpty && isRightEmpty) return 0
+    if (isLeftEmpty) return 1
+    if (isRightEmpty) return -1
+
+    return compareSortValues(leftValue, rightValue) * direction
+  })
+}
+
 export default function EntityListPage({
   title,
   entityLabel,
-  entityLabelSingular,
   createPath,
   editPath,
   fetchItems,
-  deactivateItem,
   columns,
   matchesSearch,
   getRowId,
-  isRowInactive,
   searchPlaceholder = 'Ingrese el nombre o descripción',
   resultsPerPage = 10,
   backPath = '/home',
@@ -43,13 +85,13 @@ export default function EntityListPage({
   const [loading, setLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemToDeactivate, setItemToDeactivate] = useState(null)
+  const [sortConfig, setSortConfig] = useState(null)
 
   const matches = matchesSearch ?? defaultSearch
   const resolveRowId = useMemo(() => getRowId ?? ((item) => item.id), [getRowId])
-  const resolveInactive = useMemo(
-    () => isRowInactive ?? ((item) => item.estado === 0),
-    [isRowInactive],
+  const sortedResults = useMemo(
+    () => sortRowsByColumn(results, columns, sortConfig),
+    [results, columns, sortConfig]
   )
 
   useEffect(() => {
@@ -83,40 +125,24 @@ export default function EntityListPage({
   }
 
   const handleEdit = (item) => {
-    navigate(editPath(item))
-  }
-
-  const handleDeleteClick = (item) => {
-    setItemToDeactivate(item)
-  }
-
-  const closeDeleteModal = () => {
-    setItemToDeactivate(null)
-  }
-
-  const handleConfirmDeactivate = async () => {
-    if (!itemToDeactivate) return
-    try {
-      await deactivateItem(resolveRowId(itemToDeactivate))
-      const updated = allItems.map((item) =>
-        resolveRowId(item) === resolveRowId(itemToDeactivate)
-          ? { ...item, estado: 0 }
-          : item
-      )
-      setAllItems(updated)
-      setResults(updated.filter((item) => matches(item, searchTerm)))
-    } catch (err) {
-      setErrorMsg(err.message)
-    } finally {
-      closeDeleteModal()
+    if (editPath) {
+      navigate(editPath(item))
     }
   }
 
-  const totalPages = Math.ceil(results.length / resultsPerPage)
-  const hasResults = results.length > 0
+  const handleSort = (columnKey) => {
+    setSortConfig((currentSort) => ({
+      key: columnKey,
+      direction: currentSort?.key === columnKey && currentSort.direction === 'asc' ? 'desc' : 'asc',
+    }))
+    setCurrentPage(1)
+  }
+
+  const totalPages = Math.ceil(sortedResults.length / resultsPerPage)
+  const hasResults = sortedResults.length > 0
   const startIndex = hasResults ? (currentPage - 1) * resultsPerPage : 0
   const endIndex = hasResults ? startIndex + resultsPerPage : 0
-  const currentResults = hasResults ? results.slice(startIndex, endIndex) : []
+  const currentResults = hasResults ? sortedResults.slice(startIndex, endIndex) : []
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -136,15 +162,15 @@ export default function EntityListPage({
         <EntityResultsTable
           columns={columns}
           rows={currentResults}
-          onEdit={handleEdit}
-          onDelete={handleDeleteClick}
+          onEdit={editPath ? handleEdit : undefined}
           getRowId={resolveRowId}
-          isRowInactive={resolveInactive}
+          sortConfig={sortConfig}
+          onSort={handleSort}
         />
         {hasResults ? (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
             <p style={{ margin: 0, color: COLORS.textSubtle, fontSize: '14px' }}>
-              Mostrando {startIndex + 1} a {Math.min(endIndex, results.length)} de {results.length} resultados
+              Mostrando {startIndex + 1} a {Math.min(endIndex, sortedResults.length)} de {sortedResults.length} resultados
             </p>
             <PaginationControls
               currentPage={currentPage}
@@ -274,20 +300,6 @@ export default function EntityListPage({
           disabled={loading}
         />
       </div>
-
-      <ConfirmModal
-        isOpen={Boolean(itemToDeactivate)}
-        title="Confirmar desactivación"
-        message={
-          itemToDeactivate
-            ? `¿Seguro que deseas desactivar ${entityLabelSingular} "${itemToDeactivate.nombre}"?`
-            : ''
-        }
-        confirmLabel="Desactivar"
-        cancelLabel="Cancelar"
-        onConfirm={handleConfirmDeactivate}
-        onCancel={closeDeleteModal}
-      />
     </PageLayout>
   )
 }
@@ -295,30 +307,28 @@ export default function EntityListPage({
 EntityListPage.propTypes = {
   title: PropTypes.string.isRequired,
   entityLabel: PropTypes.string.isRequired,
-  entityLabelSingular: PropTypes.string.isRequired,
   createPath: PropTypes.string.isRequired,
-  editPath: PropTypes.func.isRequired,
+  editPath: PropTypes.func,
   fetchItems: PropTypes.func.isRequired,
-  deactivateItem: PropTypes.func.isRequired,
   columns: PropTypes.arrayOf(
     PropTypes.shape({
       key: PropTypes.string.isRequired,
       label: PropTypes.string.isRequired,
       render: PropTypes.func,
+      sortValue: PropTypes.func,
       align: PropTypes.oneOf(['left', 'center', 'right']),
       width: PropTypes.string,
     })
   ).isRequired,
   matchesSearch: PropTypes.func,
   getRowId: PropTypes.func,
-  isRowInactive: PropTypes.func,
   searchPlaceholder: PropTypes.string,
   resultsPerPage: PropTypes.number,
   backPath: PropTypes.string,
 }
 
 EntityListPage.defaultProps = {
+  editPath: null,
   matchesSearch: null,
   getRowId: null,
-  isRowInactive: null,
 }

@@ -1,7 +1,29 @@
 ﻿// Navbar.test.jsx
 import { render, screen, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
+import { afterEach, vi } from 'vitest'
 import Navbar from '../components/Navbar'
+
+function mockMatchMedia(matches) {
+  Object.defineProperty(globalThis, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation((query) => ({
+      matches,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  })
+}
+
+afterEach(() => {
+  mockMatchMedia(false)
+  vi.clearAllMocks()
+})
 
 describe('Navbar', () => {
   it('renderiza navegación principal', () => {
@@ -120,6 +142,40 @@ describe('Navbar', () => {
     fireEvent.click(cerrarBtn)
 
     expect(sessionStorage.getItem('pingponeros_session')).toBeNull()
+  })
+
+  it('muestra hamburguesa y mantiene el menú principal cerrado en móvil', () => {
+    mockMatchMedia(true)
+    const { container } = render(
+      <BrowserRouter>
+        <Navbar />
+      </BrowserRouter>,
+    )
+
+    const menuButton = screen.getByRole('button', { name: 'Abrir menú principal' })
+    const mainMenu = container.querySelector('#main-navigation-menu')
+
+    expect(menuButton).toHaveAttribute('aria-expanded', 'false')
+    expect(mainMenu).toHaveStyle({ display: 'none' })
+
+    fireEvent.click(menuButton)
+
+    expect(screen.getByRole('button', { name: 'Cerrar menú principal' })).toHaveAttribute('aria-expanded', 'true')
+    expect(mainMenu).toHaveStyle({ display: 'flex' })
+  })
+
+  it('cierra el menú móvil al navegar', () => {
+    mockMatchMedia(true)
+    render(
+      <BrowserRouter>
+        <Navbar />
+      </BrowserRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir menú principal' }))
+    fireEvent.click(screen.getByText('Página Principal'))
+
+    expect(screen.getByRole('button', { name: 'Abrir menú principal' })).toHaveAttribute('aria-expanded', 'false')
   })
 })
 

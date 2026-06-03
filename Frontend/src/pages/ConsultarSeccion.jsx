@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import EntityListPage from '../components/EntityListPage'
-import { obtenerSecciones, eliminarSeccion } from '../services/seccionService'
+import { obtenerSecciones } from '../services/seccionService'
 import { obtenerAreas } from '../services/areaService'
 import { buildNameMap, formatStatusLabel, resolveOptionValueKey } from '../utils/organizationOptions'
 
@@ -27,22 +27,26 @@ export default function ConsultarSeccion() {
       key: 'nombre',
       label: 'Nombre',
       render: (seccion) => seccion.nombre,
+      width: '20%',
     },
     {
       key: 'descripcion',
       label: 'Descripción',
       render: (seccion) => seccion.descripcion,
+      width: '40%',
     },
     {
       key: 'areaLabel',
       label: 'Área',
       render: (seccion) => seccion.areaLabel,
+      width: '20%',
     },
     {
       key: 'estado',
       label: 'Estado',
       align: 'center',
       render: (seccion) => formatStatusLabel(seccion.estado),
+      width: '10%',
     },
   ]
 
@@ -60,11 +64,9 @@ export default function ConsultarSeccion() {
     <EntityListPage
       title="Secciones"
       entityLabel="secciones"
-      entityLabelSingular="la sección"
       createPath="/organizacion/secciones/crear"
       editPath={(seccion) => `/organizacion/secciones/editar/${encodeURIComponent(seccion.nombre)}`}
       fetchItems={fetchItems}
-      deactivateItem={eliminarSeccion}
       columns={columns}
       matchesSearch={matchesSearch}
       getRowId={(seccion) => seccion.id ?? seccion.idSeccion}

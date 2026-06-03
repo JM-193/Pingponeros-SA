@@ -1,5 +1,5 @@
 // ConsultarDepartamento.test.jsx
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import ConsultarDepartamento from '../pages/ConsultarDepartamento'
 import * as departamentoService from '../services/departamentoService'
@@ -40,5 +40,49 @@ describe('ConsultarDepartamento Page', () => {
     )
 
     expect(departamentoService.obtenerDepartamentos).toHaveBeenCalled()
+  })
+
+  it('filtra departamentos por nombre en el buscador', async () => {
+    render(
+      <BrowserRouter>
+        <ConsultarDepartamento />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Compras')).toBeInTheDocument()
+    })
+
+    const searchInput = document.querySelector('input[id="search"]')
+    fireEvent.change(searchInput, { target: { value: 'Compras' } })
+
+    const searchForm = document.querySelector('form')
+    fireEvent.submit(searchForm)
+
+    await waitFor(() => {
+      expect(searchInput.value).toBe('Compras')
+    })
+  })
+
+  it('filtra departamentos por área en el buscador', async () => {
+    render(
+      <BrowserRouter>
+        <ConsultarDepartamento />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Compras')).toBeInTheDocument()
+    })
+
+    const searchInput = document.querySelector('input[id="search"]')
+    fireEvent.change(searchInput, { target: { value: 'Central' } })
+
+    const searchForm = document.querySelector('form')
+    fireEvent.submit(searchForm)
+
+    await waitFor(() => {
+      expect(searchInput.value).toBe('Central')
+    })
   })
 })

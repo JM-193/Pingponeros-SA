@@ -1,5 +1,5 @@
 // ConsultarUnidad.test.jsx
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import ConsultarUnidad from '../pages/ConsultarUnidad'
 import * as unidadService from '../services/unidadService'
@@ -9,7 +9,6 @@ import * as seccionService from '../services/seccionService'
 
 vi.mock('../services/unidadService', () => ({
   obtenerUnidades: vi.fn(),
-  eliminarUnidad: vi.fn(),
 }))
 vi.mock('../services/areaService', () => ({
   obtenerAreas: vi.fn(),
@@ -64,5 +63,87 @@ describe('ConsultarUnidad Page', () => {
     )
 
     expect(unidadService.obtenerUnidades).toHaveBeenCalled()
+  })
+
+  it('filtra unidades por nombre en el buscador', async () => {
+    render(
+      <BrowserRouter>
+        <ConsultarUnidad />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Unidad Técnica')).toBeInTheDocument()
+    })
+
+    const searchInput = document.querySelector('input[id="search"]')
+    fireEvent.change(searchInput, { target: { value: 'Técnica' } })
+
+    const searchForm = document.querySelector('form')
+    fireEvent.submit(searchForm)
+
+    await waitFor(() => {
+      expect(searchInput.value).toBe('Técnica')
+    })
+  })
+
+  it('filtra unidades por área en el buscador', async () => {
+    render(
+      <BrowserRouter>
+        <ConsultarUnidad />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Unidad Técnica')).toBeInTheDocument()
+    })
+
+    const searchInput = document.querySelector('input[id="search"]')
+    fireEvent.change(searchInput, { target: { value: 'Administración' } })
+
+    const searchForm = document.querySelector('form')
+    fireEvent.submit(searchForm)
+
+    await waitFor(() => {
+      expect(searchInput.value).toBe('Administración')
+    })
+  })
+
+  it('muestra dependencia de departamento correctamente', async () => {
+    render(
+      <BrowserRouter>
+        <ConsultarUnidad />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Departamento de Compras')).toBeInTheDocument()
+    }, { timeout: 3000 })
+  })
+
+  it('muestra dependencia de sección cuando la unidad tiene idSeccion', async () => {
+    unidadService.obtenerUnidades.mockResolvedValue([
+      {
+        id: 31,
+        nombre: 'Unidad Logística',
+        descripcion: 'Unidad de logística',
+        idArea: 1,
+        idSeccion: 1,
+        estado: 1,
+      },
+    ])
+    seccionService.obtenerSecciones.mockResolvedValue([
+      { id: 1, nombre: 'Sección A', descripcion: 'Sección' },
+    ])
+
+    render(
+      <BrowserRouter>
+        <ConsultarUnidad />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Sección de Sección A')).toBeInTheDocument()
+    })
   })
 })

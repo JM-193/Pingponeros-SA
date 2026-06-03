@@ -25,7 +25,7 @@ describe('PasswordInput', () => {
   it('muestra asterisco cuando required es true', () => {
     render(<PasswordInput {...defaultProps} required />)
 
-    expect(screen.getByText('Contraseña *')).toBeInTheDocument()
+    expect(screen.getByText('*')).toBeInTheDocument()
   })
 
   it('no muestra asterisco cuando required es false', () => {

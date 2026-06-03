@@ -23,6 +23,7 @@ export default function OrganizationEntityFormPage({
         onSubmit={onSubmit}
         title={title}
         subtitle={subtitle}
+        requiredNote
       >
         {children}
 

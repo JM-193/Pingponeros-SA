@@ -32,6 +32,7 @@ internal static class Program
         MapDepartamentoRoutes(app, isDev);
         MapSeccionRoutes(app, isDev);
         MapUnidadRoutes(app, isDev);
+        MapPlazaRoutes(app, isDev);
         MapAuth(app, isDev);
 
         app.Run();
@@ -66,6 +67,8 @@ internal static class Program
             new SeccionRepository(sp.GetRequiredService<IQueryExecutor>()));
         builder.Services.AddScoped<IUnidadRepository>(sp =>
             new UnidadRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<IPlazaRepository>(sp =>
+            new PlazaRepository(sp.GetRequiredService<IQueryExecutor>()));
         builder.Services.AddScoped<IEmailService, EmailService>();
         builder.Services.AddOpenApi();
         builder.Services.AddCors(options =>
@@ -219,6 +222,10 @@ internal static class Program
     [SuppressMessage("Globalization", "CA1308:NormalizeStringsToUppercase",
         Justification = "Los nombres de entidades organizacionales se normalizan a minúsculas por requisito de negocio.")]
     private static string NormalizarNombre(string nombre) => nombre.Trim().ToLowerInvariant();
+
+    [SuppressMessage("Globalization", "CA1308:NormalizeStringsToUppercase",
+        Justification = "Los correos se normalizan a minúsculas por requisito de negocio.")]
+    private static string NormalizarCorreo(string correo) => correo.Trim().ToLowerInvariant();
 
     private static async Task<IResult> CrearUsuarioAsync(
         IUsuarioRepository repo,
@@ -1003,8 +1010,141 @@ internal static class Program
     }
 
     // ---------------------------------------------------------------- //
+    // Rutas de Plazas                                                  //
+    // ---------------------------------------------------------------- //
+    private static void MapPlazaRoutes(WebApplication app, bool isDev)
+    {
+        var plazas = app.MapGroup("/plazas");
+
+        MapPlazasGetAll(plazas);
+        MapPlazasGetByNumero(plazas);
+        MapPlazasCreate(plazas, isDev);
+        MapPlazasUpdate(plazas, isDev);
+    }
+
+    private static void MapPlazasGetAll(RouteGroupBuilder plazas)
+    {
+        // GET /plazas — Lista todas las plazas
+        plazas.MapGet("/", async (IPlazaRepository repo) =>
+        {
+            try
+            {
+                var lista = await repo.ObtenerTodasAsync().ConfigureAwait(false);
+                return Results.Ok(lista);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+    }
+
+    private static void MapPlazasCreate(RouteGroupBuilder plazas, bool isDev)
+    {
+        // POST /plazas — Crea una nueva plaza
+        plazas.MapPost("/", async (CrearPlazaDto dto, IPlazaRepository repo) =>
+        {
+            if (dto.NumeroPlaza <= 0)
+                return Results.BadRequest(new { mensaje = "El número de plaza debe ser un entero positivo." });
+
+            try
+            {
+                var existe = await repo.ExisteNumeroPlazaAsync(dto.NumeroPlaza).ConfigureAwait(false);
+                if (existe)
+                    return Results.Conflict(new { mensaje = $"Ya existe una plaza con el número '{dto.NumeroPlaza}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+
+            var plaza = new Backend.Models.Plaza
+            {
+                NumeroPlaza = dto.NumeroPlaza,
+                IdUnidad = dto.IdUnidad,
+                IdDepartamento = dto.IdDepartamento,
+                IdSeccion = dto.IdSeccion,
+                IdArea = dto.IdArea,
+            };
+
+            return await InsertarPlazaAsync(repo, plaza, isDev).ConfigureAwait(false);
+        });
+    }
+
+    private static async Task<IResult> InsertarPlazaAsync(IPlazaRepository repo, Backend.Models.Plaza plaza, bool isDev)
+    {
+        try
+        {
+            await repo.InsertarAsync(plaza).ConfigureAwait(false);
+            return Results.Created($"/plazas/{plaza.NumeroPlaza}", new { mensaje = $"Plaza '{plaza.NumeroPlaza}' creada correctamente." });
+        }
+        catch (OracleException ex)
+        {
+            var msg = isDev
+                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
+                : TraducirErrorOracle(ex.Number);
+            return Results.Json(new { mensaje = msg }, statusCode: 500);
+        }
+    }
+
+    private static void MapPlazasGetByNumero(RouteGroupBuilder plazas)
+    {
+        // GET /plazas/{numeroPlaza} — Obtiene una plaza por número
+        plazas.MapGet("/{numeroPlaza:long}", async (long numeroPlaza, IPlazaRepository repo) =>
+        {
+            try
+            {
+                var plaza = await repo.ObtenerPorNumeroAsync(numeroPlaza).ConfigureAwait(false);
+                return plaza is null
+                    ? Results.NotFound(new { mensaje = $"No se encontró la plaza '{numeroPlaza}'." })
+                    : Results.Ok(plaza);
+            }
+            catch (OracleException ex)
+            {
+                return Results.Problem(detail: ex.Message, statusCode: 500);
+            }
+        });
+    }
+
+    private static void MapPlazasUpdate(RouteGroupBuilder plazas, bool isDev)
+    {
+        // PUT /plazas/{numeroPlaza} — Actualiza las asignaciones de una plaza existente
+        plazas.MapPut("/{numeroPlaza:long}", async (long numeroPlaza, CrearPlazaDto dto, IPlazaRepository repo) =>
+        {
+            try
+            {
+                var existe = await repo.ExisteNumeroPlazaAsync(numeroPlaza).ConfigureAwait(false);
+                if (!existe)
+                    return Results.NotFound(new { mensaje = $"No se encontró la plaza '{numeroPlaza}'." });
+            }
+            catch (OracleException ex)
+            {
+                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            }
+
+            var plaza = new Backend.Models.Plaza
+            {
+                NumeroPlaza = numeroPlaza,
+                IdUnidad = dto.IdUnidad,
+                IdDepartamento = dto.IdDepartamento,
+                IdSeccion = dto.IdSeccion,
+                IdArea = dto.IdArea,
+            };
+
+            return await EjecutarActualizacionAsync(
+                () => repo.ActualizarAsync(numeroPlaza, plaza),
+                $"Plaza '{numeroPlaza}' actualizada correctamente.",
+                $"No se encontró la plaza '{numeroPlaza}'.",
+                isDev).ConfigureAwait(false);
+        });
+    }
+
+    // ---------------------------------------------------------------- //
     // Auth                                                              //
     // ---------------------------------------------------------------- //
+    private const string MensajeContrasenaTemporalExpirada =
+        "La contraseña temporal ha expirado. Contacte al equipo de soporte para recuperar el acceso.";
+
     private static void MapAuth(WebApplication app, bool isDev)
     {
         app.MapPost("/auth/login", async (LoginDto dto, IUsuarioRepository repo) =>
@@ -1023,26 +1163,42 @@ internal static class Program
             string.IsNullOrWhiteSpace(dto.Contrasena))
             return Results.BadRequest(new { mensaje = "Correo y contraseña son obligatorios." });
 
+        var correo = NormalizarCorreo(dto.CorreoInstitucional);
+
         try
         {
-            var hash = await repo.ObtenerHashMasRecienteAsync(dto.CorreoInstitucional.Trim())
-                                 .ConfigureAwait(false);
+            var contrasena = await repo.ObtenerContrasenaMasRecienteAsync(correo)
+                                       .ConfigureAwait(false);
 
-            if (hash is null || !BCrypt.Net.BCrypt.Verify(dto.Contrasena, hash))
+            if (contrasena is null || !BCrypt.Net.BCrypt.Verify(dto.Contrasena, contrasena.Hash))
                 return Results.Json(new { mensaje = "Correo o contraseña incorrectos." }, statusCode: 401);
 
-            var usuario = await repo.ObtenerPorCorreoAsync(dto.CorreoInstitucional.Trim())
-                                    .ConfigureAwait(false);
+            var usuario = await repo.ObtenerPorCorreoAsync(correo).ConfigureAwait(false);
+
+            if (usuario is null)
+                return Results.Json(new { mensaje = "Correo o contraseña incorrectos." }, statusCode: 401);
+
+            if (ContrasenaTemporalExpirada(contrasena))
+            {
+                await repo.DesactivarPorContrasenaTemporalExpiradaAsync(usuario.CorreoInstitucional)
+                          .ConfigureAwait(false);
+                return RespuestaContrasenaTemporalExpirada();
+            }
+
+            if (usuario.Estado != 1)
+                return Results.Json(new { mensaje = "La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
 
             return Results.Ok(new
             {
-                correoInstitucional = usuario!.CorreoInstitucional,
+                correoInstitucional = usuario.CorreoInstitucional,
                 primerNombre = usuario.PrimerNombre,
                 segundoNombre = usuario.SegundoNombre,
                 primerApellido = usuario.PrimerApellido,
                 segundoApellido = usuario.SegundoApellido,
                 rol = usuario.Rol,
                 estado = usuario.Estado,
+                contrasenaTemporal = contrasena.EsTemporal,
+                fechaExpiracionContrasena = contrasena.FechaExpiracion,
             });
         }
         catch (OracleException ex)
@@ -1063,19 +1219,33 @@ internal static class Program
         if (string.IsNullOrWhiteSpace(correoInstitucional))
             return Results.BadRequest(new { mensaje = "El correo institucional es obligatorio." });
 
+        var correo = NormalizarCorreo(correoInstitucional);
+
         try
         {
-            var usuario = await repo.ObtenerPorCorreoAsync(correoInstitucional.Trim())
-                                    .ConfigureAwait(false);
+            var usuario = await repo.ObtenerPorCorreoAsync(correo).ConfigureAwait(false);
 
             if (usuario is null)
                 // No revelar si el correo existe o no por seguridad
                 return Results.Ok(new { mensaje = "Si el correo existe en nuestro sistema, recibirás una nueva contraseña temporal." });
 
+            var contrasenaActual = await repo.ObtenerContrasenaMasRecienteAsync(usuario.CorreoInstitucional)
+                                             .ConfigureAwait(false);
+
+            if (contrasenaActual is not null && ContrasenaTemporalExpirada(contrasenaActual))
+            {
+                await repo.DesactivarPorContrasenaTemporalExpiradaAsync(usuario.CorreoInstitucional)
+                          .ConfigureAwait(false);
+                return RespuestaContrasenaTemporalExpirada();
+            }
+
+            if (usuario.Estado != 1)
+                return Results.Json(new { mensaje = "La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
+
             var contrasenaTemporal = EmailTemplateHelper.GenerarContrasenaTemporal();
             var hash = BCrypt.Net.BCrypt.HashPassword(contrasenaTemporal);
 
-            await repo.InsertarContrase\u00f1aAsync(usuario.CorreoInstitucional, hash).ConfigureAwait(false);
+            await repo.InsertarContraseñaAsync(usuario.CorreoInstitucional, hash).ConfigureAwait(false);
 
             // Enviar correo con contraseña temporal (en background, sin esperar)
             EnviarCorreoRecuperacion(emailService, usuario, contrasenaTemporal);
@@ -1127,6 +1297,18 @@ internal static class Program
         return error is not null ? Results.BadRequest(new { mensaje = error }) : null;
     }
 
+    private static bool ContrasenaTemporalExpirada(Backend.Models.Contrasena contrasena) =>
+        contrasena.EsTemporal && contrasena.FechaExpiracion <= DateTime.Now;
+
+    private static IResult RespuestaContrasenaTemporalExpirada() =>
+        Results.Json(
+            new
+            {
+                codigo = "TEMP_PASSWORD_EXPIRED",
+                mensaje = MensajeContrasenaTemporalExpirada,
+            },
+            statusCode: 403);
+
     private static async Task<IResult> HandleCambiarContrasena(
         CambiarContraseñaDto dto,
         IUsuarioRepository repo,
@@ -1149,19 +1331,30 @@ internal static class Program
         if (validacionContrasena is not null)
             return validacionContrasena;
 
+        var correo = NormalizarCorreo(dto.CorreoInstitucional);
+
         try
         {
-            var usuario = await repo.ObtenerPorCorreoAsync(dto.CorreoInstitucional.Trim())
-                                    .ConfigureAwait(false);
+            var usuario = await repo.ObtenerPorCorreoAsync(correo).ConfigureAwait(false);
 
             if (usuario is null)
                 return Results.NotFound(new { mensaje = "El usuario no fue encontrado." });
 
-            var hashActual = await repo.ObtenerHashMasRecienteAsync(dto.CorreoInstitucional.Trim())
-                                       .ConfigureAwait(false);
+            var contrasenaActual = await repo.ObtenerContrasenaMasRecienteAsync(correo)
+                                             .ConfigureAwait(false);
 
-            if (hashActual is null || !BCrypt.Net.BCrypt.Verify(dto.ContraseñaActual, hashActual))
+            if (contrasenaActual is null || !BCrypt.Net.BCrypt.Verify(dto.ContraseñaActual, contrasenaActual.Hash))
                 return Results.Json(new { mensaje = "La contraseña actual es incorrecta." }, statusCode: 401);
+
+            if (ContrasenaTemporalExpirada(contrasenaActual))
+            {
+                await repo.DesactivarPorContrasenaTemporalExpiradaAsync(usuario.CorreoInstitucional)
+                          .ConfigureAwait(false);
+                return RespuestaContrasenaTemporalExpirada();
+            }
+
+            if (usuario.Estado != 1)
+                return Results.Json(new { mensaje = "La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
 
             var hashNueva = BCrypt.Net.BCrypt.HashPassword(dto.ContraseñaNueva);
             await repo.CambiarContraseñaAsync(usuario.CorreoInstitucional, hashNueva).ConfigureAwait(false);
@@ -1204,5 +1397,3 @@ internal static class Program
 
 
 }
-
-

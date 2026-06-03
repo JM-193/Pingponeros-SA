@@ -1,5 +1,5 @@
 import EntityListPage from '../components/EntityListPage'
-import { obtenerAreas, eliminarArea } from '../services/areaService'
+import { obtenerAreas } from '../services/areaService'
 import { formatStatusLabel } from '../utils/organizationOptions'
 
 export default function ConsultarArea() {
@@ -8,17 +8,20 @@ export default function ConsultarArea() {
       key: 'nombre',
       label: 'Nombre',
       render: (area) => area.nombre,
+      width: '40%',
     },
     {
       key: 'descripcion',
       label: 'Descripción',
       render: (area) => area.descripcion,
+      width: '40%',
     },
     {
       key: 'estado',
       label: 'Estado',
       align: 'center',
       render: (area) => formatStatusLabel(area.estado),
+      width: '10%',
     },
   ]
 
@@ -35,11 +38,9 @@ export default function ConsultarArea() {
     <EntityListPage
       title="Áreas"
       entityLabel="áreas"
-      entityLabelSingular="el área"
       createPath="/organizacion/areas/crear"
       editPath={(area) => `/organizacion/areas/editar/${encodeURIComponent(area.nombre)}`}
       fetchItems={obtenerAreas}
-      deactivateItem={eliminarArea}
       columns={columns}
       matchesSearch={matchesSearch}
       getRowId={(area) => area.id}

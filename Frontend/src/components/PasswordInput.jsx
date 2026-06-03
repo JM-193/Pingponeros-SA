@@ -29,7 +29,7 @@ function PasswordInput({
         }}
       >
         {label}
-        {required && ' *'}
+        {required && <span style={{ color: COLORS.danger, marginLeft: '2px' }} aria-hidden="true">*</span>}
       </label>
       <div style={{ position: 'relative' }}>
         <input

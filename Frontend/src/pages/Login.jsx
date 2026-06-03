@@ -12,6 +12,16 @@ import { COLORS } from '../constants/colors'
    Fondo     #e6e6e6
    */
 
+const TEMP_PASSWORD_EXPIRED_MESSAGE =
+  'La contraseña temporal ha expirado. Contacte al equipo de soporte para recuperar el acceso.'
+
+function temporalPasswordExpired(usuario) {
+  if (!usuario?.contrasenaTemporal || !usuario?.fechaExpiracionContrasena) return false
+
+  const expirationTime = new Date(usuario.fechaExpiracionContrasena).getTime()
+  return Number.isFinite(expirationTime) && expirationTime <= Date.now()
+}
+
 export default function Login() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -45,6 +55,14 @@ export default function Login() {
 
     try {
       const usuario = await login(email.trim().toLowerCase(), password)
+      if (usuario.estado !== undefined && usuario.estado !== 1) {
+        setServerError('La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte.')
+        return
+      }
+      if (temporalPasswordExpired(usuario)) {
+        setServerError(TEMP_PASSWORD_EXPIRED_MESSAGE)
+        return
+      }
       guardarSesion(usuario)
       navigate('/home')
     } catch (err) {

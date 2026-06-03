@@ -26,7 +26,7 @@ function FormInput({
         }}
       >
         {label}
-        {required && ' *'}
+        {required && <span style={{ color: COLORS.danger, marginLeft: '2px' }} aria-hidden="true">*</span>}
       </label>
       <input
         type={type}

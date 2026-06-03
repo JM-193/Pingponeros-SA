@@ -15,7 +15,7 @@ describe('FormInput', () => {
       />,
     )
 
-    expect(screen.getByText('Nombre *')).toBeInTheDocument()
+    expect(screen.getByText('*')).toBeInTheDocument()
   })
 
   it('deshabilita el input cuando disabled es true', () => {

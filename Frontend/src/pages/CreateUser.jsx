@@ -24,19 +24,17 @@ export default function CreateUser() {
   })
   const [loading, setLoading] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
-  const [tempPassword, setTempPassword] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
 
-  const NAME_FIELDS = ['firstName', 'secondName', 'firstName_surname', 'secondName_surname']
+  const NAME_FIELDS = new Set(['firstName', 'secondName', 'firstName_surname', 'secondName_surname'])
   const NAME_REGEX = /[^A-Za-záéíóúÁÉÍÓÚñÑüÜ]/g
 
   // Manejar cambios en los campos
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setSuccessMsg('')
-    setTempPassword('')
     setErrorMsg('')
-    const sanitizedValue = NAME_FIELDS.includes(name) ? value.replace(NAME_REGEX, '') : value
+    const sanitizedValue = NAME_FIELDS.has(name) ? value.replace(NAME_REGEX, '') : value
     setFormData((prev) => ({
       ...prev,
       [name]: sanitizedValue,
@@ -48,7 +46,6 @@ export default function CreateUser() {
     e.preventDefault()
     setLoading(true)
     setSuccessMsg('')
-    setTempPassword('')
     setErrorMsg('')
 
     // Validaciones
@@ -73,7 +70,6 @@ export default function CreateUser() {
         rol:                 Number.parseInt(formData.role, 10),
       })
       setSuccessMsg(data.mensaje ?? 'Usuario creado correctamente.')
-      setTempPassword(data.contrasenaTemporal ?? '')
       handleReset()
     } catch (err) {
       setErrorMsg(err.message)
@@ -116,6 +112,7 @@ export default function CreateUser() {
           onSubmit={handleSubmit}
           title="Crear Usuario"
           subtitle="Formulario de Registro"
+          requiredNote
         >
           {/* Fila 1: Primer nombre y Segundo nombre */}
           <FormRow columns={2}>
@@ -178,33 +175,25 @@ export default function CreateUser() {
               { value: '0', label: 'Funcionario' },
               { value: '1', label: 'Administrador' },
             ]}
-            defaultLabel="Seleccione un rol"
+            defaultLabel="-- Sin asignación --"
             required
           />
 
           {/* Mensajes de feedback */}
           {successMsg && (
-            <StatusMessage variant="success" message={successMsg}>
-              {tempPassword && (
-                <div style={{ padding: '10px 14px', backgroundColor: COLORS.white, borderRadius: '4px', border: '1px dashed #66bb6a' }}>
-                  <span style={{ fontWeight: 600 }}>Contraseña temporal: </span>
-                  <code style={{ fontSize: '15px', letterSpacing: '1px', color: COLORS.successStrong }}>{tempPassword}</code>
-                  <div style={{ marginTop: '4px', fontSize: '12px', color: '#388e3c' }}>Válida por 48 horas. Compártala con el usuario de forma segura.</div>
-                </div>
-              )}
-            </StatusMessage>
+            <StatusMessage variant="success" message={successMsg} />
           )}
           {errorMsg && (
             <StatusMessage variant="error" message={errorMsg} />
           )}
 
           {/* Botones */}
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '16px' }}>
             <FormButton
               label="Regresar"
               type="button"
               variant="secondary"
-              onClick={() => navigate('/home')}
+              onClick={() => navigate('/usuarios/consultar')}
               disabled={loading}
             />
             <FormButton
