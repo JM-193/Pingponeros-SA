@@ -4,7 +4,7 @@ import {
   resolveUnidadDependencyChange,
 } from '../utils/organizationHierarchy'
 
-export function useUnidadAreaFilters({
+export function useUnitAreaFilters({
   formData,
   setFormData,
   parentType,

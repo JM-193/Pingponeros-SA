@@ -11,7 +11,7 @@ import { obtenerSecciones } from '../services/sectionService'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
 import { COLORS } from '../constants/colors'
 import { useOrganizationEntityForm } from '../hooks/useOrganizationEntityForm'
-import { useUnidadAreaFilters } from '../hooks/useUnidadAreaFilters'
+import { useUnitAreaFilters } from '../hooks/useUnitAreaFilters'
 
 const parentTypeOptions = [
   { value: 'departamento', label: 'Departamento' },
@@ -135,7 +135,7 @@ export default function EditUnits() {
   })
 
   const { filteredDepartmentOptions, filteredSectionOptions, handleFieldChange, handleParentTypeChange, conflictError } =
-    useUnidadAreaFilters({
+    useUnitAreaFilters({
       formData,
       setFormData,
       parentType,
