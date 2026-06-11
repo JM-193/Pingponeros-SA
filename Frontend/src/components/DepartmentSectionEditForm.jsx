@@ -10,20 +10,20 @@ import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizatio
 import { useOrganizationEntityForm } from '../hooks/useOrganizationEntityForm'
 import {
   DEPARTAMENTO_SECCION_INITIAL_FORM_DATA,
-  getDepartamentoSeccionConfig,
+  getDepartmentSectionConfig,
 } from '../utils/departmentSectionFormConfig'
 import { COLORS } from '../constants/colors'
 
 const subtitle = 'Formulario de Actualización'
 
-export default function DepartamentoSeccionEditForm({
+export default function DepartmentSectionEditForm({
   entityType,
   fetchByName,
   updateEntity,
 }) {
   const navigate = useNavigate()
   const { nombre } = useParams()
-  const config = getDepartamentoSeccionConfig(entityType)
+  const config = getDepartmentSectionConfig(entityType)
   const [areaOptions, setAreaOptions] = useState([])
   const [nombreOriginal, setNombreOriginal] = useState('')
 
@@ -141,7 +141,7 @@ export default function DepartamentoSeccionEditForm({
   )
 }
 
-DepartamentoSeccionEditForm.propTypes = {
+DepartmentSectionEditForm.propTypes = {
   entityType: PropTypes.oneOf(['departamento', 'seccion']).isRequired,
   fetchByName: PropTypes.func.isRequired,
   updateEntity: PropTypes.func.isRequired,

@@ -1,7 +1,7 @@
-// DepartamentoSeccionEditForm.test.jsx
+// DepartmentSectionEditForm.test.jsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
-import DepartamentoSeccionEditForm from '../components/DepartamentoSeccionEditForm'
+import DepartmentSectionEditForm from '../components/DepartmentSectionEditForm'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/areaService')
@@ -29,7 +29,7 @@ const renderDepartamentoWithRoute = (nombre, fetchByName, updateEntity) =>
         <Route
           path="/organizacion/departamentos/editar/:nombre"
           element={
-            <DepartamentoSeccionEditForm
+            <DepartmentSectionEditForm
               entityType="departamento"
               fetchByName={fetchByName}
               updateEntity={updateEntity}
@@ -48,7 +48,7 @@ const renderSeccionWithRoute = (nombre, fetchByName, updateEntity) =>
         <Route
           path="/organizacion/secciones/editar/:nombre"
           element={
-            <DepartamentoSeccionEditForm
+            <DepartmentSectionEditForm
               entityType="seccion"
               fetchByName={fetchByName}
               updateEntity={updateEntity}
@@ -60,7 +60,7 @@ const renderSeccionWithRoute = (nombre, fetchByName, updateEntity) =>
     </MemoryRouter>,
   )
 
-describe('DepartamentoSeccionEditForm', () => {
+describe('DepartmentSectionEditForm', () => {
   beforeEach(() => {
     vi.resetAllMocks()
   })
@@ -68,7 +68,7 @@ describe('DepartamentoSeccionEditForm', () => {
   it('muestra estado de carga para departamento sin nombre en ruta', () => {
     render(
       <BrowserRouter>
-        <DepartamentoSeccionEditForm
+        <DepartmentSectionEditForm
           entityType="departamento"
           fetchByName={vi.fn()}
           updateEntity={vi.fn()}
@@ -82,7 +82,7 @@ describe('DepartamentoSeccionEditForm', () => {
   it('muestra estado de carga para sección sin nombre en ruta', () => {
     render(
       <BrowserRouter>
-        <DepartamentoSeccionEditForm
+        <DepartmentSectionEditForm
           entityType="seccion"
           fetchByName={vi.fn()}
           updateEntity={vi.fn()}

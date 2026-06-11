@@ -38,7 +38,7 @@ const DEPARTAMENTO_SECCION_FORM_CONFIG = {
   },
 }
 
-export function getDepartamentoSeccionConfig(entityType) {
+export function getDepartmentSectionConfig(entityType) {
   const config = DEPARTAMENTO_SECCION_FORM_CONFIG[entityType]
   if (!config) {
     throw new Error(`Tipo de entidad no soportado: ${entityType}`)

@@ -9,16 +9,16 @@ import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizatio
 import { useOrganizationEntityForm } from '../hooks/useOrganizationEntityForm'
 import {
   DEPARTAMENTO_SECCION_INITIAL_FORM_DATA,
-  getDepartamentoSeccionConfig,
+  getDepartmentSectionConfig,
 } from '../utils/departmentSectionFormConfig'
 import { COLORS } from '../constants/colors'
 
 const loadingLabel = 'Cargando áreas...'
 const subtitle = 'Formulario de Registro'
 
-export default function DepartamentoSeccionCreateForm({ entityType, createEntity }) {
+export default function DepartmentSectionCreateForm({ entityType, createEntity }) {
   const navigate = useNavigate()
-  const config = getDepartamentoSeccionConfig(entityType)
+  const config = getDepartmentSectionConfig(entityType)
   const [areaOptions, setAreaOptions] = useState([])
 
   const loadAreas = useCallback(async () => {
@@ -104,7 +104,7 @@ export default function DepartamentoSeccionCreateForm({ entityType, createEntity
   )
 }
 
-DepartamentoSeccionCreateForm.propTypes = {
+DepartmentSectionCreateForm.propTypes = {
   entityType: PropTypes.oneOf(['departamento', 'seccion']).isRequired,
   createEntity: PropTypes.func.isRequired,
 }
