@@ -1,5 +1,5 @@
 import DepartamentoSeccionCreateForm from '../components/DepartamentoSeccionCreateForm'
-import { crearDepartamento } from '../services/departamentoService'
+import { crearDepartamento } from '../services/departmentService'
 
 export default function CreateDepartamento() {
   return (

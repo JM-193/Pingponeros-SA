@@ -4,13 +4,13 @@ import { BrowserRouter } from 'react-router-dom'
 import CreatePlaza from '../pages/CreatePlaza'
 import * as plazaService from '../services/plazaService'
 import * as unidadService from '../services/unidadService'
-import * as departamentoService from '../services/departamentoService'
+import * as departamentoService from '../services/departmentService'
 import * as seccionService from '../services/seccionService'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/plazaService')
 vi.mock('../services/unidadService')
-vi.mock('../services/departamentoService')
+vi.mock('../services/departmentService')
 vi.mock('../services/seccionService')
 vi.mock('../services/areaService')
 

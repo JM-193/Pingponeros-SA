@@ -4,12 +4,12 @@ import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
 import EditUnidad from '../pages/EditUnidad'
 import * as unidadService from '../services/unidadService'
 import * as areaService from '../services/areaService'
-import * as departamentoService from '../services/departamentoService'
+import * as departamentoService from '../services/departmentService'
 import * as seccionService from '../services/seccionService'
 
 vi.mock('../services/unidadService')
 vi.mock('../services/areaService')
-vi.mock('../services/departamentoService')
+vi.mock('../services/departmentService')
 vi.mock('../services/seccionService')
 
 const mockUnidad = {

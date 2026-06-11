@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import ConsultarUnidad from '../pages/ConsultarUnidad'
 import * as unidadService from '../services/unidadService'
 import * as areaService from '../services/areaService'
-import * as departamentoService from '../services/departamentoService'
+import * as departamentoService from '../services/departmentService'
 import * as seccionService from '../services/seccionService'
 
 vi.mock('../services/unidadService', () => ({
@@ -13,7 +13,7 @@ vi.mock('../services/unidadService', () => ({
 vi.mock('../services/areaService', () => ({
   obtenerAreas: vi.fn(),
 }))
-vi.mock('../services/departamentoService', () => ({
+vi.mock('../services/departmentService', () => ({
   obtenerDepartamentos: vi.fn(),
 }))
 vi.mock('../services/seccionService', () => ({

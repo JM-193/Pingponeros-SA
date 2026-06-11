@@ -2,10 +2,10 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import ConsultarDepartamento from '../pages/ConsultarDepartamento'
-import * as departamentoService from '../services/departamentoService'
+import * as departamentoService from '../services/departmentService'
 import * as areaService from '../services/areaService'
 
-vi.mock('../services/departamentoService')
+vi.mock('../services/departmentService')
 vi.mock('../services/areaService')
 
 describe('ConsultarDepartamento Page', () => {

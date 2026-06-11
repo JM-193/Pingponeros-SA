@@ -6,7 +6,7 @@ import {
   crearDepartamento,
   eliminarDepartamento,
   actualizarDepartamento,
-} from '../services/departamentoService'
+} from '../services/departmentService'
 
 describe('departamentoService', () => {
   const mockFetch = vi.fn()

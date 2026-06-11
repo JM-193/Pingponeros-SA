@@ -5,7 +5,7 @@ import OrganizationEntityFormFields from '../components/OrganizationEntityFormFi
 import PageLayout from '../components/PageLayout'
 import { crearUnidad } from '../services/unidadService'
 import { obtenerAreas } from '../services/areaService'
-import { obtenerDepartamentos } from '../services/departamentoService'
+import { obtenerDepartamentos } from '../services/departmentService'
 import { obtenerSecciones } from '../services/seccionService'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
 import { COLORS } from '../constants/colors'

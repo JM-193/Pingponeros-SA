@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import EntityListPage from '../components/EntityListPage'
 import { obtenerUnidades } from '../services/unidadService'
 import { obtenerAreas } from '../services/areaService'
-import { obtenerDepartamentos } from '../services/departamentoService'
+import { obtenerDepartamentos } from '../services/departmentService'
 import { obtenerSecciones } from '../services/seccionService'
 import { buildNameMap, formatStatusLabel, resolveOptionValueKey } from '../utils/organizationOptions'
 
