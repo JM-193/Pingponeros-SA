@@ -1,7 +1,7 @@
 // ConsultarUsuarios.jsx
 
 import EntityListPage from '../components/EntityListPage'
-import { obtenerUsuarios } from '../services/usuarioService'
+import { obtenerUsuarios } from '../services/userService'
 
 export default function ConsultarUsuarios() {
   const columns = [

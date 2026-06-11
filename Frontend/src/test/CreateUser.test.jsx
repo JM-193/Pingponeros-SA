@@ -2,9 +2,9 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import CreateUser from '../pages/CreateUser'
-import * as usuarioService from '../services/usuarioService'
+import * as userService from '../services/userService'
 
-vi.mock('../services/usuarioService')
+vi.mock('../services/userService')
 
 describe('CreateUser Page', () => {
   beforeEach(() => {
@@ -67,7 +67,7 @@ describe('CreateUser Page', () => {
       mensaje: 'Usuario creado exitosamente',
       contrasenaTemporal: 'TempPass123!',
     }
-    usuarioService.crearUsuario.mockResolvedValueOnce(mockResponse)
+    userService.crearUsuario.mockResolvedValueOnce(mockResponse)
 
     render(
       <BrowserRouter>
@@ -86,7 +86,7 @@ describe('CreateUser Page', () => {
       mensaje: 'Usuario creado correctamente.',
       contrasenaTemporal: 'TempPass123!',
     }
-    usuarioService.crearUsuario.mockResolvedValueOnce(mockResponse)
+    userService.crearUsuario.mockResolvedValueOnce(mockResponse)
 
     render(
       <BrowserRouter>
@@ -98,7 +98,7 @@ describe('CreateUser Page', () => {
   })
 
   it('muestra error cuando creación falla', async () => {
-    usuarioService.crearUsuario.mockRejectedValueOnce(
+    userService.crearUsuario.mockRejectedValueOnce(
       new Error('El correo ya existe'),
     )
 
@@ -139,7 +139,7 @@ describe('CreateUser Page', () => {
       mensaje: 'Usuario creado exitosamente',
       contrasenaTemporal: 'TempPass123!',
     }
-    usuarioService.crearUsuario.mockResolvedValueOnce(mockResponse)
+    userService.crearUsuario.mockResolvedValueOnce(mockResponse)
 
     const { container } = render(
       <BrowserRouter>
@@ -167,7 +167,7 @@ describe('CreateUser Page', () => {
   })
 
   it('muestra mensaje de éxito predeterminado cuando mensaje no viene en la respuesta', async () => {
-    usuarioService.crearUsuario.mockResolvedValueOnce({ id: 1 })
+    userService.crearUsuario.mockResolvedValueOnce({ id: 1 })
 
     const { container } = render(
       <BrowserRouter>
@@ -192,7 +192,7 @@ describe('CreateUser Page', () => {
   })
 
   it('muestra error del servicio al fallar la creación', async () => {
-    usuarioService.crearUsuario.mockRejectedValueOnce(new Error('El correo ya existe'))
+    userService.crearUsuario.mockRejectedValueOnce(new Error('El correo ya existe'))
 
     const { container } = render(
       <BrowserRouter>

@@ -2,9 +2,9 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import ConsultarUsuarios from '../pages/ConsultarUsuarios'
-import * as usuarioService from '../services/usuarioService'
+import * as userService from '../services/userService'
 
-vi.mock('../services/usuarioService')
+vi.mock('../services/userService')
 
 describe('ConsultarUsuarios Page', () => {
   const mockUsuarios = [
@@ -15,7 +15,7 @@ describe('ConsultarUsuarios Page', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    usuarioService.obtenerUsuarios.mockResolvedValue(mockUsuarios)
+    userService.obtenerUsuarios.mockResolvedValue(mockUsuarios)
   })
 
   it('carga y renderiza usuarios', async () => {
@@ -86,11 +86,11 @@ describe('ConsultarUsuarios Page', () => {
       </BrowserRouter>,
     )
 
-    expect(usuarioService.obtenerUsuarios).toHaveBeenCalled()
+    expect(userService.obtenerUsuarios).toHaveBeenCalled()
   })
 
   it('muestra mensaje cuando no hay resultados', async () => {
-    usuarioService.obtenerUsuarios.mockResolvedValue([])
+    userService.obtenerUsuarios.mockResolvedValue([])
 
     render(
       <BrowserRouter>

@@ -2,9 +2,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
 import EditUser from '../pages/EditUser'
-import * as usuarioService from '../services/usuarioService'
+import * as userService from '../services/userService'
 
-vi.mock('../services/usuarioService')
+vi.mock('../services/userService')
 
 const mockUser = {
   correoInstitucional: 'juan.perez@ucr.ac.cr',
@@ -63,7 +63,7 @@ describe('EditUser Page', () => {
   })
 
   it('carga y renderiza el formulario con los datos del usuario', async () => {
-    usuarioService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
 
     renderWithRoute('juan.perez@ucr.ac.cr')
 
@@ -79,8 +79,8 @@ describe('EditUser Page', () => {
   })
 
   it('actualiza usuario correctamente y redirige', async () => {
-    usuarioService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
-    usuarioService.actualizarUsuario.mockResolvedValueOnce({})
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    userService.actualizarUsuario.mockResolvedValueOnce({})
 
     renderWithRoute('juan.perez@ucr.ac.cr')
 
@@ -97,8 +97,8 @@ describe('EditUser Page', () => {
   })
 
   it('muestra error cuando la actualización falla', async () => {
-    usuarioService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
-    usuarioService.actualizarUsuario.mockRejectedValueOnce(new Error('Error al actualizar'))
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    userService.actualizarUsuario.mockRejectedValueOnce(new Error('Error al actualizar'))
 
     renderWithRoute('juan.perez@ucr.ac.cr')
 
@@ -115,7 +115,7 @@ describe('EditUser Page', () => {
   })
 
   it('muestra error cuando falla la carga del usuario', async () => {
-    usuarioService.obtenerUsuarioPorCorreo.mockRejectedValueOnce(new Error('Usuario no encontrado'))
+    userService.obtenerUsuarioPorCorreo.mockRejectedValueOnce(new Error('Usuario no encontrado'))
 
     renderWithRoute('no.existe@ucr.ac.cr')
 
@@ -125,7 +125,7 @@ describe('EditUser Page', () => {
   })
 
   it('cambia el estado del usuario con StateToggle', async () => {
-    usuarioService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
 
     renderWithRoute('juan.perez@ucr.ac.cr')
 
@@ -144,8 +144,8 @@ describe('EditUser Page', () => {
   })
 
   it('limpia mensajes de error al cambiar campos del formulario', async () => {
-    usuarioService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
-    usuarioService.actualizarUsuario.mockRejectedValueOnce(new Error('Error al actualizar'))
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    userService.actualizarUsuario.mockRejectedValueOnce(new Error('Error al actualizar'))
 
     renderWithRoute('juan.perez@ucr.ac.cr')
 

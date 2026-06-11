@@ -1,7 +1,7 @@
 // EditUser.jsx
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { obtenerUsuarioPorCorreo, actualizarUsuario } from '../services/usuarioService'
+import { obtenerUsuarioPorCorreo, actualizarUsuario } from '../services/userService'
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
