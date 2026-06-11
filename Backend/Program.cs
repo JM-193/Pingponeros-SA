@@ -138,7 +138,7 @@ internal static class Program
     private static void MapUsuariosCreate(RouteGroupBuilder usuarios, bool isDev)
     {
         // POST /usuarios — Crea un nuevo usuario con contraseña temporal
-        usuarios.MapPost("/", async (CrearUsuarioDto dto, IUserRepository repo, IEmailService emailService) =>
+        usuarios.MapPost("/", async (CreateUserDto dto, IUserRepository repo, IEmailService emailService) =>
         {
             var validationResult = ValidarCrearUsuario(dto);
             if (validationResult is not null)
@@ -162,7 +162,7 @@ internal static class Program
         new(@"^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$",
             RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
 
-    private static IResult? ValidarCrearUsuario(CrearUsuarioDto dto)
+    private static IResult? ValidarCrearUsuario(CreateUserDto dto)
     {
         if (dto.Rol is not (0 or 1))
             return Results.BadRequest(new { mensaje = "Rol inválido. Use 0 (Funcionario) o 1 (Administrador)." });
@@ -200,7 +200,7 @@ internal static class Program
 
     [SuppressMessage("Globalization", "CA1308:NormalizeStringsToUppercase",
         Justification = "Los correos y nombres se normalizan a minúsculas por requisito de negocio.")]
-    private static Backend.Models.User CrearUsuarioDesdeDto(CrearUsuarioDto dto)
+    private static Backend.Models.User CrearUsuarioDesdeDto(CreateUserDto dto)
     {
         // Función auxiliar para capitalizar (primera letra mayúscula, resto minúscula)
         static string Capitalizar(string? texto) =>
@@ -340,7 +340,7 @@ internal static class Program
     private static void MapAreasCreate(RouteGroupBuilder areas, bool isDev)
     {
         // POST /areas — Crea una nueva área
-        areas.MapPost("/", async (CrearAreaDto dto, IAreaRepository repo) =>
+        areas.MapPost("/", async (CreateAreaDto dto, IAreaRepository repo) =>
         {
             var validationResult = ValidarCrearArea(dto);
             if (validationResult is not null)
@@ -406,7 +406,7 @@ internal static class Program
     private static void MapAreasUpdate(RouteGroupBuilder areas, bool isDev)
     {
         // PUT /areas/{nombre} — Actualiza un área
-        areas.MapPut("/{nombre}", async (string nombre, CrearAreaDto dto, IAreaRepository repo) =>
+        areas.MapPut("/{nombre}", async (string nombre, CreateAreaDto dto, IAreaRepository repo) =>
         {
             var validationResult = ValidarCrearArea(dto);
             if (validationResult is not null)
@@ -456,7 +456,7 @@ internal static class Program
         });
     }
 
-    private static IResult? ValidarCrearArea(CrearAreaDto dto)
+    private static IResult? ValidarCrearArea(CreateAreaDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.Nombre))
             return Results.BadRequest(new { mensaje = "El nombre del área es obligatorio." });
@@ -577,7 +577,7 @@ internal static class Program
     private static void MapDepartamentosCreate(RouteGroupBuilder departamentos, bool isDev)
     {
         // POST /departamentos — Crea un nuevo departamento
-        departamentos.MapPost("/", async (CrearDepartamentoDto dto, IDepartmentRepository repo) =>
+        departamentos.MapPost("/", async (CreateDepartmentDto dto, IDepartmentRepository repo) =>
         {
             var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "del", "departamento");
             if (validationResult is not null)
@@ -644,7 +644,7 @@ internal static class Program
     private static void MapDepartamentosUpdate(RouteGroupBuilder departamentos, bool isDev)
     {
         // PUT /departamentos/{nombre} — Actualiza un departamento
-        departamentos.MapPut("/{nombre}", async (string nombre, CrearDepartamentoDto dto, IDepartmentRepository repo) =>
+        departamentos.MapPut("/{nombre}", async (string nombre, CreateDepartmentDto dto, IDepartmentRepository repo) =>
         {
             var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "del", "departamento");
             if (validationResult is not null)
@@ -729,7 +729,7 @@ internal static class Program
     private static void MapSeccionesCreate(RouteGroupBuilder secciones, bool isDev)
     {
         // POST /secciones — Crea una nueva sección
-        secciones.MapPost("/", async (CrearSeccionDto dto, ISectionRepository repo) =>
+        secciones.MapPost("/", async (CreateSectionDto dto, ISectionRepository repo) =>
         {
             var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "sección");
             if (validationResult is not null)
@@ -796,7 +796,7 @@ internal static class Program
     private static void MapSeccionesUpdate(RouteGroupBuilder secciones, bool isDev)
     {
         // PUT /secciones/{nombre} — Actualiza una sección
-        secciones.MapPut("/{nombre}", async (string nombre, CrearSeccionDto dto, ISectionRepository repo) =>
+        secciones.MapPut("/{nombre}", async (string nombre, CreateSectionDto dto, ISectionRepository repo) =>
         {
             var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "sección");
             if (validationResult is not null)
@@ -881,7 +881,7 @@ internal static class Program
     private static void MapUnidadesCreate(RouteGroupBuilder unidades, bool isDev)
     {
         // POST /unidades — Crea una nueva unidad
-        unidades.MapPost("/", async (CrearUnidadDto dto, IUnitRepository repo) =>
+        unidades.MapPost("/", async (CreateUnitDto dto, IUnitRepository repo) =>
         {
             var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "unidad");
             if (validationResult is not null)
@@ -953,7 +953,7 @@ internal static class Program
     private static void MapUnidadesUpdate(RouteGroupBuilder unidades, bool isDev)
     {
         // PUT /unidades/{nombre} — Actualiza una unidad
-        unidades.MapPut("/{nombre}", async (string nombre, CrearUnidadDto dto, IUnitRepository repo) =>
+        unidades.MapPut("/{nombre}", async (string nombre, CreateUnitDto dto, IUnitRepository repo) =>
         {
             var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "unidad");
             if (validationResult is not null)
@@ -1042,7 +1042,7 @@ internal static class Program
     private static void MapPlazasCreate(RouteGroupBuilder plazas, bool isDev)
     {
         // POST /plazas — Crea una nueva plaza
-        plazas.MapPost("/", async (CrearPlazaDto dto, IPositionRepository repo) =>
+        plazas.MapPost("/", async (CreatePositionDto dto, IPositionRepository repo) =>
         {
             if (dto.NumeroPlaza <= 0)
                 return Results.BadRequest(new { mensaje = "El número de plaza debe ser un entero positivo." });
@@ -1109,7 +1109,7 @@ internal static class Program
     private static void MapPlazasUpdate(RouteGroupBuilder plazas, bool isDev)
     {
         // PUT /plazas/{numeroPlaza} — Actualiza las asignaciones de una plaza existente
-        plazas.MapPut("/{numeroPlaza:long}", async (long numeroPlaza, CrearPlazaDto dto, IPositionRepository repo) =>
+        plazas.MapPut("/{numeroPlaza:long}", async (long numeroPlaza, CreatePositionDto dto, IPositionRepository repo) =>
         {
             try
             {

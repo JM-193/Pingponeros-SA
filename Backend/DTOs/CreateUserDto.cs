@@ -8,7 +8,7 @@ namespace Backend.DTOs;
 /// DTO para la creación de un nuevo usuario.
 /// <para><c>Rol</c>: 0 = Funcionario, 1 = Administrador.</para>
 /// </summary>
-internal sealed record CrearUsuarioDto(
+internal sealed record CreateUserDto(
     string CorreoInstitucional,
     string PrimerNombre,
     string? SegundoNombre,

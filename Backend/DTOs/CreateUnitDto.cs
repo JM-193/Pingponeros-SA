@@ -4,4 +4,10 @@ namespace Backend.DTOs;
 
 [SuppressMessage("Performance", "CA1812:AvoidUninstantiatedInternalClasses",
     Justification = "Instanciado por el enlazador de modelos de ASP.NET Core.")]
-internal sealed record CrearDepartamentoDto(string Nombre, string Descripcion, int? IdArea, int? Estado);
+internal sealed record CreateUnitDto(
+    string Nombre,
+    string Descripcion,
+    int? IdArea,
+    int? IdDepartamento,
+    int? IdSeccion,
+    int? Estado);
