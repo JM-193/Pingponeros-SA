@@ -56,7 +56,7 @@ export default function ConsultarPlaza() {
       key: 'numeroPlaza',
       label: 'Número de Plaza',
       render: (plaza) => plaza.numeroPlaza,
-      width: '15%',
+      width: '20%',
     },
     {
       key: 'unidadLabel',
@@ -74,7 +74,7 @@ export default function ConsultarPlaza() {
       key: 'areaLabel',
       label: 'Área',
       render: (plaza) => plaza.areaLabel,
-      width: '25%',
+      width: '20%',
     },
   ]
 
