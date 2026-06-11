@@ -294,10 +294,10 @@ public sealed class RepositoriesTests
         table.Rows.Add("hashvalue", vencimiento, 1);
 
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Contrasena?>>>() )
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Password?>>>() )
             .Returns(ci =>
             {
-                var map = (Func<DbDataReader, Task<Contrasena?>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<Password?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });

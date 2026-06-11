@@ -1297,7 +1297,7 @@ internal static class Program
         return error is not null ? Results.BadRequest(new { mensaje = error }) : null;
     }
 
-    private static bool ContrasenaTemporalExpirada(Backend.Models.Contrasena contrasena) =>
+    private static bool ContrasenaTemporalExpirada(Backend.Models.Password contrasena) =>
         contrasena.EsTemporal && contrasena.FechaExpiracion <= DateTime.Now;
 
     private static IResult RespuestaContrasenaTemporalExpirada() =>

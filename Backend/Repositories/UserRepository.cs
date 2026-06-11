@@ -151,7 +151,7 @@ internal sealed class UserRepository : IUserRepository
     // ------------------------------------------------------------------ //
     // GET HASH MÁS RECIENTE                                               //
     // ------------------------------------------------------------------ //
-    public async Task<Contrasena?> ObtenerContrasenaMasRecienteAsync(string correo)
+    public async Task<Password?> ObtenerContrasenaMasRecienteAsync(string correo)
     {
         const string sql = """
             SELECT CONTRASENA_HASH, FECHA_EXPIRACION, ES_TEMPORAL
@@ -174,7 +174,7 @@ internal sealed class UserRepository : IUserRepository
             if (!await reader.ReadAsync().ConfigureAwait(false))
                 return null;
 
-            return new Contrasena
+            return new Password
             {
                 Hash = reader.GetString(0),
                 FechaExpiracion = reader.GetDateTime(1),

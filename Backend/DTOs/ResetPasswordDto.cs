@@ -1,10 +1,10 @@
-// RecuperarContraseñaDto.cs
+// ResetPasswordDto.cs
 namespace Backend.DTOs;
 
 /// <summary>
 /// DTO para solicitar recuperación de contraseña.
 /// </summary>
-internal class RecuperarContraseñaDto
+internal class ResetPasswordDto
 {
     /// <summary>
     /// Correo institucional del usuario.

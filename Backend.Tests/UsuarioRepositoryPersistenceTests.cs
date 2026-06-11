@@ -62,11 +62,11 @@ public sealed class UserRepositoryPersistenceTests
     {
         var table = CrearTablaContrasenas();
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Contrasena?>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Password?>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<Contrasena?>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<Password?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
@@ -85,11 +85,11 @@ public sealed class UserRepositoryPersistenceTests
         table.Rows.Add("hash-activo", vencimiento, 0);
 
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Contrasena?>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Password?>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<Contrasena?>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<Password?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
