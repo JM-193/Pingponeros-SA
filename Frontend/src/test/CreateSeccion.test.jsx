@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import CreateSeccion from '../pages/CreateSeccion'
 import * as areaService from '../services/areaService'
 
-vi.mock('../services/seccionService')
+vi.mock('../services/sectionService')
 vi.mock('../services/areaService')
 
 describe('CreateSeccion Page', () => {

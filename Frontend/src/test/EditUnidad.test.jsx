@@ -5,12 +5,12 @@ import EditUnidad from '../pages/EditUnidad'
 import * as unidadService from '../services/unidadService'
 import * as areaService from '../services/areaService'
 import * as departamentoService from '../services/departmentService'
-import * as seccionService from '../services/seccionService'
+import * as sectionService from '../services/sectionService'
 
 vi.mock('../services/unidadService')
 vi.mock('../services/areaService')
 vi.mock('../services/departmentService')
-vi.mock('../services/seccionService')
+vi.mock('../services/sectionService')
 
 const mockUnidad = {
   nombre: 'Unidad Administrativa',
@@ -54,7 +54,7 @@ describe('EditUnidad Page', () => {
     unidadService.obtenerUnidadPorNombre.mockResolvedValueOnce(mockUnidad)
     areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
     departamentoService.obtenerDepartamentos.mockResolvedValueOnce(mockDepartamentos)
-    seccionService.obtenerSecciones.mockResolvedValueOnce(mockSecciones)
+    sectionService.obtenerSecciones.mockResolvedValueOnce(mockSecciones)
 
     renderWithRoute('Unidad Administrativa')
 
@@ -70,7 +70,7 @@ describe('EditUnidad Page', () => {
     unidadService.obtenerUnidadPorNombre.mockResolvedValueOnce(mockUnidad)
     areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
     departamentoService.obtenerDepartamentos.mockResolvedValueOnce(mockDepartamentos)
-    seccionService.obtenerSecciones.mockResolvedValueOnce(mockSecciones)
+    sectionService.obtenerSecciones.mockResolvedValueOnce(mockSecciones)
     unidadService.actualizarUnidad.mockResolvedValueOnce({})
 
     renderWithRoute('Unidad Administrativa')
@@ -91,7 +91,7 @@ describe('EditUnidad Page', () => {
     unidadService.obtenerUnidadPorNombre.mockResolvedValue(mockUnidad)
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
     departamentoService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
-    seccionService.obtenerSecciones.mockResolvedValue(mockSecciones)
+    sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
     unidadService.actualizarUnidad.mockRejectedValueOnce(new Error('Error al actualizar unidad'))
 
     renderWithRoute('Unidad Administrativa')
@@ -112,7 +112,7 @@ describe('EditUnidad Page', () => {
     unidadService.obtenerUnidadPorNombre.mockRejectedValueOnce(new Error('Unidad no encontrada'))
     areaService.obtenerAreas.mockResolvedValueOnce([])
     departamentoService.obtenerDepartamentos.mockResolvedValueOnce([])
-    seccionService.obtenerSecciones.mockResolvedValueOnce([])
+    sectionService.obtenerSecciones.mockResolvedValueOnce([])
 
     renderWithRoute('Inexistente')
 

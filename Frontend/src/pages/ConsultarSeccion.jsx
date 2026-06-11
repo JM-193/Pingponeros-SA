@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import EntityListPage from '../components/EntityListPage'
-import { obtenerSecciones } from '../services/seccionService'
+import { obtenerSecciones } from '../services/sectionService'
 import { obtenerAreas } from '../services/areaService'
 import { buildNameMap, formatStatusLabel, resolveOptionValueKey } from '../utils/organizationOptions'
 

@@ -3,7 +3,7 @@ import EntityListPage from '../components/EntityListPage'
 import { obtenerUnidades } from '../services/unidadService'
 import { obtenerAreas } from '../services/areaService'
 import { obtenerDepartamentos } from '../services/departmentService'
-import { obtenerSecciones } from '../services/seccionService'
+import { obtenerSecciones } from '../services/sectionService'
 import { buildNameMap, formatStatusLabel, resolveOptionValueKey } from '../utils/organizationOptions'
 
 export default function ConsultarUnidad() {

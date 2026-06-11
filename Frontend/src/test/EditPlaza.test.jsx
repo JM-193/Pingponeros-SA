@@ -5,13 +5,13 @@ import EditPlaza from '../pages/EditPlaza'
 import * as positionService from '../services/positionService'
 import * as unidadService from '../services/unidadService'
 import * as departamentoService from '../services/departmentService'
-import * as seccionService from '../services/seccionService'
+import * as sectionService from '../services/sectionService'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/positionService')
 vi.mock('../services/unidadService')
 vi.mock('../services/departmentService')
-vi.mock('../services/seccionService')
+vi.mock('../services/sectionService')
 vi.mock('../services/areaService')
 
 const mockPlaza = {
@@ -52,7 +52,7 @@ describe('EditPlaza Page', () => {
     positionService.obtenerPlazaPorNumero.mockResolvedValue(mockPlaza)
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
     departamentoService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
-    seccionService.obtenerSecciones.mockResolvedValue(mockSecciones)
+    sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
     unidadService.obtenerUnidades.mockResolvedValue(mockUnidades)
   })
 

@@ -5,13 +5,13 @@ import ConsultarPlaza from '../pages/ConsultarPlaza'
 import * as positionService from '../services/positionService'
 import * as unidadService from '../services/unidadService'
 import * as departamentoService from '../services/departmentService'
-import * as seccionService from '../services/seccionService'
+import * as sectionService from '../services/sectionService'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/positionService')
 vi.mock('../services/unidadService')
 vi.mock('../services/departmentService')
-vi.mock('../services/seccionService')
+vi.mock('../services/sectionService')
 vi.mock('../services/areaService')
 
 const mockPlazas = [
@@ -30,7 +30,7 @@ describe('ConsultarPlaza Page', () => {
     positionService.obtenerPlazas.mockResolvedValue(mockPlazas)
     unidadService.obtenerUnidades.mockResolvedValue(mockUnidades)
     departamentoService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
-    seccionService.obtenerSecciones.mockResolvedValue(mockSecciones)
+    sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
   })
 
@@ -170,7 +170,7 @@ describe('ConsultarPlaza Page', () => {
     await waitFor(() => {
       expect(unidadService.obtenerUnidades).toHaveBeenCalled()
       expect(departamentoService.obtenerDepartamentos).toHaveBeenCalled()
-      expect(seccionService.obtenerSecciones).toHaveBeenCalled()
+      expect(sectionService.obtenerSecciones).toHaveBeenCalled()
       expect(areaService.obtenerAreas).toHaveBeenCalled()
     })
   })

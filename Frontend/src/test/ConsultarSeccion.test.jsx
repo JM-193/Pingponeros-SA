@@ -2,16 +2,16 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import ConsultarSeccion from '../pages/ConsultarSeccion'
-import * as seccionService from '../services/seccionService'
+import * as sectionService from '../services/sectionService'
 import * as areaService from '../services/areaService'
 
-vi.mock('../services/seccionService')
+vi.mock('../services/sectionService')
 vi.mock('../services/areaService')
 
 describe('ConsultarSeccion Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    seccionService.obtenerSecciones.mockResolvedValueOnce([
+    sectionService.obtenerSecciones.mockResolvedValueOnce([
       { id: 20, nombre: 'Soporte', descripcion: 'Sección de soporte', idArea: 1, estado: 1 },
     ])
     areaService.obtenerAreas.mockResolvedValueOnce([
@@ -39,7 +39,7 @@ describe('ConsultarSeccion Page', () => {
       </BrowserRouter>,
     )
 
-    expect(seccionService.obtenerSecciones).toHaveBeenCalled()
+    expect(sectionService.obtenerSecciones).toHaveBeenCalled()
   })
 
   it('filtra secciones por nombre en el buscador', async () => {

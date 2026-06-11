@@ -4,7 +4,7 @@ import EntityListPage from '../components/EntityListPage'
 import { obtenerPlazas } from '../services/positionService'
 import { obtenerUnidades } from '../services/unidadService'
 import { obtenerDepartamentos } from '../services/departmentService'
-import { obtenerSecciones } from '../services/seccionService'
+import { obtenerSecciones } from '../services/sectionService'
 import { obtenerAreas } from '../services/areaService'
 import { buildNameMap, resolveOptionValueKey } from '../utils/organizationOptions'
 

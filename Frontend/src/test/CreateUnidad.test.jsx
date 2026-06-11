@@ -4,12 +4,12 @@ import { BrowserRouter } from 'react-router-dom'
 import CreateUnidad from '../pages/CreateUnidad'
 import * as areaService from '../services/areaService'
 import * as departamentoService from '../services/departmentService'
-import * as seccionService from '../services/seccionService'
+import * as sectionService from '../services/sectionService'
 
 vi.mock('../services/unidadService')
 vi.mock('../services/areaService')
 vi.mock('../services/departmentService')
-vi.mock('../services/seccionService')
+vi.mock('../services/sectionService')
 
 describe('CreateUnidad Page', () => {
   const mockAreas = [
@@ -30,7 +30,7 @@ describe('CreateUnidad Page', () => {
     vi.resetAllMocks()
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
     departamentoService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
-    seccionService.obtenerSecciones.mockResolvedValue(mockSecciones)
+    sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
   })
 
   it('renderiza formulario de crear unidad', async () => {
@@ -66,7 +66,7 @@ describe('CreateUnidad Page', () => {
     await waitFor(() => {
       expect(areaService.obtenerAreas).toHaveBeenCalled()
       expect(departamentoService.obtenerDepartamentos).toHaveBeenCalled()
-      expect(seccionService.obtenerSecciones).toHaveBeenCalled()
+      expect(sectionService.obtenerSecciones).toHaveBeenCalled()
     })
   })
 

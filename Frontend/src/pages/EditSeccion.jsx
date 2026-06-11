@@ -1,5 +1,5 @@
 import DepartamentoSeccionEditForm from '../components/DepartamentoSeccionEditForm'
-import { obtenerSeccionPorNombre, actualizarSeccion } from '../services/seccionService'
+import { obtenerSeccionPorNombre, actualizarSeccion } from '../services/sectionService'
 
 export default function EditSeccion() {
   return (

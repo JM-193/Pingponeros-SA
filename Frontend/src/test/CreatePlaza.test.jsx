@@ -5,13 +5,13 @@ import CreatePlaza from '../pages/CreatePlaza'
 import * as positionService from '../services/positionService'
 import * as unidadService from '../services/unidadService'
 import * as departamentoService from '../services/departmentService'
-import * as seccionService from '../services/seccionService'
+import * as sectionService from '../services/sectionService'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/positionService')
 vi.mock('../services/unidadService')
 vi.mock('../services/departmentService')
-vi.mock('../services/seccionService')
+vi.mock('../services/sectionService')
 vi.mock('../services/areaService')
 
 const mockUnidades = [{ id: 1, nombre: 'Administración' }]
@@ -24,7 +24,7 @@ describe('CreatePlaza Page', () => {
     vi.resetAllMocks()
     unidadService.obtenerUnidades.mockResolvedValue(mockUnidades)
     departamentoService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
-    seccionService.obtenerSecciones.mockResolvedValue(mockSecciones)
+    sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
   })
 
@@ -32,7 +32,7 @@ describe('CreatePlaza Page', () => {
     // Las mocks resuelven de forma asíncrona, así que al montar debería verse cargando
     unidadService.obtenerUnidades.mockImplementation(() => new Promise(() => {}))
     departamentoService.obtenerDepartamentos.mockImplementation(() => new Promise(() => {}))
-    seccionService.obtenerSecciones.mockImplementation(() => new Promise(() => {}))
+    sectionService.obtenerSecciones.mockImplementation(() => new Promise(() => {}))
     areaService.obtenerAreas.mockImplementation(() => new Promise(() => {}))
 
     render(

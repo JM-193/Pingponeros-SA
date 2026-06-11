@@ -1,4 +1,4 @@
-// seccionService.test.js
+// sectionService.test.js
 import { describe, it, expect, beforeEach } from 'vitest'
 import {
   obtenerSecciones,
@@ -6,9 +6,9 @@ import {
   crearSeccion,
   eliminarSeccion,
   actualizarSeccion,
-} from '../services/seccionService'
+} from '../services/sectionService'
 
-describe('seccionService', () => {
+describe('sectionService', () => {
   const mockFetch = vi.fn()
 
   beforeEach(() => {

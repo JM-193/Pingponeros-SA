@@ -5,7 +5,7 @@ import ConsultarUnidad from '../pages/ConsultarUnidad'
 import * as unidadService from '../services/unidadService'
 import * as areaService from '../services/areaService'
 import * as departamentoService from '../services/departmentService'
-import * as seccionService from '../services/seccionService'
+import * as sectionService from '../services/sectionService'
 
 vi.mock('../services/unidadService', () => ({
   obtenerUnidades: vi.fn(),
@@ -16,7 +16,7 @@ vi.mock('../services/areaService', () => ({
 vi.mock('../services/departmentService', () => ({
   obtenerDepartamentos: vi.fn(),
 }))
-vi.mock('../services/seccionService', () => ({
+vi.mock('../services/sectionService', () => ({
   obtenerSecciones: vi.fn(),
 }))
 
@@ -39,7 +39,7 @@ describe('ConsultarUnidad Page', () => {
     departamentoService.obtenerDepartamentos.mockResolvedValue([
       { id: 2, nombre: 'Compras', descripcion: 'Departamento' },
     ])
-    seccionService.obtenerSecciones.mockResolvedValue([])
+    sectionService.obtenerSecciones.mockResolvedValue([])
   })
 
   it('carga y renderiza unidades', async () => {
@@ -132,7 +132,7 @@ describe('ConsultarUnidad Page', () => {
         estado: 1,
       },
     ])
-    seccionService.obtenerSecciones.mockResolvedValue([
+    sectionService.obtenerSecciones.mockResolvedValue([
       { id: 1, nombre: 'Sección A', descripcion: 'Sección' },
     ])
 
