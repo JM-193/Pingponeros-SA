@@ -1,13 +1,13 @@
-// EditSeccion.test.jsx
+// EditSections.test.jsx
 import { render, screen } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import EditSeccion from '../pages/EditSeccion'
+import EditSections from '../pages/EditSections'
 
-describe('EditSeccion Page', () => {
+describe('EditSections Page', () => {
   it('renderiza página en estado de carga sin parámetros de ruta', () => {
     render(
       <BrowserRouter>
-        <EditSeccion />
+        <EditSections />
       </BrowserRouter>,
     )
 

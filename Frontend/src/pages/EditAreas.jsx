@@ -8,7 +8,7 @@ import StateToggle from '../components/StateToggle'
 import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormError, getOrganizationEntityPayload } from '../utils/organizationEntityForm'
 import { COLORS } from '../constants/colors'
 
-export default function EditArea() {
+export default function EditAreas() {
   const navigate = useNavigate()
   const { nombre } = useParams()
   const [formData, setFormData] = useState({

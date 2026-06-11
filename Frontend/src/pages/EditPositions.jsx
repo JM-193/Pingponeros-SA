@@ -1,4 +1,4 @@
-// EditPlaza.jsx
+// EditPositions.jsx
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { actualizarPlaza, obtenerPlazaPorNumero } from '../services/positionService'
@@ -30,7 +30,7 @@ const initialFormData = {
   idUnidad: '',
 }
 
-export default function EditPlaza() {
+export default function EditPositions() {
   const navigate = useNavigate()
   const { numeroPlaza } = useParams()
 

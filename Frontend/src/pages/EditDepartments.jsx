@@ -1,7 +1,7 @@
 import DepartamentoSeccionEditForm from '../components/DepartamentoSeccionEditForm'
 import { obtenerDepartamentoPorNombre, actualizarDepartamento } from '../services/departmentService'
 
-export default function EditDepartamento() {
+export default function EditDepartments() {
   return (
     <DepartamentoSeccionEditForm
       entityType="departamento"

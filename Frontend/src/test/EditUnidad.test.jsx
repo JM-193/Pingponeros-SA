@@ -1,7 +1,7 @@
-// EditUnidad.test.jsx
+// EditUnits.test.jsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
-import EditUnidad from '../pages/EditUnidad'
+import EditUnits from '../pages/EditUnits'
 import * as unitService from '../services/unitService'
 import * as areaService from '../services/areaService'
 import * as departmentService from '../services/departmentService'
@@ -29,13 +29,13 @@ const renderWithRoute = (nombre) =>
   render(
     <MemoryRouter initialEntries={[`/organizacion/unidades/editar/${nombre}`]}>
       <Routes>
-        <Route path="/organizacion/unidades/editar/:nombre" element={<EditUnidad />} />
+        <Route path="/organizacion/unidades/editar/:nombre" element={<EditUnits />} />
         <Route path="/organizacion/unidades/consultar" element={<div>Lista de unidades</div>} />
       </Routes>
     </MemoryRouter>,
   )
 
-describe('EditUnidad Page', () => {
+describe('EditUnits Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
   })
@@ -43,7 +43,7 @@ describe('EditUnidad Page', () => {
   it('renderiza página en estado de carga sin parámetros de ruta', () => {
     render(
       <BrowserRouter>
-        <EditUnidad />
+        <EditUnits />
       </BrowserRouter>,
     )
 

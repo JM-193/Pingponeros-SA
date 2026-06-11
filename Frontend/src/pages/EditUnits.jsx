@@ -27,7 +27,7 @@ const initialFormData = {
   estado: 1,
 }
 
-export default function EditUnidad() {
+export default function EditUnits() {
   const navigate = useNavigate()
   const { nombre } = useParams()
   const [parentType, setParentType] = useState('')

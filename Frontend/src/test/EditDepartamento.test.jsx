@@ -1,13 +1,13 @@
-// EditDepartamento.test.jsx
+// EditDepartments.test.jsx
 import { render, screen } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import EditDepartamento from '../pages/EditDepartamento'
+import EditDepartments from '../pages/EditDepartments'
 
-describe('EditDepartamento Page', () => {
+describe('EditDepartments Page', () => {
   it('renderiza página en estado de carga sin parámetros de ruta', () => {
     render(
       <BrowserRouter>
-        <EditDepartamento />
+        <EditDepartments />
       </BrowserRouter>,
     )
 

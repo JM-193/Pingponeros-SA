@@ -1,7 +1,7 @@
-// EditUser.test.jsx
+// EditUsers.test.jsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
-import EditUser from '../pages/EditUser'
+import EditUsers from '../pages/EditUsers'
 import * as userService from '../services/userService'
 
 vi.mock('../services/userService')
@@ -20,13 +20,13 @@ const renderWithRoute = (correo) =>
   render(
     <MemoryRouter initialEntries={[`/usuarios/editar/${encodeURIComponent(correo)}`]}>
       <Routes>
-        <Route path="/usuarios/editar/:correo" element={<EditUser />} />
+        <Route path="/usuarios/editar/:correo" element={<EditUsers />} />
         <Route path="/usuarios/consultar" element={<div>Lista de usuarios</div>} />
       </Routes>
     </MemoryRouter>,
   )
 
-describe('EditUser Page', () => {
+describe('EditUsers Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
   })
@@ -34,7 +34,7 @@ describe('EditUser Page', () => {
   it('renderiza página en estado de carga sin parámetros de ruta', () => {
     render(
       <BrowserRouter>
-        <EditUser />
+        <EditUsers />
       </BrowserRouter>,
     )
 
@@ -44,7 +44,7 @@ describe('EditUser Page', () => {
   it('renderiza Header y Navbar', () => {
     render(
       <BrowserRouter>
-        <EditUser />
+        <EditUsers />
       </BrowserRouter>,
     )
 
@@ -54,7 +54,7 @@ describe('EditUser Page', () => {
   it('renderiza Footer', () => {
     render(
       <BrowserRouter>
-        <EditUser />
+        <EditUsers />
       </BrowserRouter>,
     )
 

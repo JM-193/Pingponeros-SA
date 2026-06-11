@@ -1,7 +1,7 @@
-// EditPlaza.test.jsx
+// EditPositions.test.jsx
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import EditPlaza from '../pages/EditPlaza'
+import EditPositions from '../pages/EditPositions'
 import * as positionService from '../services/positionService'
 import * as unitService from '../services/unitService'
 import * as departmentService from '../services/departmentService'
@@ -40,13 +40,13 @@ const renderWithRoute = (numeroPlaza = '7') =>
   render(
     <MemoryRouter initialEntries={[`/organizacion/plazas/editar/${numeroPlaza}`]}>
       <Routes>
-        <Route path="/organizacion/plazas/editar/:numeroPlaza" element={<EditPlaza />} />
+        <Route path="/organizacion/plazas/editar/:numeroPlaza" element={<EditPositions />} />
         <Route path="/organizacion/plazas/consultar" element={<div>Lista de plazas</div>} />
       </Routes>
     </MemoryRouter>,
   )
 
-describe('EditPlaza Page', () => {
+describe('EditPositions Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     positionService.obtenerPlazaPorNumero.mockResolvedValue(mockPlaza)

@@ -1,7 +1,7 @@
-﻿// EditArea.test.jsx
+﻿// EditAreas.test.jsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
-import EditArea from '../pages/EditArea'
+import EditAreas from '../pages/EditAreas'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/areaService')
@@ -16,13 +16,13 @@ const renderWithRoute = (nombre) =>
   render(
     <MemoryRouter initialEntries={[`/organizacion/areas/editar/${nombre}`]}>
       <Routes>
-        <Route path="/organizacion/areas/editar/:nombre" element={<EditArea />} />
+        <Route path="/organizacion/areas/editar/:nombre" element={<EditAreas />} />
         <Route path="/organizacion/areas/consultar" element={<div>Lista de áreas</div>} />
       </Routes>
     </MemoryRouter>,
   )
 
-describe('EditArea Page', () => {
+describe('EditAreas Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
   })
@@ -30,7 +30,7 @@ describe('EditArea Page', () => {
   it('renderiza página en estado de carga sin parámetros de ruta', () => {
     render(
       <BrowserRouter>
-        <EditArea />
+        <EditAreas />
       </BrowserRouter>,
     )
 
@@ -40,7 +40,7 @@ describe('EditArea Page', () => {
   it('renderiza Header y Navbar', () => {
     render(
       <BrowserRouter>
-        <EditArea />
+        <EditAreas />
       </BrowserRouter>,
     )
 
@@ -50,7 +50,7 @@ describe('EditArea Page', () => {
   it('renderiza Footer', () => {
     render(
       <BrowserRouter>
-        <EditArea />
+        <EditAreas />
       </BrowserRouter>,
     )
 
@@ -61,7 +61,7 @@ describe('EditArea Page', () => {
   it('tiene layout con full height', () => {
     const { container } = render(
       <BrowserRouter>
-        <EditArea />
+        <EditAreas />
       </BrowserRouter>,
     )
 
@@ -73,7 +73,7 @@ describe('EditArea Page', () => {
   it('contiene elemento main', () => {
     const { container } = render(
       <BrowserRouter>
-        <EditArea />
+        <EditAreas />
       </BrowserRouter>,
     )
 

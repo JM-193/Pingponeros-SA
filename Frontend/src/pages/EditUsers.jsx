@@ -1,4 +1,4 @@
-// EditUser.jsx
+// EditUsers.jsx
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { obtenerUsuarioPorCorreo, actualizarUsuario } from '../services/userService'
@@ -14,7 +14,7 @@ import StatusMessage from '../components/StatusMessage'
 import StateToggle from '../components/StateToggle'
 import { COLORS } from '../constants/colors'
 
-export default function EditUser() {
+export default function EditUsers() {
   const navigate = useNavigate()
   const { correo } = useParams()
   const [formData, setFormData] = useState({
