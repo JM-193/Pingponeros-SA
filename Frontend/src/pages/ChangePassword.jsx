@@ -189,7 +189,7 @@ export default function ChangePassword() {
               </div>
 
               <button
-                onClick={() => navigate('/home')}
+                onClick={() => navigate(-1)}
                 type="button"
                 style={{
                   display: 'block',
