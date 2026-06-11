@@ -57,16 +57,16 @@ export default function ConsultarUnidad() {
       width: '25%',
     },
     {
-      key: 'areaLabel',
-      label: 'Área',
-      render: (unidad) => unidad.areaLabel,
-      width: '15%',
-    },
-    {
       key: 'dependenciaLabel',
       label: 'Departamento/Sección',
       render: (unidad) => unidad.dependenciaLabel,
       width: '20%',
+    },
+    {
+      key: 'areaLabel',
+      label: 'Área',
+      render: (unidad) => unidad.areaLabel,
+      width: '15%',
     },
     {
       key: 'estado',
