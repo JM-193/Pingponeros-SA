@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Backend.Tests;
 
-public sealed class UsuarioRepositoryPersistenceTests
+public sealed class UserRepositoryPersistenceTests
 {
     [Fact]
     public async Task ObtenerTodosAsync_ReturnsUsuarios()
@@ -27,7 +27,7 @@ public sealed class UsuarioRepositoryPersistenceTests
                 return map(reader);
             });
 
-        var repo = new UsuarioRepository(q);
+        var repo = new UserRepository(q);
         var usuarios = (await repo.ObtenerTodosAsync()).ToList();
 
         Assert.Equal(2, usuarios.Count);
@@ -51,7 +51,7 @@ public sealed class UsuarioRepositoryPersistenceTests
                 return map(reader);
             });
 
-        var repo = new UsuarioRepository(q);
+        var repo = new UserRepository(q);
         var usuario = await repo.ObtenerPorCorreoAsync("noexiste@test.com");
 
         Assert.Null(usuario);
@@ -71,7 +71,7 @@ public sealed class UsuarioRepositoryPersistenceTests
                 return map(reader);
             });
 
-        var repo = new UsuarioRepository(q);
+        var repo = new UserRepository(q);
         var contrasena = await repo.ObtenerContrasenaMasRecienteAsync("noexiste@test.com");
 
         Assert.Null(contrasena);
@@ -94,7 +94,7 @@ public sealed class UsuarioRepositoryPersistenceTests
                 return map(reader);
             });
 
-        var repo = new UsuarioRepository(q);
+        var repo = new UserRepository(q);
         var hash = await repo.ObtenerHashMasRecienteAsync("ana@test.com");
 
         Assert.Equal("hash-activo", hash);
@@ -112,7 +112,7 @@ public sealed class UsuarioRepositoryPersistenceTests
                 return Task.FromResult(1);
             });
 
-        var repo = new UsuarioRepository(q);
+        var repo = new UserRepository(q);
         await repo.InsertarAsync(new Usuario
         {
             CorreoInstitucional = "ana@test.com",
@@ -142,7 +142,7 @@ public sealed class UsuarioRepositoryPersistenceTests
                 return Task.FromResult(1);
             });
 
-        var repo = new UsuarioRepository(q);
+        var repo = new UserRepository(q);
         await repo.InsertarConContrasenaAsync(
             new Usuario { CorreoInstitucional = "ana@test.com", PrimerNombre = "Ana", PrimerApellido = "Lopez", Rol = 0, Estado = 1 },
             "hash-temporal");
@@ -162,7 +162,7 @@ public sealed class UsuarioRepositoryPersistenceTests
                 return Task.FromResult(1);
             });
 
-        var repo = new UsuarioRepository(q);
+        var repo = new UserRepository(q);
         await repo.CambiarContraseñaAsync("ana@test.com", "hash-nuevo");
 
         Assert.NotNull(command);
@@ -183,7 +183,7 @@ public sealed class UsuarioRepositoryPersistenceTests
                 return Task.FromResult(1);
             });
 
-        var repo = new UsuarioRepository(q);
+        var repo = new UserRepository(q);
         var result = await repo.DesactivarPorContrasenaTemporalExpiradaAsync("ana@test.com");
 
         Assert.True(result);
@@ -200,7 +200,7 @@ public sealed class UsuarioRepositoryPersistenceTests
                 return Task.FromResult(0);
             });
 
-        var repo = new UsuarioRepository(q);
+        var repo = new UserRepository(q);
         var result = await repo.DesactivarPorContrasenaTemporalExpiradaAsync("noexiste@test.com");
 
         Assert.False(result);

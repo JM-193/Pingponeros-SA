@@ -6,12 +6,12 @@ using Backend.Models;
 
 namespace Backend.Repositories;
 
-internal sealed class SeccionRepository : ISeccionRepository
+internal sealed class SectionRepository : ISectionRepository
 {
     private const string ParamNombre = ":nombre";
     private readonly IQueryExecutor _q;
 
-    public SeccionRepository(IQueryExecutor q) => _q = q;
+    public SectionRepository(IQueryExecutor q) => _q = q;
 
     public async Task<List<Seccion>> ObtenerTodasAsync()
     {

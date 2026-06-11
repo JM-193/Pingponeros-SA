@@ -28,10 +28,10 @@ public sealed class AreaRepositoryTests
     }
 }
 
-public sealed class UsuarioRepositoryTests
+public sealed class UserRepositoryTests
 {
     private static MethodInfo ObtenerMetodoPrivado(string nombre) =>
-        typeof(UsuarioRepository).GetMethod(nombre, BindingFlags.NonPublic | BindingFlags.Static)
+        typeof(UserRepository).GetMethod(nombre, BindingFlags.NonPublic | BindingFlags.Static)
         ?? throw new InvalidOperationException($"No se encontro el metodo {nombre}.");
 
     [Fact]

@@ -1,14 +1,14 @@
-// UsuarioRepository.cs
+// UserRepository.cs
 using Backend.Models;
 using Oracle.ManagedDataAccess.Client;
 
 namespace Backend.Repositories;
 
-internal sealed class UsuarioRepository : IUsuarioRepository
+internal sealed class UserRepository : IUserRepository
 {
     private readonly IQueryExecutor _q;
 
-    public UsuarioRepository(IQueryExecutor q) => _q = q;
+    public UserRepository(IQueryExecutor q) => _q = q;
     // ------------------------------------------------------------------ //
     // SELECT ALL                                                           //
     // ------------------------------------------------------------------ //

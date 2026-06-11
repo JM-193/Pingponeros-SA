@@ -6,19 +6,19 @@ using Backend.Models;
 
 namespace Backend.Repositories;
 
-internal sealed class DepartamentoRepository : IDepartamentoRepository
+internal sealed class UnitRepository : IUnitRepository
 {
     private const string ParamNombre = ":nombre";
     private readonly IQueryExecutor _q;
 
-    public DepartamentoRepository(IQueryExecutor q) => _q = q;
+    public UnitRepository(IQueryExecutor q) => _q = q;
 
-    public async Task<List<Departamento>> ObtenerTodosAsync()
+    public async Task<List<Unidad>> ObtenerTodasAsync()
     {
         return await _q.QueryAsync(connection =>
         {
             var cmd = new OracleCommand(
-                "SELECT ID_DEPARTAMENTO, ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM DEPARTAMENTOS ORDER BY NOMBRE",
+                "SELECT ID_UNIDAD, ID_AREA, ID_DEPARTAMENTO, ID_SECCION, NOMBRE, DESCRIPCION, ESTADO FROM UNIDADES ORDER BY NOMBRE",
                 connection)
             {
                 BindByName = true,
@@ -26,19 +26,21 @@ internal sealed class DepartamentoRepository : IDepartamentoRepository
             return cmd;
         }, async reader =>
         {
-            var departamentos = new List<Departamento>();
+            var unidades = new List<Unidad>();
             while (await reader.ReadAsync().ConfigureAwait(false))
             {
-                departamentos.Add(new Departamento
+                unidades.Add(new Unidad
                 {
-                    Id = Convert.ToInt32(reader["ID_DEPARTAMENTO"], CultureInfo.InvariantCulture),
+                    Id = Convert.ToInt32(reader["ID_UNIDAD"], CultureInfo.InvariantCulture),
                     IdArea = reader["ID_AREA"] is DBNull ? null : Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
+                    IdDepartamento = reader["ID_DEPARTAMENTO"] is DBNull ? null : Convert.ToInt32(reader["ID_DEPARTAMENTO"], CultureInfo.InvariantCulture),
+                    IdSeccion = reader["ID_SECCION"] is DBNull ? null : Convert.ToInt32(reader["ID_SECCION"], CultureInfo.InvariantCulture),
                     Nombre = reader["NOMBRE"].ToString() ?? "",
                     Descripcion = reader["DESCRIPCION"].ToString() ?? "",
                     Estado = Convert.ToInt32(reader["ESTADO"], CultureInfo.InvariantCulture),
                 });
             }
-            return departamentos;
+            return unidades;
         }).ConfigureAwait(false);
     }
 
@@ -47,7 +49,7 @@ internal sealed class DepartamentoRepository : IDepartamentoRepository
         var result = await _q.ExecuteScalarAsync(connection =>
         {
             var cmd = new OracleCommand(
-                "SELECT COUNT(*) FROM DEPARTAMENTOS WHERE LOWER(NOMBRE) = LOWER(:nombre)",
+                "SELECT COUNT(*) FROM UNIDADES WHERE LOWER(NOMBRE) = LOWER(:nombre)",
                 connection)
             {
                 BindByName = true,
@@ -58,23 +60,25 @@ internal sealed class DepartamentoRepository : IDepartamentoRepository
         return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
     }
 
-    public async Task<int> InsertarAsync(Departamento departamento)
+    public async Task<int> InsertarAsync(Unidad unidad)
     {
-        ArgumentNullException.ThrowIfNull(departamento);
+        ArgumentNullException.ThrowIfNull(unidad);
 
         const string query = """
-            INSERT INTO DEPARTAMENTOS (ID_AREA, NOMBRE, DESCRIPCION, ESTADO)
-            VALUES (:idArea, :nombre, :descripcion, :estado)
-            RETURNING ID_DEPARTAMENTO INTO :id
+            INSERT INTO UNIDADES (ID_AREA, ID_DEPARTAMENTO, ID_SECCION, NOMBRE, DESCRIPCION, ESTADO)
+            VALUES (:idArea, :idDepartamento, :idSeccion, :nombre, :descripcion, :estado)
+            RETURNING ID_UNIDAD INTO :id
             """;
 
         var result = await _q.ExecuteScalarAsync(connection =>
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
-            OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", departamento.IdArea);
-            cmd.Parameters.Add(ParamNombre, departamento.Nombre);
-            cmd.Parameters.Add(":descripcion", departamento.Descripcion);
-            cmd.Parameters.Add(":estado", departamento.Estado);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", unidad.IdArea);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idDepartamento", unidad.IdDepartamento);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idSeccion", unidad.IdSeccion);
+            cmd.Parameters.Add(ParamNombre, unidad.Nombre);
+            cmd.Parameters.Add(":descripcion", unidad.Descripcion);
+            cmd.Parameters.Add(":estado", unidad.Estado);
             cmd.Parameters.Add(new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output));
             return cmd;
         }).ConfigureAwait(false);
@@ -82,12 +86,12 @@ internal sealed class DepartamentoRepository : IDepartamentoRepository
         return (int)(OracleDecimal)result!;
     }
 
-    public async Task<Departamento?> ObtenerPorNombreAsync(string nombre)
+    public async Task<Unidad?> ObtenerPorNombreAsync(string nombre)
     {
         return await _q.QueryAsync(connection =>
         {
             var cmd = new OracleCommand(
-                "SELECT ID_DEPARTAMENTO, ID_AREA, NOMBRE, DESCRIPCION, ESTADO FROM DEPARTAMENTOS WHERE LOWER(NOMBRE) = LOWER(:nombre)",
+                "SELECT ID_UNIDAD, ID_AREA, ID_DEPARTAMENTO, ID_SECCION, NOMBRE, DESCRIPCION, ESTADO FROM UNIDADES WHERE LOWER(NOMBRE) = LOWER(:nombre)",
                 connection)
             {
                 BindByName = true,
@@ -98,10 +102,12 @@ internal sealed class DepartamentoRepository : IDepartamentoRepository
         {
             if (await reader.ReadAsync().ConfigureAwait(false))
             {
-                return new Departamento
+                return new Unidad
                 {
-                    Id = Convert.ToInt32(reader["ID_DEPARTAMENTO"], CultureInfo.InvariantCulture),
+                    Id = Convert.ToInt32(reader["ID_UNIDAD"], CultureInfo.InvariantCulture),
                     IdArea = reader["ID_AREA"] is DBNull ? null : Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
+                    IdDepartamento = reader["ID_DEPARTAMENTO"] is DBNull ? null : Convert.ToInt32(reader["ID_DEPARTAMENTO"], CultureInfo.InvariantCulture),
+                    IdSeccion = reader["ID_SECCION"] is DBNull ? null : Convert.ToInt32(reader["ID_SECCION"], CultureInfo.InvariantCulture),
                     Nombre = reader["NOMBRE"].ToString() ?? "",
                     Descripcion = reader["DESCRIPCION"].ToString() ?? "",
                     Estado = Convert.ToInt32(reader["ESTADO"], CultureInfo.InvariantCulture),
@@ -111,23 +117,26 @@ internal sealed class DepartamentoRepository : IDepartamentoRepository
         }).ConfigureAwait(false);
     }
 
-    public async Task<bool> ActualizarAsync(string nombreOriginal, Departamento departamento)
+    public async Task<bool> ActualizarAsync(string nombreOriginal, Unidad unidad)
     {
-        ArgumentNullException.ThrowIfNull(departamento);
+        ArgumentNullException.ThrowIfNull(unidad);
 
         const string query = """
-            UPDATE DEPARTAMENTOS
-            SET ID_AREA = :idArea, NOMBRE = :nombre, DESCRIPCION = :descripcion, ESTADO = :estado
+            UPDATE UNIDADES
+            SET ID_AREA = :idArea, ID_DEPARTAMENTO = :idDepartamento, ID_SECCION = :idSeccion,
+                NOMBRE = :nombre, DESCRIPCION = :descripcion, ESTADO = :estado
             WHERE LOWER(NOMBRE) = LOWER(:nombreOriginal)
             """;
 
         var rows = await _q.ExecuteAsync(connection =>
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
-            OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", departamento.IdArea);
-            cmd.Parameters.Add(ParamNombre, departamento.Nombre);
-            cmd.Parameters.Add(":descripcion", departamento.Descripcion);
-            cmd.Parameters.Add(":estado", departamento.Estado);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", unidad.IdArea);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idDepartamento", unidad.IdDepartamento);
+            OracleCommandHelpers.AddNullableIntParam(cmd, ":idSeccion", unidad.IdSeccion);
+            cmd.Parameters.Add(ParamNombre, unidad.Nombre);
+            cmd.Parameters.Add(":descripcion", unidad.Descripcion);
+            cmd.Parameters.Add(":estado", unidad.Estado);
             cmd.Parameters.Add(":nombreOriginal", nombreOriginal);
             return cmd;
         }).ConfigureAwait(false);
@@ -140,7 +149,7 @@ internal sealed class DepartamentoRepository : IDepartamentoRepository
         var rows = await _q.ExecuteAsync(connection =>
         {
             var cmd = new OracleCommand(
-                "UPDATE DEPARTAMENTOS SET ESTADO = 0 WHERE ID_DEPARTAMENTO = :id AND ESTADO = 1",
+                "UPDATE UNIDADES SET ESTADO = 0 WHERE ID_UNIDAD = :id AND ESTADO = 1",
                 connection)
             {
                 BindByName = true,

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Backend.Tests;
 
-public sealed class PlazaRepositoryTests
+public sealed class PositionRepositoryTests
 {
     [Fact]
     public async Task ObtenerTodasAsync_ReturnsPlazasConRelacionesOpcionales()
@@ -27,7 +27,7 @@ public sealed class PlazaRepositoryTests
                 return map(reader);
             });
 
-        var repo = new PlazaRepository(q);
+        var repo = new PositionRepository(q);
         var plazas = await repo.ObtenerTodasAsync();
 
         Assert.Equal(2, plazas.Count);
@@ -57,7 +57,7 @@ public sealed class PlazaRepositoryTests
                 return map(reader);
             });
 
-        var repo = new PlazaRepository(q);
+        var repo = new PositionRepository(q);
         var plazas = await repo.ObtenerTodasAsync();
 
         Assert.Empty(plazas);
@@ -74,7 +74,7 @@ public sealed class PlazaRepositoryTests
                 return Task.FromResult<object?>(1);
             });
 
-        var repo = new PlazaRepository(q);
+        var repo = new PositionRepository(q);
         var exists = await repo.ExisteNumeroPlazaAsync(1001);
 
         Assert.True(exists);
@@ -91,7 +91,7 @@ public sealed class PlazaRepositoryTests
                 return Task.FromResult<object?>(0);
             });
 
-        var repo = new PlazaRepository(q);
+        var repo = new PositionRepository(q);
         var exists = await repo.ExisteNumeroPlazaAsync(9999);
 
         Assert.False(exists);
@@ -109,7 +109,7 @@ public sealed class PlazaRepositoryTests
                 return Task.FromResult(1);
             });
 
-        var repo = new PlazaRepository(q);
+        var repo = new PositionRepository(q);
         await repo.InsertarAsync(new Plaza
         {
             NumeroPlaza = 1001,
@@ -130,7 +130,7 @@ public sealed class PlazaRepositoryTests
     [Fact]
     public async Task InsertarAsync_LanzaExcepcionCuandoPlazaEsNull()
     {
-        var repo = new PlazaRepository(Substitute.For<IQueryExecutor>());
+        var repo = new PositionRepository(Substitute.For<IQueryExecutor>());
 
         await Assert.ThrowsAsync<ArgumentNullException>(() => repo.InsertarAsync(null!));
     }
@@ -151,7 +151,7 @@ public sealed class PlazaRepositoryTests
                 return map(reader);
             });
 
-        var repo = new PlazaRepository(q);
+        var repo = new PositionRepository(q);
         var plaza = await repo.ObtenerPorNumeroAsync(1001);
 
         Assert.NotNull(plaza);
@@ -178,7 +178,7 @@ public sealed class PlazaRepositoryTests
                 return map(reader);
             });
 
-        var repo = new PlazaRepository(q);
+        var repo = new PositionRepository(q);
         var plaza = await repo.ObtenerPorNumeroAsync(1002);
 
         Assert.NotNull(plaza);
@@ -203,7 +203,7 @@ public sealed class PlazaRepositoryTests
                 return map(reader);
             });
 
-        var repo = new PlazaRepository(q);
+        var repo = new PositionRepository(q);
         var plaza = await repo.ObtenerPorNumeroAsync(9999);
 
         Assert.Null(plaza);
@@ -220,7 +220,7 @@ public sealed class PlazaRepositoryTests
                 return Task.FromResult(1);
             });
 
-        var repo = new PlazaRepository(q);
+        var repo = new PositionRepository(q);
         var updated = await repo.ActualizarAsync(1001, new Plaza { NumeroPlaza = 1001, IdUnidad = 1, IdArea = 4 });
 
         Assert.True(updated);
@@ -237,7 +237,7 @@ public sealed class PlazaRepositoryTests
                 return Task.FromResult(0);
             });
 
-        var repo = new PlazaRepository(q);
+        var repo = new PositionRepository(q);
         var updated = await repo.ActualizarAsync(9999, new Plaza { NumeroPlaza = 9999 });
 
         Assert.False(updated);
@@ -246,7 +246,7 @@ public sealed class PlazaRepositoryTests
     [Fact]
     public async Task ActualizarAsync_LanzaExcepcionCuandoPlazaEsNull()
     {
-        var repo = new PlazaRepository(Substitute.For<IQueryExecutor>());
+        var repo = new PositionRepository(Substitute.For<IQueryExecutor>());
 
         await Assert.ThrowsAsync<ArgumentNullException>(() => repo.ActualizarAsync(1001, null!));
     }

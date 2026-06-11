@@ -2,7 +2,7 @@ using Backend.Models;
 
 namespace Backend.Repositories;
 
-internal interface ISeccionRepository
+internal interface ISectionRepository
 {
     Task<List<Seccion>> ObtenerTodasAsync();
     Task<Seccion?> ObtenerPorNombreAsync(string nombre);

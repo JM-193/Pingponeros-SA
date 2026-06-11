@@ -1,9 +1,9 @@
-// IPlazaRepository.cs
+// IPositionRepository.cs
 using Backend.Models;
 
 namespace Backend.Repositories;
 
-internal interface IPlazaRepository
+internal interface IPositionRepository
 {
     Task<List<Plaza>> ObtenerTodasAsync();
     Task<Plaza?> ObtenerPorNumeroAsync(long numeroPlaza);

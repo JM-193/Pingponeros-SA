@@ -57,18 +57,18 @@ internal static class Program
             new OracleConnection(builder.Configuration.GetConnectionString("OracleDB")));
         builder.Services.AddScoped<IDbExecutor, OracleDbExecutor>();
         builder.Services.AddScoped<IQueryExecutor, OracleQueryExecutor>();
-        builder.Services.AddScoped<IUsuarioRepository>(sp =>
-            new UsuarioRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<IUserRepository>(sp =>
+            new UserRepository(sp.GetRequiredService<IQueryExecutor>()));
         builder.Services.AddScoped<IAreaRepository>(sp =>
             new AreaRepository(sp.GetRequiredService<IQueryExecutor>()));
-        builder.Services.AddScoped<IDepartamentoRepository>(sp =>
-            new DepartamentoRepository(sp.GetRequiredService<IQueryExecutor>()));
-        builder.Services.AddScoped<ISeccionRepository>(sp =>
-            new SeccionRepository(sp.GetRequiredService<IQueryExecutor>()));
-        builder.Services.AddScoped<IUnidadRepository>(sp =>
-            new UnidadRepository(sp.GetRequiredService<IQueryExecutor>()));
-        builder.Services.AddScoped<IPlazaRepository>(sp =>
-            new PlazaRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<IDepartmentRepository>(sp =>
+            new DepartmentRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<ISectionRepository>(sp =>
+            new SectionRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<IUnitRepository>(sp =>
+            new UnitRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<IPositionRepository>(sp =>
+            new PositionRepository(sp.GetRequiredService<IQueryExecutor>()));
         builder.Services.AddScoped<IEmailService, EmailService>();
         builder.Services.AddOpenApi();
         builder.Services.AddCors(options =>
@@ -102,7 +102,7 @@ internal static class Program
     private static void MapUsuariosGetAll(RouteGroupBuilder usuarios)
     {
         // GET /usuarios — Lista todos los usuarios
-        usuarios.MapGet("/", async (IUsuarioRepository repo) =>
+        usuarios.MapGet("/", async (IUserRepository repo) =>
         {
             try
             {
@@ -119,7 +119,7 @@ internal static class Program
     private static void MapUsuariosGetByCorreo(RouteGroupBuilder usuarios)
     {
         // GET /usuarios/{correo} — Busca por clave primaria
-        usuarios.MapGet("/{correo}", async (string correo, IUsuarioRepository repo) =>
+        usuarios.MapGet("/{correo}", async (string correo, IUserRepository repo) =>
         {
             try
             {
@@ -138,7 +138,7 @@ internal static class Program
     private static void MapUsuariosCreate(RouteGroupBuilder usuarios, bool isDev)
     {
         // POST /usuarios — Crea un nuevo usuario con contraseña temporal
-        usuarios.MapPost("/", async (CrearUsuarioDto dto, IUsuarioRepository repo, IEmailService emailService) =>
+        usuarios.MapPost("/", async (CrearUsuarioDto dto, IUserRepository repo, IEmailService emailService) =>
         {
             var validationResult = ValidarCrearUsuario(dto);
             if (validationResult is not null)
@@ -228,7 +228,7 @@ internal static class Program
     private static string NormalizarCorreo(string correo) => correo.Trim().ToLowerInvariant();
 
     private static async Task<IResult> CrearUsuarioAsync(
-        IUsuarioRepository repo,
+        IUserRepository repo,
         IEmailService emailService,
         Backend.Models.Usuario usuario,
         string contrasenaTemp,
@@ -271,7 +271,7 @@ internal static class Program
     private static void MapUsuariosUpdate(RouteGroupBuilder usuarios)
     {
         // PUT /usuarios/{correo} — Actualiza un usuario existente
-        usuarios.MapPut("/{correo}", async (string correo, Backend.Models.Usuario usuario, IUsuarioRepository repo) =>
+        usuarios.MapPut("/{correo}", async (string correo, Backend.Models.Usuario usuario, IUserRepository repo) =>
         {
             try
             {
@@ -290,7 +290,7 @@ internal static class Program
     private static void MapUsuariosDelete(RouteGroupBuilder usuarios)
     {
         // DELETE /usuarios/{correo} — Elimina un usuario
-        usuarios.MapDelete("/{correo}", async (string correo, IUsuarioRepository repo) =>
+        usuarios.MapDelete("/{correo}", async (string correo, IUserRepository repo) =>
         {
             try
             {
@@ -560,7 +560,7 @@ internal static class Program
     private static void MapDepartamentosGetAll(RouteGroupBuilder departamentos)
     {
         // GET /departamentos — Lista todos los departamentos
-        departamentos.MapGet("/", async (IDepartamentoRepository repo) =>
+        departamentos.MapGet("/", async (IDepartmentRepository repo) =>
         {
             try
             {
@@ -577,7 +577,7 @@ internal static class Program
     private static void MapDepartamentosCreate(RouteGroupBuilder departamentos, bool isDev)
     {
         // POST /departamentos — Crea un nuevo departamento
-        departamentos.MapPost("/", async (CrearDepartamentoDto dto, IDepartamentoRepository repo) =>
+        departamentos.MapPost("/", async (CrearDepartamentoDto dto, IDepartmentRepository repo) =>
         {
             var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "del", "departamento");
             if (validationResult is not null)
@@ -606,7 +606,7 @@ internal static class Program
         });
     }
 
-    private static async Task<IResult> InsertarDepartamentoAsync(IDepartamentoRepository repo, Backend.Models.Departamento departamento, bool isDev)
+    private static async Task<IResult> InsertarDepartamentoAsync(IDepartmentRepository repo, Backend.Models.Departamento departamento, bool isDev)
     {
         try
         {
@@ -625,7 +625,7 @@ internal static class Program
     private static void MapDepartamentosGetByNombre(RouteGroupBuilder departamentos)
     {
         // GET /departamentos/{nombre} — Obtiene un departamento por nombre
-        departamentos.MapGet("/{nombre}", async (string nombre, IDepartamentoRepository repo) =>
+        departamentos.MapGet("/{nombre}", async (string nombre, IDepartmentRepository repo) =>
         {
             try
             {
@@ -644,7 +644,7 @@ internal static class Program
     private static void MapDepartamentosUpdate(RouteGroupBuilder departamentos, bool isDev)
     {
         // PUT /departamentos/{nombre} — Actualiza un departamento
-        departamentos.MapPut("/{nombre}", async (string nombre, CrearDepartamentoDto dto, IDepartamentoRepository repo) =>
+        departamentos.MapPut("/{nombre}", async (string nombre, CrearDepartamentoDto dto, IDepartmentRepository repo) =>
         {
             var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "del", "departamento");
             if (validationResult is not null)
@@ -679,7 +679,7 @@ internal static class Program
     private static void MapDepartamentosDelete(RouteGroupBuilder departamentos)
     {
         // DELETE /departamentos/{id} — Borrado lógico: pasa ESTADO de 1 a 0
-        departamentos.MapDelete("/{id:int}", async (int id, IDepartamentoRepository repo) =>
+        departamentos.MapDelete("/{id:int}", async (int id, IDepartmentRepository repo) =>
         {
             try
             {
@@ -712,7 +712,7 @@ internal static class Program
     private static void MapSeccionesGetAll(RouteGroupBuilder secciones)
     {
         // GET /secciones — Lista todas las secciones
-        secciones.MapGet("/", async (ISeccionRepository repo) =>
+        secciones.MapGet("/", async (ISectionRepository repo) =>
         {
             try
             {
@@ -729,7 +729,7 @@ internal static class Program
     private static void MapSeccionesCreate(RouteGroupBuilder secciones, bool isDev)
     {
         // POST /secciones — Crea una nueva sección
-        secciones.MapPost("/", async (CrearSeccionDto dto, ISeccionRepository repo) =>
+        secciones.MapPost("/", async (CrearSeccionDto dto, ISectionRepository repo) =>
         {
             var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "sección");
             if (validationResult is not null)
@@ -758,7 +758,7 @@ internal static class Program
         });
     }
 
-    private static async Task<IResult> InsertarSeccionAsync(ISeccionRepository repo, Backend.Models.Seccion seccion, bool isDev)
+    private static async Task<IResult> InsertarSeccionAsync(ISectionRepository repo, Backend.Models.Seccion seccion, bool isDev)
     {
         try
         {
@@ -777,7 +777,7 @@ internal static class Program
     private static void MapSeccionesGetByNombre(RouteGroupBuilder secciones)
     {
         // GET /secciones/{nombre} — Obtiene una sección por nombre
-        secciones.MapGet("/{nombre}", async (string nombre, ISeccionRepository repo) =>
+        secciones.MapGet("/{nombre}", async (string nombre, ISectionRepository repo) =>
         {
             try
             {
@@ -796,7 +796,7 @@ internal static class Program
     private static void MapSeccionesUpdate(RouteGroupBuilder secciones, bool isDev)
     {
         // PUT /secciones/{nombre} — Actualiza una sección
-        secciones.MapPut("/{nombre}", async (string nombre, CrearSeccionDto dto, ISeccionRepository repo) =>
+        secciones.MapPut("/{nombre}", async (string nombre, CrearSeccionDto dto, ISectionRepository repo) =>
         {
             var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "sección");
             if (validationResult is not null)
@@ -831,7 +831,7 @@ internal static class Program
     private static void MapSeccionesDelete(RouteGroupBuilder secciones)
     {
         // DELETE /secciones/{id} — Borrado lógico: pasa ESTADO de 1 a 0
-        secciones.MapDelete("/{id:int}", async (int id, ISeccionRepository repo) =>
+        secciones.MapDelete("/{id:int}", async (int id, ISectionRepository repo) =>
         {
             try
             {
@@ -864,7 +864,7 @@ internal static class Program
     private static void MapUnidadesGetAll(RouteGroupBuilder unidades)
     {
         // GET /unidades — Lista todas las unidades
-        unidades.MapGet("/", async (IUnidadRepository repo) =>
+        unidades.MapGet("/", async (IUnitRepository repo) =>
         {
             try
             {
@@ -881,7 +881,7 @@ internal static class Program
     private static void MapUnidadesCreate(RouteGroupBuilder unidades, bool isDev)
     {
         // POST /unidades — Crea una nueva unidad
-        unidades.MapPost("/", async (CrearUnidadDto dto, IUnidadRepository repo) =>
+        unidades.MapPost("/", async (CrearUnidadDto dto, IUnitRepository repo) =>
         {
             var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "unidad");
             if (validationResult is not null)
@@ -915,7 +915,7 @@ internal static class Program
         });
     }
 
-    private static async Task<IResult> InsertarUnidadAsync(IUnidadRepository repo, Backend.Models.Unidad unidad, bool isDev)
+    private static async Task<IResult> InsertarUnidadAsync(IUnitRepository repo, Backend.Models.Unidad unidad, bool isDev)
     {
         try
         {
@@ -934,7 +934,7 @@ internal static class Program
     private static void MapUnidadesGetByNombre(RouteGroupBuilder unidades)
     {
         // GET /unidades/{nombre} — Obtiene una unidad por nombre
-        unidades.MapGet("/{nombre}", async (string nombre, IUnidadRepository repo) =>
+        unidades.MapGet("/{nombre}", async (string nombre, IUnitRepository repo) =>
         {
             try
             {
@@ -953,7 +953,7 @@ internal static class Program
     private static void MapUnidadesUpdate(RouteGroupBuilder unidades, bool isDev)
     {
         // PUT /unidades/{nombre} — Actualiza una unidad
-        unidades.MapPut("/{nombre}", async (string nombre, CrearUnidadDto dto, IUnidadRepository repo) =>
+        unidades.MapPut("/{nombre}", async (string nombre, CrearUnidadDto dto, IUnitRepository repo) =>
         {
             var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "unidad");
             if (validationResult is not null)
@@ -993,7 +993,7 @@ internal static class Program
     private static void MapUnidadesDelete(RouteGroupBuilder unidades)
     {
         // DELETE /unidades/{id} — Borrado lógico: pasa ESTADO de 1 a 0
-        unidades.MapDelete("/{id:int}", async (int id, IUnidadRepository repo) =>
+        unidades.MapDelete("/{id:int}", async (int id, IUnitRepository repo) =>
         {
             try
             {
@@ -1025,7 +1025,7 @@ internal static class Program
     private static void MapPlazasGetAll(RouteGroupBuilder plazas)
     {
         // GET /plazas — Lista todas las plazas
-        plazas.MapGet("/", async (IPlazaRepository repo) =>
+        plazas.MapGet("/", async (IPositionRepository repo) =>
         {
             try
             {
@@ -1042,7 +1042,7 @@ internal static class Program
     private static void MapPlazasCreate(RouteGroupBuilder plazas, bool isDev)
     {
         // POST /plazas — Crea una nueva plaza
-        plazas.MapPost("/", async (CrearPlazaDto dto, IPlazaRepository repo) =>
+        plazas.MapPost("/", async (CrearPlazaDto dto, IPositionRepository repo) =>
         {
             if (dto.NumeroPlaza <= 0)
                 return Results.BadRequest(new { mensaje = "El número de plaza debe ser un entero positivo." });
@@ -1071,7 +1071,7 @@ internal static class Program
         });
     }
 
-    private static async Task<IResult> InsertarPlazaAsync(IPlazaRepository repo, Backend.Models.Plaza plaza, bool isDev)
+    private static async Task<IResult> InsertarPlazaAsync(IPositionRepository repo, Backend.Models.Plaza plaza, bool isDev)
     {
         try
         {
@@ -1090,7 +1090,7 @@ internal static class Program
     private static void MapPlazasGetByNumero(RouteGroupBuilder plazas)
     {
         // GET /plazas/{numeroPlaza} — Obtiene una plaza por número
-        plazas.MapGet("/{numeroPlaza:long}", async (long numeroPlaza, IPlazaRepository repo) =>
+        plazas.MapGet("/{numeroPlaza:long}", async (long numeroPlaza, IPositionRepository repo) =>
         {
             try
             {
@@ -1109,7 +1109,7 @@ internal static class Program
     private static void MapPlazasUpdate(RouteGroupBuilder plazas, bool isDev)
     {
         // PUT /plazas/{numeroPlaza} — Actualiza las asignaciones de una plaza existente
-        plazas.MapPut("/{numeroPlaza:long}", async (long numeroPlaza, CrearPlazaDto dto, IPlazaRepository repo) =>
+        plazas.MapPut("/{numeroPlaza:long}", async (long numeroPlaza, CrearPlazaDto dto, IPositionRepository repo) =>
         {
             try
             {
@@ -1147,17 +1147,17 @@ internal static class Program
 
     private static void MapAuth(WebApplication app, bool isDev)
     {
-        app.MapPost("/auth/login", async (LoginDto dto, IUsuarioRepository repo) =>
+        app.MapPost("/auth/login", async (LoginDto dto, IUserRepository repo) =>
             await HandleAuthLogin(dto, repo, isDev).ConfigureAwait(false));
 
-        app.MapPost("/auth/recuperar-contrasena", async (RecuperarContraseñaDto dto, IUsuarioRepository repo, IEmailService emailService) =>
+        app.MapPost("/auth/recuperar-contrasena", async (RecuperarContraseñaDto dto, IUserRepository repo, IEmailService emailService) =>
             await HandleRecuperarContrasena(dto.CorreoInstitucional, repo, emailService, isDev).ConfigureAwait(false));
 
-        app.MapPost("/auth/cambiar-contrasena", async (CambiarContraseñaDto dto, IUsuarioRepository repo, IEmailService emailService) =>
+        app.MapPost("/auth/cambiar-contrasena", async (CambiarContraseñaDto dto, IUserRepository repo, IEmailService emailService) =>
             await HandleCambiarContrasena(dto, repo, emailService, isDev).ConfigureAwait(false));
     }
 
-    private static async Task<IResult> HandleAuthLogin(LoginDto dto, IUsuarioRepository repo, bool isDev)
+    private static async Task<IResult> HandleAuthLogin(LoginDto dto, IUserRepository repo, bool isDev)
     {
         if (string.IsNullOrWhiteSpace(dto.CorreoInstitucional) ||
             string.IsNullOrWhiteSpace(dto.Contrasena))
@@ -1212,7 +1212,7 @@ internal static class Program
 
     private static async Task<IResult> HandleRecuperarContrasena(
         string correoInstitucional,
-        IUsuarioRepository repo,
+        IUserRepository repo,
         IEmailService emailService,
         bool isDev)
     {
@@ -1311,7 +1311,7 @@ internal static class Program
 
     private static async Task<IResult> HandleCambiarContrasena(
         CambiarContraseñaDto dto,
-        IUsuarioRepository repo,
+        IUserRepository repo,
         IEmailService emailService,
         bool isDev)
     {

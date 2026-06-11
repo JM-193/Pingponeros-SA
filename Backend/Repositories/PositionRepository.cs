@@ -1,15 +1,15 @@
-// PlazaRepository.cs
+// PositionRepository.cs
 using System.Globalization;
 using Oracle.ManagedDataAccess.Client;
 using Backend.Models;
 
 namespace Backend.Repositories;
 
-internal sealed class PlazaRepository : IPlazaRepository
+internal sealed class PositionRepository : IPositionRepository
 {
     private readonly IQueryExecutor _q;
 
-    public PlazaRepository(IQueryExecutor q) => _q = q;
+    public PositionRepository(IQueryExecutor q) => _q = q;
 
     public async Task<List<Plaza>> ObtenerTodasAsync()
     {

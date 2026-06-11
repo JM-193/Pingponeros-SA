@@ -2,7 +2,7 @@ using Backend.Models;
 
 namespace Backend.Repositories;
 
-internal interface IDepartamentoRepository
+internal interface IDepartmentRepository
 {
     Task<List<Departamento>> ObtenerTodosAsync();
     Task<Departamento?> ObtenerPorNombreAsync(string nombre);
