@@ -2,7 +2,7 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import ConsultarDepartamento from '../pages/ConsultarDepartamento'
-import * as departamentoService from '../services/departmentService'
+import * as departmentService from '../services/departmentService'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/departmentService')
@@ -11,7 +11,7 @@ vi.mock('../services/areaService')
 describe('ConsultarDepartamento Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    departamentoService.obtenerDepartamentos.mockResolvedValueOnce([
+    departmentService.obtenerDepartamentos.mockResolvedValueOnce([
       { id: 10, nombre: 'Compras', descripcion: 'Departamento de compras', idArea: 1, estado: 1 },
     ])
     areaService.obtenerAreas.mockResolvedValueOnce([
@@ -39,7 +39,7 @@ describe('ConsultarDepartamento Page', () => {
       </BrowserRouter>,
     )
 
-    expect(departamentoService.obtenerDepartamentos).toHaveBeenCalled()
+    expect(departmentService.obtenerDepartamentos).toHaveBeenCalled()
   })
 
   it('filtra departamentos por nombre en el buscador', async () => {

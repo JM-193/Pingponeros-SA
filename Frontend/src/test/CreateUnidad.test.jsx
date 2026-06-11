@@ -3,7 +3,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import CreateUnidad from '../pages/CreateUnidad'
 import * as areaService from '../services/areaService'
-import * as departamentoService from '../services/departmentService'
+import * as departmentService from '../services/departmentService'
 import * as sectionService from '../services/sectionService'
 
 vi.mock('../services/unidadService')
@@ -29,7 +29,7 @@ describe('CreateUnidad Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
-    departamentoService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
+    departmentService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
     sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
   })
 
@@ -65,7 +65,7 @@ describe('CreateUnidad Page', () => {
 
     await waitFor(() => {
       expect(areaService.obtenerAreas).toHaveBeenCalled()
-      expect(departamentoService.obtenerDepartamentos).toHaveBeenCalled()
+      expect(departmentService.obtenerDepartamentos).toHaveBeenCalled()
       expect(sectionService.obtenerSecciones).toHaveBeenCalled()
     })
   })

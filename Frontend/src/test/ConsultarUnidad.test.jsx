@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import ConsultarUnidad from '../pages/ConsultarUnidad'
 import * as unidadService from '../services/unidadService'
 import * as areaService from '../services/areaService'
-import * as departamentoService from '../services/departmentService'
+import * as departmentService from '../services/departmentService'
 import * as sectionService from '../services/sectionService'
 
 vi.mock('../services/unidadService', () => ({
@@ -36,7 +36,7 @@ describe('ConsultarUnidad Page', () => {
     areaService.obtenerAreas.mockResolvedValue([
       { id: 1, nombre: 'Administración', descripcion: 'Área' },
     ])
-    departamentoService.obtenerDepartamentos.mockResolvedValue([
+    departmentService.obtenerDepartamentos.mockResolvedValue([
       { id: 2, nombre: 'Compras', descripcion: 'Departamento' },
     ])
     sectionService.obtenerSecciones.mockResolvedValue([])

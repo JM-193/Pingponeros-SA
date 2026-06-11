@@ -1,4 +1,4 @@
-// departamentoService.test.js
+// departmentService.test.js
 import { describe, it, expect, beforeEach } from 'vitest'
 import {
   obtenerDepartamentos,
@@ -8,7 +8,7 @@ import {
   actualizarDepartamento,
 } from '../services/departmentService'
 
-describe('departamentoService', () => {
+describe('departmentService', () => {
   const mockFetch = vi.fn()
 
   beforeEach(() => {

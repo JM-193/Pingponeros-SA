@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import CreatePlaza from '../pages/CreatePlaza'
 import * as positionService from '../services/positionService'
 import * as unidadService from '../services/unidadService'
-import * as departamentoService from '../services/departmentService'
+import * as departmentService from '../services/departmentService'
 import * as sectionService from '../services/sectionService'
 import * as areaService from '../services/areaService'
 
@@ -23,7 +23,7 @@ describe('CreatePlaza Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     unidadService.obtenerUnidades.mockResolvedValue(mockUnidades)
-    departamentoService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
+    departmentService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
     sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
   })
@@ -31,7 +31,7 @@ describe('CreatePlaza Page', () => {
   it('muestra indicador de carga mientras carga opciones', () => {
     // Las mocks resuelven de forma asíncrona, así que al montar debería verse cargando
     unidadService.obtenerUnidades.mockImplementation(() => new Promise(() => {}))
-    departamentoService.obtenerDepartamentos.mockImplementation(() => new Promise(() => {}))
+    departmentService.obtenerDepartamentos.mockImplementation(() => new Promise(() => {}))
     sectionService.obtenerSecciones.mockImplementation(() => new Promise(() => {}))
     areaService.obtenerAreas.mockImplementation(() => new Promise(() => {}))
 
@@ -178,7 +178,7 @@ describe('CreatePlaza Page', () => {
     unidadService.obtenerUnidades.mockResolvedValueOnce([
       { id: 1, nombre: 'Portal', idDepartamento: 1 },
     ])
-    departamentoService.obtenerDepartamentos.mockResolvedValueOnce([
+    departmentService.obtenerDepartamentos.mockResolvedValueOnce([
       { id: 1, nombre: 'ITI', idArea: 1 },
     ])
 

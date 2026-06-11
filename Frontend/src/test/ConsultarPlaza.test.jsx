@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import ConsultarPlaza from '../pages/ConsultarPlaza'
 import * as positionService from '../services/positionService'
 import * as unidadService from '../services/unidadService'
-import * as departamentoService from '../services/departmentService'
+import * as departmentService from '../services/departmentService'
 import * as sectionService from '../services/sectionService'
 import * as areaService from '../services/areaService'
 
@@ -29,7 +29,7 @@ describe('ConsultarPlaza Page', () => {
     vi.resetAllMocks()
     positionService.obtenerPlazas.mockResolvedValue(mockPlazas)
     unidadService.obtenerUnidades.mockResolvedValue(mockUnidades)
-    departamentoService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
+    departmentService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
     sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
   })
@@ -169,7 +169,7 @@ describe('ConsultarPlaza Page', () => {
 
     await waitFor(() => {
       expect(unidadService.obtenerUnidades).toHaveBeenCalled()
-      expect(departamentoService.obtenerDepartamentos).toHaveBeenCalled()
+      expect(departmentService.obtenerDepartamentos).toHaveBeenCalled()
       expect(sectionService.obtenerSecciones).toHaveBeenCalled()
       expect(areaService.obtenerAreas).toHaveBeenCalled()
     })

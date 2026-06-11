@@ -4,7 +4,7 @@ import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
 import EditUnidad from '../pages/EditUnidad'
 import * as unidadService from '../services/unidadService'
 import * as areaService from '../services/areaService'
-import * as departamentoService from '../services/departmentService'
+import * as departmentService from '../services/departmentService'
 import * as sectionService from '../services/sectionService'
 
 vi.mock('../services/unidadService')
@@ -53,7 +53,7 @@ describe('EditUnidad Page', () => {
   it('carga y renderiza el formulario con los datos de la unidad', async () => {
     unidadService.obtenerUnidadPorNombre.mockResolvedValueOnce(mockUnidad)
     areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
-    departamentoService.obtenerDepartamentos.mockResolvedValueOnce(mockDepartamentos)
+    departmentService.obtenerDepartamentos.mockResolvedValueOnce(mockDepartamentos)
     sectionService.obtenerSecciones.mockResolvedValueOnce(mockSecciones)
 
     renderWithRoute('Unidad Administrativa')
@@ -69,7 +69,7 @@ describe('EditUnidad Page', () => {
   it('actualiza unidad correctamente y redirige', async () => {
     unidadService.obtenerUnidadPorNombre.mockResolvedValueOnce(mockUnidad)
     areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
-    departamentoService.obtenerDepartamentos.mockResolvedValueOnce(mockDepartamentos)
+    departmentService.obtenerDepartamentos.mockResolvedValueOnce(mockDepartamentos)
     sectionService.obtenerSecciones.mockResolvedValueOnce(mockSecciones)
     unidadService.actualizarUnidad.mockResolvedValueOnce({})
 
@@ -90,7 +90,7 @@ describe('EditUnidad Page', () => {
   it('muestra error cuando falla la actualización', async () => {
     unidadService.obtenerUnidadPorNombre.mockResolvedValue(mockUnidad)
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
-    departamentoService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
+    departmentService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
     sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
     unidadService.actualizarUnidad.mockRejectedValueOnce(new Error('Error al actualizar unidad'))
 
@@ -111,7 +111,7 @@ describe('EditUnidad Page', () => {
   it('muestra error cuando falla la carga', async () => {
     unidadService.obtenerUnidadPorNombre.mockRejectedValueOnce(new Error('Unidad no encontrada'))
     areaService.obtenerAreas.mockResolvedValueOnce([])
-    departamentoService.obtenerDepartamentos.mockResolvedValueOnce([])
+    departmentService.obtenerDepartamentos.mockResolvedValueOnce([])
     sectionService.obtenerSecciones.mockResolvedValueOnce([])
 
     renderWithRoute('Inexistente')

@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import EditPlaza from '../pages/EditPlaza'
 import * as positionService from '../services/positionService'
 import * as unidadService from '../services/unidadService'
-import * as departamentoService from '../services/departmentService'
+import * as departmentService from '../services/departmentService'
 import * as sectionService from '../services/sectionService'
 import * as areaService from '../services/areaService'
 
@@ -51,7 +51,7 @@ describe('EditPlaza Page', () => {
     vi.resetAllMocks()
     positionService.obtenerPlazaPorNumero.mockResolvedValue(mockPlaza)
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
-    departamentoService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
+    departmentService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
     sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
     unidadService.obtenerUnidades.mockResolvedValue(mockUnidades)
   })
