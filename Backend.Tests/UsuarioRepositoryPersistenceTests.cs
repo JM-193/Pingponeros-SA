@@ -18,11 +18,11 @@ public sealed class UserRepositoryPersistenceTests
         table.Rows.Add("juan@test.com", "Juan", "Carlos", "Mora", "Vega", 1, 0);
 
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<Usuario>>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<User>>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<List<Usuario>>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<List<User>>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
@@ -42,11 +42,11 @@ public sealed class UserRepositoryPersistenceTests
     {
         var table = CrearTablaUsuarios();
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Usuario?>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<User?>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<Usuario?>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<User?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
@@ -113,7 +113,7 @@ public sealed class UserRepositoryPersistenceTests
             });
 
         var repo = new UserRepository(q);
-        await repo.InsertarAsync(new Usuario
+        await repo.InsertarAsync(new User
         {
             CorreoInstitucional = "ana@test.com",
             PrimerNombre = "Ana",
@@ -144,7 +144,7 @@ public sealed class UserRepositoryPersistenceTests
 
         var repo = new UserRepository(q);
         await repo.InsertarConContrasenaAsync(
-            new Usuario { CorreoInstitucional = "ana@test.com", PrimerNombre = "Ana", PrimerApellido = "Lopez", Rol = 0, Estado = 1 },
+            new User { CorreoInstitucional = "ana@test.com", PrimerNombre = "Ana", PrimerApellido = "Lopez", Rol = 0, Estado = 1 },
             "hash-temporal");
 
         await q.Received(2).ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>());
@@ -163,7 +163,7 @@ public sealed class UserRepositoryPersistenceTests
             });
 
         var repo = new UserRepository(q);
-        await repo.CambiarContraseñaAsync("ana@test.com", "hash-nuevo");
+        await repo.ChangePasswordAsync("ana@test.com", "hash-nuevo");
 
         Assert.NotNull(command);
         Assert.Equal("ana@test.com", command!.Parameters["correo"].Value);

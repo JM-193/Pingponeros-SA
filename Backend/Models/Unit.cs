@@ -1,6 +1,6 @@
 namespace Backend.Models;
 
-internal sealed class Unidad
+internal sealed class Unit
 {
     public int Id { get; set; }
     public int? IdArea { get; set; }

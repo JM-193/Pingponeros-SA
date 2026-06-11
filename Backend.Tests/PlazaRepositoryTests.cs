@@ -18,11 +18,11 @@ public sealed class PositionRepositoryTests
         table.Rows.Add(1002L, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value);
 
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<Plaza>>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<Position>>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<List<Plaza>>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<List<Position>>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
@@ -48,11 +48,11 @@ public sealed class PositionRepositoryTests
     {
         var table = CrearTablaPlazas();
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<Plaza>>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<Position>>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<List<Plaza>>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<List<Position>>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
@@ -110,7 +110,7 @@ public sealed class PositionRepositoryTests
             });
 
         var repo = new PositionRepository(q);
-        await repo.InsertarAsync(new Plaza
+        await repo.InsertarAsync(new Position
         {
             NumeroPlaza = 1001,
             IdUnidad = 1,
@@ -142,11 +142,11 @@ public sealed class PositionRepositoryTests
         table.Rows.Add(1001L, 1, DBNull.Value, 3, DBNull.Value);
 
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Plaza?>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Position?>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<Plaza?>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<Position?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
@@ -169,11 +169,11 @@ public sealed class PositionRepositoryTests
         table.Rows.Add(1002L, DBNull.Value, 2, DBNull.Value, 4);
 
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Plaza?>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Position?>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<Plaza?>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<Position?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
@@ -194,11 +194,11 @@ public sealed class PositionRepositoryTests
     {
         var table = CrearTablaPlazas();
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Plaza?>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Position?>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<Plaza?>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<Position?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
@@ -221,7 +221,7 @@ public sealed class PositionRepositoryTests
             });
 
         var repo = new PositionRepository(q);
-        var updated = await repo.ActualizarAsync(1001, new Plaza { NumeroPlaza = 1001, IdUnidad = 1, IdArea = 4 });
+        var updated = await repo.ActualizarAsync(1001, new Position { NumeroPlaza = 1001, IdUnidad = 1, IdArea = 4 });
 
         Assert.True(updated);
     }
@@ -238,7 +238,7 @@ public sealed class PositionRepositoryTests
             });
 
         var repo = new PositionRepository(q);
-        var updated = await repo.ActualizarAsync(9999, new Plaza { NumeroPlaza = 9999 });
+        var updated = await repo.ActualizarAsync(9999, new Position { NumeroPlaza = 9999 });
 
         Assert.False(updated);
     }

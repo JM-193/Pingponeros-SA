@@ -13,7 +13,7 @@ internal sealed class DepartmentRepository : IDepartmentRepository
 
     public DepartmentRepository(IQueryExecutor q) => _q = q;
 
-    public async Task<List<Departamento>> ObtenerTodosAsync()
+    public async Task<List<Department>> ObtenerTodosAsync()
     {
         return await _q.QueryAsync(connection =>
         {
@@ -26,10 +26,10 @@ internal sealed class DepartmentRepository : IDepartmentRepository
             return cmd;
         }, async reader =>
         {
-            var departamentos = new List<Departamento>();
+            var departamentos = new List<Department>();
             while (await reader.ReadAsync().ConfigureAwait(false))
             {
-                departamentos.Add(new Departamento
+                departamentos.Add(new Department
                 {
                     Id = Convert.ToInt32(reader["ID_DEPARTAMENTO"], CultureInfo.InvariantCulture),
                     IdArea = reader["ID_AREA"] is DBNull ? null : Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
@@ -58,7 +58,7 @@ internal sealed class DepartmentRepository : IDepartmentRepository
         return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
     }
 
-    public async Task<int> InsertarAsync(Departamento departamento)
+    public async Task<int> InsertarAsync(Department departamento)
     {
         ArgumentNullException.ThrowIfNull(departamento);
 
@@ -82,7 +82,7 @@ internal sealed class DepartmentRepository : IDepartmentRepository
         return (int)(OracleDecimal)result!;
     }
 
-    public async Task<Departamento?> ObtenerPorNombreAsync(string nombre)
+    public async Task<Department?> ObtenerPorNombreAsync(string nombre)
     {
         return await _q.QueryAsync(connection =>
         {
@@ -98,7 +98,7 @@ internal sealed class DepartmentRepository : IDepartmentRepository
         {
             if (await reader.ReadAsync().ConfigureAwait(false))
             {
-                return new Departamento
+                return new Department
                 {
                     Id = Convert.ToInt32(reader["ID_DEPARTAMENTO"], CultureInfo.InvariantCulture),
                     IdArea = reader["ID_AREA"] is DBNull ? null : Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
@@ -111,7 +111,7 @@ internal sealed class DepartmentRepository : IDepartmentRepository
         }).ConfigureAwait(false);
     }
 
-    public async Task<bool> ActualizarAsync(string nombreOriginal, Departamento departamento)
+    public async Task<bool> ActualizarAsync(string nombreOriginal, Department departamento)
     {
         ArgumentNullException.ThrowIfNull(departamento);
 

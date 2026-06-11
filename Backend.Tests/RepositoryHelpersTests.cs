@@ -44,7 +44,7 @@ public sealed class UserRepositoryTests
         Assert.True(reader.Read());
 
         var method = ObtenerMetodoPrivado("MapearFila");
-        var usuario = (Usuario)method.Invoke(null, new object[] { reader })!;
+        var usuario = (User)method.Invoke(null, new object[] { reader })!;
 
         Assert.Null(usuario.SegundoNombre);
         Assert.Null(usuario.SegundoApellido);
@@ -60,7 +60,7 @@ public sealed class UserRepositoryTests
         Assert.True(reader.Read());
 
         var method = ObtenerMetodoPrivado("MapearFila");
-        var usuario = (Usuario)method.Invoke(null, new object[] { reader })!;
+        var usuario = (User)method.Invoke(null, new object[] { reader })!;
 
         Assert.Equal("Maria", usuario.SegundoNombre);
         Assert.Equal("Vega", usuario.SegundoApellido);
@@ -70,7 +70,7 @@ public sealed class UserRepositoryTests
     public void AgregarParametros_UsaDbNullParaOpcionalesVacios()
     {
         var cmd = new OracleCommand();
-        var usuario = new Usuario
+        var usuario = new User
         {
             CorreoInstitucional = "ana@test.com",
             PrimerNombre = "Ana",
@@ -94,7 +94,7 @@ public sealed class UserRepositoryTests
     public void AgregarParametros_UsaValoresParaOpcionales()
     {
         var cmd = new OracleCommand();
-        var usuario = new Usuario
+        var usuario = new User
         {
             CorreoInstitucional = "ana@test.com",
             PrimerNombre = "Ana",

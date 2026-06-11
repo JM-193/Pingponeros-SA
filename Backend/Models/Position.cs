@@ -1,7 +1,7 @@
 // Plaza.cs
 namespace Backend.Models;
 
-internal sealed class Plaza
+internal sealed class Position
 {
     public long NumeroPlaza { get; set; }
     public int? IdUnidad { get; set; }

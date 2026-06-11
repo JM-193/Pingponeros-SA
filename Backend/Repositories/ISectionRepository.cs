@@ -4,10 +4,10 @@ namespace Backend.Repositories;
 
 internal interface ISectionRepository
 {
-    Task<List<Seccion>> ObtenerTodasAsync();
-    Task<Seccion?> ObtenerPorNombreAsync(string nombre);
+    Task<List<Section>> ObtenerTodasAsync();
+    Task<Section?> ObtenerPorNombreAsync(string nombre);
     Task<bool> ExisteNombreAsync(string nombre);
-    Task<int> InsertarAsync(Seccion seccion);
-    Task<bool> ActualizarAsync(string nombreOriginal, Seccion seccion);
+    Task<int> InsertarAsync(Section seccion);
+    Task<bool> ActualizarAsync(string nombreOriginal, Section seccion);
     Task<bool> DesactivarAsync(int id);
 }

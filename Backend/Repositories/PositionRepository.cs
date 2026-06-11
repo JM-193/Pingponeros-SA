@@ -11,7 +11,7 @@ internal sealed class PositionRepository : IPositionRepository
 
     public PositionRepository(IQueryExecutor q) => _q = q;
 
-    public async Task<List<Plaza>> ObtenerTodasAsync()
+    public async Task<List<Position>> ObtenerTodasAsync()
     {
         return await _q.QueryAsync(connection =>
         {
@@ -24,10 +24,10 @@ internal sealed class PositionRepository : IPositionRepository
             return cmd;
         }, async reader =>
         {
-            var plazas = new List<Plaza>();
+            var plazas = new List<Position>();
             while (await reader.ReadAsync().ConfigureAwait(false))
             {
-                plazas.Add(new Plaza
+                plazas.Add(new Position
                 {
                     NumeroPlaza = Convert.ToInt64(reader["NUMERO_PLAZA"], CultureInfo.InvariantCulture),
                     IdUnidad = reader["ID_UNIDAD"] is DBNull ? null : Convert.ToInt32(reader["ID_UNIDAD"], CultureInfo.InvariantCulture),
@@ -56,7 +56,7 @@ internal sealed class PositionRepository : IPositionRepository
         return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
     }
 
-    public async Task InsertarAsync(Plaza plaza)
+    public async Task InsertarAsync(Position plaza)
     {
         ArgumentNullException.ThrowIfNull(plaza);
 
@@ -77,7 +77,7 @@ internal sealed class PositionRepository : IPositionRepository
         }).ConfigureAwait(false);
     }
 
-    public async Task<Plaza?> ObtenerPorNumeroAsync(long numeroPlaza)
+    public async Task<Position?> ObtenerPorNumeroAsync(long numeroPlaza)
     {
         return await _q.QueryAsync(connection =>
         {
@@ -93,7 +93,7 @@ internal sealed class PositionRepository : IPositionRepository
         {
             if (await reader.ReadAsync().ConfigureAwait(false))
             {
-                return new Plaza
+                return new Position
                 {
                     NumeroPlaza = Convert.ToInt64(reader["NUMERO_PLAZA"], CultureInfo.InvariantCulture),
                     IdUnidad = reader["ID_UNIDAD"] is DBNull ? null : Convert.ToInt32(reader["ID_UNIDAD"], CultureInfo.InvariantCulture),
@@ -106,7 +106,7 @@ internal sealed class PositionRepository : IPositionRepository
         }).ConfigureAwait(false);
     }
 
-    public async Task<bool> ActualizarAsync(long numeroPlaza, Plaza plaza)
+    public async Task<bool> ActualizarAsync(long numeroPlaza, Position plaza)
     {
         ArgumentNullException.ThrowIfNull(plaza);
 

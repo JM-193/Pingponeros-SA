@@ -13,7 +13,7 @@ internal sealed class SectionRepository : ISectionRepository
 
     public SectionRepository(IQueryExecutor q) => _q = q;
 
-    public async Task<List<Seccion>> ObtenerTodasAsync()
+    public async Task<List<Section>> ObtenerTodasAsync()
     {
         return await _q.QueryAsync(connection =>
         {
@@ -26,10 +26,10 @@ internal sealed class SectionRepository : ISectionRepository
             return cmd;
         }, async reader =>
         {
-            var secciones = new List<Seccion>();
+            var secciones = new List<Section>();
             while (await reader.ReadAsync().ConfigureAwait(false))
             {
-                secciones.Add(new Seccion
+                secciones.Add(new Section
                 {
                     Id = Convert.ToInt32(reader["ID_SECCION"], CultureInfo.InvariantCulture),
                     IdArea = reader["ID_AREA"] is DBNull ? null : Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
@@ -58,7 +58,7 @@ internal sealed class SectionRepository : ISectionRepository
         return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
     }
 
-    public async Task<int> InsertarAsync(Seccion seccion)
+    public async Task<int> InsertarAsync(Section seccion)
     {
         ArgumentNullException.ThrowIfNull(seccion);
 
@@ -82,7 +82,7 @@ internal sealed class SectionRepository : ISectionRepository
         return (int)(OracleDecimal)result!;
     }
 
-    public async Task<Seccion?> ObtenerPorNombreAsync(string nombre)
+    public async Task<Section?> ObtenerPorNombreAsync(string nombre)
     {
         return await _q.QueryAsync(connection =>
         {
@@ -98,7 +98,7 @@ internal sealed class SectionRepository : ISectionRepository
         {
             if (await reader.ReadAsync().ConfigureAwait(false))
             {
-                return new Seccion
+                return new Section
                 {
                     Id = Convert.ToInt32(reader["ID_SECCION"], CultureInfo.InvariantCulture),
                     IdArea = reader["ID_AREA"] is DBNull ? null : Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
@@ -111,7 +111,7 @@ internal sealed class SectionRepository : ISectionRepository
         }).ConfigureAwait(false);
     }
 
-    public async Task<bool> ActualizarAsync(string nombreOriginal, Seccion seccion)
+    public async Task<bool> ActualizarAsync(string nombreOriginal, Section seccion)
     {
         ArgumentNullException.ThrowIfNull(seccion);
 

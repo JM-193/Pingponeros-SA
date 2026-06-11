@@ -5,9 +5,9 @@ namespace Backend.Repositories;
 
 internal interface IPositionRepository
 {
-    Task<List<Plaza>> ObtenerTodasAsync();
-    Task<Plaza?> ObtenerPorNumeroAsync(long numeroPlaza);
+    Task<List<Position>> ObtenerTodasAsync();
+    Task<Position?> ObtenerPorNumeroAsync(long numeroPlaza);
     Task<bool> ExisteNumeroPlazaAsync(long numeroPlaza);
-    Task InsertarAsync(Plaza plaza);
-    Task<bool> ActualizarAsync(long numeroPlaza, Plaza plaza);
+    Task InsertarAsync(Position plaza);
+    Task<bool> ActualizarAsync(long numeroPlaza, Position plaza);
 }

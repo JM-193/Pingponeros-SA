@@ -200,14 +200,14 @@ internal static class Program
 
     [SuppressMessage("Globalization", "CA1308:NormalizeStringsToUppercase",
         Justification = "Los correos y nombres se normalizan a minúsculas por requisito de negocio.")]
-    private static Backend.Models.Usuario CrearUsuarioDesdeDto(CrearUsuarioDto dto)
+    private static Backend.Models.User CrearUsuarioDesdeDto(CrearUsuarioDto dto)
     {
         // Función auxiliar para capitalizar (primera letra mayúscula, resto minúscula)
         static string Capitalizar(string? texto) =>
             string.IsNullOrWhiteSpace(texto) ? texto?.Trim() ?? "" :
             char.ToUpper(texto.Trim()[0], CultureInfo.InvariantCulture) + texto.Trim()[1..].ToLower(CultureInfo.InvariantCulture);
 
-        return new Backend.Models.Usuario
+        return new Backend.Models.User
         {
             CorreoInstitucional = dto.CorreoInstitucional.Trim().ToLowerInvariant(),
             PrimerNombre = Capitalizar(dto.PrimerNombre),
@@ -230,7 +230,7 @@ internal static class Program
     private static async Task<IResult> CrearUsuarioAsync(
         IUserRepository repo,
         IEmailService emailService,
-        Backend.Models.Usuario usuario,
+        Backend.Models.User usuario,
         string contrasenaTemp,
         string hash,
         bool isDev)
@@ -271,7 +271,7 @@ internal static class Program
     private static void MapUsuariosUpdate(RouteGroupBuilder usuarios)
     {
         // PUT /usuarios/{correo} — Actualiza un usuario existente
-        usuarios.MapPut("/{correo}", async (string correo, Backend.Models.Usuario usuario, IUserRepository repo) =>
+        usuarios.MapPut("/{correo}", async (string correo, Backend.Models.User usuario, IUserRepository repo) =>
         {
             try
             {
@@ -594,7 +594,7 @@ internal static class Program
                 return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
             }
 
-            var departamento = new Backend.Models.Departamento
+            var departamento = new Backend.Models.Department
             {
                 Nombre = NormalizarNombre(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
@@ -606,7 +606,7 @@ internal static class Program
         });
     }
 
-    private static async Task<IResult> InsertarDepartamentoAsync(IDepartmentRepository repo, Backend.Models.Departamento departamento, bool isDev)
+    private static async Task<IResult> InsertarDepartamentoAsync(IDepartmentRepository repo, Backend.Models.Department departamento, bool isDev)
     {
         try
         {
@@ -660,7 +660,7 @@ internal static class Program
             if (conflicto is not null)
                 return conflicto;
 
-            var departamento = new Backend.Models.Departamento
+            var departamento = new Backend.Models.Department
             {
                 Nombre = NormalizarNombre(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
@@ -746,7 +746,7 @@ internal static class Program
                 return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
             }
 
-            var seccion = new Backend.Models.Seccion
+            var seccion = new Backend.Models.Section
             {
                 Nombre = NormalizarNombre(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
@@ -758,7 +758,7 @@ internal static class Program
         });
     }
 
-    private static async Task<IResult> InsertarSeccionAsync(ISectionRepository repo, Backend.Models.Seccion seccion, bool isDev)
+    private static async Task<IResult> InsertarSeccionAsync(ISectionRepository repo, Backend.Models.Section seccion, bool isDev)
     {
         try
         {
@@ -812,7 +812,7 @@ internal static class Program
             if (conflicto is not null)
                 return conflicto;
 
-            var seccion = new Backend.Models.Seccion
+            var seccion = new Backend.Models.Section
             {
                 Nombre = NormalizarNombre(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
@@ -901,7 +901,7 @@ internal static class Program
                 return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
             }
 
-            var unidad = new Backend.Models.Unidad
+            var unidad = new Backend.Models.Unit
             {
                 Nombre = NormalizarNombre(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
@@ -915,7 +915,7 @@ internal static class Program
         });
     }
 
-    private static async Task<IResult> InsertarUnidadAsync(IUnitRepository repo, Backend.Models.Unidad unidad, bool isDev)
+    private static async Task<IResult> InsertarUnidadAsync(IUnitRepository repo, Backend.Models.Unit unidad, bool isDev)
     {
         try
         {
@@ -972,7 +972,7 @@ internal static class Program
             if (conflicto is not null)
                 return conflicto;
 
-            var unidad = new Backend.Models.Unidad
+            var unidad = new Backend.Models.Unit
             {
                 Nombre = NormalizarNombre(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
@@ -1058,7 +1058,7 @@ internal static class Program
                 return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
             }
 
-            var plaza = new Backend.Models.Plaza
+            var plaza = new Backend.Models.Position
             {
                 NumeroPlaza = dto.NumeroPlaza,
                 IdUnidad = dto.IdUnidad,
@@ -1071,7 +1071,7 @@ internal static class Program
         });
     }
 
-    private static async Task<IResult> InsertarPlazaAsync(IPositionRepository repo, Backend.Models.Plaza plaza, bool isDev)
+    private static async Task<IResult> InsertarPlazaAsync(IPositionRepository repo, Backend.Models.Position plaza, bool isDev)
     {
         try
         {
@@ -1122,7 +1122,7 @@ internal static class Program
                 return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
             }
 
-            var plaza = new Backend.Models.Plaza
+            var plaza = new Backend.Models.Position
             {
                 NumeroPlaza = numeroPlaza,
                 IdUnidad = dto.IdUnidad,
@@ -1150,10 +1150,10 @@ internal static class Program
         app.MapPost("/auth/login", async (LoginDto dto, IUserRepository repo) =>
             await HandleAuthLogin(dto, repo, isDev).ConfigureAwait(false));
 
-        app.MapPost("/auth/recuperar-contrasena", async (RecuperarContraseñaDto dto, IUserRepository repo, IEmailService emailService) =>
+        app.MapPost("/auth/recuperar-contrasena", async (ResetPasswordDto dto, IUserRepository repo, IEmailService emailService) =>
             await HandleRecuperarContrasena(dto.CorreoInstitucional, repo, emailService, isDev).ConfigureAwait(false));
 
-        app.MapPost("/auth/cambiar-contrasena", async (CambiarContraseñaDto dto, IUserRepository repo, IEmailService emailService) =>
+        app.MapPost("/auth/cambiar-contrasena", async (ChangePasswordDto dto, IUserRepository repo, IEmailService emailService) =>
             await HandleCambiarContrasena(dto, repo, emailService, isDev).ConfigureAwait(false));
     }
 
@@ -1261,7 +1261,7 @@ internal static class Program
         }
     }
 
-    private static void EnviarCorreoRecuperacion(IEmailService emailService, Backend.Models.Usuario usuario, string contrasenaTemporal)
+    private static void EnviarCorreoRecuperacion(IEmailService emailService, Backend.Models.User usuario, string contrasenaTemporal)
     {
         var asunto = "Recuperación de Contraseña - Pingponeros";
         var apellidos = $"{usuario.PrimerApellido} {usuario.SegundoApellido}";
@@ -1310,7 +1310,7 @@ internal static class Program
             statusCode: 403);
 
     private static async Task<IResult> HandleCambiarContrasena(
-        CambiarContraseñaDto dto,
+        ChangePasswordDto dto,
         IUserRepository repo,
         IEmailService emailService,
         bool isDev)
@@ -1318,16 +1318,16 @@ internal static class Program
         if (string.IsNullOrWhiteSpace(dto.CorreoInstitucional))
             return Results.BadRequest(new { mensaje = "El correo institucional es obligatorio." });
 
-        if (string.IsNullOrWhiteSpace(dto.ContraseñaActual))
+        if (string.IsNullOrWhiteSpace(dto.ContrasenaActual))
             return Results.BadRequest(new { mensaje = "La contraseña actual es obligatoria." });
 
-        if (string.IsNullOrWhiteSpace(dto.ContraseñaNueva))
+        if (string.IsNullOrWhiteSpace(dto.ContrasenaNueva))
             return Results.BadRequest(new { mensaje = "La nueva contraseña es obligatoria." });
 
-        if (dto.ContraseñaNueva.Equals(dto.ContraseñaActual, StringComparison.Ordinal))
+        if (dto.ContrasenaNueva.Equals(dto.ContrasenaActual, StringComparison.Ordinal))
             return Results.BadRequest(new { mensaje = "La nueva contraseña debe ser diferente a la actual." });
 
-        var validacionContrasena = ValidarComplejidadContraseñaResult(dto.ContraseñaNueva);
+        var validacionContrasena = ValidarComplejidadContraseñaResult(dto.ContrasenaNueva);
         if (validacionContrasena is not null)
             return validacionContrasena;
 
@@ -1343,7 +1343,7 @@ internal static class Program
             var contrasenaActual = await repo.ObtenerContrasenaMasRecienteAsync(correo)
                                              .ConfigureAwait(false);
 
-            if (contrasenaActual is null || !BCrypt.Net.BCrypt.Verify(dto.ContraseñaActual, contrasenaActual.Hash))
+            if (contrasenaActual is null || !BCrypt.Net.BCrypt.Verify(dto.ContrasenaActual, contrasenaActual.Hash))
                 return Results.Json(new { mensaje = "La contraseña actual es incorrecta." }, statusCode: 401);
 
             if (ContrasenaTemporalExpirada(contrasenaActual))
@@ -1356,8 +1356,8 @@ internal static class Program
             if (usuario.Estado != 1)
                 return Results.Json(new { mensaje = "La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
 
-            var hashNueva = BCrypt.Net.BCrypt.HashPassword(dto.ContraseñaNueva);
-            await repo.CambiarContraseñaAsync(usuario.CorreoInstitucional, hashNueva).ConfigureAwait(false);
+            var hashNueva = BCrypt.Net.BCrypt.HashPassword(dto.ContrasenaNueva);
+            await repo.ChangePasswordAsync(usuario.CorreoInstitucional, hashNueva).ConfigureAwait(false);
 
             // Enviar correo de confirmación (sin contraseña)
             EnviarCorreoCambioContrasena(emailService, usuario);
@@ -1373,7 +1373,7 @@ internal static class Program
         }
     }
 
-    private static void EnviarCorreoCambioContrasena(IEmailService emailService, Backend.Models.Usuario usuario)
+    private static void EnviarCorreoCambioContrasena(IEmailService emailService, Backend.Models.User usuario)
     {
         var asunto = "Contraseña Actualizada - Pingponeros";
         var apellidos = $"{usuario.PrimerApellido} {usuario.SegundoApellido}";

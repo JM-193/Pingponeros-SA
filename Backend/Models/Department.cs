@@ -1,6 +1,6 @@
 namespace Backend.Models;
 
-internal sealed class Seccion
+internal sealed class Department
 {
     public int Id { get; set; }
     public int? IdArea { get; set; }

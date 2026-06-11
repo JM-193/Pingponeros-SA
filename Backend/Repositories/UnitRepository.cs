@@ -13,7 +13,7 @@ internal sealed class UnitRepository : IUnitRepository
 
     public UnitRepository(IQueryExecutor q) => _q = q;
 
-    public async Task<List<Unidad>> ObtenerTodasAsync()
+    public async Task<List<Unit>> ObtenerTodasAsync()
     {
         return await _q.QueryAsync(connection =>
         {
@@ -26,10 +26,10 @@ internal sealed class UnitRepository : IUnitRepository
             return cmd;
         }, async reader =>
         {
-            var unidades = new List<Unidad>();
+            var unidades = new List<Unit>();
             while (await reader.ReadAsync().ConfigureAwait(false))
             {
-                unidades.Add(new Unidad
+                unidades.Add(new Unit
                 {
                     Id = Convert.ToInt32(reader["ID_UNIDAD"], CultureInfo.InvariantCulture),
                     IdArea = reader["ID_AREA"] is DBNull ? null : Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
@@ -60,7 +60,7 @@ internal sealed class UnitRepository : IUnitRepository
         return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
     }
 
-    public async Task<int> InsertarAsync(Unidad unidad)
+    public async Task<int> InsertarAsync(Unit unidad)
     {
         ArgumentNullException.ThrowIfNull(unidad);
 
@@ -86,7 +86,7 @@ internal sealed class UnitRepository : IUnitRepository
         return (int)(OracleDecimal)result!;
     }
 
-    public async Task<Unidad?> ObtenerPorNombreAsync(string nombre)
+    public async Task<Unit?> ObtenerPorNombreAsync(string nombre)
     {
         return await _q.QueryAsync(connection =>
         {
@@ -102,7 +102,7 @@ internal sealed class UnitRepository : IUnitRepository
         {
             if (await reader.ReadAsync().ConfigureAwait(false))
             {
-                return new Unidad
+                return new Unit
                 {
                     Id = Convert.ToInt32(reader["ID_UNIDAD"], CultureInfo.InvariantCulture),
                     IdArea = reader["ID_AREA"] is DBNull ? null : Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
@@ -117,7 +117,7 @@ internal sealed class UnitRepository : IUnitRepository
         }).ConfigureAwait(false);
     }
 
-    public async Task<bool> ActualizarAsync(string nombreOriginal, Unidad unidad)
+    public async Task<bool> ActualizarAsync(string nombreOriginal, Unit unidad)
     {
         ArgumentNullException.ThrowIfNull(unidad);
 

@@ -58,7 +58,7 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
         var correo = "test@ucr.ac.cr";
         var contrasena = "ValidPassword123!";
         var hash = BCrypt.Net.BCrypt.HashPassword(contrasena);
-        var usuario = new Usuario
+        var usuario = new User
         {
             CorreoInstitucional = correo,
             PrimerNombre = "Test",
@@ -110,7 +110,7 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
     [Fact]
     public async Task RecuperarContrasena_Returns200CuandoCorreoNoExiste()
     {
-        _factory.UsuarioRepo.ObtenerPorCorreoAsync(Arg.Any<string>()).Returns((Usuario?)null);
+        _factory.UsuarioRepo.ObtenerPorCorreoAsync(Arg.Any<string>()).Returns((User?)null);
 
         var dto = new { CorreoInstitucional = "noexiste@ucr.ac.cr" };
 
@@ -122,7 +122,7 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
     [Fact]
     public async Task RecuperarContrasena_Returns200CuandoCorreoExiste()
     {
-        var usuario = new Usuario
+        var usuario = new User
         {
             CorreoInstitucional = "test@ucr.ac.cr",
             PrimerNombre = "Test",
@@ -146,7 +146,7 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
     [Fact]
     public async Task CambiarContrasena_Returns400ConCorreoVacio()
     {
-        var dto = new { CorreoInstitucional = "", ContraseñaActual = "Old123!", ContraseñaNueva = "New123!Aa" };
+        var dto = new { CorreoInstitucional = "", ContrasenaActual = "Old123!", ContrasenaNueva = "New123!Aa" };
 
         var response = await _client.PostAsJsonAsync("/auth/cambiar-contrasena", dto);
 
@@ -156,7 +156,7 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
     [Fact]
     public async Task CambiarContrasena_Returns400ConContraseñaActualVacia()
     {
-        var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContraseñaActual = "", ContraseñaNueva = "New123!Aa" };
+        var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContrasenaActual = "", ContrasenaNueva = "New123!Aa" };
 
         var response = await _client.PostAsJsonAsync("/auth/cambiar-contrasena", dto);
 
@@ -166,7 +166,7 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
     [Fact]
     public async Task CambiarContrasena_Returns400ConContraseñaNuevaVacia()
     {
-        var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContraseñaActual = "Old123!", ContraseñaNueva = "" };
+        var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContrasenaActual = "Old123!", ContrasenaNueva = "" };
 
         var response = await _client.PostAsJsonAsync("/auth/cambiar-contrasena", dto);
 
@@ -177,7 +177,7 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
     public async Task CambiarContrasena_Returns400CuandoContraseñasIguales()
     {
         var mismaContrasena = "Same123!Aa";
-        var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContraseñaActual = mismaContrasena, ContraseñaNueva = mismaContrasena };
+        var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContrasenaActual = mismaContrasena, ContrasenaNueva = mismaContrasena };
 
         var response = await _client.PostAsJsonAsync("/auth/cambiar-contrasena", dto);
 
@@ -187,7 +187,7 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
     [Fact]
     public async Task CambiarContrasena_Returns400ConContraseñaNuevaMuyCortaAsync()
     {
-        var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContraseñaActual = "Old123!Aa", ContraseñaNueva = "Short1!" };
+        var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContrasenaActual = "Old123!Aa", ContrasenaNueva = "Short1!" };
 
         var response = await _client.PostAsJsonAsync("/auth/cambiar-contrasena", dto);
 
@@ -197,7 +197,7 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
     [Fact]
     public async Task CambiarContrasena_Returns400ConContraseñaSinMayuscula()
     {
-        var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContraseñaActual = "Old123!Aa", ContraseñaNueva = "newpassword123!" };
+        var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContrasenaActual = "Old123!Aa", ContrasenaNueva = "newpassword123!" };
 
         var response = await _client.PostAsJsonAsync("/auth/cambiar-contrasena", dto);
 
@@ -207,7 +207,7 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
     [Fact]
     public async Task CambiarContrasena_Returns400ConContraseñaSinMinuscula()
     {
-        var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContraseñaActual = "Old123!Aa", ContraseñaNueva = "NEWPASSWORD123!" };
+        var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContrasenaActual = "Old123!Aa", ContrasenaNueva = "NEWPASSWORD123!" };
 
         var response = await _client.PostAsJsonAsync("/auth/cambiar-contrasena", dto);
 
@@ -217,7 +217,7 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
     [Fact]
     public async Task CambiarContrasena_Returns400ConContraseñaSinNumero()
     {
-        var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContraseñaActual = "Old123!Aa", ContraseñaNueva = "NewPassword!Aa" };
+        var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContrasenaActual = "Old123!Aa", ContrasenaNueva = "NewPassword!Aa" };
 
         var response = await _client.PostAsJsonAsync("/auth/cambiar-contrasena", dto);
 
@@ -227,7 +227,7 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
     [Fact]
     public async Task CambiarContrasena_Returns400ConContraseñaSinCaracterEspecial()
     {
-        var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContraseñaActual = "Old123!Aa", ContraseñaNueva = "NewPassword123Aa" };
+        var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContrasenaActual = "Old123!Aa", ContrasenaNueva = "NewPassword123Aa" };
 
         var response = await _client.PostAsJsonAsync("/auth/cambiar-contrasena", dto);
 
@@ -237,9 +237,9 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
     [Fact]
     public async Task CambiarContrasena_Returns404CuandoUsuarioNoExiste()
     {
-        _factory.UsuarioRepo.ObtenerPorCorreoAsync(Arg.Any<string>()).Returns((Usuario?)null);
+        _factory.UsuarioRepo.ObtenerPorCorreoAsync(Arg.Any<string>()).Returns((User?)null);
 
-        var dto = new { CorreoInstitucional = "noexiste@ucr.ac.cr", ContraseñaActual = "Old123!Aa", ContraseñaNueva = "New123!Bbbbbb" };
+        var dto = new { CorreoInstitucional = "noexiste@ucr.ac.cr", ContrasenaActual = "Old123!Aa", ContrasenaNueva = "New123!Bbbbbb" };
 
         var response = await _client.PostAsJsonAsync("/auth/cambiar-contrasena", dto);
 
@@ -249,7 +249,7 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
     [Fact]
     public async Task CambiarContrasena_Returns401ConContraseñaActualIncorrecta()
     {
-        var usuario = new Usuario
+        var usuario = new User
         {
             CorreoInstitucional = "test@ucr.ac.cr",
             PrimerNombre = "Test",
@@ -265,7 +265,7 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
         _factory.UsuarioRepo.ObtenerContrasenaMasRecienteAsync("test@ucr.ac.cr")
             .Returns(new Password { Hash = hashIncorrecto, EsTemporal = false, FechaExpiracion = DateTime.Now.AddDays(30) });
 
-        var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContraseñaActual = "Wrong123!Aa", ContraseñaNueva = "New123!Bbbbbb" };
+        var dto = new { CorreoInstitucional = "test@ucr.ac.cr", ContrasenaActual = "Wrong123!Aa", ContrasenaNueva = "New123!Bbbbbb" };
 
         var response = await _client.PostAsJsonAsync("/auth/cambiar-contrasena", dto);
 
@@ -276,7 +276,7 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
     public async Task CambiarContrasena_Returns200CuandoSeActualizaCorrectamente()
     {
         var correo = "test@ucr.ac.cr";
-        var usuario = new Usuario
+        var usuario = new User
         {
             CorreoInstitucional = correo,
             PrimerNombre = "Test",
@@ -291,9 +291,9 @@ public sealed class AuthEndpointsTests_Extended : IClassFixture<TestWebApplicati
         _factory.UsuarioRepo.ObtenerPorCorreoAsync(correo).Returns(usuario);
         _factory.UsuarioRepo.ObtenerContrasenaMasRecienteAsync(correo)
             .Returns(new Password { Hash = hashActual, EsTemporal = false, FechaExpiracion = DateTime.Now.AddDays(30) });
-        _factory.UsuarioRepo.CambiarContraseñaAsync(correo, Arg.Any<string>()).Returns(Task.CompletedTask);
+        _factory.UsuarioRepo.ChangePasswordAsync(correo, Arg.Any<string>()).Returns(Task.CompletedTask);
 
-        var dto = new { CorreoInstitucional = correo, ContraseñaActual = "Old123!Aa", ContraseñaNueva = "New123!Bbbbbb" };
+        var dto = new { CorreoInstitucional = correo, ContrasenaActual = "Old123!Aa", ContrasenaNueva = "New123!Bbbbbb" };
 
         var response = await _client.PostAsJsonAsync("/auth/cambiar-contrasena", dto);
 

@@ -268,10 +268,10 @@ public sealed class RepositoriesTests
         table.Rows.Add("u@test.com", "U", DBNull.Value, "T", DBNull.Value, 1, 1);
 
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Usuario?>>>() )
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<User?>>>() )
             .Returns(ci =>
             {
-                var map = (Func<DbDataReader, Task<Usuario?>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<User?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
@@ -318,7 +318,7 @@ public sealed class RepositoriesTests
         q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>()).Returns(1);
 
         var repo = new UserRepository(q);
-        var updated = await repo.ActualizarAsync("u@test.com", new Usuario { CorreoInstitucional = "u@test.com", PrimerNombre = "A", PrimerApellido = "B", Rol = 0, Estado = 1 });
+        var updated = await repo.ActualizarAsync("u@test.com", new User { CorreoInstitucional = "u@test.com", PrimerNombre = "A", PrimerApellido = "B", Rol = 0, Estado = 1 });
 
         Assert.True(updated);
     }

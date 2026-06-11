@@ -25,11 +25,11 @@ public sealed class SectionRepositoryTests
         table.Rows.Add(2, DBNull.Value, "Seccion B", "Desc B", 0);
 
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<Seccion>>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<Section>>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<List<Seccion>>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<List<Section>>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
@@ -90,7 +90,7 @@ public sealed class SectionRepositoryTests
             });
 
         var repo = new SectionRepository(q);
-        var id = await repo.InsertarAsync(new Seccion { IdArea = 10, Nombre = "X", Descripcion = "Y", Estado = 1 });
+        var id = await repo.InsertarAsync(new Section { IdArea = 10, Nombre = "X", Descripcion = "Y", Estado = 1 });
 
         Assert.Equal(42, id);
     }
@@ -116,11 +116,11 @@ public sealed class SectionRepositoryTests
         table.Rows.Add(5, 10, "Sistemas", "Seccion de sistemas", 1);
 
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Seccion?>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Section?>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<Seccion?>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<Section?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
@@ -145,11 +145,11 @@ public sealed class SectionRepositoryTests
         table.Columns.Add("ESTADO", typeof(int));
 
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Seccion?>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Section?>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<Seccion?>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<Section?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
@@ -172,7 +172,7 @@ public sealed class SectionRepositoryTests
             });
 
         var repo = new SectionRepository(q);
-        var updated = await repo.ActualizarAsync("Sistemas", new Seccion { Nombre = "Sistemas", Descripcion = "Nueva desc", Estado = 1 });
+        var updated = await repo.ActualizarAsync("Sistemas", new Section { Nombre = "Sistemas", Descripcion = "Nueva desc", Estado = 1 });
 
         Assert.True(updated);
     }
@@ -189,7 +189,7 @@ public sealed class SectionRepositoryTests
             });
 
         var repo = new SectionRepository(q);
-        var updated = await repo.ActualizarAsync("NoExiste", new Seccion { Nombre = "NoExiste", Descripcion = "Desc", Estado = 1 });
+        var updated = await repo.ActualizarAsync("NoExiste", new Section { Nombre = "NoExiste", Descripcion = "Desc", Estado = 1 });
 
         Assert.False(updated);
     }

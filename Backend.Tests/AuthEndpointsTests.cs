@@ -60,7 +60,7 @@ public sealed class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory
     {
         const string password = "contrasenaCorrecta!";
         var hash = BCrypt.Net.BCrypt.HashPassword(password);
-        var usuario = new Usuario
+        var usuario = new User
         {
             CorreoInstitucional = "test@test.com",
             PrimerNombre = "Test",
@@ -86,7 +86,7 @@ public sealed class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory
     {
         const string password = "temporalVigente!";
         var hash = BCrypt.Net.BCrypt.HashPassword(password);
-        var usuario = new Usuario
+        var usuario = new User
         {
             CorreoInstitucional = "temp@test.com",
             PrimerNombre = "Temp",
@@ -115,7 +115,7 @@ public sealed class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory
     {
         const string password = "temporalVencida!";
         var hash = BCrypt.Net.BCrypt.HashPassword(password);
-        var usuario = new Usuario
+        var usuario = new User
         {
             CorreoInstitucional = "expirada@test.com",
             PrimerNombre = "Temp",
@@ -144,7 +144,7 @@ public sealed class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory
     [Fact]
     public async Task RecuperarContrasena_Returns403SiUsuarioFueDesactivadoPorTemporalVencida()
     {
-        var usuario = new Usuario
+        var usuario = new User
         {
             CorreoInstitucional = "expirada@test.com",
             PrimerNombre = "Temp",

@@ -1,6 +1,6 @@
 namespace Backend.Models;
 
-internal sealed class Departamento
+internal sealed class Section
 {
     public int Id { get; set; }
     public int? IdArea { get; set; }

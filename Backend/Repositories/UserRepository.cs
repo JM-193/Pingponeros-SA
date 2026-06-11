@@ -12,7 +12,7 @@ internal sealed class UserRepository : IUserRepository
     // ------------------------------------------------------------------ //
     // SELECT ALL                                                           //
     // ------------------------------------------------------------------ //
-    public async Task<IEnumerable<Usuario>> ObtenerTodosAsync()
+    public async Task<IEnumerable<User>> ObtenerTodosAsync()
     {
         const string sql = """
             SELECT CORREO_INSTITUCIONAL, PRIMER_NOMBRE, SEGUNDO_NOMBRE,
@@ -30,7 +30,7 @@ internal sealed class UserRepository : IUserRepository
             return cmd;
         }, async reader =>
         {
-            var lista = new List<Usuario>();
+            var lista = new List<User>();
             while (await reader.ReadAsync().ConfigureAwait(false))
                 lista.Add(MapearFila(reader));
             return lista;
@@ -40,7 +40,7 @@ internal sealed class UserRepository : IUserRepository
     // ------------------------------------------------------------------ //
     // SELECT BY PK                                                         //
     // ------------------------------------------------------------------ //
-    public async Task<Usuario?> ObtenerPorCorreoAsync(string correo)
+    public async Task<User?> ObtenerPorCorreoAsync(string correo)
     {
         const string sql = """
             SELECT CORREO_INSTITUCIONAL, PRIMER_NOMBRE, SEGUNDO_NOMBRE,
@@ -66,7 +66,7 @@ internal sealed class UserRepository : IUserRepository
     // ------------------------------------------------------------------ //
     // INSERT                                                               //
     // ------------------------------------------------------------------ //
-    public async Task InsertarAsync(Usuario usuario)
+    public async Task InsertarAsync(User usuario)
     {
         const string sql = """
             INSERT INTO USUARIOS
@@ -91,7 +91,7 @@ internal sealed class UserRepository : IUserRepository
     // ------------------------------------------------------------------ //
     // INSERT USUARIO + CONTRASEÑA TEMPORAL (transaccional)                //
     // ------------------------------------------------------------------ //
-    public async Task InsertarConContrasenaAsync(Usuario usuario, string contrasenaHash)
+    public async Task InsertarConContrasenaAsync(User usuario, string contrasenaHash)
     {
         // Insertar usuario
         await InsertarAsync(usuario).ConfigureAwait(false);
@@ -127,7 +127,7 @@ internal sealed class UserRepository : IUserRepository
     // ------------------------------------------------------------------ //
     // CAMBIAR CONTRASEÑA (válida por 90 días)                            //
     // ------------------------------------------------------------------ //
-    public async Task CambiarContraseñaAsync(string correo, string contrasenaHash)
+    public async Task ChangePasswordAsync(string correo, string contrasenaHash)
     {
         const string sql = """
             INSERT INTO CONTRASENAS
@@ -192,7 +192,7 @@ internal sealed class UserRepository : IUserRepository
     // ------------------------------------------------------------------ //
     // UPDATE                                                               //
     // ------------------------------------------------------------------ //
-    public async Task<bool> ActualizarAsync(string correo, Usuario usuario)
+    public async Task<bool> ActualizarAsync(string correo, User usuario)
     {
         const string sql = """
             UPDATE USUARIOS SET
@@ -257,7 +257,7 @@ internal sealed class UserRepository : IUserRepository
     // ------------------------------------------------------------------ //
     // Helpers privados                                                     //
     // ------------------------------------------------------------------ //
-    private static Usuario MapearFila(System.Data.Common.DbDataReader r) => new()
+    private static User MapearFila(System.Data.Common.DbDataReader r) => new()
     {
         CorreoInstitucional = r.GetString(0),
         PrimerNombre = r.GetString(1),
@@ -268,7 +268,7 @@ internal sealed class UserRepository : IUserRepository
         Estado = r.GetInt32(6),
     };
 
-    private static void AgregarParametros(OracleCommand cmd, Usuario u)
+    private static void AgregarParametros(OracleCommand cmd, User u)
     {
         cmd.Parameters.Add("correo", u.CorreoInstitucional);
         cmd.Parameters.Add("primerNombre", u.PrimerNombre);
