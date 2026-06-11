@@ -11,7 +11,7 @@ import { useOrganizationEntityForm } from '../hooks/useOrganizationEntityForm'
 import {
   DEPARTAMENTO_SECCION_INITIAL_FORM_DATA,
   getDepartamentoSeccionConfig,
-} from '../utils/departamentoSeccionFormConfig'
+} from '../utils/departmentSectionFormConfig'
 import { COLORS } from '../constants/colors'
 
 const subtitle = 'Formulario de Actualización'
