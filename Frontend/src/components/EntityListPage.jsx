@@ -76,7 +76,6 @@ export default function EntityListPage({
   getRowId,
   searchPlaceholder = 'Ingrese el nombre o descripción',
   resultsPerPage = 10,
-  backPath = '/home',
 }) {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
@@ -296,7 +295,7 @@ export default function EntityListPage({
           label="Regresar"
           type="button"
           variant="secondary"
-          onClick={() => navigate(backPath)}
+          onClick={() => navigate(-1)}
           disabled={loading}
         />
       </div>
@@ -324,7 +323,6 @@ EntityListPage.propTypes = {
   getRowId: PropTypes.func,
   searchPlaceholder: PropTypes.string,
   resultsPerPage: PropTypes.number,
-  backPath: PropTypes.string,
 }
 
 EntityListPage.defaultProps = {

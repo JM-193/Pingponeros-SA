@@ -103,7 +103,7 @@ export default function EditUsers() {
         estado:              formData.estado,
       })
       setSuccessMsg('Usuario actualizado correctamente.')
-      setTimeout(() => navigate('/usuarios/consultar'), 1500)
+      setTimeout(() => navigate(-1), 1500)
     } catch (err) {
       setErrorMsg(err.message)
     } finally {
@@ -244,7 +244,7 @@ export default function EditUsers() {
               label="Regresar"
               type="button"
               variant="secondary"
-              onClick={() => navigate('/usuarios/consultar')}
+              onClick={() => navigate(-1)}
               disabled={submitting}
             />
             <FormButton

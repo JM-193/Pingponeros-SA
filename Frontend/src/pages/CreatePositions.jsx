@@ -158,7 +158,7 @@ export default function CreatePositions() {
       await crearPlaza(payload)
       setSuccessMsg(`Plaza '${numero}' creada correctamente.`)
       setFormData(initialFormData)
-      setTimeout(() => navigate('/organizacion/plazas/consultar'), 1500)
+      setTimeout(() => navigate(-1), 1500)
     } catch (err) {
       setErrorMsg(err.message)
     } finally {
@@ -263,7 +263,7 @@ export default function CreatePositions() {
               label="Regresar"
               type="button"
               variant="secondary"
-              onClick={() => navigate('/plazas/consultar')}
+              onClick={() => navigate(-1)}
               disabled={isSubmitting}
             />
             <FormButton

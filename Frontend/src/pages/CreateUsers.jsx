@@ -71,6 +71,7 @@ export default function CreateUsers() {
       })
       setSuccessMsg(data.mensaje ?? 'Usuario creado correctamente.')
       handleReset()
+      setTimeout(() => navigate(-1), 1500)
     } catch (err) {
       setErrorMsg(err.message)
     } finally {
@@ -193,7 +194,7 @@ export default function CreateUsers() {
               label="Regresar"
               type="button"
               variant="secondary"
-              onClick={() => navigate('/usuarios/consultar')}
+              onClick={() => navigate(-1)}
               disabled={loading}
             />
             <FormButton

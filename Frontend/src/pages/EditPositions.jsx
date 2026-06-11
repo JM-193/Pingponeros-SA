@@ -229,7 +229,7 @@ export default function EditPositions() {
       }
       await actualizarPlaza(numeroPlaza, payload)
       setSuccessMsg(`Plaza '${numeroPlaza}' actualizada correctamente.`)
-      setTimeout(() => navigate('/organizacion/plazas/consultar'), 1500)
+      setTimeout(() => navigate(-1), 1500)
     } catch (err) {
       setErrorMsg(err.message)
     } finally {
@@ -351,7 +351,7 @@ export default function EditPositions() {
               type="button"
               variant="secondary"
               label="Regresar"
-              onClick={() => navigate('/organizacion/plazas/consultar')}
+              onClick={() => navigate(-1)}
             />
             <FormButton
               type="submit"
