@@ -12,7 +12,7 @@ import FormButton from '../components/FormButton'
 import StatusMessage from '../components/StatusMessage'
 import { COLORS } from '../constants/colors'
 
-export default function CreateUser() {
+export default function CreateUsers() {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     firstName: '',

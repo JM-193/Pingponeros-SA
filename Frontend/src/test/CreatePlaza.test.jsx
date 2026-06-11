@@ -1,7 +1,7 @@
-// CreatePlaza.test.jsx
+// CreatePositions.test.jsx
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import CreatePlaza from '../pages/CreatePlaza'
+import CreatePositions from '../pages/CreatePositions'
 import * as positionService from '../services/positionService'
 import * as unitService from '../services/unitService'
 import * as departmentService from '../services/departmentService'
@@ -19,7 +19,7 @@ const mockDepartamentos = [{ id: 1, nombre: 'Compras' }]
 const mockSecciones = [{ id: 1, nombre: 'Soporte' }]
 const mockAreas = [{ id: 1, nombre: 'Central' }]
 
-describe('CreatePlaza Page', () => {
+describe('CreatePositions Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     unitService.obtenerUnidades.mockResolvedValue(mockUnidades)
@@ -37,7 +37,7 @@ describe('CreatePlaza Page', () => {
 
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -47,7 +47,7 @@ describe('CreatePlaza Page', () => {
   it('renderiza formulario después de cargar opciones', async () => {
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -61,7 +61,7 @@ describe('CreatePlaza Page', () => {
   it('renderiza Header y Navbar', async () => {
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -73,7 +73,7 @@ describe('CreatePlaza Page', () => {
   it('muestra error cuando el número de plaza está vacío', async () => {
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -90,7 +90,7 @@ describe('CreatePlaza Page', () => {
   it('muestra error cuando el número de plaza es cero o negativo', async () => {
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -110,7 +110,7 @@ describe('CreatePlaza Page', () => {
   it('solo permite dígitos en el campo número de plaza', async () => {
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -127,7 +127,7 @@ describe('CreatePlaza Page', () => {
   it('limpia mensajes de error al cambiar el campo', async () => {
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -151,7 +151,7 @@ describe('CreatePlaza Page', () => {
 
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -184,7 +184,7 @@ describe('CreatePlaza Page', () => {
 
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -210,7 +210,7 @@ describe('CreatePlaza Page', () => {
 
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -240,7 +240,7 @@ describe('CreatePlaza Page', () => {
 
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -264,7 +264,7 @@ describe('CreatePlaza Page', () => {
 
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 

@@ -1,7 +1,7 @@
-// CreateUnidad.test.jsx
+// CreateUnits.test.jsx
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import CreateUnidad from '../pages/CreateUnidad'
+import CreateUnits from '../pages/CreateUnits'
 import * as areaService from '../services/areaService'
 import * as departmentService from '../services/departmentService'
 import * as sectionService from '../services/sectionService'
@@ -11,7 +11,7 @@ vi.mock('../services/areaService')
 vi.mock('../services/departmentService')
 vi.mock('../services/sectionService')
 
-describe('CreateUnidad Page', () => {
+describe('CreateUnits Page', () => {
   const mockAreas = [
     { id: 1, nombre: 'Administración' },
     { id: 2, nombre: 'Recursos Humanos' },
@@ -36,7 +36,7 @@ describe('CreateUnidad Page', () => {
   it('renderiza formulario de crear unidad', async () => {
     render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
@@ -47,7 +47,7 @@ describe('CreateUnidad Page', () => {
   it('renderiza Header y Navbar', async () => {
     render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
@@ -59,7 +59,7 @@ describe('CreateUnidad Page', () => {
   it('carga opciones de área, departamento y sección en el montaje', async () => {
     render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
@@ -73,7 +73,7 @@ describe('CreateUnidad Page', () => {
   it('cambia el tipo de dependencia a departamento', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
@@ -92,7 +92,7 @@ describe('CreateUnidad Page', () => {
   it('cambia el tipo de dependencia a sección', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
@@ -111,7 +111,7 @@ describe('CreateUnidad Page', () => {
   it('filtra departamentos por área seleccionada', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
@@ -134,7 +134,7 @@ describe('CreateUnidad Page', () => {
   it('filtra secciones por área seleccionada', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
@@ -156,7 +156,7 @@ describe('CreateUnidad Page', () => {
   it('muestra error cuando el departamento seleccionado no pertenece al área', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
@@ -183,7 +183,7 @@ describe('CreateUnidad Page', () => {
   it('muestra error cuando la sección seleccionada no pertenece al área', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
@@ -210,7 +210,7 @@ describe('CreateUnidad Page', () => {
   it('limpia el error cuando se cambia el tipo de dependencia', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 

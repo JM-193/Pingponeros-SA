@@ -1,12 +1,12 @@
-﻿// CreateArea.test.jsx
+﻿// CreateAreas.test.jsx
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import CreateArea from '../pages/CreateArea'
+import CreateAreas from '../pages/CreateAreas'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/areaService')
 
-describe('CreateArea Page', () => {
+describe('CreateAreas Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
   })
@@ -14,7 +14,7 @@ describe('CreateArea Page', () => {
   it('renderiza formulario de crear área', () => {
     render(
       <BrowserRouter>
-        <CreateArea />
+        <CreateAreas />
       </BrowserRouter>,
     )
 
@@ -26,7 +26,7 @@ describe('CreateArea Page', () => {
   it('renderiza Header y Navbar', () => {
     render(
       <BrowserRouter>
-        <CreateArea />
+        <CreateAreas />
       </BrowserRouter>,
     )
 
@@ -36,7 +36,7 @@ describe('CreateArea Page', () => {
   it('valida que nombre sea requerido', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateArea />
+        <CreateAreas />
       </BrowserRouter>,
     )
 
@@ -49,7 +49,7 @@ describe('CreateArea Page', () => {
   it('valida que descripción sea requerida', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateArea />
+        <CreateAreas />
       </BrowserRouter>,
     )
 
@@ -67,7 +67,7 @@ describe('CreateArea Page', () => {
 
     render(
       <BrowserRouter>
-        <CreateArea />
+        <CreateAreas />
       </BrowserRouter>,
     )
 
@@ -94,7 +94,7 @@ describe('CreateArea Page', () => {
 
     render(
       <BrowserRouter>
-        <CreateArea />
+        <CreateAreas />
       </BrowserRouter>,
     )
 
@@ -117,7 +117,7 @@ describe('CreateArea Page', () => {
 
     render(
       <BrowserRouter>
-        <CreateArea />
+        <CreateAreas />
       </BrowserRouter>,
     )
 
@@ -140,7 +140,7 @@ describe('CreateArea Page', () => {
 
     render(
       <BrowserRouter>
-        <CreateArea />
+        <CreateAreas />
       </BrowserRouter>,
     )
 
@@ -164,7 +164,7 @@ describe('CreateArea Page', () => {
 
     render(
       <BrowserRouter>
-        <CreateArea />
+        <CreateAreas />
       </BrowserRouter>,
     )
 

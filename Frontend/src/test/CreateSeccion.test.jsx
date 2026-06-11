@@ -1,13 +1,13 @@
-// CreateSeccion.test.jsx
+// CreateSections.test.jsx
 import { render, screen, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import CreateSeccion from '../pages/CreateSeccion'
+import CreateSections from '../pages/CreateSections'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/sectionService')
 vi.mock('../services/areaService')
 
-describe('CreateSeccion Page', () => {
+describe('CreateSections Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     areaService.obtenerAreas.mockResolvedValue([
@@ -18,7 +18,7 @@ describe('CreateSeccion Page', () => {
   it('renderiza formulario de crear sección', async () => {
     render(
       <BrowserRouter>
-        <CreateSeccion />
+        <CreateSections />
       </BrowserRouter>,
     )
 
@@ -29,7 +29,7 @@ describe('CreateSeccion Page', () => {
   it('renderiza Header y Navbar', async () => {
     render(
       <BrowserRouter>
-        <CreateSeccion />
+        <CreateSections />
       </BrowserRouter>,
     )
 

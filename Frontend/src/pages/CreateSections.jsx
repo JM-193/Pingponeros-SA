@@ -1,7 +1,7 @@
 import DepartamentoSeccionCreateForm from '../components/DepartamentoSeccionCreateForm'
 import { crearSeccion } from '../services/sectionService'
 
-export default function CreateSeccion() {
+export default function CreateSections() {
   return (
     <DepartamentoSeccionCreateForm
       entityType="seccion"

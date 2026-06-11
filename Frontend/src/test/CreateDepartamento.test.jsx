@@ -1,13 +1,13 @@
-// CreateDepartamento.test.jsx
+// CreateDepartments.test.jsx
 import { render, screen, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import CreateDepartamento from '../pages/CreateDepartamento'
+import CreateDepartments from '../pages/CreateDepartments'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/departmentService')
 vi.mock('../services/areaService')
 
-describe('CreateDepartamento Page', () => {
+describe('CreateDepartments Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     areaService.obtenerAreas.mockResolvedValue([
@@ -18,7 +18,7 @@ describe('CreateDepartamento Page', () => {
   it('renderiza formulario de crear departamento', async () => {
     render(
       <BrowserRouter>
-        <CreateDepartamento />
+        <CreateDepartments />
       </BrowserRouter>,
     )
 
@@ -29,7 +29,7 @@ describe('CreateDepartamento Page', () => {
   it('renderiza Header y Navbar', async () => {
     render(
       <BrowserRouter>
-        <CreateDepartamento />
+        <CreateDepartments />
       </BrowserRouter>,
     )
 

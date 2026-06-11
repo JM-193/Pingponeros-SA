@@ -5,7 +5,7 @@ import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
 import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormError, getOrganizationEntityPayload } from '../utils/organizationEntityForm'
 
-export default function CreateArea() {
+export default function CreateAreas() {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     nombre: '',

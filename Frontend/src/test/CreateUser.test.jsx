@@ -1,12 +1,12 @@
-﻿// CreateUser.test.jsx
+﻿// CreateUsers.test.jsx
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import CreateUser from '../pages/CreateUser'
+import CreateUsers from '../pages/CreateUsers'
 import * as userService from '../services/userService'
 
 vi.mock('../services/userService')
 
-describe('CreateUser Page', () => {
+describe('CreateUsers Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
   })
@@ -14,7 +14,7 @@ describe('CreateUser Page', () => {
   it('renderiza formulario de crear usuario', () => {
     render(
       <BrowserRouter>
-        <CreateUser />
+        <CreateUsers />
       </BrowserRouter>,
     )
 
@@ -24,7 +24,7 @@ describe('CreateUser Page', () => {
   it('renderiza campos de nombre, apellido y email', () => {
     render(
       <BrowserRouter>
-        <CreateUser />
+        <CreateUsers />
       </BrowserRouter>,
     )
 
@@ -35,7 +35,7 @@ describe('CreateUser Page', () => {
   it('valida que email sea requerido', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUser />
+        <CreateUsers />
       </BrowserRouter>,
     )
 
@@ -48,7 +48,7 @@ describe('CreateUser Page', () => {
   it('valida formato de email UCR', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUser />
+        <CreateUsers />
       </BrowserRouter>,
     )
 
@@ -71,7 +71,7 @@ describe('CreateUser Page', () => {
 
     render(
       <BrowserRouter>
-        <CreateUser />
+        <CreateUsers />
       </BrowserRouter>,
     )
 
@@ -90,7 +90,7 @@ describe('CreateUser Page', () => {
 
     render(
       <BrowserRouter>
-        <CreateUser />
+        <CreateUsers />
       </BrowserRouter>,
     )
 
@@ -104,7 +104,7 @@ describe('CreateUser Page', () => {
 
     render(
       <BrowserRouter>
-        <CreateUser />
+        <CreateUsers />
       </BrowserRouter>,
     )
 
@@ -114,7 +114,7 @@ describe('CreateUser Page', () => {
   it('renderiza Header y Navbar', () => {
     render(
       <BrowserRouter>
-        <CreateUser />
+        <CreateUsers />
       </BrowserRouter>,
     )
 
@@ -124,7 +124,7 @@ describe('CreateUser Page', () => {
   it('tiene layout con full height', () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUser />
+        <CreateUsers />
       </BrowserRouter>,
     )
 
@@ -143,7 +143,7 @@ describe('CreateUser Page', () => {
 
     const { container } = render(
       <BrowserRouter>
-        <CreateUser />
+        <CreateUsers />
       </BrowserRouter>,
     )
 
@@ -171,7 +171,7 @@ describe('CreateUser Page', () => {
 
     const { container } = render(
       <BrowserRouter>
-        <CreateUser />
+        <CreateUsers />
       </BrowserRouter>,
     )
 
@@ -196,7 +196,7 @@ describe('CreateUser Page', () => {
 
     const { container } = render(
       <BrowserRouter>
-        <CreateUser />
+        <CreateUsers />
       </BrowserRouter>,
     )
 
@@ -219,7 +219,7 @@ describe('CreateUser Page', () => {
   it('sanitiza caracteres no válidos en campos de nombre', () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUser />
+        <CreateUsers />
       </BrowserRouter>,
     )
 
@@ -232,7 +232,7 @@ describe('CreateUser Page', () => {
   it('limpia mensajes al cambiar un campo de texto', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUser />
+        <CreateUsers />
       </BrowserRouter>,
     )
 

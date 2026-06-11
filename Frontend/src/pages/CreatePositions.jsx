@@ -1,4 +1,4 @@
-// CreatePlaza.jsx
+// CreatePositions.jsx
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { crearPlaza } from '../services/positionService'
@@ -29,7 +29,7 @@ const initialFormData = {
 
 const NUMERO_REGEX = /\D/g
 
-export default function CreatePlaza() {
+export default function CreatePositions() {
   const navigate = useNavigate()
   const [formData, setFormData] = useState(initialFormData)
   const [loading, setLoading] = useState(true)

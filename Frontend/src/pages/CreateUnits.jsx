@@ -26,7 +26,7 @@ const initialFormData = {
   estado: 1,
 }
 
-export default function CreateUnidad() {
+export default function CreateUnits() {
   const navigate = useNavigate()
   const [parentType, setParentType] = useState('')
   const [areaOptions, setAreaOptions] = useState([])
