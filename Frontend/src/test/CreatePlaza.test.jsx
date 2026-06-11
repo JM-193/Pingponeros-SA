@@ -2,13 +2,13 @@
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import CreatePlaza from '../pages/CreatePlaza'
-import * as plazaService from '../services/plazaService'
+import * as positionService from '../services/positionService'
 import * as unidadService from '../services/unidadService'
 import * as departamentoService from '../services/departmentService'
 import * as seccionService from '../services/seccionService'
 import * as areaService from '../services/areaService'
 
-vi.mock('../services/plazaService')
+vi.mock('../services/positionService')
 vi.mock('../services/unidadService')
 vi.mock('../services/departmentService')
 vi.mock('../services/seccionService')
@@ -147,7 +147,7 @@ describe('CreatePlaza Page', () => {
   })
 
   it('crea plaza correctamente y muestra mensaje de éxito', async () => {
-    plazaService.crearPlaza.mockResolvedValueOnce({ numeroPlaza: 5 })
+    positionService.crearPlaza.mockResolvedValueOnce({ numeroPlaza: 5 })
 
     render(
       <BrowserRouter>
@@ -169,7 +169,7 @@ describe('CreatePlaza Page', () => {
       expect(screen.getByText(/Plaza '5' creada correctamente/i)).toBeInTheDocument()
     })
 
-    expect(plazaService.crearPlaza).toHaveBeenCalledWith(
+    expect(positionService.crearPlaza).toHaveBeenCalledWith(
       expect.objectContaining({ numeroPlaza: 5 }),
     )
   })
@@ -206,7 +206,7 @@ describe('CreatePlaza Page', () => {
   })
 
   it('envía null en campos opcionales no seleccionados', async () => {
-    plazaService.crearPlaza.mockResolvedValueOnce({ numeroPlaza: 8 })
+    positionService.crearPlaza.mockResolvedValueOnce({ numeroPlaza: 8 })
 
     render(
       <BrowserRouter>
@@ -225,7 +225,7 @@ describe('CreatePlaza Page', () => {
     await act(async () => { fireEvent.submit(form) })
 
     await waitFor(() => {
-      expect(plazaService.crearPlaza).toHaveBeenCalledWith({
+      expect(positionService.crearPlaza).toHaveBeenCalledWith({
         numeroPlaza: 8,
         idUnidad: null,
         idDepartamento: null,
@@ -236,7 +236,7 @@ describe('CreatePlaza Page', () => {
   })
 
   it('muestra mensaje de error cuando la creación falla', async () => {
-    plazaService.crearPlaza.mockRejectedValueOnce(new Error('La plaza ya existe'))
+    positionService.crearPlaza.mockRejectedValueOnce(new Error('La plaza ya existe'))
 
     render(
       <BrowserRouter>

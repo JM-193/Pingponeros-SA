@@ -1,7 +1,7 @@
 // ConsultarPlaza.jsx
 import { useCallback } from 'react'
 import EntityListPage from '../components/EntityListPage'
-import { obtenerPlazas } from '../services/plazaService'
+import { obtenerPlazas } from '../services/positionService'
 import { obtenerUnidades } from '../services/unidadService'
 import { obtenerDepartamentos } from '../services/departmentService'
 import { obtenerSecciones } from '../services/seccionService'

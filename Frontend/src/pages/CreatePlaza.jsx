@@ -1,7 +1,7 @@
 // CreatePlaza.jsx
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { crearPlaza } from '../services/plazaService'
+import { crearPlaza } from '../services/positionService'
 import { obtenerUnidades } from '../services/unidadService'
 import { obtenerDepartamentos } from '../services/departmentService'
 import { obtenerSecciones } from '../services/seccionService'

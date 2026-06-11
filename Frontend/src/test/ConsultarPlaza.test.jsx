@@ -2,13 +2,13 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import ConsultarPlaza from '../pages/ConsultarPlaza'
-import * as plazaService from '../services/plazaService'
+import * as positionService from '../services/positionService'
 import * as unidadService from '../services/unidadService'
 import * as departamentoService from '../services/departmentService'
 import * as seccionService from '../services/seccionService'
 import * as areaService from '../services/areaService'
 
-vi.mock('../services/plazaService')
+vi.mock('../services/positionService')
 vi.mock('../services/unidadService')
 vi.mock('../services/departmentService')
 vi.mock('../services/seccionService')
@@ -27,7 +27,7 @@ const mockAreas = [{ id: 1, nombre: 'Central' }]
 describe('ConsultarPlaza Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    plazaService.obtenerPlazas.mockResolvedValue(mockPlazas)
+    positionService.obtenerPlazas.mockResolvedValue(mockPlazas)
     unidadService.obtenerUnidades.mockResolvedValue(mockUnidades)
     departamentoService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
     seccionService.obtenerSecciones.mockResolvedValue(mockSecciones)
@@ -45,7 +45,7 @@ describe('ConsultarPlaza Page', () => {
       expect(screen.getByText('1')).toBeInTheDocument()
     })
 
-    expect(plazaService.obtenerPlazas).toHaveBeenCalled()
+    expect(positionService.obtenerPlazas).toHaveBeenCalled()
   })
 
   it('renderiza tabla con las columnas correctas', async () => {
@@ -147,7 +147,7 @@ describe('ConsultarPlaza Page', () => {
   })
 
   it('muestra mensaje cuando no hay plazas', async () => {
-    plazaService.obtenerPlazas.mockResolvedValueOnce([])
+    positionService.obtenerPlazas.mockResolvedValueOnce([])
 
     render(
       <BrowserRouter>
@@ -156,7 +156,7 @@ describe('ConsultarPlaza Page', () => {
     )
 
     await waitFor(() => {
-      expect(plazaService.obtenerPlazas).toHaveBeenCalled()
+      expect(positionService.obtenerPlazas).toHaveBeenCalled()
     })
   })
 

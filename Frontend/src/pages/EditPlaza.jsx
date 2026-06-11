@@ -1,7 +1,7 @@
 // EditPlaza.jsx
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { actualizarPlaza, obtenerPlazaPorNumero } from '../services/plazaService'
+import { actualizarPlaza, obtenerPlazaPorNumero } from '../services/positionService'
 import { obtenerUnidades } from '../services/unidadService'
 import { obtenerDepartamentos } from '../services/departmentService'
 import { obtenerSecciones } from '../services/seccionService'

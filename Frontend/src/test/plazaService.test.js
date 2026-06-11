@@ -1,13 +1,13 @@
-// plazaService.test.js
+// positionService.test.js
 import { describe, it, expect, beforeEach } from 'vitest'
 import {
   obtenerPlazas,
   crearPlaza,
   obtenerPlazaPorNumero,
   actualizarPlaza,
-} from '../services/plazaService'
+} from '../services/positionService'
 
-describe('plazaService', () => {
+describe('positionService', () => {
   const mockFetch = vi.fn()
 
   beforeEach(() => {

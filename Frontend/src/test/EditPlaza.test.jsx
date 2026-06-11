@@ -2,13 +2,13 @@
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import EditPlaza from '../pages/EditPlaza'
-import * as plazaService from '../services/plazaService'
+import * as positionService from '../services/positionService'
 import * as unidadService from '../services/unidadService'
 import * as departamentoService from '../services/departmentService'
 import * as seccionService from '../services/seccionService'
 import * as areaService from '../services/areaService'
 
-vi.mock('../services/plazaService')
+vi.mock('../services/positionService')
 vi.mock('../services/unidadService')
 vi.mock('../services/departmentService')
 vi.mock('../services/seccionService')
@@ -49,7 +49,7 @@ const renderWithRoute = (numeroPlaza = '7') =>
 describe('EditPlaza Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    plazaService.obtenerPlazaPorNumero.mockResolvedValue(mockPlaza)
+    positionService.obtenerPlazaPorNumero.mockResolvedValue(mockPlaza)
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
     departamentoService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
     seccionService.obtenerSecciones.mockResolvedValue(mockSecciones)
@@ -57,7 +57,7 @@ describe('EditPlaza Page', () => {
   })
 
   it('muestra indicador de carga mientras carga datos', () => {
-    plazaService.obtenerPlazaPorNumero.mockImplementation(() => new Promise(() => {}))
+    positionService.obtenerPlazaPorNumero.mockImplementation(() => new Promise(() => {}))
 
     renderWithRoute()
 
@@ -94,7 +94,7 @@ describe('EditPlaza Page', () => {
   })
 
   it('detecta el tipo de dependencia "seccion" según la plaza cargada', async () => {
-    plazaService.obtenerPlazaPorNumero.mockResolvedValueOnce({
+    positionService.obtenerPlazaPorNumero.mockResolvedValueOnce({
       ...mockPlaza,
       idDepartamento: null,
       idSeccion: 1,
@@ -111,7 +111,7 @@ describe('EditPlaza Page', () => {
   })
 
   it('actualiza la plaza correctamente y muestra mensaje de éxito', async () => {
-    plazaService.actualizarPlaza.mockResolvedValueOnce({})
+    positionService.actualizarPlaza.mockResolvedValueOnce({})
 
     renderWithRoute()
 
@@ -128,7 +128,7 @@ describe('EditPlaza Page', () => {
   })
 
   it('muestra error cuando la actualización falla', async () => {
-    plazaService.actualizarPlaza.mockRejectedValueOnce(new Error('Error al actualizar plaza'))
+    positionService.actualizarPlaza.mockRejectedValueOnce(new Error('Error al actualizar plaza'))
 
     renderWithRoute()
 
@@ -146,7 +146,7 @@ describe('EditPlaza Page', () => {
 
   it('muestra error si departamento y sección están seleccionados a la vez', async () => {
     // Plaza con ambos idDepartamento e idSeccion (estado inválido forzado)
-    plazaService.obtenerPlazaPorNumero.mockResolvedValueOnce({
+    positionService.obtenerPlazaPorNumero.mockResolvedValueOnce({
       ...mockPlaza,
       idDepartamento: 1,
       idSeccion: 1,
@@ -169,7 +169,7 @@ describe('EditPlaza Page', () => {
   })
 
   it('muestra error cuando falla la carga de datos', async () => {
-    plazaService.obtenerPlazaPorNumero.mockRejectedValueOnce(new Error('Plaza no encontrada'))
+    positionService.obtenerPlazaPorNumero.mockRejectedValueOnce(new Error('Plaza no encontrada'))
 
     renderWithRoute('999')
 
@@ -238,7 +238,7 @@ describe('EditPlaza Page', () => {
   })
 
   it('muestra conflicto al cambiar departamento cuando la unidad no pertenece a él', async () => {
-    plazaService.obtenerPlazaPorNumero.mockResolvedValueOnce({
+    positionService.obtenerPlazaPorNumero.mockResolvedValueOnce({
       ...mockPlaza,
       idDepartamento: 1,
       idUnidad: 1,
