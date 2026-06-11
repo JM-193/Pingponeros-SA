@@ -1,12 +1,12 @@
-﻿// ConsultarArea.test.jsx
+﻿// QueryAreas.test.jsx
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import ConsultarArea from '../pages/ConsultarArea'
+import QueryAreas from '../pages/QueryAreas'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/areaService')
 
-describe('ConsultarArea Page', () => {
+describe('QueryAreas Page', () => {
   const mockAreas = [
     { id: 1, nombre: 'Administración', descripcion: 'Ãrea de administración', estado: 1 },
     { id: 2, nombre: 'Contabilidad', descripcion: 'Ãrea de contabilidad', estado: 1 },
@@ -21,7 +21,7 @@ describe('ConsultarArea Page', () => {
   it('carga y renderiza áreas', async () => {
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -34,7 +34,7 @@ describe('ConsultarArea Page', () => {
   it('renderiza tabla con columnas correctas', async () => {
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -55,7 +55,7 @@ describe('ConsultarArea Page', () => {
 
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -76,7 +76,7 @@ describe('ConsultarArea Page', () => {
   it('renderiza botones de editar', async () => {
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -89,7 +89,7 @@ describe('ConsultarArea Page', () => {
   it('renderiza campo de bÃºsqueda', () => {
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -102,7 +102,7 @@ describe('ConsultarArea Page', () => {
   it('renderiza Header y Navbar', () => {
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -112,7 +112,7 @@ describe('ConsultarArea Page', () => {
   it('renderiza footer', () => {
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -123,7 +123,7 @@ describe('ConsultarArea Page', () => {
   it('tiene layout con full height', () => {
     const { container } = render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -134,7 +134,7 @@ describe('ConsultarArea Page', () => {
   it('llama a obtenerAreas en mount', () => {
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -146,7 +146,7 @@ describe('ConsultarArea Page', () => {
 
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -161,7 +161,7 @@ describe('ConsultarArea Page', () => {
   it('muestra la lista de áreas correctamente', async () => {
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 

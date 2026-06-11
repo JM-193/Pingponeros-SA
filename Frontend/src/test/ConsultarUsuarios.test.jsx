@@ -1,12 +1,12 @@
-// ConsultarUsuarios.test.jsx
+// QueryUsers.test.jsx
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import ConsultarUsuarios from '../pages/ConsultarUsuarios'
+import QueryUsers from '../pages/QueryUsers'
 import * as userService from '../services/userService'
 
 vi.mock('../services/userService')
 
-describe('ConsultarUsuarios Page', () => {
+describe('QueryUsers Page', () => {
   const mockUsuarios = [
     { correoInstitucional: 'juanito.perezperez@ucr.ac.cr', primerNombre: 'Juanito', primerApellido: 'Pérez', estado: 1 },
     { correoInstitucional: 'juanito.moraporras@ucr.ac.cr', primerNombre: 'Juanito', segundoNombre: 'Manuel', primerApellido: 'Mora', segundoApellido: 'Porras', estado: 1 },
@@ -21,7 +21,7 @@ describe('ConsultarUsuarios Page', () => {
   it('carga y renderiza usuarios', async () => {
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
@@ -34,7 +34,7 @@ describe('ConsultarUsuarios Page', () => {
   it('renderiza tabla con columnas correctas', async () => {
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
@@ -48,7 +48,7 @@ describe('ConsultarUsuarios Page', () => {
   it('renderiza campo de búsqueda', () => {
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
@@ -61,7 +61,7 @@ describe('ConsultarUsuarios Page', () => {
   it('renderiza Header y Navbar', () => {
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
@@ -71,7 +71,7 @@ describe('ConsultarUsuarios Page', () => {
   it('renderiza footer', () => {
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
@@ -82,7 +82,7 @@ describe('ConsultarUsuarios Page', () => {
   it('llama a obtenerUsuarios en mount', () => {
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
@@ -94,7 +94,7 @@ describe('ConsultarUsuarios Page', () => {
 
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
@@ -109,7 +109,7 @@ describe('ConsultarUsuarios Page', () => {
   it('filtra usuarios por nombre en el buscador', async () => {
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
@@ -131,7 +131,7 @@ describe('ConsultarUsuarios Page', () => {
   it('filtra usuarios por correo en el buscador', async () => {
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
@@ -153,7 +153,7 @@ describe('ConsultarUsuarios Page', () => {
   it('renderiza usuarios con segundo nombre y segundo apellido concatenados', async () => {
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 

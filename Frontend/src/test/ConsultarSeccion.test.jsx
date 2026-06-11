@@ -1,14 +1,14 @@
-// ConsultarSeccion.test.jsx
+// QuerySections.test.jsx
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import ConsultarSeccion from '../pages/ConsultarSeccion'
+import QuerySections from '../pages/QuerySections'
 import * as sectionService from '../services/sectionService'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/sectionService')
 vi.mock('../services/areaService')
 
-describe('ConsultarSeccion Page', () => {
+describe('QuerySections Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     sectionService.obtenerSecciones.mockResolvedValueOnce([
@@ -22,7 +22,7 @@ describe('ConsultarSeccion Page', () => {
   it('carga y renderiza secciones', async () => {
     render(
       <BrowserRouter>
-        <ConsultarSeccion />
+        <QuerySections />
       </BrowserRouter>,
     )
 
@@ -35,7 +35,7 @@ describe('ConsultarSeccion Page', () => {
   it('llama a obtenerSecciones al montar', () => {
     render(
       <BrowserRouter>
-        <ConsultarSeccion />
+        <QuerySections />
       </BrowserRouter>,
     )
 
@@ -45,7 +45,7 @@ describe('ConsultarSeccion Page', () => {
   it('filtra secciones por nombre en el buscador', async () => {
     render(
       <BrowserRouter>
-        <ConsultarSeccion />
+        <QuerySections />
       </BrowserRouter>,
     )
 
@@ -67,7 +67,7 @@ describe('ConsultarSeccion Page', () => {
   it('filtra secciones por área en el buscador', async () => {
     render(
       <BrowserRouter>
-        <ConsultarSeccion />
+        <QuerySections />
       </BrowserRouter>,
     )
 

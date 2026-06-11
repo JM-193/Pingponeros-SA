@@ -4,7 +4,7 @@ import { obtenerSecciones } from '../services/sectionService'
 import { obtenerAreas } from '../services/areaService'
 import { buildNameMap, formatStatusLabel, resolveOptionValueKey } from '../utils/organizationOptions'
 
-export default function ConsultarSeccion() {
+export default function QuerySections() {
   const fetchItems = useCallback(async () => {
     const [secciones, areas] = await Promise.all([
       obtenerSecciones(),

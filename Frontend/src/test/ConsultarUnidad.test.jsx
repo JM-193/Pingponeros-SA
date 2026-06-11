@@ -1,7 +1,7 @@
-// ConsultarUnidad.test.jsx
+// QueryUnits.test.jsx
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import ConsultarUnidad from '../pages/ConsultarUnidad'
+import QueryUnits from '../pages/QueryUnits'
 import * as unitService from '../services/unitService'
 import * as areaService from '../services/areaService'
 import * as departmentService from '../services/departmentService'
@@ -20,7 +20,7 @@ vi.mock('../services/sectionService', () => ({
   obtenerSecciones: vi.fn(),
 }))
 
-describe('ConsultarUnidad Page', () => {
+describe('QueryUnits Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     unitService.obtenerUnidades.mockResolvedValue([
@@ -45,7 +45,7 @@ describe('ConsultarUnidad Page', () => {
   it('carga y renderiza unidades', async () => {
     render(
       <BrowserRouter>
-        <ConsultarUnidad />
+        <QueryUnits />
       </BrowserRouter>,
     )
 
@@ -58,7 +58,7 @@ describe('ConsultarUnidad Page', () => {
   it('llama a obtenerUnidades al montar', () => {
     render(
       <BrowserRouter>
-        <ConsultarUnidad />
+        <QueryUnits />
       </BrowserRouter>,
     )
 
@@ -68,7 +68,7 @@ describe('ConsultarUnidad Page', () => {
   it('filtra unidades por nombre en el buscador', async () => {
     render(
       <BrowserRouter>
-        <ConsultarUnidad />
+        <QueryUnits />
       </BrowserRouter>,
     )
 
@@ -90,7 +90,7 @@ describe('ConsultarUnidad Page', () => {
   it('filtra unidades por área en el buscador', async () => {
     render(
       <BrowserRouter>
-        <ConsultarUnidad />
+        <QueryUnits />
       </BrowserRouter>,
     )
 
@@ -112,7 +112,7 @@ describe('ConsultarUnidad Page', () => {
   it('muestra dependencia de departamento correctamente', async () => {
     render(
       <BrowserRouter>
-        <ConsultarUnidad />
+        <QueryUnits />
       </BrowserRouter>,
     )
 
@@ -138,7 +138,7 @@ describe('ConsultarUnidad Page', () => {
 
     render(
       <BrowserRouter>
-        <ConsultarUnidad />
+        <QueryUnits />
       </BrowserRouter>,
     )
 

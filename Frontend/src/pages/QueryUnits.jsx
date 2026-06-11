@@ -6,7 +6,7 @@ import { obtenerDepartamentos } from '../services/departmentService'
 import { obtenerSecciones } from '../services/sectionService'
 import { buildNameMap, formatStatusLabel, resolveOptionValueKey } from '../utils/organizationOptions'
 
-export default function ConsultarUnidad() {
+export default function QueryUnits() {
   const fetchItems = useCallback(async () => {
     const [unidades, areas, departamentos, secciones] = await Promise.all([
       obtenerUnidades(),

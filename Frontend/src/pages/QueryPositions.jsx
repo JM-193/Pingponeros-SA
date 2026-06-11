@@ -1,4 +1,4 @@
-// ConsultarPlaza.jsx
+// QueryPositions.jsx
 import { useCallback } from 'react'
 import EntityListPage from '../components/EntityListPage'
 import { obtenerPlazas } from '../services/positionService'
@@ -8,7 +8,7 @@ import { obtenerSecciones } from '../services/sectionService'
 import { obtenerAreas } from '../services/areaService'
 import { buildNameMap, resolveOptionValueKey } from '../utils/organizationOptions'
 
-export default function ConsultarPlaza() {
+export default function QueryPositions() {
   const fetchItems = useCallback(async () => {
     const [plazas, unidades, departamentos, secciones, areas] = await Promise.all([
       obtenerPlazas(),

@@ -1,7 +1,7 @@
-// ConsultarPlaza.test.jsx
+// QueryPositions.test.jsx
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import ConsultarPlaza from '../pages/ConsultarPlaza'
+import QueryPositions from '../pages/QueryPositions'
 import * as positionService from '../services/positionService'
 import * as unitService from '../services/unitService'
 import * as departmentService from '../services/departmentService'
@@ -24,7 +24,7 @@ const mockDepartamentos = [{ id: 1, nombre: 'Compras', idArea: 1 }]
 const mockSecciones = [{ id: 1, nombre: 'Soporte', idArea: 1 }]
 const mockAreas = [{ id: 1, nombre: 'Central' }]
 
-describe('ConsultarPlaza Page', () => {
+describe('QueryPositions Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     positionService.obtenerPlazas.mockResolvedValue(mockPlazas)
@@ -37,7 +37,7 @@ describe('ConsultarPlaza Page', () => {
   it('carga y renderiza plazas', async () => {
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
@@ -51,7 +51,7 @@ describe('ConsultarPlaza Page', () => {
   it('renderiza tabla con las columnas correctas', async () => {
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
@@ -66,7 +66,7 @@ describe('ConsultarPlaza Page', () => {
   it('resuelve etiquetas de unidad, departamento, sección y área', async () => {
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
@@ -80,7 +80,7 @@ describe('ConsultarPlaza Page', () => {
   it('muestra "Sin asignación" cuando la plaza no tiene unidad ni área', async () => {
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
@@ -93,7 +93,7 @@ describe('ConsultarPlaza Page', () => {
   it('renderiza botones de editar', async () => {
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
@@ -106,7 +106,7 @@ describe('ConsultarPlaza Page', () => {
   it('renderiza Header y Navbar', async () => {
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
@@ -116,7 +116,7 @@ describe('ConsultarPlaza Page', () => {
   it('renderiza footer', async () => {
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
@@ -127,7 +127,7 @@ describe('ConsultarPlaza Page', () => {
   it('filtra plazas por número en el buscador', async () => {
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
@@ -151,7 +151,7 @@ describe('ConsultarPlaza Page', () => {
 
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
@@ -163,7 +163,7 @@ describe('ConsultarPlaza Page', () => {
   it('llama a todos los servicios de organización al montar', async () => {
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 

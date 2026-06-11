@@ -1,14 +1,14 @@
-// ConsultarDepartamento.test.jsx
+// QueryDepartments.test.jsx
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import ConsultarDepartamento from '../pages/ConsultarDepartamento'
+import QueryDepartments from '../pages/QueryDepartments'
 import * as departmentService from '../services/departmentService'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/departmentService')
 vi.mock('../services/areaService')
 
-describe('ConsultarDepartamento Page', () => {
+describe('QueryDepartments Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     departmentService.obtenerDepartamentos.mockResolvedValueOnce([
@@ -22,7 +22,7 @@ describe('ConsultarDepartamento Page', () => {
   it('carga y renderiza departamentos', async () => {
     render(
       <BrowserRouter>
-        <ConsultarDepartamento />
+        <QueryDepartments />
       </BrowserRouter>,
     )
 
@@ -35,7 +35,7 @@ describe('ConsultarDepartamento Page', () => {
   it('llama a obtenerDepartamentos al montar', () => {
     render(
       <BrowserRouter>
-        <ConsultarDepartamento />
+        <QueryDepartments />
       </BrowserRouter>,
     )
 
@@ -45,7 +45,7 @@ describe('ConsultarDepartamento Page', () => {
   it('filtra departamentos por nombre en el buscador', async () => {
     render(
       <BrowserRouter>
-        <ConsultarDepartamento />
+        <QueryDepartments />
       </BrowserRouter>,
     )
 
@@ -67,7 +67,7 @@ describe('ConsultarDepartamento Page', () => {
   it('filtra departamentos por área en el buscador', async () => {
     render(
       <BrowserRouter>
-        <ConsultarDepartamento />
+        <QueryDepartments />
       </BrowserRouter>,
     )
 

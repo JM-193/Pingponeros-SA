@@ -1,9 +1,9 @@
-// ConsultarUsuarios.jsx
+// QueryUsers.jsx
 
 import EntityListPage from '../components/EntityListPage'
 import { obtenerUsuarios } from '../services/userService'
 
-export default function ConsultarUsuarios() {
+export default function QueryUsers() {
   const columns = [
     {
       key: 'primerNombre',

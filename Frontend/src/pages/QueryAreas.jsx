@@ -2,7 +2,7 @@ import EntityListPage from '../components/EntityListPage'
 import { obtenerAreas } from '../services/areaService'
 import { formatStatusLabel } from '../utils/organizationOptions'
 
-export default function ConsultarArea() {
+export default function QueryAreas() {
   const columns = [
     {
       key: 'nombre',
