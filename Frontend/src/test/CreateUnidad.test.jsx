@@ -6,7 +6,7 @@ import * as areaService from '../services/areaService'
 import * as departmentService from '../services/departmentService'
 import * as sectionService from '../services/sectionService'
 
-vi.mock('../services/unidadService')
+vi.mock('../services/unitService')
 vi.mock('../services/areaService')
 vi.mock('../services/departmentService')
 vi.mock('../services/sectionService')

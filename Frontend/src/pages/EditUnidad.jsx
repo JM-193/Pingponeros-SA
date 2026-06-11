@@ -4,7 +4,7 @@ import OrganizationEntityFormFields from '../components/OrganizationEntityFormFi
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
 import PageLayout from '../components/PageLayout'
 import StateToggle from '../components/StateToggle'
-import { actualizarUnidad, obtenerUnidadPorNombre } from '../services/unidadService'
+import { actualizarUnidad, obtenerUnidadPorNombre } from '../services/unitService'
 import { obtenerAreas } from '../services/areaService'
 import { obtenerDepartamentos } from '../services/departmentService'
 import { obtenerSecciones } from '../services/sectionService'

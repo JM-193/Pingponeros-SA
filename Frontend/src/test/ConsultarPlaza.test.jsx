@@ -3,13 +3,13 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import ConsultarPlaza from '../pages/ConsultarPlaza'
 import * as positionService from '../services/positionService'
-import * as unidadService from '../services/unidadService'
+import * as unitService from '../services/unitService'
 import * as departmentService from '../services/departmentService'
 import * as sectionService from '../services/sectionService'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/positionService')
-vi.mock('../services/unidadService')
+vi.mock('../services/unitService')
 vi.mock('../services/departmentService')
 vi.mock('../services/sectionService')
 vi.mock('../services/areaService')
@@ -28,7 +28,7 @@ describe('ConsultarPlaza Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     positionService.obtenerPlazas.mockResolvedValue(mockPlazas)
-    unidadService.obtenerUnidades.mockResolvedValue(mockUnidades)
+    unitService.obtenerUnidades.mockResolvedValue(mockUnidades)
     departmentService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
     sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
@@ -168,7 +168,7 @@ describe('ConsultarPlaza Page', () => {
     )
 
     await waitFor(() => {
-      expect(unidadService.obtenerUnidades).toHaveBeenCalled()
+      expect(unitService.obtenerUnidades).toHaveBeenCalled()
       expect(departmentService.obtenerDepartamentos).toHaveBeenCalled()
       expect(sectionService.obtenerSecciones).toHaveBeenCalled()
       expect(areaService.obtenerAreas).toHaveBeenCalled()

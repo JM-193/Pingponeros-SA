@@ -3,13 +3,13 @@ import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import CreatePlaza from '../pages/CreatePlaza'
 import * as positionService from '../services/positionService'
-import * as unidadService from '../services/unidadService'
+import * as unitService from '../services/unitService'
 import * as departmentService from '../services/departmentService'
 import * as sectionService from '../services/sectionService'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/positionService')
-vi.mock('../services/unidadService')
+vi.mock('../services/unitService')
 vi.mock('../services/departmentService')
 vi.mock('../services/sectionService')
 vi.mock('../services/areaService')
@@ -22,7 +22,7 @@ const mockAreas = [{ id: 1, nombre: 'Central' }]
 describe('CreatePlaza Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    unidadService.obtenerUnidades.mockResolvedValue(mockUnidades)
+    unitService.obtenerUnidades.mockResolvedValue(mockUnidades)
     departmentService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
     sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
@@ -30,7 +30,7 @@ describe('CreatePlaza Page', () => {
 
   it('muestra indicador de carga mientras carga opciones', () => {
     // Las mocks resuelven de forma asíncrona, así que al montar debería verse cargando
-    unidadService.obtenerUnidades.mockImplementation(() => new Promise(() => {}))
+    unitService.obtenerUnidades.mockImplementation(() => new Promise(() => {}))
     departmentService.obtenerDepartamentos.mockImplementation(() => new Promise(() => {}))
     sectionService.obtenerSecciones.mockImplementation(() => new Promise(() => {}))
     areaService.obtenerAreas.mockImplementation(() => new Promise(() => {}))
@@ -175,7 +175,7 @@ describe('CreatePlaza Page', () => {
   })
 
   it('mantiene la unidad seleccionada cuando el area se infiere desde su departamento', async () => {
-    unidadService.obtenerUnidades.mockResolvedValueOnce([
+    unitService.obtenerUnidades.mockResolvedValueOnce([
       { id: 1, nombre: 'Portal', idDepartamento: 1 },
     ])
     departmentService.obtenerDepartamentos.mockResolvedValueOnce([
@@ -260,7 +260,7 @@ describe('CreatePlaza Page', () => {
   })
 
   it('muestra error cuando falla la carga de opciones', async () => {
-    unidadService.obtenerUnidades.mockRejectedValueOnce(new Error('Error al cargar unidades'))
+    unitService.obtenerUnidades.mockRejectedValueOnce(new Error('Error al cargar unidades'))
 
     render(
       <BrowserRouter>

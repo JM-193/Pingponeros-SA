@@ -2,12 +2,12 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import ConsultarUnidad from '../pages/ConsultarUnidad'
-import * as unidadService from '../services/unidadService'
+import * as unitService from '../services/unitService'
 import * as areaService from '../services/areaService'
 import * as departmentService from '../services/departmentService'
 import * as sectionService from '../services/sectionService'
 
-vi.mock('../services/unidadService', () => ({
+vi.mock('../services/unitService', () => ({
   obtenerUnidades: vi.fn(),
 }))
 vi.mock('../services/areaService', () => ({
@@ -23,7 +23,7 @@ vi.mock('../services/sectionService', () => ({
 describe('ConsultarUnidad Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    unidadService.obtenerUnidades.mockResolvedValue([
+    unitService.obtenerUnidades.mockResolvedValue([
       {
         id: 30,
         nombre: 'Unidad Técnica',
@@ -62,7 +62,7 @@ describe('ConsultarUnidad Page', () => {
       </BrowserRouter>,
     )
 
-    expect(unidadService.obtenerUnidades).toHaveBeenCalled()
+    expect(unitService.obtenerUnidades).toHaveBeenCalled()
   })
 
   it('filtra unidades por nombre en el buscador', async () => {
@@ -122,7 +122,7 @@ describe('ConsultarUnidad Page', () => {
   })
 
   it('muestra dependencia de sección cuando la unidad tiene idSeccion', async () => {
-    unidadService.obtenerUnidades.mockResolvedValue([
+    unitService.obtenerUnidades.mockResolvedValue([
       {
         id: 31,
         nombre: 'Unidad Logística',

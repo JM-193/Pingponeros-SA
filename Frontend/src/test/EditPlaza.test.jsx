@@ -3,13 +3,13 @@ import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import EditPlaza from '../pages/EditPlaza'
 import * as positionService from '../services/positionService'
-import * as unidadService from '../services/unidadService'
+import * as unitService from '../services/unitService'
 import * as departmentService from '../services/departmentService'
 import * as sectionService from '../services/sectionService'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/positionService')
-vi.mock('../services/unidadService')
+vi.mock('../services/unitService')
 vi.mock('../services/departmentService')
 vi.mock('../services/sectionService')
 vi.mock('../services/areaService')
@@ -53,7 +53,7 @@ describe('EditPlaza Page', () => {
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
     departmentService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
     sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
-    unidadService.obtenerUnidades.mockResolvedValue(mockUnidades)
+    unitService.obtenerUnidades.mockResolvedValue(mockUnidades)
   })
 
   it('muestra indicador de carga mientras carga datos', () => {

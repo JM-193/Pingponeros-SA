@@ -1,4 +1,4 @@
-// unidadService.test.js
+// unitService.test.js
 import { describe, it, expect, beforeEach } from 'vitest'
 import {
   obtenerUnidades,
@@ -6,9 +6,9 @@ import {
   crearUnidad,
   eliminarUnidad,
   actualizarUnidad,
-} from '../services/unidadService'
+} from '../services/unitService'
 
-describe('unidadService', () => {
+describe('unitService', () => {
   const mockFetch = vi.fn()
 
   beforeEach(() => {
