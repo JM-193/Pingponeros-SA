@@ -130,6 +130,7 @@ export default function Login() {
               color: COLORS.textDark,
               transition: 'border-color 0.2s',
             }}
+            maxLength={100}
           />
           {errors.email && (
             <span style={{ fontSize: '12px', color: COLORS.danger }}>
@@ -165,6 +166,7 @@ export default function Login() {
               color: COLORS.textDark,
               transition: 'border-color 0.2s',
             }}
+            maxLength={30}
           />
           {errors.password && (
             <span style={{ fontSize: '12px', color: COLORS.danger }}>
