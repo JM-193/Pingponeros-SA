@@ -132,6 +132,7 @@ export default function OrganizationEntityFormFields({
             backgroundColor: COLORS.inputBg,
             color: COLORS.black,
           }}
+          maxLength={50}
         />
       </div>
 
@@ -168,6 +169,7 @@ export default function OrganizationEntityFormFields({
             minHeight: '100px',
             resize: 'vertical',
           }}
+          maxLength={2048}
           placeholder={descriptionPlaceholder}
         />
       </div>
