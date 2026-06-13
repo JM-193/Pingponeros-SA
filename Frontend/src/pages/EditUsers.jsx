@@ -161,7 +161,6 @@ export default function EditUsers() {
               value={formData.firstName}
               onChange={handleInputChange}
               required
-              disabled={submitting}
               disabled={true}
             />
             <FormInput
@@ -170,7 +169,6 @@ export default function EditUsers() {
               name="secondName"
               value={formData.secondName}
               onChange={handleInputChange}
-              disabled={submitting}
               disabled={true}
             />
           </FormRow>
@@ -184,7 +182,6 @@ export default function EditUsers() {
               value={formData.firstName_surname}
               onChange={handleInputChange}
               required
-              disabled={submitting}
               disabled={true}
             />
             <FormInput
@@ -194,7 +191,6 @@ export default function EditUsers() {
               value={formData.secondName_surname}
               onChange={handleInputChange}
               required
-              disabled={submitting}
               disabled={true}
             />
           </FormRow>

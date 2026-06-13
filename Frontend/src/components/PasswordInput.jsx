@@ -97,6 +97,7 @@ PasswordInput.propTypes = {
   error: PropTypes.string,
   required: PropTypes.bool,
   disabled: PropTypes.bool,
+  maxlength: PropTypes.number,
 }
 
 PasswordInput.defaultProps = {
