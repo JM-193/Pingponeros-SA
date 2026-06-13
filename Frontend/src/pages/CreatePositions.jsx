@@ -212,6 +212,7 @@ export default function CreatePositions() {
             inputMode="numeric"
             value={formData.numeroPlaza}
             onChange={handleInputChange}
+            maxLength={20}
             required
           />
 
