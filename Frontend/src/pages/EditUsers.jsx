@@ -162,6 +162,7 @@ export default function EditUsers() {
               onChange={handleInputChange}
               required
               disabled={submitting}
+              disabled={true}
             />
             <FormInput
               label="Segundo Nombre"
@@ -170,6 +171,7 @@ export default function EditUsers() {
               value={formData.secondName}
               onChange={handleInputChange}
               disabled={submitting}
+              disabled={true}
             />
           </FormRow>
 
@@ -183,6 +185,7 @@ export default function EditUsers() {
               onChange={handleInputChange}
               required
               disabled={submitting}
+              disabled={true}
             />
             <FormInput
               label="Segundo Apellido"
@@ -192,6 +195,7 @@ export default function EditUsers() {
               onChange={handleInputChange}
               required
               disabled={submitting}
+              disabled={true}
             />
           </FormRow>
 
