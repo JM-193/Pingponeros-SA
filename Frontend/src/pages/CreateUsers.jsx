@@ -123,6 +123,7 @@ export default function CreateUsers() {
               name="firstName"
               value={formData.firstName}
               onChange={handleInputChange}
+              maxLength={20}
               required
             />
             <FormInput
@@ -131,6 +132,7 @@ export default function CreateUsers() {
               name="secondName"
               value={formData.secondName}
               onChange={handleInputChange}
+              maxLength={20}
             />
           </FormRow>
 
@@ -142,6 +144,7 @@ export default function CreateUsers() {
               name="firstName_surname"
               value={formData.firstName_surname}
               onChange={handleInputChange}
+              maxLength={20}
               required
             />
             <FormInput
@@ -150,6 +153,7 @@ export default function CreateUsers() {
               name="secondName_surname"
               value={formData.secondName_surname}
               onChange={handleInputChange}
+              maxLength={20}
               required
             />
           </FormRow>
@@ -162,6 +166,7 @@ export default function CreateUsers() {
             type="email"
             value={formData.email}
             onChange={handleInputChange}
+            maxLength={100}
             required
           />
 
