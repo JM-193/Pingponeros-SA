@@ -17,6 +17,15 @@ internal sealed class PositionRepository : IPositionRepository
 
     public PositionRepository(IQueryExecutor q) => _q = q;
 
+    private static Position MapearFila(System.Data.Common.DbDataReader reader) => new()
+    {
+        NumeroPlaza = reader.GetInt64(reader.GetOrdinal(ColumnNumeroPlaza)),
+        IdUnidad = reader.IsDBNull(reader.GetOrdinal(ColumnIdUnidad)) ? null : reader.GetInt32(reader.GetOrdinal(ColumnIdUnidad)),
+        IdDepartamento = reader.IsDBNull(reader.GetOrdinal(ColumnIdDepartamento)) ? null : reader.GetInt32(reader.GetOrdinal(ColumnIdDepartamento)),
+        IdSeccion = reader.IsDBNull(reader.GetOrdinal(ColumnIdSeccion)) ? null : reader.GetInt32(reader.GetOrdinal(ColumnIdSeccion)),
+        IdArea = reader.IsDBNull(reader.GetOrdinal(ColumnIdArea)) ? null : reader.GetInt32(reader.GetOrdinal(ColumnIdArea)),
+    };
+
     public async Task<List<Position>> ObtenerTodasAsync()
     {
         return await _q.QueryAsync(connection =>
@@ -33,14 +42,7 @@ internal sealed class PositionRepository : IPositionRepository
             var plazas = new List<Position>();
             while (await reader.ReadAsync().ConfigureAwait(false))
             {
-                plazas.Add(new Position
-                {
-                    NumeroPlaza = Convert.ToInt64(reader[ColumnNumeroPlaza], CultureInfo.InvariantCulture),
-                    IdUnidad = reader[ColumnIdUnidad] is DBNull ? null : Convert.ToInt32(reader[ColumnIdUnidad], CultureInfo.InvariantCulture),
-                    IdDepartamento = reader[ColumnIdDepartamento] is DBNull ? null : Convert.ToInt32(reader[ColumnIdDepartamento], CultureInfo.InvariantCulture),
-                    IdSeccion = reader[ColumnIdSeccion] is DBNull ? null : Convert.ToInt32(reader[ColumnIdSeccion], CultureInfo.InvariantCulture),
-                    IdArea = reader[ColumnIdArea] is DBNull ? null : Convert.ToInt32(reader[ColumnIdArea], CultureInfo.InvariantCulture),
-                });
+                plazas.Add(MapearFila(reader));
             }
             return plazas;
         }).ConfigureAwait(false);
@@ -99,14 +101,7 @@ internal sealed class PositionRepository : IPositionRepository
         {
             if (await reader.ReadAsync().ConfigureAwait(false))
             {
-                return new Position
-                {
-                    NumeroPlaza = Convert.ToInt64(reader[ColumnNumeroPlaza], CultureInfo.InvariantCulture),
-                    IdUnidad = reader[ColumnIdUnidad] is DBNull ? null : Convert.ToInt32(reader[ColumnIdUnidad], CultureInfo.InvariantCulture),
-                    IdDepartamento = reader[ColumnIdDepartamento] is DBNull ? null : Convert.ToInt32(reader[ColumnIdDepartamento], CultureInfo.InvariantCulture),
-                    IdSeccion = reader[ColumnIdSeccion] is DBNull ? null : Convert.ToInt32(reader[ColumnIdSeccion], CultureInfo.InvariantCulture),
-                    IdArea = reader[ColumnIdArea] is DBNull ? null : Convert.ToInt32(reader[ColumnIdArea], CultureInfo.InvariantCulture),
-                };
+                return MapearFila(reader);
             }
             return null;
         }).ConfigureAwait(false);

@@ -21,6 +21,17 @@ internal sealed class UnitRepository : IUnitRepository
 
     public UnitRepository(IQueryExecutor q) => _q = q;
 
+    private static Unit MapearFila(System.Data.Common.DbDataReader reader) => new()
+    {
+        Id = reader.GetInt32(reader.GetOrdinal(ColumnIdUnidad)),
+        IdArea = reader.IsDBNull(reader.GetOrdinal(ColumnIdArea)) ? null : reader.GetInt32(reader.GetOrdinal(ColumnIdArea)),
+        IdDepartamento = reader.IsDBNull(reader.GetOrdinal(ColumnIdDepartamento)) ? null : reader.GetInt32(reader.GetOrdinal(ColumnIdDepartamento)),
+        IdSeccion = reader.IsDBNull(reader.GetOrdinal(ColumnIdSeccion)) ? null : reader.GetInt32(reader.GetOrdinal(ColumnIdSeccion)),
+        Nombre = reader.IsDBNull(reader.GetOrdinal(ColumnNombre)) ? string.Empty : reader.GetString(reader.GetOrdinal(ColumnNombre)),
+        Descripcion = reader.IsDBNull(reader.GetOrdinal(ColumnDescripcion)) ? string.Empty : reader.GetString(reader.GetOrdinal(ColumnDescripcion)),
+        Estado = reader.GetInt32(reader.GetOrdinal(ColumnEstado)),
+    };
+
     public async Task<List<Unit>> ObtenerTodasAsync()
     {
         return await _q.QueryAsync(connection =>
@@ -37,16 +48,7 @@ internal sealed class UnitRepository : IUnitRepository
             var unidades = new List<Unit>();
             while (await reader.ReadAsync().ConfigureAwait(false))
             {
-                unidades.Add(new Unit
-                {
-                    Id = Convert.ToInt32(reader[ColumnIdUnidad], CultureInfo.InvariantCulture),
-                    IdArea = reader[ColumnIdArea] is DBNull ? null : Convert.ToInt32(reader[ColumnIdArea], CultureInfo.InvariantCulture),
-                    IdDepartamento = reader[ColumnIdDepartamento] is DBNull ? null : Convert.ToInt32(reader[ColumnIdDepartamento], CultureInfo.InvariantCulture),
-                    IdSeccion = reader[ColumnIdSeccion] is DBNull ? null : Convert.ToInt32(reader[ColumnIdSeccion], CultureInfo.InvariantCulture),
-                    Nombre = reader[ColumnNombre].ToString() ?? "",
-                    Descripcion = reader[ColumnDescripcion].ToString() ?? "",
-                    Estado = Convert.ToInt32(reader[ColumnEstado], CultureInfo.InvariantCulture),
-                });
+                unidades.Add(MapearFila(reader));
             }
             return unidades;
         }).ConfigureAwait(false);
@@ -84,8 +86,8 @@ internal sealed class UnitRepository : IUnitRepository
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", unidad.IdArea);
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idDepartamento", unidad.IdDepartamento);
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idSeccion", unidad.IdSeccion);
-            cmd.Parameters.Add(ParamNombre, unidad.Nombre);
-            cmd.Parameters.Add(":descripcion", unidad.Descripcion);
+            OracleCommandHelpers.AddStringParam(cmd, ParamNombre, unidad.Nombre);
+            OracleCommandHelpers.AddStringParam(cmd, ":descripcion", unidad.Descripcion);
             cmd.Parameters.Add(":estado", unidad.Estado);
             cmd.Parameters.Add(new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output));
             return cmd;
@@ -110,16 +112,7 @@ internal sealed class UnitRepository : IUnitRepository
         {
             if (await reader.ReadAsync().ConfigureAwait(false))
             {
-                return new Unit
-                {
-                    Id = Convert.ToInt32(reader[ColumnIdUnidad], CultureInfo.InvariantCulture),
-                    IdArea = reader[ColumnIdArea] is DBNull ? null : Convert.ToInt32(reader[ColumnIdArea], CultureInfo.InvariantCulture),
-                    IdDepartamento = reader[ColumnIdDepartamento] is DBNull ? null : Convert.ToInt32(reader[ColumnIdDepartamento], CultureInfo.InvariantCulture),
-                    IdSeccion = reader[ColumnIdSeccion] is DBNull ? null : Convert.ToInt32(reader[ColumnIdSeccion], CultureInfo.InvariantCulture),
-                    Nombre = reader[ColumnNombre].ToString() ?? "",
-                    Descripcion = reader[ColumnDescripcion].ToString() ?? "",
-                    Estado = Convert.ToInt32(reader[ColumnEstado], CultureInfo.InvariantCulture),
-                };
+                return MapearFila(reader);
             }
             return null;
         }).ConfigureAwait(false);
@@ -142,10 +135,10 @@ internal sealed class UnitRepository : IUnitRepository
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", unidad.IdArea);
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idDepartamento", unidad.IdDepartamento);
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idSeccion", unidad.IdSeccion);
-            cmd.Parameters.Add(ParamNombre, unidad.Nombre);
-            cmd.Parameters.Add(":descripcion", unidad.Descripcion);
+            OracleCommandHelpers.AddStringParam(cmd, ParamNombre, unidad.Nombre);
+            OracleCommandHelpers.AddStringParam(cmd, ":descripcion", unidad.Descripcion);
             cmd.Parameters.Add(":estado", unidad.Estado);
-            cmd.Parameters.Add(":nombreOriginal", nombreOriginal);
+            OracleCommandHelpers.AddStringParam(cmd, ":nombreOriginal", nombreOriginal);
             return cmd;
         }).ConfigureAwait(false);
 

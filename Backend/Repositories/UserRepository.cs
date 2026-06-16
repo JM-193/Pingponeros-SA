@@ -6,6 +6,14 @@ namespace Backend.Repositories;
 
 internal sealed class UserRepository : IUserRepository
 {
+    private const string ColumnCorreoInstitucional = "CORREO_INSTITUCIONAL";
+    private const string ColumnPrimerNombre = "PRIMER_NOMBRE";
+    private const string ColumnSegundoNombre = "SEGUNDO_NOMBRE";
+    private const string ColumnPrimerApellido = "PRIMER_APELLIDO";
+    private const string ColumnSegundoApellido = "SEGUNDO_APELLIDO";
+    private const string ColumnRol = "ROL";
+    private const string ColumnEstado = "ESTADO";
+
     private readonly IQueryExecutor _q;
 
     public UserRepository(IQueryExecutor q) => _q = q;
@@ -259,22 +267,22 @@ internal sealed class UserRepository : IUserRepository
     // ------------------------------------------------------------------ //
     private static User MapearFila(System.Data.Common.DbDataReader r) => new()
     {
-        CorreoInstitucional = r.GetString(0),
-        PrimerNombre = r.GetString(1),
-        SegundoNombre = r.IsDBNull(2) ? null : r.GetString(2),
-        PrimerApellido = r.GetString(3),
-        SegundoApellido = r.IsDBNull(4) ? null : r.GetString(4),
-        Rol = r.GetInt32(5),
-        Estado = r.GetInt32(6),
+        CorreoInstitucional = r.GetString(r.GetOrdinal(ColumnCorreoInstitucional)),
+        PrimerNombre = r.GetString(r.GetOrdinal(ColumnPrimerNombre)),
+        SegundoNombre = r.IsDBNull(r.GetOrdinal(ColumnSegundoNombre)) ? null : r.GetString(r.GetOrdinal(ColumnSegundoNombre)),
+        PrimerApellido = r.GetString(r.GetOrdinal(ColumnPrimerApellido)),
+        SegundoApellido = r.IsDBNull(r.GetOrdinal(ColumnSegundoApellido)) ? null : r.GetString(r.GetOrdinal(ColumnSegundoApellido)),
+        Rol = r.GetInt32(r.GetOrdinal(ColumnRol)),
+        Estado = r.GetInt32(r.GetOrdinal(ColumnEstado)),
     };
 
     private static void AgregarParametros(OracleCommand cmd, User u)
     {
-        cmd.Parameters.Add("correo", u.CorreoInstitucional);
-        cmd.Parameters.Add("primerNombre", u.PrimerNombre);
-        cmd.Parameters.Add("segundoNombre", u.SegundoNombre ?? (object)DBNull.Value);
-        cmd.Parameters.Add("primerApellido", u.PrimerApellido);
-        cmd.Parameters.Add("segundoApellido", u.SegundoApellido ?? (object)DBNull.Value);
+        OracleCommandHelpers.AddStringParam(cmd, "correo", u.CorreoInstitucional);
+        OracleCommandHelpers.AddStringParam(cmd, "primerNombre", u.PrimerNombre);
+        OracleCommandHelpers.AddStringParam(cmd, "segundoNombre", u.SegundoNombre);
+        OracleCommandHelpers.AddStringParam(cmd, "primerApellido", u.PrimerApellido);
+        OracleCommandHelpers.AddStringParam(cmd, "segundoApellido", u.SegundoApellido);
         cmd.Parameters.Add("rol", u.Rol);
         cmd.Parameters.Add("estado", u.Estado);
     }

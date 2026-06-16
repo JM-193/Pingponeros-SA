@@ -19,6 +19,15 @@ internal sealed class SectionRepository : ISectionRepository
 
     public SectionRepository(IQueryExecutor q) => _q = q;
 
+    private static Section MapearFila(System.Data.Common.DbDataReader reader) => new()
+    {
+        Id = reader.GetInt32(reader.GetOrdinal(ColumnIdSeccion)),
+        IdArea = reader.IsDBNull(reader.GetOrdinal(ColumnIdArea)) ? null : reader.GetInt32(reader.GetOrdinal(ColumnIdArea)),
+        Nombre = reader.IsDBNull(reader.GetOrdinal(ColumnNombre)) ? string.Empty : reader.GetString(reader.GetOrdinal(ColumnNombre)),
+        Descripcion = reader.IsDBNull(reader.GetOrdinal(ColumnDescripcion)) ? string.Empty : reader.GetString(reader.GetOrdinal(ColumnDescripcion)),
+        Estado = reader.GetInt32(reader.GetOrdinal(ColumnEstado)),
+    };
+
     public async Task<List<Section>> ObtenerTodasAsync()
     {
         return await _q.QueryAsync(connection =>
@@ -35,14 +44,7 @@ internal sealed class SectionRepository : ISectionRepository
             var secciones = new List<Section>();
             while (await reader.ReadAsync().ConfigureAwait(false))
             {
-                secciones.Add(new Section
-                {
-                    Id = Convert.ToInt32(reader[ColumnIdSeccion], CultureInfo.InvariantCulture),
-                    IdArea = reader[ColumnIdArea] is DBNull ? null : Convert.ToInt32(reader[ColumnIdArea], CultureInfo.InvariantCulture),
-                    Nombre = reader[ColumnNombre].ToString() ?? "",
-                    Descripcion = reader[ColumnDescripcion].ToString() ?? "",
-                    Estado = Convert.ToInt32(reader[ColumnEstado], CultureInfo.InvariantCulture),
-                });
+                secciones.Add(MapearFila(reader));
             }
             return secciones;
         }).ConfigureAwait(false);
@@ -78,8 +80,8 @@ internal sealed class SectionRepository : ISectionRepository
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", seccion.IdArea);
-            cmd.Parameters.Add(ParamNombre, seccion.Nombre);
-            cmd.Parameters.Add(":descripcion", seccion.Descripcion);
+            OracleCommandHelpers.AddStringParam(cmd, ParamNombre, seccion.Nombre);
+            OracleCommandHelpers.AddStringParam(cmd, ":descripcion", seccion.Descripcion);
             cmd.Parameters.Add(":estado", seccion.Estado);
             cmd.Parameters.Add(new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output));
             return cmd;
@@ -104,14 +106,7 @@ internal sealed class SectionRepository : ISectionRepository
         {
             if (await reader.ReadAsync().ConfigureAwait(false))
             {
-                return new Section
-                {
-                    Id = Convert.ToInt32(reader[ColumnIdSeccion], CultureInfo.InvariantCulture),
-                    IdArea = reader[ColumnIdArea] is DBNull ? null : Convert.ToInt32(reader[ColumnIdArea], CultureInfo.InvariantCulture),
-                    Nombre = reader[ColumnNombre].ToString() ?? "",
-                    Descripcion = reader[ColumnDescripcion].ToString() ?? "",
-                    Estado = Convert.ToInt32(reader[ColumnEstado], CultureInfo.InvariantCulture),
-                };
+                return MapearFila(reader);
             }
             return null;
         }).ConfigureAwait(false);
@@ -131,10 +126,10 @@ internal sealed class SectionRepository : ISectionRepository
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", seccion.IdArea);
-            cmd.Parameters.Add(ParamNombre, seccion.Nombre);
-            cmd.Parameters.Add(":descripcion", seccion.Descripcion);
+            OracleCommandHelpers.AddStringParam(cmd, ParamNombre, seccion.Nombre);
+            OracleCommandHelpers.AddStringParam(cmd, ":descripcion", seccion.Descripcion);
             cmd.Parameters.Add(":estado", seccion.Estado);
-            cmd.Parameters.Add(":nombreOriginal", nombreOriginal);
+            OracleCommandHelpers.AddStringParam(cmd, ":nombreOriginal", nombreOriginal);
             return cmd;
         }).ConfigureAwait(false);
 
