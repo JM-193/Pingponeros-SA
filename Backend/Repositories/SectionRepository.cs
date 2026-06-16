@@ -29,7 +29,7 @@ internal sealed class SectionRepository : ISectionRepository
 
     private static void AgregarParamNombre(OracleCommand cmd, string nombre)
     {
-        OracleCommandHelpers.AddStringParam(cmd, ColumnNombre, nombre);
+        OracleCommandHelpers.AddStringParam(cmd, ":nombre", nombre);
     }
 
     private static void AgregarParametros(OracleCommand cmd, Section seccion)

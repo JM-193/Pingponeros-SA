@@ -228,6 +228,8 @@ internal sealed class UserRepository : IUserRepository
     // ------------------------------------------------------------------ //
     public async Task<bool> ActualizarAsync(string correo, User usuario)
     {
+        ArgumentNullException.ThrowIfNull(usuario);
+
         const string sql = """
             UPDATE USUARIOS SET
                 PRIMER_NOMBRE    = :primerNombre,

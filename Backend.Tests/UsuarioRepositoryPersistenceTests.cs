@@ -206,6 +206,99 @@ public sealed class UserRepositoryPersistenceTests
         Assert.False(result);
     }
 
+    [Fact]
+    public async Task ActualizarAsync_ReturnsTrueWhenUpdated()
+    {
+        var q = Substitute.For<IQueryExecutor>();
+        q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
+            .Returns(ci =>
+            {
+                ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
+                return Task.FromResult(1);
+            });
+
+        var repo = new UserRepository(q);
+        var updated = await repo.ActualizarAsync("ana@test.com", new User
+        {
+            CorreoInstitucional = "ana@test.com",
+            PrimerNombre = "Ana",
+            SegundoNombre = null,
+            PrimerApellido = "Lopez",
+            SegundoApellido = "Mora",
+            Rol = 1,
+            Estado = 1,
+        });
+
+        Assert.True(updated);
+    }
+
+    [Fact]
+    public async Task ActualizarAsync_ReturnsFalseWhenNotFound()
+    {
+        var q = Substitute.For<IQueryExecutor>();
+        q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
+            .Returns(ci =>
+            {
+                ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
+                return Task.FromResult(0);
+            });
+
+        var repo = new UserRepository(q);
+        var updated = await repo.ActualizarAsync("noexiste@test.com", new User
+        {
+            CorreoInstitucional = "noexiste@test.com",
+            PrimerNombre = "NoExiste",
+            PrimerApellido = "Usuario",
+            Rol = 0,
+            Estado = 1,
+        });
+
+        Assert.False(updated);
+    }
+
+    [Fact]
+    public async Task ActualizarAsync_LanzaExcepcionCuandoUsuarioEsNulo()
+    {
+        var q = Substitute.For<IQueryExecutor>();
+        var repo = new UserRepository(q);
+
+        await Assert.ThrowsAsync<ArgumentNullException>(() => repo.ActualizarAsync("ana@test.com", null!));
+    }
+
+    [Fact]
+    public async Task EliminarAsync_ReturnsTrueWhenDeactivated()
+    {
+        var q = Substitute.For<IQueryExecutor>();
+        q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
+            .Returns(ci =>
+            {
+                ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
+                return Task.FromResult(1);
+            });
+
+        var repo = new UserRepository(q);
+        var result = await repo.EliminarAsync("ana@test.com");
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task EliminarAsync_ReturnsFalseWhenNotFound()
+    {
+        var q = Substitute.For<IQueryExecutor>();
+        q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
+            .Returns(ci =>
+            {
+                ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
+                return Task.FromResult(0);
+            });
+
+        var repo = new UserRepository(q);
+        var result = await repo.EliminarAsync("noexiste@test.com");
+
+        Assert.False(result);
+    }
+
     private static DataTable CrearTablaUsuarios()
     {
         var table = new DataTable();
