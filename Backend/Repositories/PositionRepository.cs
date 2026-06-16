@@ -7,6 +7,7 @@ namespace Backend.Repositories;
 
 internal sealed class PositionRepository : IPositionRepository
 {
+    private const string ParamNumeroPlaza = ":numeroPlaza";
     private const string ColumnNumeroPlaza = "NUMERO_PLAZA";
     private const string ColumnIdUnidad = "ID_UNIDAD";
     private const string ColumnIdDepartamento = "ID_DEPARTAMENTO";
@@ -58,7 +59,7 @@ internal sealed class PositionRepository : IPositionRepository
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(":numeroPlaza", OracleDbType.Int64).Value = numeroPlaza;
+            OracleCommandHelpers.AddInt64Param(cmd, ParamNumeroPlaza, numeroPlaza);
             return cmd;
         }).ConfigureAwait(false);
         return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
@@ -76,7 +77,7 @@ internal sealed class PositionRepository : IPositionRepository
         await _q.ExecuteAsync(connection =>
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
-            cmd.Parameters.Add(":numeroPlaza", OracleDbType.Int64).Value = plaza.NumeroPlaza;
+            OracleCommandHelpers.AddInt64Param(cmd, ParamNumeroPlaza, plaza.NumeroPlaza);
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idUnidad", plaza.IdUnidad);
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idDepartamento", plaza.IdDepartamento);
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idSeccion", plaza.IdSeccion);
@@ -120,7 +121,7 @@ internal sealed class PositionRepository : IPositionRepository
         var filas = await _q.ExecuteAsync(connection =>
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
-            cmd.Parameters.Add(":numeroPlaza", OracleDbType.Int64).Value = numeroPlaza;
+            OracleCommandHelpers.AddInt64Param(cmd, ParamNumeroPlaza, numeroPlaza);
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idUnidad", plaza.IdUnidad);
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idDepartamento", plaza.IdDepartamento);
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idSeccion", plaza.IdSeccion);
