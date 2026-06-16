@@ -9,6 +9,14 @@ namespace Backend.Repositories;
 internal sealed class UnitRepository : IUnitRepository
 {
     private const string ParamNombre = ":nombre";
+    private const string ColumnIdUnidad = "ID_UNIDAD";
+    private const string ColumnIdArea = "ID_AREA";
+    private const string ColumnIdDepartamento = "ID_DEPARTAMENTO";
+    private const string ColumnIdSeccion = "ID_SECCION";
+    private const string ColumnNombre = "NOMBRE";
+    private const string ColumnDescripcion = "DESCRIPCION";
+    private const string ColumnEstado = "ESTADO";
+
     private readonly IQueryExecutor _q;
 
     public UnitRepository(IQueryExecutor q) => _q = q;
@@ -31,13 +39,13 @@ internal sealed class UnitRepository : IUnitRepository
             {
                 unidades.Add(new Unit
                 {
-                    Id = Convert.ToInt32(reader["ID_UNIDAD"], CultureInfo.InvariantCulture),
-                    IdArea = reader["ID_AREA"] is DBNull ? null : Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
-                    IdDepartamento = reader["ID_DEPARTAMENTO"] is DBNull ? null : Convert.ToInt32(reader["ID_DEPARTAMENTO"], CultureInfo.InvariantCulture),
-                    IdSeccion = reader["ID_SECCION"] is DBNull ? null : Convert.ToInt32(reader["ID_SECCION"], CultureInfo.InvariantCulture),
-                    Nombre = reader["NOMBRE"].ToString() ?? "",
-                    Descripcion = reader["DESCRIPCION"].ToString() ?? "",
-                    Estado = Convert.ToInt32(reader["ESTADO"], CultureInfo.InvariantCulture),
+                    Id = Convert.ToInt32(reader[ColumnIdUnidad], CultureInfo.InvariantCulture),
+                    IdArea = reader[ColumnIdArea] is DBNull ? null : Convert.ToInt32(reader[ColumnIdArea], CultureInfo.InvariantCulture),
+                    IdDepartamento = reader[ColumnIdDepartamento] is DBNull ? null : Convert.ToInt32(reader[ColumnIdDepartamento], CultureInfo.InvariantCulture),
+                    IdSeccion = reader[ColumnIdSeccion] is DBNull ? null : Convert.ToInt32(reader[ColumnIdSeccion], CultureInfo.InvariantCulture),
+                    Nombre = reader[ColumnNombre].ToString() ?? "",
+                    Descripcion = reader[ColumnDescripcion].ToString() ?? "",
+                    Estado = Convert.ToInt32(reader[ColumnEstado], CultureInfo.InvariantCulture),
                 });
             }
             return unidades;
@@ -104,13 +112,13 @@ internal sealed class UnitRepository : IUnitRepository
             {
                 return new Unit
                 {
-                    Id = Convert.ToInt32(reader["ID_UNIDAD"], CultureInfo.InvariantCulture),
-                    IdArea = reader["ID_AREA"] is DBNull ? null : Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
-                    IdDepartamento = reader["ID_DEPARTAMENTO"] is DBNull ? null : Convert.ToInt32(reader["ID_DEPARTAMENTO"], CultureInfo.InvariantCulture),
-                    IdSeccion = reader["ID_SECCION"] is DBNull ? null : Convert.ToInt32(reader["ID_SECCION"], CultureInfo.InvariantCulture),
-                    Nombre = reader["NOMBRE"].ToString() ?? "",
-                    Descripcion = reader["DESCRIPCION"].ToString() ?? "",
-                    Estado = Convert.ToInt32(reader["ESTADO"], CultureInfo.InvariantCulture),
+                    Id = Convert.ToInt32(reader[ColumnIdUnidad], CultureInfo.InvariantCulture),
+                    IdArea = reader[ColumnIdArea] is DBNull ? null : Convert.ToInt32(reader[ColumnIdArea], CultureInfo.InvariantCulture),
+                    IdDepartamento = reader[ColumnIdDepartamento] is DBNull ? null : Convert.ToInt32(reader[ColumnIdDepartamento], CultureInfo.InvariantCulture),
+                    IdSeccion = reader[ColumnIdSeccion] is DBNull ? null : Convert.ToInt32(reader[ColumnIdSeccion], CultureInfo.InvariantCulture),
+                    Nombre = reader[ColumnNombre].ToString() ?? "",
+                    Descripcion = reader[ColumnDescripcion].ToString() ?? "",
+                    Estado = Convert.ToInt32(reader[ColumnEstado], CultureInfo.InvariantCulture),
                 };
             }
             return null;

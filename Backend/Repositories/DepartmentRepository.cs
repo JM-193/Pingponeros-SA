@@ -9,6 +9,12 @@ namespace Backend.Repositories;
 internal sealed class DepartmentRepository : IDepartmentRepository
 {
     private const string ParamNombre = ":nombre";
+    private const string ColumnIdArea = "ID_AREA";
+    private const string ColumnIdDepartamento = "ID_DEPARTAMENTO";
+    private const string ColumnNombre = "NOMBRE";
+    private const string ColumnDescripcion = "DESCRIPCION";
+    private const string ColumnEstado = "ESTADO";
+
     private readonly IQueryExecutor _q;
 
     public DepartmentRepository(IQueryExecutor q) => _q = q;
@@ -31,11 +37,11 @@ internal sealed class DepartmentRepository : IDepartmentRepository
             {
                 departamentos.Add(new Department
                 {
-                    Id = Convert.ToInt32(reader["ID_DEPARTAMENTO"], CultureInfo.InvariantCulture),
-                    IdArea = reader["ID_AREA"] is DBNull ? null : Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
-                    Nombre = reader["NOMBRE"].ToString() ?? "",
-                    Descripcion = reader["DESCRIPCION"].ToString() ?? "",
-                    Estado = Convert.ToInt32(reader["ESTADO"], CultureInfo.InvariantCulture),
+                    Id = Convert.ToInt32(reader[ColumnIdDepartamento], CultureInfo.InvariantCulture),
+                    IdArea = reader[ColumnIdArea] is DBNull ? null : Convert.ToInt32(reader[ColumnIdArea], CultureInfo.InvariantCulture),
+                    Nombre = reader[ColumnNombre].ToString() ?? "",
+                    Descripcion = reader[ColumnDescripcion].ToString() ?? "",
+                    Estado = Convert.ToInt32(reader[ColumnEstado], CultureInfo.InvariantCulture),
                 });
             }
             return departamentos;
@@ -100,11 +106,11 @@ internal sealed class DepartmentRepository : IDepartmentRepository
             {
                 return new Department
                 {
-                    Id = Convert.ToInt32(reader["ID_DEPARTAMENTO"], CultureInfo.InvariantCulture),
-                    IdArea = reader["ID_AREA"] is DBNull ? null : Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
-                    Nombre = reader["NOMBRE"].ToString() ?? "",
-                    Descripcion = reader["DESCRIPCION"].ToString() ?? "",
-                    Estado = Convert.ToInt32(reader["ESTADO"], CultureInfo.InvariantCulture),
+                    Id = Convert.ToInt32(reader[ColumnIdDepartamento], CultureInfo.InvariantCulture),
+                    IdArea = reader[ColumnIdArea] is DBNull ? null : Convert.ToInt32(reader[ColumnIdArea], CultureInfo.InvariantCulture),
+                    Nombre = reader[ColumnNombre].ToString() ?? "",
+                    Descripcion = reader[ColumnDescripcion].ToString() ?? "",
+                    Estado = Convert.ToInt32(reader[ColumnEstado], CultureInfo.InvariantCulture),
                 };
             }
             return null;

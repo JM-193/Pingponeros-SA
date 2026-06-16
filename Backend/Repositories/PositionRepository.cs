@@ -7,6 +7,12 @@ namespace Backend.Repositories;
 
 internal sealed class PositionRepository : IPositionRepository
 {
+    private const string ColumnNumeroPlaza = "NUMERO_PLAZA";
+    private const string ColumnIdUnidad = "ID_UNIDAD";
+    private const string ColumnIdDepartamento = "ID_DEPARTAMENTO";
+    private const string ColumnIdSeccion = "ID_SECCION";
+    private const string ColumnIdArea = "ID_AREA";
+
     private readonly IQueryExecutor _q;
 
     public PositionRepository(IQueryExecutor q) => _q = q;
@@ -29,11 +35,11 @@ internal sealed class PositionRepository : IPositionRepository
             {
                 plazas.Add(new Position
                 {
-                    NumeroPlaza = Convert.ToInt64(reader["NUMERO_PLAZA"], CultureInfo.InvariantCulture),
-                    IdUnidad = reader["ID_UNIDAD"] is DBNull ? null : Convert.ToInt32(reader["ID_UNIDAD"], CultureInfo.InvariantCulture),
-                    IdDepartamento = reader["ID_DEPARTAMENTO"] is DBNull ? null : Convert.ToInt32(reader["ID_DEPARTAMENTO"], CultureInfo.InvariantCulture),
-                    IdSeccion = reader["ID_SECCION"] is DBNull ? null : Convert.ToInt32(reader["ID_SECCION"], CultureInfo.InvariantCulture),
-                    IdArea = reader["ID_AREA"] is DBNull ? null : Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
+                    NumeroPlaza = Convert.ToInt64(reader[ColumnNumeroPlaza], CultureInfo.InvariantCulture),
+                    IdUnidad = reader[ColumnIdUnidad] is DBNull ? null : Convert.ToInt32(reader[ColumnIdUnidad], CultureInfo.InvariantCulture),
+                    IdDepartamento = reader[ColumnIdDepartamento] is DBNull ? null : Convert.ToInt32(reader[ColumnIdDepartamento], CultureInfo.InvariantCulture),
+                    IdSeccion = reader[ColumnIdSeccion] is DBNull ? null : Convert.ToInt32(reader[ColumnIdSeccion], CultureInfo.InvariantCulture),
+                    IdArea = reader[ColumnIdArea] is DBNull ? null : Convert.ToInt32(reader[ColumnIdArea], CultureInfo.InvariantCulture),
                 });
             }
             return plazas;
@@ -95,11 +101,11 @@ internal sealed class PositionRepository : IPositionRepository
             {
                 return new Position
                 {
-                    NumeroPlaza = Convert.ToInt64(reader["NUMERO_PLAZA"], CultureInfo.InvariantCulture),
-                    IdUnidad = reader["ID_UNIDAD"] is DBNull ? null : Convert.ToInt32(reader["ID_UNIDAD"], CultureInfo.InvariantCulture),
-                    IdDepartamento = reader["ID_DEPARTAMENTO"] is DBNull ? null : Convert.ToInt32(reader["ID_DEPARTAMENTO"], CultureInfo.InvariantCulture),
-                    IdSeccion = reader["ID_SECCION"] is DBNull ? null : Convert.ToInt32(reader["ID_SECCION"], CultureInfo.InvariantCulture),
-                    IdArea = reader["ID_AREA"] is DBNull ? null : Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
+                    NumeroPlaza = Convert.ToInt64(reader[ColumnNumeroPlaza], CultureInfo.InvariantCulture),
+                    IdUnidad = reader[ColumnIdUnidad] is DBNull ? null : Convert.ToInt32(reader[ColumnIdUnidad], CultureInfo.InvariantCulture),
+                    IdDepartamento = reader[ColumnIdDepartamento] is DBNull ? null : Convert.ToInt32(reader[ColumnIdDepartamento], CultureInfo.InvariantCulture),
+                    IdSeccion = reader[ColumnIdSeccion] is DBNull ? null : Convert.ToInt32(reader[ColumnIdSeccion], CultureInfo.InvariantCulture),
+                    IdArea = reader[ColumnIdArea] is DBNull ? null : Convert.ToInt32(reader[ColumnIdArea], CultureInfo.InvariantCulture),
                 };
             }
             return null;
