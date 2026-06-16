@@ -7,7 +7,6 @@ namespace Backend.Repositories;
 
 internal sealed class PositionRepository : IPositionRepository
 {
-    private const string ParamNumeroPlaza = ":numeroPlaza";
     private const string ColumnNumeroPlaza = "NUMERO_PLAZA";
     private const string ColumnIdUnidad = "ID_UNIDAD";
     private const string ColumnIdDepartamento = "ID_DEPARTAMENTO";
@@ -26,6 +25,20 @@ internal sealed class PositionRepository : IPositionRepository
         IdSeccion = reader.IsDBNull(reader.GetOrdinal(ColumnIdSeccion)) ? null : reader.GetInt32(reader.GetOrdinal(ColumnIdSeccion)),
         IdArea = reader.IsDBNull(reader.GetOrdinal(ColumnIdArea)) ? null : reader.GetInt32(reader.GetOrdinal(ColumnIdArea)),
     };
+
+    private static void AgregarParamNumeroPlaza(OracleCommand cmd, long numeroPlaza)
+    {
+        OracleCommandHelpers.AddInt64Param(cmd, ":numeroPlaza", numeroPlaza);
+    }
+
+    private static void AgregarParametros(OracleCommand cmd, Position plaza)
+    {
+        AgregarParamNumeroPlaza(cmd, plaza.NumeroPlaza);
+        OracleCommandHelpers.AddNullableIntParam(cmd, ":idUnidad", plaza.IdUnidad);
+        OracleCommandHelpers.AddNullableIntParam(cmd, ":idDepartamento", plaza.IdDepartamento);
+        OracleCommandHelpers.AddNullableIntParam(cmd, ":idSeccion", plaza.IdSeccion);
+        OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", plaza.IdArea);
+    }
 
     public async Task<List<Position>> ObtenerTodasAsync()
     {
@@ -59,7 +72,7 @@ internal sealed class PositionRepository : IPositionRepository
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddInt64Param(cmd, ParamNumeroPlaza, numeroPlaza);
+            AgregarParamNumeroPlaza(cmd, numeroPlaza);
             return cmd;
         }).ConfigureAwait(false);
         return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
@@ -77,11 +90,7 @@ internal sealed class PositionRepository : IPositionRepository
         await _q.ExecuteAsync(connection =>
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
-            OracleCommandHelpers.AddInt64Param(cmd, ParamNumeroPlaza, plaza.NumeroPlaza);
-            OracleCommandHelpers.AddNullableIntParam(cmd, ":idUnidad", plaza.IdUnidad);
-            OracleCommandHelpers.AddNullableIntParam(cmd, ":idDepartamento", plaza.IdDepartamento);
-            OracleCommandHelpers.AddNullableIntParam(cmd, ":idSeccion", plaza.IdSeccion);
-            OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", plaza.IdArea);
+            AgregarParametros(cmd, plaza);
             return cmd;
         }).ConfigureAwait(false);
     }
@@ -96,7 +105,7 @@ internal sealed class PositionRepository : IPositionRepository
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddInt64Param(cmd, ParamNumeroPlaza, numeroPlaza);
+            AgregarParamNumeroPlaza(cmd, numeroPlaza);
             return cmd;
         }, async reader =>
         {
@@ -121,11 +130,7 @@ internal sealed class PositionRepository : IPositionRepository
         var filas = await _q.ExecuteAsync(connection =>
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
-            OracleCommandHelpers.AddInt64Param(cmd, ParamNumeroPlaza, numeroPlaza);
-            OracleCommandHelpers.AddNullableIntParam(cmd, ":idUnidad", plaza.IdUnidad);
-            OracleCommandHelpers.AddNullableIntParam(cmd, ":idDepartamento", plaza.IdDepartamento);
-            OracleCommandHelpers.AddNullableIntParam(cmd, ":idSeccion", plaza.IdSeccion);
-            OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", plaza.IdArea);
+            AgregarParametros(cmd, plaza);
             return cmd;
         }).ConfigureAwait(false);
 

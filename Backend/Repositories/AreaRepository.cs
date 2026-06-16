@@ -8,7 +8,6 @@ namespace Backend.Repositories;
 
 internal sealed class AreaRepository : IAreaRepository
 {
-    private const string ParamNombre = ":nombre";
     private const string ColumnIdArea = "ID_AREA";
     private const string ColumnNombre = "NOMBRE";
     private const string ColumnDescripcion = "DESCRIPCION";
@@ -25,6 +24,18 @@ internal sealed class AreaRepository : IAreaRepository
         Descripcion = reader.IsDBNull(reader.GetOrdinal(ColumnDescripcion)) ? string.Empty : reader.GetString(reader.GetOrdinal(ColumnDescripcion)),
         Estado = reader.GetInt32(reader.GetOrdinal(ColumnEstado)),
     };
+
+    private static void AgregarParamNombre(OracleCommand cmd, string nombre)
+    {
+        OracleCommandHelpers.AddStringParam(cmd, ":nombre", nombre);
+    }
+    
+    private static void AgregarParametros(OracleCommand cmd, Area area)
+    {
+        AgregarParamNombre(cmd, area.Nombre);
+        OracleCommandHelpers.AddStringParam(cmd, ":descripcion", area.Descripcion);
+        OracleCommandHelpers.AddInt32Param(cmd, ":estado", area.Estado);
+    }
 
     public async Task<List<Area>> ObtenerTodasAsync()
     {
@@ -54,7 +65,7 @@ internal sealed class AreaRepository : IAreaRepository
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddStringParam(cmd, ParamNombre, nombre);
+            AgregarParamNombre(cmd, nombre);
             return cmd;
         }).ConfigureAwait(false);
         var count = Convert.ToInt32(result, CultureInfo.InvariantCulture);
@@ -77,9 +88,7 @@ internal sealed class AreaRepository : IAreaRepository
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddStringParam(cmd, ParamNombre, area.Nombre);
-            OracleCommandHelpers.AddStringParam(cmd, ":descripcion", area.Descripcion);
-            OracleCommandHelpers.AddInt32Param(cmd, ":estado", area.Estado);
+            AgregarParametros(cmd, area);
             var idParam = new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output);
             cmd.Parameters.Add(idParam);
             return cmd;
@@ -96,7 +105,7 @@ internal sealed class AreaRepository : IAreaRepository
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddStringParam(cmd, ParamNombre, nombre);
+            AgregarParamNombre(cmd, nombre);
             return cmd;
         }, async reader =>
         {
@@ -124,9 +133,7 @@ internal sealed class AreaRepository : IAreaRepository
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddStringParam(cmd, ParamNombre, area.Nombre);
-            OracleCommandHelpers.AddStringParam(cmd, ":descripcion", area.Descripcion);
-            OracleCommandHelpers.AddInt32Param(cmd, ":estado", area.Estado);
+            AgregarParametros(cmd, area);
             OracleCommandHelpers.AddStringParam(cmd, ":nombreOriginal", nombreOriginal);
             return cmd;
         }).ConfigureAwait(false);

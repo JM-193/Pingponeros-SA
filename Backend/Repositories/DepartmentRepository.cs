@@ -8,7 +8,6 @@ namespace Backend.Repositories;
 
 internal sealed class DepartmentRepository : IDepartmentRepository
 {
-    private const string ParamNombre = ":nombre";
     private const string ColumnIdArea = "ID_AREA";
     private const string ColumnIdDepartamento = "ID_DEPARTAMENTO";
     private const string ColumnNombre = "NOMBRE";
@@ -27,6 +26,19 @@ internal sealed class DepartmentRepository : IDepartmentRepository
         Descripcion = reader.IsDBNull(reader.GetOrdinal(ColumnDescripcion)) ? string.Empty : reader.GetString(reader.GetOrdinal(ColumnDescripcion)),
         Estado = reader.GetInt32(reader.GetOrdinal(ColumnEstado)),
     };
+
+    private static void AgregarParamNombre(OracleCommand cmd, string nombre)
+    {
+        OracleCommandHelpers.AddStringParam(cmd, ":nombre", nombre);
+    }
+
+    private static void AgregarParametros(OracleCommand cmd, Department departamento)
+    {
+        OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", departamento.IdArea);
+        OracleCommandHelpers.AddStringParam(cmd, ":nombre", departamento.Nombre);
+        OracleCommandHelpers.AddStringParam(cmd, ":descripcion", departamento.Descripcion);
+        OracleCommandHelpers.AddInt32Param(cmd, ":estado", departamento.Estado);
+    }
 
     public async Task<List<Department>> ObtenerTodosAsync()
     {
@@ -60,7 +72,7 @@ internal sealed class DepartmentRepository : IDepartmentRepository
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddStringParam(cmd, ParamNombre, nombre);
+            AgregarParamNombre(cmd, nombre);
             return cmd;
         }).ConfigureAwait(false);
         return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
@@ -79,11 +91,9 @@ internal sealed class DepartmentRepository : IDepartmentRepository
         var result = await _q.ExecuteScalarAsync(connection =>
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
-            OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", departamento.IdArea);
-            OracleCommandHelpers.AddStringParam(cmd, ParamNombre, departamento.Nombre);
-            OracleCommandHelpers.AddStringParam(cmd, ":descripcion", departamento.Descripcion);
-            OracleCommandHelpers.AddInt32Param(cmd, ":estado", departamento.Estado);
-            cmd.Parameters.Add(new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output));
+            AgregarParametros(cmd, departamento);
+            var idParam = new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output);
+            cmd.Parameters.Add(idParam);
             return cmd;
         }).ConfigureAwait(false);
 
@@ -100,7 +110,7 @@ internal sealed class DepartmentRepository : IDepartmentRepository
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddStringParam(cmd, ParamNombre, nombre);
+            AgregarParamNombre(cmd, nombre);
             return cmd;
         }, async reader =>
         {
@@ -125,10 +135,7 @@ internal sealed class DepartmentRepository : IDepartmentRepository
         var rows = await _q.ExecuteAsync(connection =>
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
-            OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", departamento.IdArea);
-            OracleCommandHelpers.AddStringParam(cmd, ParamNombre, departamento.Nombre);
-            OracleCommandHelpers.AddStringParam(cmd, ":descripcion", departamento.Descripcion);
-            OracleCommandHelpers.AddInt32Param(cmd, ":estado", departamento.Estado);
+            AgregarParametros(cmd, departamento);
             OracleCommandHelpers.AddStringParam(cmd, ":nombreOriginal", nombreOriginal);
             return cmd;
         }).ConfigureAwait(false);
