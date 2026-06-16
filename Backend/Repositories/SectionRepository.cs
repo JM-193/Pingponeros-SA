@@ -60,7 +60,7 @@ internal sealed class SectionRepository : ISectionRepository
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(ParamNombre, nombre);
+            OracleCommandHelpers.AddStringParam(cmd, ParamNombre, nombre);
             return cmd;
         }).ConfigureAwait(false);
         return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
@@ -82,7 +82,7 @@ internal sealed class SectionRepository : ISectionRepository
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", seccion.IdArea);
             OracleCommandHelpers.AddStringParam(cmd, ParamNombre, seccion.Nombre);
             OracleCommandHelpers.AddStringParam(cmd, ":descripcion", seccion.Descripcion);
-            cmd.Parameters.Add(":estado", seccion.Estado);
+            OracleCommandHelpers.AddInt32Param(cmd, ":estado", seccion.Estado);
             cmd.Parameters.Add(new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output));
             return cmd;
         }).ConfigureAwait(false);
@@ -100,7 +100,7 @@ internal sealed class SectionRepository : ISectionRepository
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(ParamNombre, nombre);
+            OracleCommandHelpers.AddStringParam(cmd, ParamNombre, nombre);
             return cmd;
         }, async reader =>
         {
@@ -128,7 +128,7 @@ internal sealed class SectionRepository : ISectionRepository
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", seccion.IdArea);
             OracleCommandHelpers.AddStringParam(cmd, ParamNombre, seccion.Nombre);
             OracleCommandHelpers.AddStringParam(cmd, ":descripcion", seccion.Descripcion);
-            cmd.Parameters.Add(":estado", seccion.Estado);
+            OracleCommandHelpers.AddInt32Param(cmd, ":estado", seccion.Estado);
             OracleCommandHelpers.AddStringParam(cmd, ":nombreOriginal", nombreOriginal);
             return cmd;
         }).ConfigureAwait(false);
@@ -146,7 +146,7 @@ internal sealed class SectionRepository : ISectionRepository
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(":id", id);
+            OracleCommandHelpers.AddInt32Param(cmd, ":id", id);
             return cmd;
         }).ConfigureAwait(false);
         return rows > 0;

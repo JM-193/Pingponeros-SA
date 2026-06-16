@@ -54,7 +54,7 @@ internal sealed class AreaRepository : IAreaRepository
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(ParamNombre, nombre);
+            OracleCommandHelpers.AddStringParam(cmd, ParamNombre, nombre);
             return cmd;
         }).ConfigureAwait(false);
         var count = Convert.ToInt32(result, CultureInfo.InvariantCulture);
@@ -79,7 +79,7 @@ internal sealed class AreaRepository : IAreaRepository
             };
             OracleCommandHelpers.AddStringParam(cmd, ParamNombre, area.Nombre);
             OracleCommandHelpers.AddStringParam(cmd, ":descripcion", area.Descripcion);
-            cmd.Parameters.Add(":estado", area.Estado);
+            OracleCommandHelpers.AddInt32Param(cmd, ":estado", area.Estado);
             var idParam = new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output);
             cmd.Parameters.Add(idParam);
             return cmd;
@@ -96,7 +96,7 @@ internal sealed class AreaRepository : IAreaRepository
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(ParamNombre, nombre);
+            OracleCommandHelpers.AddStringParam(cmd, ParamNombre, nombre);
             return cmd;
         }, async reader =>
         {
@@ -126,7 +126,7 @@ internal sealed class AreaRepository : IAreaRepository
             };
             OracleCommandHelpers.AddStringParam(cmd, ParamNombre, area.Nombre);
             OracleCommandHelpers.AddStringParam(cmd, ":descripcion", area.Descripcion);
-            cmd.Parameters.Add(":estado", area.Estado);
+            OracleCommandHelpers.AddInt32Param(cmd, ":estado", area.Estado);
             OracleCommandHelpers.AddStringParam(cmd, ":nombreOriginal", nombreOriginal);
             return cmd;
         }).ConfigureAwait(false);
@@ -142,7 +142,7 @@ internal sealed class AreaRepository : IAreaRepository
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(":id", id);
+            OracleCommandHelpers.AddInt32Param(cmd, ":id", id);
             return cmd;
         }).ConfigureAwait(false);
         return rows > 0;

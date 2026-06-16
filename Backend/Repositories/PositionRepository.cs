@@ -96,7 +96,7 @@ internal sealed class PositionRepository : IPositionRepository
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(":numeroPlaza", OracleDbType.Int64).Value = numeroPlaza;
+            OracleCommandHelpers.AddInt64Param(cmd, ParamNumeroPlaza, numeroPlaza);
             return cmd;
         }, async reader =>
         {

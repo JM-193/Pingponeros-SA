@@ -64,7 +64,7 @@ internal sealed class UnitRepository : IUnitRepository
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(ParamNombre, nombre);
+            OracleCommandHelpers.AddStringParam(cmd, ParamNombre, nombre);
             return cmd;
         }).ConfigureAwait(false);
         return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
@@ -88,7 +88,7 @@ internal sealed class UnitRepository : IUnitRepository
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idSeccion", unidad.IdSeccion);
             OracleCommandHelpers.AddStringParam(cmd, ParamNombre, unidad.Nombre);
             OracleCommandHelpers.AddStringParam(cmd, ":descripcion", unidad.Descripcion);
-            cmd.Parameters.Add(":estado", unidad.Estado);
+            OracleCommandHelpers.AddInt32Param(cmd, ":estado", unidad.Estado);
             cmd.Parameters.Add(new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output));
             return cmd;
         }).ConfigureAwait(false);
@@ -106,7 +106,7 @@ internal sealed class UnitRepository : IUnitRepository
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(ParamNombre, nombre);
+            OracleCommandHelpers.AddStringParam(cmd, ParamNombre, nombre);
             return cmd;
         }, async reader =>
         {
@@ -137,7 +137,7 @@ internal sealed class UnitRepository : IUnitRepository
             OracleCommandHelpers.AddNullableIntParam(cmd, ":idSeccion", unidad.IdSeccion);
             OracleCommandHelpers.AddStringParam(cmd, ParamNombre, unidad.Nombre);
             OracleCommandHelpers.AddStringParam(cmd, ":descripcion", unidad.Descripcion);
-            cmd.Parameters.Add(":estado", unidad.Estado);
+            OracleCommandHelpers.AddInt32Param(cmd, ":estado", unidad.Estado);
             OracleCommandHelpers.AddStringParam(cmd, ":nombreOriginal", nombreOriginal);
             return cmd;
         }).ConfigureAwait(false);
@@ -155,7 +155,7 @@ internal sealed class UnitRepository : IUnitRepository
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(":id", id);
+            OracleCommandHelpers.AddInt32Param(cmd, ":id", id);
             return cmd;
         }).ConfigureAwait(false);
         return rows > 0;
