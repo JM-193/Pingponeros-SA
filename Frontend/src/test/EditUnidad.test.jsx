@@ -121,3 +121,97 @@ describe('EditUnits Page', () => {
     })
   })
 })
+
+describe('EditUnits Modal Mode', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+  })
+
+  it('renderiza dentro de un modal cuando isModal es true', async () => {
+    unitService.obtenerUnidadPorNombre.mockResolvedValueOnce(mockUnidad)
+    areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
+    departmentService.obtenerDepartamentos.mockResolvedValueOnce(mockDepartamentos)
+    sectionService.obtenerSecciones.mockResolvedValueOnce(mockSecciones)
+
+    render(
+      <BrowserRouter>
+        <EditUnits isModal isOpen={true} entityName="Unidad Administrativa" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Editar Unidad/i })).toBeInTheDocument()
+    })
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Unidad Administrativa')).toBeInTheDocument()
+  })
+
+  it('muestra cargando dentro del modal', () => {
+    render(
+      <BrowserRouter>
+        <EditUnits isModal isOpen={true} entityName="Test" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByText('Cargando unidad...')).toBeInTheDocument()
+  })
+
+  it('no renderiza Header ni Navbar en modo modal', async () => {
+    unitService.obtenerUnidadPorNombre.mockResolvedValueOnce(mockUnidad)
+    areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
+    departmentService.obtenerDepartamentos.mockResolvedValueOnce(mockDepartamentos)
+    sectionService.obtenerSecciones.mockResolvedValueOnce(mockSecciones)
+
+    render(
+      <BrowserRouter>
+        <EditUnits isModal isOpen={true} entityName="Unidad Administrativa" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Unidad Administrativa')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('Página Principal')).not.toBeInTheDocument()
+  })
+
+  it('llama a onClose al hacer clic en Cancelar', async () => {
+    unitService.obtenerUnidadPorNombre.mockResolvedValueOnce(mockUnidad)
+    areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
+    departmentService.obtenerDepartamentos.mockResolvedValueOnce(mockDepartamentos)
+    sectionService.obtenerSecciones.mockResolvedValueOnce(mockSecciones)
+    const onClose = vi.fn()
+
+    render(
+      <BrowserRouter>
+        <EditUnits isModal isOpen={true} entityName="Unidad Administrativa" onClose={onClose} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Unidad Administrativa')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('usa entityName prop en lugar de useParams', async () => {
+    unitService.obtenerUnidadPorNombre.mockResolvedValueOnce(mockUnidad)
+    areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
+    departmentService.obtenerDepartamentos.mockResolvedValueOnce(mockDepartamentos)
+    sectionService.obtenerSecciones.mockResolvedValueOnce(mockSecciones)
+
+    render(
+      <BrowserRouter>
+        <EditUnits isModal isOpen={true} entityName="Unidad Administrativa" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(unitService.obtenerUnidadPorNombre).toHaveBeenCalledWith('Unidad Administrativa')
+    })
+  })
+})

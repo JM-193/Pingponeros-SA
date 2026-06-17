@@ -1,6 +1,6 @@
 // EditPositions.test.jsx
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
 import EditPositions from '../pages/EditPositions'
 import * as positionService from '../services/positionService'
 import * as unitService from '../services/unitService'
@@ -262,5 +262,88 @@ describe('EditPositions Page', () => {
         }
       })
     }
+  })
+})
+
+describe('EditPositions Modal Mode', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+    positionService.obtenerPlazaPorNumero.mockResolvedValue(mockPlaza)
+    areaService.obtenerAreas.mockResolvedValue(mockAreas)
+    departmentService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
+    sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
+    unitService.obtenerUnidades.mockResolvedValue(mockUnidades)
+  })
+
+  it('renderiza dentro de un modal cuando isModal es true', async () => {
+    render(
+      <BrowserRouter>
+        <EditPositions isModal isOpen={true} entityId="7" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Editar Plaza/i })).toBeInTheDocument()
+    })
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByText('7')).toBeInTheDocument()
+  })
+
+  it('muestra cargando dentro del modal', () => {
+    positionService.obtenerPlazaPorNumero.mockImplementation(() => new Promise(() => {}))
+
+    render(
+      <BrowserRouter>
+        <EditPositions isModal isOpen={true} entityId="7" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByText(/Cargando datos de la plaza/i)).toBeInTheDocument()
+  })
+
+  it('no renderiza Header ni Navbar en modo modal', async () => {
+    render(
+      <BrowserRouter>
+        <EditPositions isModal isOpen={true} entityId="7" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Editar Plaza/i })).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('Página Principal')).not.toBeInTheDocument()
+    expect(document.querySelector('footer')).not.toBeInTheDocument()
+  })
+
+  it('llama a onClose al hacer clic en Cancelar', async () => {
+    const onClose = vi.fn()
+
+    render(
+      <BrowserRouter>
+        <EditPositions isModal isOpen={true} entityId="7" onClose={onClose} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Editar Plaza/i })).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('usa entityId prop en lugar de useParams', async () => {
+    render(
+      <BrowserRouter>
+        <EditPositions isModal isOpen={true} entityId="7" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(positionService.obtenerPlazaPorNumero).toHaveBeenCalledWith('7')
+    })
   })
 })

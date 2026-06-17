@@ -167,3 +167,109 @@ describe('EditUsers Page', () => {
     expect(screen.queryByText('Error al actualizar')).not.toBeInTheDocument()
   })
 })
+
+describe('EditUsers Modal Mode', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+  })
+
+  it('renderiza dentro de un modal cuando isModal es true', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+
+    render(
+      <BrowserRouter>
+        <EditUsers isModal isOpen={true} entityId="juan.perez@ucr.ac.cr" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Editar Usuario')).toBeInTheDocument()
+    })
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
+  })
+
+  it('muestra cargando dentro del modal', () => {
+    render(
+      <BrowserRouter>
+        <EditUsers isModal isOpen={true} entityId="test@ucr.ac.cr" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByText('Cargando usuario...')).toBeInTheDocument()
+  })
+
+  it('no renderiza Header ni Navbar en modo modal', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+
+    render(
+      <BrowserRouter>
+        <EditUsers isModal isOpen={true} entityId="juan.perez@ucr.ac.cr" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('Página Principal')).not.toBeInTheDocument()
+    expect(document.querySelector('footer')).not.toBeInTheDocument()
+  })
+
+  it('llama a onClose al hacer clic en Cancelar', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    const onClose = vi.fn()
+
+    render(
+      <BrowserRouter>
+        <EditUsers isModal isOpen={true} entityId="juan.perez@ucr.ac.cr" onClose={onClose} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('muestra éxito y llama al servicio en modo modal', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    userService.actualizarUsuario.mockResolvedValueOnce({})
+
+    render(
+      <BrowserRouter>
+        <EditUsers isModal isOpen={true} entityId="juan.perez@ucr.ac.cr" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Actualizar/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Usuario actualizado correctamente.')).toBeInTheDocument()
+    })
+
+    expect(userService.actualizarUsuario).toHaveBeenCalled()
+  })
+
+  it('usa entityId prop en lugar de useParams', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValue(mockUser)
+
+    render(
+      <BrowserRouter>
+        <EditUsers isModal isOpen={true} entityId="juan.perez@ucr.ac.cr" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(userService.obtenerUsuarioPorCorreo).toHaveBeenCalledWith('juan.perez@ucr.ac.cr')
+    })
+  })
+})
