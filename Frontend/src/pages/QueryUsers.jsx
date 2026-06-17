@@ -1,7 +1,7 @@
-// QueryUsers.jsx
-
 import EntityListPage from '../components/EntityListPage'
 import { obtenerUsuarios } from '../services/userService'
+import CreateUsers from './CreateUsers'
+import EditUsers from './EditUsers'
 
 export default function QueryUsers() {
   const columns = [
@@ -55,14 +55,18 @@ export default function QueryUsers() {
     <EntityListPage
       title="Usuarios"
       entityLabel="usuarios"
-      createPath="/usuarios/crear"
-      editPath={(usuario) => `/usuarios/editar/${encodeURIComponent(usuario.correoInstitucional)}`}
       fetchItems={obtenerUsuarios}
       columns={columns}
       matchesSearch={matchesSearch}
       getRowId={(usuario) => usuario.correoInstitucional}
       isRowInactive={(usuario) => usuario.estado === 0}
       searchPlaceholder="Ingrese el nombre, apellidos o correo del usuario"
+      renderCreateModal={({ isOpen, onClose, onSuccess }) => (
+        <CreateUsers isModal isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
+      )}
+      renderEditModal={({ isOpen, onClose, onSuccess, item }) =>
+        item && <EditUsers isModal isOpen={isOpen} entityId={item.correoInstitucional} onClose={onClose} onSuccess={onSuccess} />
+      }
     />
   )
 }
