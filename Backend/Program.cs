@@ -1207,12 +1207,6 @@ internal static class Program
             return Results.Ok(new
             {
                 token,
-                correoInstitucional = usuario.CorreoInstitucional,
-                primerNombre = usuario.PrimerNombre,
-                segundoNombre = usuario.SegundoNombre,
-                primerApellido = usuario.PrimerApellido,
-                segundoApellido = usuario.SegundoApellido,
-                rol = usuario.Rol,
                 estado = usuario.Estado,
                 contrasenaTemporal = contrasena.EsTemporal,
                 fechaExpiracionContrasena = contrasena.FechaExpiracion,

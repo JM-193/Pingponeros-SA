@@ -51,8 +51,8 @@ internal class JwtService : IJwtService
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, correoInstitucional),
-            new(ClaimTypes.Email, correoInstitucional),
-            new(ClaimTypes.Role, rol.ToString(CultureInfo.InvariantCulture)),
+            new("correoInstitucional", correoInstitucional),
+            new("rol", rol.ToString(CultureInfo.InvariantCulture)),
             new("primerNombre", primerNombre),
             new("primerApellido", primerApellido),
             new("segundoApellido", segundoApellido),
