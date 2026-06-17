@@ -3,7 +3,9 @@ import { useCallback, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import OrganizationEntityFormFields from './OrganizationEntityFormFields'
 import OrganizationEntityFormPage from './OrganizationEntityFormPage'
+import OrganizationEntityFormModal from './OrganizationEntityFormModal'
 import PageLayout from './PageLayout'
+import Modal from './Modal'
 import StateToggle from './StateToggle'
 import { obtenerAreas } from '../services/areaService'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
@@ -20,9 +22,15 @@ export default function DepartmentSectionEditForm({
   entityType,
   fetchByName,
   updateEntity,
+  isModal,
+  isOpen,
+  onSuccess,
+  onClose,
+  entityName,
 }) {
   const navigate = useNavigate()
-  const { nombre } = useParams()
+  const params = useParams()
+  const nombre = entityName ?? params.nombre
   const config = getDepartmentSectionConfig(entityType)
   const [areaOptions, setAreaOptions] = useState([])
   const [nombreOriginal, setNombreOriginal] = useState('')
@@ -52,12 +60,20 @@ export default function DepartmentSectionEditForm({
   }, [])
 
   const handleLoadError = useCallback(() => {
-    setTimeout(() => navigate(config.listPath), 2000)
-  }, [navigate, config.listPath])
+    if (isModal && onClose) {
+      setTimeout(() => onClose(), 2000)
+    } else {
+      setTimeout(() => navigate(config.listPath), 2000)
+    }
+  }, [navigate, config.listPath, isModal, onClose])
 
   const handleSuccess = useCallback(() => {
-    setTimeout(() => navigate(config.listPath), 1500)
-  }, [navigate, config.listPath])
+    if (isModal && onSuccess) {
+      setTimeout(() => onSuccess(), 1200)
+    } else {
+      setTimeout(() => navigate(config.listPath), 1500)
+    }
+  }, [navigate, config.listPath, isModal, onSuccess])
 
   const submitUpdate = useCallback(
     (payload) => updateEntity(nombreOriginal, payload),
@@ -97,31 +113,16 @@ export default function DepartmentSectionEditForm({
     clearFeedback()
   }
 
-  if (isLoading && !formData.nombre) {
-    return (
-      <PageLayout
-        mainStyle={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <p style={{ color: COLORS.textSubtle }}>{config.loadingEditLabel}</p>
-      </PageLayout>
-    )
+  const handleCancel = () => {
+    if (isModal && onClose) {
+      onClose()
+    } else {
+      navigate(config.listPath)
+    }
   }
 
-  return (
-    <OrganizationEntityFormPage
-      title={config.titleEdit}
-      subtitle={subtitle}
-      onSubmit={handleSubmit}
-      onCancel={() => navigate(config.listPath)}
-      isBusy={isSubmitting}
-      successMsg={successMsg}
-      errorMsg={errorMsg}
-      primaryLabel="Actualizar"
-    >
+  const formFields = (
+    <>
       <OrganizationEntityFormFields
         formData={formData}
         onChange={handleInputChange}
@@ -137,6 +138,60 @@ export default function DepartmentSectionEditForm({
         onStateChange={handleStateChange}
         disabled={isSubmitting}
       />
+    </>
+  )
+
+  if (isLoading && !formData.nombre) {
+    if (isModal) {
+      return (
+        <Modal isOpen={isOpen} title={config.titleEdit} onClose={handleCancel}>
+          <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>{config.loadingEditLabel}</p>
+        </Modal>
+      )
+    }
+    return (
+      <PageLayout
+        mainStyle={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <p style={{ color: COLORS.textSubtle }}>{config.loadingEditLabel}</p>
+      </PageLayout>
+    )
+  }
+
+  if (isModal) {
+    return (
+      <OrganizationEntityFormModal
+        isOpen={isOpen}
+        title={config.titleEdit}
+        subtitle={subtitle}
+        onSubmit={handleSubmit}
+        onClose={handleCancel}
+        isBusy={isSubmitting}
+        successMsg={successMsg}
+        errorMsg={errorMsg}
+        primaryLabel="Actualizar"
+      >
+        {formFields}
+      </OrganizationEntityFormModal>
+    )
+  }
+
+  return (
+    <OrganizationEntityFormPage
+      title={config.titleEdit}
+      subtitle={subtitle}
+      onSubmit={handleSubmit}
+      onCancel={handleCancel}
+      isBusy={isSubmitting}
+      successMsg={successMsg}
+      errorMsg={errorMsg}
+      primaryLabel="Actualizar"
+    >
+      {formFields}
     </OrganizationEntityFormPage>
   )
 }
@@ -145,4 +200,17 @@ DepartmentSectionEditForm.propTypes = {
   entityType: PropTypes.oneOf(['departamento', 'seccion']).isRequired,
   fetchByName: PropTypes.func.isRequired,
   updateEntity: PropTypes.func.isRequired,
+  isModal: PropTypes.bool,
+  isOpen: PropTypes.bool,
+  onSuccess: PropTypes.func,
+  onClose: PropTypes.func,
+  entityName: PropTypes.string,
+}
+
+DepartmentSectionEditForm.defaultProps = {
+  isModal: false,
+  isOpen: false,
+  onSuccess: null,
+  onClose: null,
+  entityName: null,
 }

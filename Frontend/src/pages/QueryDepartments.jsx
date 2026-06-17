@@ -3,6 +3,8 @@ import EntityListPage from '../components/EntityListPage'
 import { obtenerDepartamentos } from '../services/departmentService'
 import { obtenerAreas } from '../services/areaService'
 import { buildNameMap, formatStatusLabel, resolveOptionValueKey } from '../utils/organizationOptions'
+import CreateDepartments from './CreateDepartments'
+import EditDepartments from './EditDepartments'
 
 export default function QueryDepartments() {
   const fetchItems = useCallback(async () => {
@@ -64,13 +66,17 @@ export default function QueryDepartments() {
     <EntityListPage
       title="Departamentos"
       entityLabel="departamentos"
-      createPath="/organizacion/departamentos/crear"
-      editPath={(departamento) => `/organizacion/departamentos/editar/${encodeURIComponent(departamento.nombre)}`}
       fetchItems={fetchItems}
       columns={columns}
       matchesSearch={matchesSearch}
       getRowId={(departamento) => departamento.id ?? departamento.idDepartamento}
       searchPlaceholder="Ingrese el nombre, descripción o área del departamento"
+      renderCreateModal={({ isOpen, onClose, onSuccess }) => (
+        <CreateDepartments isModal isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
+      )}
+      renderEditModal={({ isOpen, onClose, onSuccess, item }) =>
+        item && <EditDepartments isModal isOpen={isOpen} entityName={item.nombre} onClose={onClose} onSuccess={onSuccess} />
+      }
     />
   )
 }
