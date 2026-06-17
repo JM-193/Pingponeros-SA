@@ -70,6 +70,7 @@ internal static class Program
         builder.Services.AddScoped<IPositionRepository>(sp =>
             new PositionRepository(sp.GetRequiredService<IQueryExecutor>()));
         builder.Services.AddScoped<IEmailService, EmailService>();
+        builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddOpenApi();
         builder.Services.AddCors(options =>
             options.AddPolicy("FrontendOrigin", policy =>
@@ -1147,8 +1148,8 @@ internal static class Program
 
     private static void MapAuth(WebApplication app, bool isDev)
     {
-        app.MapPost("/auth/login", async (LoginDto dto, IUserRepository repo) =>
-            await HandleAuthLogin(dto, repo, isDev).ConfigureAwait(false));
+        app.MapPost("/auth/login", async (LoginDto dto, IUserRepository repo, IJwtService jwtService) =>
+            await HandleAuthLogin(dto, repo, jwtService, isDev).ConfigureAwait(false));
 
         app.MapPost("/auth/recuperar-contrasena", async (ResetPasswordDto dto, IUserRepository repo, IEmailService emailService) =>
             await HandleRecuperarContrasena(dto.CorreoInstitucional, repo, emailService, isDev).ConfigureAwait(false));
@@ -1157,7 +1158,11 @@ internal static class Program
             await HandleCambiarContrasena(dto, repo, emailService, isDev).ConfigureAwait(false));
     }
 
-    private static async Task<IResult> HandleAuthLogin(LoginDto dto, IUserRepository repo, bool isDev)
+    private static async Task<IResult> HandleAuthLogin(
+    LoginDto dto,
+    IUserRepository repo,
+    IJwtService jwtService,
+    bool isDev)
     {
         if (string.IsNullOrWhiteSpace(dto.CorreoInstitucional) ||
             string.IsNullOrWhiteSpace(dto.Contrasena))
@@ -1168,7 +1173,7 @@ internal static class Program
         try
         {
             var contrasena = await repo.ObtenerContrasenaMasRecienteAsync(correo)
-                                       .ConfigureAwait(false);
+                                    .ConfigureAwait(false);
 
             if (contrasena is null || !BCrypt.Net.BCrypt.Verify(dto.Contrasena, contrasena.Hash))
                 return Results.Json(new { mensaje = "Correo o contraseña incorrectos." }, statusCode: 401);
@@ -1181,15 +1186,27 @@ internal static class Program
             if (ContrasenaTemporalExpirada(contrasena))
             {
                 await repo.DesactivarPorContrasenaTemporalExpiradaAsync(usuario.CorreoInstitucional)
-                          .ConfigureAwait(false);
+                        .ConfigureAwait(false);
                 return RespuestaContrasenaTemporalExpirada();
             }
 
             if (usuario.Estado != 1)
                 return Results.Json(new { mensaje = "La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
 
+            // If the password is temporary, the frontend needs to know this to 
+            // force the change, so that data goes outside the token, next to 
+            // the token, not inside the claims.
+            var token = jwtService.GenerarToken(
+                usuario.CorreoInstitucional,
+                usuario.PrimerNombre,
+                usuario.SegundoNombre,
+                usuario.PrimerApellido,
+                usuario.SegundoApellido,
+                usuario.Rol);
+
             return Results.Ok(new
             {
+                token,
                 correoInstitucional = usuario.CorreoInstitucional,
                 primerNombre = usuario.PrimerNombre,
                 segundoNombre = usuario.SegundoNombre,
