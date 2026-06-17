@@ -55,14 +55,12 @@ internal class JwtService : IJwtService
             new(ClaimTypes.Role, rol.ToString(CultureInfo.InvariantCulture)),
             new("primerNombre", primerNombre),
             new("primerApellido", primerApellido),
+            new("segundoApellido", segundoApellido),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
         if (!string.IsNullOrWhiteSpace(segundoNombre))
             claims.Add(new Claim("segundoNombre", segundoNombre));
-
-        if (!string.IsNullOrWhiteSpace(segundoApellido))
-            claims.Add(new Claim("segundoApellido", segundoApellido));
 
         var token = new JwtSecurityToken(
             issuer: _issuer,
