@@ -249,3 +249,93 @@ describe('CreateUsers Page', () => {
   })
 })
 
+describe('CreateUsers Modal Mode', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+  })
+
+  it('renderiza dentro de un modal cuando isModal es true', () => {
+    render(
+      <BrowserRouter>
+        <CreateUsers isModal isOpen={true} onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByText('Crear Usuario')).toBeInTheDocument()
+  })
+
+  it('no renderiza Header ni Navbar en modo modal', () => {
+    render(
+      <BrowserRouter>
+        <CreateUsers isModal isOpen={true} onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    expect(screen.queryByText('Página Principal')).not.toBeInTheDocument()
+    expect(document.querySelector('footer')).not.toBeInTheDocument()
+  })
+
+  it('no renderiza nada cuando isOpen es false', () => {
+    const { container } = render(
+      <BrowserRouter>
+        <CreateUsers isModal isOpen={false} onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    expect(container.querySelector('dialog')).toBeNull()
+  })
+
+  it('llama a onClose al hacer clic en Cancelar', () => {
+    const onClose = vi.fn()
+    render(
+      <BrowserRouter>
+        <CreateUsers isModal isOpen={true} onClose={onClose} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('muestra éxito y llama al servicio en modo modal', async () => {
+    userService.crearUsuario.mockResolvedValueOnce({ mensaje: 'Usuario creado correctamente.' })
+
+    const { container } = render(
+      <BrowserRouter>
+        <CreateUsers isModal isOpen={true} onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    const emailInput = container.querySelector('input[name="email"]')
+    const firstNameInput = container.querySelector('input[name="firstName"]')
+    const surnameInput = container.querySelector('input[name="firstName_surname"]')
+
+    fireEvent.change(firstNameInput, { target: { value: 'Juan' } })
+    fireEvent.change(surnameInput, { target: { value: 'Pérez' } })
+    fireEvent.change(emailInput, { target: { value: 'juan.perez@ucr.ac.cr' } })
+
+    const form = container.querySelector('form')
+    await act(async () => { fireEvent.submit(form) })
+
+    await waitFor(() => {
+      expect(screen.getByText('Usuario creado correctamente.')).toBeInTheDocument()
+    })
+
+    expect(userService.crearUsuario).toHaveBeenCalled()
+  })
+
+  it('valida email en modo modal', async () => {
+    const { container } = render(
+      <BrowserRouter>
+        <CreateUsers isModal isOpen={true} onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    const form = container.querySelector('form')
+    await act(async () => { fireEvent.submit(form) })
+
+    expect(screen.getByText('El correo es requerido')).toBeInTheDocument()
+  })
+})
+
