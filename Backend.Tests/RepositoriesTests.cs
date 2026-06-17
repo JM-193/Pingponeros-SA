@@ -265,7 +265,7 @@ public sealed class RepositoriesTests
         table.Columns.Add("SEGUNDO_APELLIDO", typeof(string));
         table.Columns.Add("ROL", typeof(int));
         table.Columns.Add("ESTADO", typeof(int));
-        table.Rows.Add("u@test.com", "U", DBNull.Value, "T", DBNull.Value, 1, 1);
+        table.Rows.Add("u@test.com", "U", DBNull.Value, "T", "N", 1, 1);
 
         var q = Substitute.For<IQueryExecutor>();
         q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<User?>>>() )

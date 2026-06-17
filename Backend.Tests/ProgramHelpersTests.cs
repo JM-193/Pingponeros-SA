@@ -50,7 +50,7 @@ public sealed class ProgramHelpersTests
     {
         var method = typeof(Backend.Program)
             .GetMethod("TraducirErrorOracle", BindingFlags.NonPublic | BindingFlags.Static);
-        return (string)method!.Invoke(null, new object[] { numero })!;
+        return (string)method!.Invoke(null, [numero])!;
     }
 
     private static string GenerarContrasenaTemporal()
@@ -64,7 +64,7 @@ public sealed class ProgramHelpersTests
     {
         var method = typeof(Backend.Program)
             .GetMethod("ValidarComplejidadContrasena", BindingFlags.NonPublic | BindingFlags.Static);
-        return (string?)method!.Invoke(null, new object[] { contrasena });
+        return (string?)method!.Invoke(null, [contrasena]);
     }
 
     [Fact]

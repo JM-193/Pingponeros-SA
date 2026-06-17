@@ -3,7 +3,7 @@ const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5119'
 /**
  * Crea un nuevo usuario en el backend.
  * @param {{ correoInstitucional: string, primerNombre: string, segundoNombre?: string,
- *           primerApellido: string, segundoApellido?: string, rol: number }} datos
+ *           primerApellido: string, segundoApellido: string, rol: number }} datos
  * @returns {Promise<object>} El usuario creado devuelto por el servidor.
  */
 export async function crearUsuario(datos) {
@@ -78,7 +78,7 @@ export async function obtenerUsuarioPorCorreo(correo) {
  * Actualiza la información de un usuario existente.
  * @param {string} correo - El correo original del usuario a actualizar.
  * @param {{ correoInstitucional: string, primerNombre: string, segundoNombre?: string,
- *           primerApellido: string, segundoApellido?: string, rol: number, estado: number }} datos
+ *           primerApellido: string, segundoApellido: string, rol: number, estado: number }} datos
  * @returns {Promise<object>} El usuario actualizado devuelvo por el servidor.
  */
 export async function actualizarUsuario(correo, datos) {

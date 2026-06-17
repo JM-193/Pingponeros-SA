@@ -14,7 +14,7 @@ public sealed class UserRepositoryPersistenceTests
     public async Task ObtenerTodosAsync_ReturnsUsuarios()
     {
         var table = CrearTablaUsuarios();
-        table.Rows.Add("ana@test.com", "Ana", DBNull.Value, "Lopez", DBNull.Value, 0, 1);
+        table.Rows.Add("ana@test.com", "Ana", DBNull.Value, "Lopez", "Mora", 0, 1);
         table.Rows.Add("juan@test.com", "Juan", "Carlos", "Mora", "Vega", 1, 0);
 
         var q = Substitute.For<IQueryExecutor>();

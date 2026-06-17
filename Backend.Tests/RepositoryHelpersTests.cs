@@ -38,16 +38,16 @@ public sealed class UserRepositoryTests
     public void MapearFila_ConvierteOpcionalesEnNull()
     {
         var table = CrearTablaUsuarios();
-        table.Rows.Add("ana@test.com", "Ana", DBNull.Value, "Lopez", DBNull.Value, 1, 1);
+        table.Rows.Add("ana@test.com", "Ana", DBNull.Value, "Lopez", "Cruz", 1, 1);
 
         using var reader = table.CreateDataReader();
         Assert.True(reader.Read());
 
         var method = ObtenerMetodoPrivado("MapearFila");
-        var usuario = (User)method.Invoke(null, [reader])!;
+        var usuario = (User)method.Invoke(null, new object[] { reader })!;
 
         Assert.Null(usuario.SegundoNombre);
-        Assert.Null(usuario.SegundoApellido);
+        Assert.Equal("Cruz", usuario.SegundoApellido);
     }
 
     [Fact]
