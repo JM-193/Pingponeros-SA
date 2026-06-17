@@ -11,10 +11,10 @@ vi.mock('../services/areaService')
 describe('QuerySections Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    sectionService.obtenerSecciones.mockResolvedValueOnce([
+    sectionService.obtenerSecciones.mockResolvedValue([
       { id: 20, nombre: 'Soporte', descripcion: 'Sección de soporte', idArea: 1, estado: 1 },
     ])
-    areaService.obtenerAreas.mockResolvedValueOnce([
+    areaService.obtenerAreas.mockResolvedValue([
       { id: 1, nombre: 'Administración', descripcion: 'Área' },
     ])
   })
@@ -83,6 +83,53 @@ describe('QuerySections Page', () => {
 
     await waitFor(() => {
       expect(searchInput.value).toBe('Administración')
+    })
+  })
+
+  it('abre modal de crear al hacer clic en Crear', async () => {
+    render(
+      <BrowserRouter>
+        <QuerySections />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Soporte')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
+
+    await waitFor(() => {
+      const dialog = document.querySelector('dialog')
+      expect(dialog).toBeInTheDocument()
+      expect(screen.getByText('Crear Sección')).toBeInTheDocument()
+    })
+  })
+
+  it('abre modal de editar al hacer clic en Editar', async () => {
+    sectionService.obtenerSeccionPorNombre.mockResolvedValue({
+      nombre: 'Soporte',
+      descripcion: 'Sección de soporte',
+      idArea: 1,
+      estado: 1,
+    })
+
+    render(
+      <BrowserRouter>
+        <QuerySections />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Soporte')).toBeInTheDocument()
+    })
+
+    const editButtons = screen.getAllByRole('button', { name: /Editar/i })
+    fireEvent.click(editButtons[0])
+
+    await waitFor(() => {
+      const dialogs = document.querySelectorAll('dialog')
+      expect(dialogs.length).toBeGreaterThan(0)
     })
   })
 })

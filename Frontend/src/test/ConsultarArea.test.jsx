@@ -175,4 +175,74 @@ describe('QueryAreas Page', () => {
       expect(emptyMessage).toBeInTheDocument()
     }
   })
+
+  it('abre modal de crear al hacer clic en Crear', async () => {
+    render(
+      <BrowserRouter>
+        <QueryAreas />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Administración')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
+
+    await waitFor(() => {
+      const dialog = document.querySelector('dialog')
+      expect(dialog).toBeInTheDocument()
+      expect(screen.getByText('Crear Área')).toBeInTheDocument()
+    })
+  })
+
+  it('abre modal de editar al hacer clic en Editar', async () => {
+    areaService.obtenerAreaPorNombre.mockResolvedValue({
+      nombre: 'Administración',
+      descripcion: 'Área de administración',
+      estado: 1,
+    })
+
+    render(
+      <BrowserRouter>
+        <QueryAreas />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Administración')).toBeInTheDocument()
+    })
+
+    const editButtons = screen.getAllByRole('button', { name: /Editar/i })
+    fireEvent.click(editButtons[0])
+
+    await waitFor(() => {
+      const dialogs = document.querySelectorAll('dialog')
+      expect(dialogs.length).toBeGreaterThan(0)
+    })
+  })
+
+  it('cierra modal de crear al hacer clic en cerrar', async () => {
+    render(
+      <BrowserRouter>
+        <QueryAreas />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Administración')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
+
+    await waitFor(() => {
+      expect(document.querySelector('dialog')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar modal' }))
+
+    await waitFor(() => {
+      expect(document.querySelector('dialog')).not.toBeInTheDocument()
+    })
+  })
 })

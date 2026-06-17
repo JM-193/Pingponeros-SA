@@ -7,18 +7,10 @@ import * as areaService from '../services/areaService'
 import * as departmentService from '../services/departmentService'
 import * as sectionService from '../services/sectionService'
 
-vi.mock('../services/unitService', () => ({
-  obtenerUnidades: vi.fn(),
-}))
-vi.mock('../services/areaService', () => ({
-  obtenerAreas: vi.fn(),
-}))
-vi.mock('../services/departmentService', () => ({
-  obtenerDepartamentos: vi.fn(),
-}))
-vi.mock('../services/sectionService', () => ({
-  obtenerSecciones: vi.fn(),
-}))
+vi.mock('../services/unitService')
+vi.mock('../services/areaService')
+vi.mock('../services/departmentService')
+vi.mock('../services/sectionService')
 
 describe('QueryUnits Page', () => {
   beforeEach(() => {
@@ -144,6 +136,54 @@ describe('QueryUnits Page', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Sección de Sección A')).toBeInTheDocument()
+    })
+  })
+
+  it('abre modal de crear al hacer clic en Crear', async () => {
+    render(
+      <BrowserRouter>
+        <QueryUnits />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Unidad Técnica')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
+
+    await waitFor(() => {
+      const dialog = document.querySelector('dialog')
+      expect(dialog).toBeInTheDocument()
+      expect(screen.getByText('Crear Unidad')).toBeInTheDocument()
+    })
+  })
+
+  it('abre modal de editar al hacer clic en Editar', async () => {
+    unitService.obtenerUnidadPorNombre.mockResolvedValue({
+      nombre: 'Unidad Técnica',
+      descripcion: 'Unidad de soporte',
+      idArea: 1,
+      idDepartamento: 2,
+      estado: 1,
+    })
+
+    render(
+      <BrowserRouter>
+        <QueryUnits />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Unidad Técnica')).toBeInTheDocument()
+    })
+
+    const editButtons = screen.getAllByRole('button', { name: /Editar/i })
+    fireEvent.click(editButtons[0])
+
+    await waitFor(() => {
+      const dialogs = document.querySelectorAll('dialog')
+      expect(dialogs.length).toBeGreaterThan(0)
     })
   })
 })

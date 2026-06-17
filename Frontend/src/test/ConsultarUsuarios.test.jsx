@@ -162,4 +162,76 @@ describe('QueryUsers Page', () => {
       expect(screen.getByText('Mora Porras')).toBeInTheDocument()
     })
   })
+
+  it('abre modal de crear al hacer clic en Crear', async () => {
+    render(
+      <BrowserRouter>
+        <QueryUsers />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Juanito')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
+
+    await waitFor(() => {
+      const dialog = document.querySelector('dialog')
+      expect(dialog).toBeInTheDocument()
+      expect(screen.getByText('Crear Usuario')).toBeInTheDocument()
+    })
+  })
+
+  it('abre modal de editar al hacer clic en Editar', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValue({
+      correoInstitucional: 'juanito.perezperez@ucr.ac.cr',
+      primerNombre: 'Juanito',
+      primerApellido: 'Pérez',
+      rol: 1,
+      estado: 1,
+    })
+
+    render(
+      <BrowserRouter>
+        <QueryUsers />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Juanito')).toBeInTheDocument()
+    })
+
+    const editButtons = screen.getAllByRole('button', { name: /Editar/i })
+    fireEvent.click(editButtons[0])
+
+    await waitFor(() => {
+      const dialogs = document.querySelectorAll('dialog')
+      expect(dialogs.length).toBeGreaterThan(0)
+    })
+  })
+
+  it('cierra modal de crear al hacer clic en cerrar', async () => {
+    render(
+      <BrowserRouter>
+        <QueryUsers />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Juanito')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
+
+    await waitFor(() => {
+      expect(document.querySelector('dialog')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar modal' }))
+
+    await waitFor(() => {
+      expect(document.querySelector('dialog')).not.toBeInTheDocument()
+    })
+  })
 })
