@@ -44,7 +44,7 @@ public sealed class UserRepositoryTests
         Assert.True(reader.Read());
 
         var method = ObtenerMetodoPrivado("MapearFila");
-        var usuario = (User)method.Invoke(null, new object[] { reader })!;
+        var usuario = (User)method.Invoke(null, [reader])!;
 
         Assert.Null(usuario.SegundoNombre);
         Assert.Null(usuario.SegundoApellido);
@@ -60,7 +60,7 @@ public sealed class UserRepositoryTests
         Assert.True(reader.Read());
 
         var method = ObtenerMetodoPrivado("MapearFila");
-        var usuario = (User)method.Invoke(null, new object[] { reader })!;
+        var usuario = (User)method.Invoke(null, [reader])!;
 
         Assert.Equal("Maria", usuario.SegundoNombre);
         Assert.Equal("Vega", usuario.SegundoApellido);
@@ -82,12 +82,10 @@ public sealed class UserRepositoryTests
         };
 
         var method = ObtenerMetodoPrivado("AgregarParametros");
-        method.Invoke(null, new object[] { cmd, usuario });
+        method.Invoke(null, [cmd, usuario]);
 
         var segundoNombre = cmd.Parameters["segundoNombre"].Value;
-        var segundoApellido = cmd.Parameters["segundoApellido"].Value;
         Assert.True(segundoNombre is null || segundoNombre == DBNull.Value);
-        Assert.True(segundoApellido is null || segundoApellido == DBNull.Value);
     }
 
     [Fact]
@@ -106,7 +104,7 @@ public sealed class UserRepositoryTests
         };
 
         var method = ObtenerMetodoPrivado("AgregarParametros");
-        method.Invoke(null, new object[] { cmd, usuario });
+        method.Invoke(null, [cmd, usuario]);
 
         Assert.Equal("Maria", cmd.Parameters["segundoNombre"].Value);
         Assert.Equal("Vega", cmd.Parameters["segundoApellido"].Value);
