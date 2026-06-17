@@ -1,8 +1,11 @@
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import PropTypes from 'prop-types'
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
+import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
 import PageLayout from '../components/PageLayout'
+import Modal from '../components/Modal'
 import { crearUnidad } from '../services/unitService'
 import { obtenerAreas } from '../services/areaService'
 import { obtenerDepartamentos } from '../services/departmentService'
@@ -26,7 +29,7 @@ const initialFormData = {
   estado: 1,
 }
 
-export default function CreateUnits() {
+export default function CreateUnits({ isModal, isOpen, onSuccess, onClose }) {
   const navigate = useNavigate()
   const [parentType, setParentType] = useState('')
   const [areaOptions, setAreaOptions] = useState([])
@@ -69,9 +72,13 @@ export default function CreateUnits() {
     ({ resetFormData }) => {
       resetFormData()
       setParentType('')
-      setTimeout(() => navigate('/organizacion/unidades/consultar'), 1500)
+      if (isModal && onSuccess) {
+        setTimeout(() => onSuccess(), 1200)
+      } else {
+        setTimeout(() => navigate('/organizacion/unidades/consultar'), 1500)
+      }
     },
-    [navigate, setParentType],
+    [navigate, setParentType, isModal, onSuccess],
   )
 
   const {
@@ -118,7 +125,42 @@ export default function CreateUnits() {
       handleInputChange,
     })
 
+  const handleCancel = () => {
+    if (isModal && onClose) {
+      onClose()
+    } else {
+      navigate('/organizacion/unidades/consultar')
+    }
+  }
+
+  const formFields = (
+    <OrganizationEntityFormFields
+      formData={formData}
+      onChange={handleFieldChange}
+      namePrefix="Unidad de"
+      namePlaceholder="Nombre de la unidad"
+      descriptionPlaceholder="Ingrese la descripción de la unidad"
+      nameLabel="Nombre de la Unidad"
+      descriptionLabel="Descripción de la Unidad"
+      areaOptions={areaOptions}
+      parentType={parentType}
+      parentTypeOptions={parentTypeOptions}
+      onParentTypeChange={handleParentTypeChange}
+      parentTypeLabel="Tipo de dependencia"
+      parentTypeDefaultLabel="Seleccione un tipo de dependencia (opcional)"
+      departmentOptions={filteredDepartmentOptions}
+      sectionOptions={filteredSectionOptions}
+    />
+  )
+
   if (isLoading) {
+    if (isModal) {
+      return (
+        <Modal isOpen={isOpen} title="Crear Unidad" onClose={handleCancel}>
+          <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando datos de organización...</p>
+        </Modal>
+      )
+    }
     return (
       <PageLayout
         mainStyle={{
@@ -132,34 +174,50 @@ export default function CreateUnits() {
     )
   }
 
+  if (isModal) {
+    return (
+      <OrganizationEntityFormModal
+        isOpen={isOpen}
+        title="Crear Unidad"
+        subtitle="Formulario de Registro"
+        onSubmit={handleSubmit}
+        onClose={handleCancel}
+        isBusy={isSubmitting}
+        successMsg={successMsg}
+        errorMsg={conflictError || errorMsg}
+        primaryLabel="Crear"
+      >
+        {formFields}
+      </OrganizationEntityFormModal>
+    )
+  }
+
   return (
     <OrganizationEntityFormPage
       title="Crear Unidad"
       subtitle="Formulario de Registro"
       onSubmit={handleSubmit}
-      onCancel={() => navigate('/organizacion/unidades/consultar')}
+      onCancel={handleCancel}
       isBusy={isSubmitting}
       successMsg={successMsg}
       errorMsg={conflictError || errorMsg}
       primaryLabel="Crear"
     >
-      <OrganizationEntityFormFields
-        formData={formData}
-        onChange={handleFieldChange}
-        namePrefix="Unidad de"
-        namePlaceholder="Nombre de la unidad"
-        descriptionPlaceholder="Ingrese la descripción de la unidad"
-        nameLabel="Nombre de la Unidad"
-        descriptionLabel="Descripción de la Unidad"
-        areaOptions={areaOptions}
-        parentType={parentType}
-        parentTypeOptions={parentTypeOptions}
-        onParentTypeChange={handleParentTypeChange}
-        parentTypeLabel="Tipo de dependencia"
-        parentTypeDefaultLabel="Seleccione un tipo de dependencia (opcional)"
-        departmentOptions={filteredDepartmentOptions}
-        sectionOptions={filteredSectionOptions}
-      />
+      {formFields}
     </OrganizationEntityFormPage>
   )
+}
+
+CreateUnits.propTypes = {
+  isModal: PropTypes.bool,
+  isOpen: PropTypes.bool,
+  onSuccess: PropTypes.func,
+  onClose: PropTypes.func,
+}
+
+CreateUnits.defaultProps = {
+  isModal: false,
+  isOpen: false,
+  onSuccess: null,
+  onClose: null,
 }

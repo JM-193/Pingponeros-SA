@@ -1,8 +1,11 @@
 import { useCallback, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import PropTypes from 'prop-types'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
+import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
 import PageLayout from '../components/PageLayout'
+import Modal from '../components/Modal'
 import StateToggle from '../components/StateToggle'
 import { actualizarUnidad, obtenerUnidadPorNombre } from '../services/unitService'
 import { obtenerAreas } from '../services/areaService'
@@ -27,9 +30,10 @@ const initialFormData = {
   estado: 1,
 }
 
-export default function EditUnits() {
+export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityName }) {
   const navigate = useNavigate()
-  const { nombre } = useParams()
+  const params = useParams()
+  const nombre = entityName ?? params.nombre
   const [parentType, setParentType] = useState('')
   const [areaOptions, setAreaOptions] = useState([])
   const [departmentOptions, setDepartmentOptions] = useState([])
@@ -89,12 +93,20 @@ export default function EditUnits() {
   }, [])
 
   const handleLoadError = useCallback(() => {
-    setTimeout(() => navigate('/organizacion/unidades/consultar'), 2000)
-  }, [navigate])
+    if (isModal && onClose) {
+      setTimeout(() => onClose(), 2000)
+    } else {
+      setTimeout(() => navigate('/organizacion/unidades/consultar'), 2000)
+    }
+  }, [navigate, isModal, onClose])
 
   const handleSuccess = useCallback(() => {
-    setTimeout(() => navigate('/organizacion/unidades/consultar'), 1500)
-  }, [navigate])
+    if (isModal && onSuccess) {
+      setTimeout(() => onSuccess(), 1200)
+    } else {
+      setTimeout(() => navigate('/organizacion/unidades/consultar'), 1500)
+    }
+  }, [navigate, isModal, onSuccess])
 
   const submitUpdate = useCallback(
     (payload) => actualizarUnidad(nombreOriginal, payload),
@@ -153,31 +165,16 @@ export default function EditUnits() {
     clearFeedback()
   }
 
-  if (isLoading && !formData.nombre) {
-    return (
-      <PageLayout
-        mainStyle={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <p style={{ color: COLORS.textSubtle }}>Cargando unidad...</p>
-      </PageLayout>
-    )
+  const handleCancel = () => {
+    if (isModal && onClose) {
+      onClose()
+    } else {
+      navigate('/organizacion/unidades/consultar')
+    }
   }
 
-  return (
-    <OrganizationEntityFormPage
-      title="Editar Unidad"
-      subtitle="Formulario de Actualización"
-      onSubmit={handleSubmit}
-      onCancel={() => navigate('/organizacion/unidades/consultar')}
-      isBusy={isSubmitting}
-      successMsg={successMsg}
-      errorMsg={conflictError || errorMsg}
-      primaryLabel="Actualizar"
-    >
+  const formFields = (
+    <>
       <OrganizationEntityFormFields
         formData={formData}
         onChange={handleFieldChange}
@@ -200,6 +197,76 @@ export default function EditUnits() {
         onStateChange={handleStateChange}
         disabled={isSubmitting}
       />
+    </>
+  )
+
+  if (isLoading && !formData.nombre) {
+    if (isModal) {
+      return (
+        <Modal isOpen={isOpen} title="Editar Unidad" onClose={handleCancel}>
+          <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando unidad...</p>
+        </Modal>
+      )
+    }
+    return (
+      <PageLayout
+        mainStyle={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <p style={{ color: COLORS.textSubtle }}>Cargando unidad...</p>
+      </PageLayout>
+    )
+  }
+
+  if (isModal) {
+    return (
+      <OrganizationEntityFormModal
+        isOpen={isOpen}
+        title="Editar Unidad"
+        subtitle="Formulario de Actualización"
+        onSubmit={handleSubmit}
+        onClose={handleCancel}
+        isBusy={isSubmitting}
+        successMsg={successMsg}
+        errorMsg={conflictError || errorMsg}
+        primaryLabel="Actualizar"
+      >
+        {formFields}
+      </OrganizationEntityFormModal>
+    )
+  }
+
+  return (
+    <OrganizationEntityFormPage
+      title="Editar Unidad"
+      subtitle="Formulario de Actualización"
+      onSubmit={handleSubmit}
+      onCancel={handleCancel}
+      isBusy={isSubmitting}
+      successMsg={successMsg}
+      errorMsg={conflictError || errorMsg}
+      primaryLabel="Actualizar"
+    >
+      {formFields}
     </OrganizationEntityFormPage>
   )
+}
+
+EditUnits.propTypes = {
+  isModal: PropTypes.bool,
+  isOpen: PropTypes.bool,
+  onSuccess: PropTypes.func,
+  onClose: PropTypes.func,
+  entityName: PropTypes.string,
+}
+
+EditUnits.defaultProps = {
+  isModal: false,
+  isOpen: false,
+  onSuccess: null,
+  onClose: null,
+  entityName: null,
 }
