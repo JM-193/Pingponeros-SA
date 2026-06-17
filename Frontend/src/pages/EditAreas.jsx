@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import PropTypes from 'prop-types'
 import { actualizarArea, obtenerAreaPorNombre } from '../services/areaService'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
+import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
 import PageLayout from '../components/PageLayout'
 import StateToggle from '../components/StateToggle'
 import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormError, getOrganizationEntityPayload } from '../utils/organizationEntityForm'
 import { COLORS } from '../constants/colors'
 
-export default function EditAreas() {
+export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityName }) {
   const navigate = useNavigate()
-  const { nombre } = useParams()
+  const params = useParams()
+  const nombre = entityName ?? params.nombre
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
@@ -22,7 +25,6 @@ export default function EditAreas() {
   const [successMsg, setSuccessMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
 
-  // Cargar el área al montar el componente
   useEffect(() => {
     const cargarArea = async () => {
       setIsLoading(true)
@@ -37,7 +39,11 @@ export default function EditAreas() {
         setNombreOriginal(area.nombre)
       } catch (err) {
         setErrorMsg(err.message)
-        setTimeout(() => navigate('/organizacion/areas/consultar'), 2000)
+        if (isModal && onClose) {
+          setTimeout(() => onClose(), 2000)
+        } else {
+          setTimeout(() => navigate('/organizacion/areas/consultar'), 2000)
+        }
       } finally {
         setIsLoading(false)
       }
@@ -46,17 +52,15 @@ export default function EditAreas() {
     if (nombre) {
       cargarArea()
     }
-  }, [nombre, navigate])
+  }, [nombre, navigate, isModal, onClose])
 
   const clearFeedback = () => {
     setSuccessMsg('')
     setErrorMsg('')
   }
 
-  // Manage changes in the fields
   const handleInputChange = createOrganizationEntityInputChangeHandler(setFormData, clearFeedback)
 
-  // Manage form submission
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -76,8 +80,11 @@ export default function EditAreas() {
       await actualizarArea(nombreOriginal, getOrganizationEntityPayload(formData, { includeEstado: true }))
 
       setSuccessMsg('Área actualizada correctamente')
-      // Redirigir después de 1.5 segundos
-      setTimeout(() => navigate('/organizacion/areas/consultar'), 1500)
+      if (isModal && onSuccess) {
+        setTimeout(() => onSuccess(), 1200)
+      } else {
+        setTimeout(() => navigate('/organizacion/areas/consultar'), 1500)
+      }
     } catch (err) {
       setErrorMsg(err.message)
     } finally {
@@ -90,31 +97,16 @@ export default function EditAreas() {
     clearFeedback()
   }
 
-  if (isLoading && !formData.nombre) {
-    return (
-      <PageLayout
-        mainStyle={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <p style={{ color: COLORS.textSubtle }}>Cargando área...</p>
-      </PageLayout>
-    )
+  const handleCancel = () => {
+    if (isModal && onClose) {
+      onClose()
+    } else {
+      navigate('/organizacion/areas/consultar')
+    }
   }
 
-  return (
-    <OrganizationEntityFormPage
-      title="Editar Área"
-      subtitle="Formulario de Actualización"
-      onSubmit={handleSubmit}
-      onCancel={() => navigate('/organizacion/areas/consultar')}
-      isBusy={isSubmitting}
-      successMsg={successMsg}
-      errorMsg={errorMsg}
-      primaryLabel="Actualizar"
-    >
+  const formFields = (
+    <>
       <OrganizationEntityFormFields
         formData={formData}
         onChange={handleInputChange}
@@ -129,6 +121,82 @@ export default function EditAreas() {
         onStateChange={handleStateChange}
         disabled={isSubmitting}
       />
+    </>
+  )
+
+  if (isLoading && !formData.nombre) {
+    if (isModal) {
+      return (
+        <OrganizationEntityFormModal
+          isOpen={isOpen}
+          title="Editar Área"
+          onSubmit={(e) => e.preventDefault()}
+          onClose={handleCancel}
+          primaryLabel="Actualizar"
+        >
+          <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando área...</p>
+        </OrganizationEntityFormModal>
+      )
+    }
+    return (
+      <PageLayout
+        mainStyle={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <p style={{ color: COLORS.textSubtle }}>Cargando área...</p>
+      </PageLayout>
+    )
+  }
+
+  if (isModal) {
+    return (
+      <OrganizationEntityFormModal
+        isOpen={isOpen}
+        title="Editar Área"
+        subtitle="Formulario de Actualización"
+        onSubmit={handleSubmit}
+        onClose={handleCancel}
+        isBusy={isSubmitting}
+        successMsg={successMsg}
+        errorMsg={errorMsg}
+        primaryLabel="Actualizar"
+      >
+        {formFields}
+      </OrganizationEntityFormModal>
+    )
+  }
+
+  return (
+    <OrganizationEntityFormPage
+      title="Editar Área"
+      subtitle="Formulario de Actualización"
+      onSubmit={handleSubmit}
+      onCancel={handleCancel}
+      isBusy={isSubmitting}
+      successMsg={successMsg}
+      errorMsg={errorMsg}
+      primaryLabel="Actualizar"
+    >
+      {formFields}
     </OrganizationEntityFormPage>
   )
+}
+
+EditAreas.propTypes = {
+  isModal: PropTypes.bool,
+  isOpen: PropTypes.bool,
+  onSuccess: PropTypes.func,
+  onClose: PropTypes.func,
+  entityName: PropTypes.string,
+}
+
+EditAreas.defaultProps = {
+  isModal: false,
+  isOpen: false,
+  onSuccess: null,
+  onClose: null,
+  entityName: null,
 }

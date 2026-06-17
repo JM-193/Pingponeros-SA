@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useNavigate } from 'react-router-dom'
 import { FaSearch } from 'react-icons/fa'
@@ -70,6 +70,8 @@ export default function EntityListPage({
   entityLabel,
   createPath,
   editPath,
+  renderCreateModal,
+  renderEditModal,
   fetchItems,
   columns,
   matchesSearch,
@@ -85,6 +87,9 @@ export default function EntityListPage({
   const [errorMsg, setErrorMsg] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [sortConfig, setSortConfig] = useState(null)
+  const [createModalOpen, setCreateModalOpen] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [editingItem, setEditingItem] = useState(null)
 
   const matches = matchesSearch ?? defaultSearch
   const resolveRowId = useMemo(() => getRowId ?? ((item) => item.id), [getRowId])
@@ -93,23 +98,24 @@ export default function EntityListPage({
     [results, columns, sortConfig]
   )
 
-  useEffect(() => {
-    const loadItems = async () => {
-      setLoading(true)
-      setErrorMsg('')
-      try {
-        const data = await fetchItems()
-        setAllItems(data)
-        setResults(data)
-      } catch (error) {
-        setErrorMsg(error.message)
-      } finally {
-        setLoading(false)
-      }
+  const loadItems = useCallback(async () => {
+    setLoading(true)
+    setErrorMsg('')
+    try {
+      const data = await fetchItems()
+      setAllItems(data)
+      setResults(data)
+      setSearchTerm('')
+    } catch (error) {
+      setErrorMsg(error.message)
+    } finally {
+      setLoading(false)
     }
-
-    loadItems()
   }, [fetchItems])
+
+  useEffect(() => {
+    loadItems()
+  }, [loadItems])
 
   const handleInputChange = (e) => {
     setSearchTerm(e.target.value)
@@ -124,10 +130,28 @@ export default function EntityListPage({
   }
 
   const handleEdit = (item) => {
-    if (editPath) {
+    if (renderEditModal) {
+      setEditingItem(item)
+      setEditModalOpen(true)
+    } else if (editPath) {
       navigate(editPath(item))
     }
   }
+
+  const handleCreateClick = () => {
+    if (renderCreateModal) {
+      setCreateModalOpen(true)
+    } else if (createPath) {
+      navigate(createPath)
+    }
+  }
+
+  const handleModalSuccess = useCallback(() => {
+    setCreateModalOpen(false)
+    setEditModalOpen(false)
+    setEditingItem(null)
+    loadItems()
+  }, [loadItems])
 
   const handleSort = (columnKey) => {
     setSortConfig((currentSort) => ({
@@ -161,7 +185,7 @@ export default function EntityListPage({
         <EntityResultsTable
           columns={columns}
           rows={currentResults}
-          onEdit={editPath ? handleEdit : undefined}
+          onEdit={(editPath || renderEditModal) ? handleEdit : undefined}
           getRowId={resolveRowId}
           sortConfig={sortConfig}
           onSort={handleSort}
@@ -259,7 +283,7 @@ export default function EntityListPage({
             </div>
             <button
               type="button"
-              onClick={() => navigate(createPath)}
+              onClick={handleCreateClick}
               style={{
                 padding: '10px 32px',
                 backgroundColor: COLORS.primaryBtn,
@@ -299,6 +323,18 @@ export default function EntityListPage({
           disabled={loading}
         />
       </div>
+
+      {renderCreateModal?.({
+        isOpen: createModalOpen,
+        onClose: () => setCreateModalOpen(false),
+        onSuccess: handleModalSuccess,
+      })}
+      {renderEditModal?.({
+        isOpen: editModalOpen,
+        onClose: () => { setEditModalOpen(false); setEditingItem(null) },
+        onSuccess: handleModalSuccess,
+        item: editingItem,
+      })}
     </PageLayout>
   )
 }
@@ -306,8 +342,10 @@ export default function EntityListPage({
 EntityListPage.propTypes = {
   title: PropTypes.string.isRequired,
   entityLabel: PropTypes.string.isRequired,
-  createPath: PropTypes.string.isRequired,
+  createPath: PropTypes.string,
   editPath: PropTypes.func,
+  renderCreateModal: PropTypes.func,
+  renderEditModal: PropTypes.func,
   fetchItems: PropTypes.func.isRequired,
   columns: PropTypes.arrayOf(
     PropTypes.shape({
@@ -326,7 +364,10 @@ EntityListPage.propTypes = {
 }
 
 EntityListPage.defaultProps = {
+  createPath: null,
   editPath: null,
+  renderCreateModal: null,
+  renderEditModal: null,
   matchesSearch: null,
   getRowId: null,
 }

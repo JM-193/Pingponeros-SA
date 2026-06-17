@@ -1,6 +1,8 @@
 import EntityListPage from '../components/EntityListPage'
 import { obtenerAreas } from '../services/areaService'
 import { formatStatusLabel } from '../utils/organizationOptions'
+import CreateAreas from './CreateAreas'
+import EditAreas from './EditAreas'
 
 export default function QueryAreas() {
   const columns = [
@@ -38,13 +40,17 @@ export default function QueryAreas() {
     <EntityListPage
       title="Áreas"
       entityLabel="áreas"
-      createPath="/organizacion/areas/crear"
-      editPath={(area) => `/organizacion/areas/editar/${encodeURIComponent(area.nombre)}`}
       fetchItems={obtenerAreas}
       columns={columns}
       matchesSearch={matchesSearch}
       getRowId={(area) => area.id}
       searchPlaceholder="Ingrese el nombre o descripción del área"
+      renderCreateModal={({ isOpen, onClose, onSuccess }) => (
+        <CreateAreas isModal isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
+      )}
+      renderEditModal={({ isOpen, onClose, onSuccess, item }) =>
+        item && <EditAreas isModal isOpen={isOpen} entityName={item.nombre} onClose={onClose} onSuccess={onSuccess} />
+      }
     />
   )
 }
