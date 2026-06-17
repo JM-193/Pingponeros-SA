@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import PasswordChecklist from 'react-password-checklist'
 import { obtenerSesion } from '../services/session'
 import { cambiarContrasena } from '../services/authService'
 import { COLORS } from '../constants/colors'
@@ -156,6 +157,27 @@ export default function ChangePassword() {
                 error={errors.newPassword}
                 required
               />
+
+              {formData.newPassword && (
+                <div style={{ marginTop: '-12px', marginBottom: '20px' }}>
+                  <PasswordChecklist
+                    rules={['minLength', 'capital', 'lowercase', 'number', 'specialChar']}
+                    minLength={12}
+                    value={formData.newPassword}
+                    validColor={COLORS.successColor}
+                    invalidColor={COLORS.danger}
+                    messages={{
+                      minLength: 'Mínimo 12 caracteres',
+                      capital: 'Una mayúscula',
+                      lowercase: 'Una minúscula',
+                      number: 'Un número',
+                      specialChar: 'Un carácter especial (!@#$%&*)',
+                    }}
+                    iconSize={13}
+                    style={{ fontSize: '13px' }}
+                  />
+                </div>
+              )}
 
               <PasswordInput
                 label="Confirmar Nueva Contraseña"
