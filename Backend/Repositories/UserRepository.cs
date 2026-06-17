@@ -27,7 +27,7 @@ internal sealed class UserRepository : IUserRepository
         PrimerNombre = r.GetString(r.GetOrdinal(ColumnPrimerNombre)),
         SegundoNombre = r.IsDBNull(r.GetOrdinal(ColumnSegundoNombre)) ? null : r.GetString(r.GetOrdinal(ColumnSegundoNombre)),
         PrimerApellido = r.GetString(r.GetOrdinal(ColumnPrimerApellido)),
-        SegundoApellido = r.IsDBNull(r.GetOrdinal(ColumnSegundoApellido)) ? null : r.GetString(r.GetOrdinal(ColumnSegundoApellido)),
+        SegundoApellido = r.GetString(r.GetOrdinal(ColumnSegundoApellido)),
         Rol = r.GetInt32(r.GetOrdinal(ColumnRol)),
         Estado = r.GetInt32(r.GetOrdinal(ColumnEstado)),
     };

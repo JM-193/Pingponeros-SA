@@ -76,7 +76,7 @@ public sealed class UserRepositoryTests
             PrimerNombre = "Ana",
             SegundoNombre = null,
             PrimerApellido = "Lopez",
-            SegundoApellido = null,
+            SegundoApellido = "Cruz",
             Rol = 0,
             Estado = 1,
         };
