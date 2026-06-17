@@ -386,7 +386,207 @@ NavbarSubmenuItem.propTypes = {
   menuId: PropTypes.string.isRequired,
   rootMenuId: PropTypes.string.isRequired,
   scheduleCloseAll: PropTypes.func.isRequired,
-  topLevelButtonBaseStyle: menuButtonBaseStylePropType.isRequired,
+  topLevelButtonBaseStyle: menuButtonBaseStylePropType.isRequired,  
+}
+
+function buildToggleMenuState(prev, menuId) {
+  if (!prev[menuId]) return { [menuId]: true }
+  return Object.fromEntries(Object.entries(prev).filter(([key]) => key !== menuId))
+}
+
+
+function ProfileDropdown({
+  isMobile,
+  menuOpen,
+  onToggle,
+  onKeyDown,
+  buttonRef,
+  dropdownRef,
+  nombreCompleto,
+  sesion,
+  navigate,
+}) {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        order: isMobile ? 1 : 0,
+        minHeight: isMobile ? '50px' : 'auto',
+      }}
+    >
+      <button
+        ref={buttonRef}
+        style={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          cursor: 'pointer',
+          background: 'none',
+          border: 'none',
+          padding: isMobile ? 0 : '0 0 0 12px',
+        }}
+        onClick={onToggle}
+        onKeyDown={onKeyDown}
+        aria-label="User menu"
+        aria-haspopup="true"
+        aria-expanded={menuOpen}
+      >
+        <div
+          style={{
+            width: '34px',
+            height: '34px',
+            borderRadius: '50%',
+            backgroundColor: 'rgba(255,255,255,0.2)',
+            border: '2px solid rgba(255,255,255,0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill={COLORS.white}>
+            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+          </svg>
+        </div>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill={COLORS.white}>
+          <path d="M7 10l5 5 5-5z" />
+        </svg>
+      </button>
+
+      {menuOpen && (
+        <div
+          ref={dropdownRef}
+          style={{
+            position: 'absolute',
+            top: isMobile ? '48px' : '52px',
+            right: 0,
+            backgroundColor: COLORS.white,
+            borderRadius: '6px',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+            minWidth: '240px',
+            zIndex: 100,
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              width: '100%',
+              padding: '14px 16px',
+              borderBottom: '1px solid #eee',
+              backgroundColor: COLORS.white,
+            }}
+          >
+            <div
+              style={{
+                width: '34px',
+                height: '34px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(0,0,0,0.05)',
+                border: '1px solid rgba(0,0,0,0.12)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={COLORS.textDark}>
+                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+              </svg>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+              <span
+                style={{
+                  fontSize: '15px',
+                  fontWeight: 700,
+                  color: COLORS.textDark,
+                  lineHeight: 1.2,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {nombreCompleto || 'Mi Perfil'}
+              </span>
+              <span
+                style={{
+                  fontSize: '12px',
+                  color: COLORS.textDark,
+                  opacity: 0.8,
+                  lineHeight: 1.2,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {sesion?.correoInstitucional ?? 'correo no disponible'}
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate('/cambiar-contrasena')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              width: '100%',
+              padding: '12px 16px',
+              textAlign: 'left',
+              border: 'none',
+              background: 'none',
+              fontSize: '13px',
+              color: COLORS.headerBg,
+              cursor: 'pointer',
+            }}
+          >
+            <FiKey size={16} />
+            <span>Cambiar Contraseña</span>
+          </button>
+          <button
+            onClick={() => {
+              cerrarSesion()
+              navigate('/')
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              width: '100%',
+              padding: '12px 16px',
+              textAlign: 'left',
+              border: 'none',
+              borderTop: '1px solid #fff',
+              background: 'none',
+              fontSize: '13px',
+              color: COLORS.danger,
+              cursor: 'pointer',
+            }}
+          >
+            <FiLogOut size={16} />
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+ProfileDropdown.propTypes = {
+  buttonRef: PropTypes.shape({ current: PropTypes.instanceOf(Element) }).isRequired,
+  dropdownRef: PropTypes.shape({ current: PropTypes.instanceOf(Element) }).isRequired,
+  isMobile: PropTypes.bool.isRequired,
+  menuOpen: PropTypes.bool.isRequired,
+  navigate: PropTypes.func.isRequired,
+  nombreCompleto: PropTypes.string,
+  onKeyDown: PropTypes.func.isRequired,
+  onToggle: PropTypes.func.isRequired,
+  sesion: PropTypes.shape({
+    correoInstitucional: PropTypes.string,
+  }),
 }
 
 export default function Navbar() {
@@ -436,14 +636,7 @@ export default function Navbar() {
 
   const toggleSubmenu = (menuId) => {
     clearCloseTimer()
-    setOpenMenus((prev) => {
-      if (prev[menuId]) {
-        const newState = { ...prev }
-        delete newState[menuId]
-        return newState
-      }
-      return { [menuId]: true }
-    })
+    setOpenMenus((prev) => buildToggleMenuState(prev, menuId))
   }
 
   const handleNavClick = (path) => {
@@ -460,6 +653,13 @@ export default function Navbar() {
     if (mobileMenuOpen) setOpenMenus({})
     setMobileMenuOpen(!mobileMenuOpen)
     setMenuOpen(false)
+  }
+
+  const handleProfileKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      setMenuOpen(!menuOpen)
+    }
   }
 
   const getMenuButtonProps = (options) =>
@@ -554,169 +754,17 @@ export default function Navbar() {
         />
       </div>
 
-      <div
-        style={{
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          order: isMobile ? 1 : 0,
-          minHeight: isMobile ? '50px' : 'auto',
-        }}
-      >
-        <button
-          ref={profileMenuButtonRef}
-          style={{
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            cursor: 'pointer',
-            background: 'none',
-            border: 'none',
-            padding: isMobile ? 0 : '0 0 0 12px',
-          }}
-          onClick={() => setMenuOpen(!menuOpen)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              setMenuOpen(!menuOpen)
-            }
-          }}
-          aria-label="User menu"
-          aria-haspopup="true"
-          aria-expanded={menuOpen}
-        >
-          <div
-            style={{
-              width: '34px',
-              height: '34px',
-              borderRadius: '50%',
-              backgroundColor: 'rgba(255,255,255,0.2)',
-              border: '2px solid rgba(255,255,255,0.7)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill={COLORS.white}>
-              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-            </svg>
-          </div>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill={COLORS.white}>
-            <path d="M7 10l5 5 5-5z" />
-          </svg>
-        </button>
-
-        {menuOpen && (
-          <div
-            ref={profileMenuRef}
-            style={{
-              position: 'absolute',
-              top: isMobile ? '48px' : '52px',
-              right: 0,
-              backgroundColor: COLORS.white,
-              borderRadius: '6px',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-              minWidth: '240px',
-              zIndex: 100,
-              overflow: 'hidden',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                width: '100%',
-                padding: '14px 16px',
-                borderBottom: '1px solid #eee',
-                backgroundColor: COLORS.white,
-              }}
-            >
-              <div
-                style={{
-                  width: '34px',
-                  height: '34px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(0,0,0,0.05)',
-                  border: '1px solid rgba(0,0,0,0.12)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill={COLORS.textDark}>
-                  <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-                </svg>
-              </div>
-              <div style={{display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                <span style={{
-                  fontSize: '15px',
-                  fontWeight: 700,
-                  color: COLORS.textDark,
-                  lineHeight: 1.2,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}>
-                  {nombreCompleto || 'Mi Perfil'}
-                </span>
-                <span style={{
-                  fontSize: '12px',
-                  color: COLORS.textDark,
-                  opacity: 0.8,
-                  lineHeight: 1.2,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}>
-                  {sesion?.correoInstitucional ?? 'correo no disponible'}
-                </span>
-              </div>
-            </div>
-            <button
-              onClick={() => navigate('/cambiar-contrasena')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                width: '100%',
-                padding: '12px 16px',
-                textAlign: 'left',
-                border: 'none',
-                background: 'none',
-                fontSize: '13px',
-                color: COLORS.headerBg,
-                cursor: 'pointer',
-              }}
-            >
-              <FiKey size={16} />
-              <span>Cambiar Contraseña</span>
-            </button>
-            <button
-              onClick={() => { cerrarSesion(); navigate('/') }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                width: '100%',
-                padding: '12px 16px',
-                textAlign: 'left',
-                border: 'none',
-                borderTop: '1px solid #fff',
-                background: 'none',
-                fontSize: '13px',
-                color: COLORS.danger,
-                cursor: 'pointer',
-              }}
-            >
-              <FiLogOut size={16} />
-              <span>Cerrar Sesión</span>
-            </button>
-          </div>
-        )}
-      </div>
+      <ProfileDropdown
+        isMobile={isMobile}
+        menuOpen={menuOpen}
+        onToggle={() => setMenuOpen(!menuOpen)}
+        onKeyDown={handleProfileKeyDown}
+        buttonRef={profileMenuButtonRef}
+        dropdownRef={profileMenuRef}
+        nombreCompleto={nombreCompleto}
+        sesion={sesion}
+        navigate={navigate}
+      />
     </nav>
   )
 }
