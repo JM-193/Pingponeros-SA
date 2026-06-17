@@ -1,41 +1,77 @@
 const SESSION_KEY = 'pingponeros_session'
-const SESSION_TTL_MS = 60 * 60 * 1000 // 1 hora
 
 /**
- * Guarda los datos del usuario en SessionStorage con timestamp de expiración.
- * @param {object} usuario
- */
-export function guardarSesion(usuario) {
-  const payload = {
-    usuario,
-    expira: Date.now() + SESSION_TTL_MS,
-  }
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(payload))
-}
-
-/**
- * Devuelve los datos del usuario si la sesión es válida, o null si expiró / no existe.
+ * Decode a JWT payload without verifying the signature
+ * (signature verification is handled by the backend).
+ * @param {string} token
  * @returns {object|null}
  */
-export function obtenerSesion() {
-  const raw = sessionStorage.getItem(SESSION_KEY)
-  if (!raw) return null
-
+function decodificarPayload(token) {
   try {
-    const { usuario, expira } = JSON.parse(raw)
-    if (Date.now() > expira) {
-      sessionStorage.removeItem(SESSION_KEY)
-      return null
-    }
-    return usuario
+    const [, payloadB64] = token.split('.')
+    if (!payloadB64) return null
+    const base64 = payloadB64.replaceAll('-', '+').replaceAll('_', '/')
+    const json = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + c.codePointAt(0).toString(16).padStart(2, '0'))
+        .join('')
+    )
+    return JSON.parse(json)
   } catch {
-    sessionStorage.removeItem(SESSION_KEY)
     return null
   }
 }
 
 /**
- * Elimina la sesión activa.
+ * Save the JWT token to SessionStorage.
+ * The expiration is obtained from the `exp` claim of the token itself (seconds epoch).
+ * @param {string} token JWT received from the backend
+ */
+export function guardarSesion(token) {
+  if (typeof token !== 'string' || !token) return
+  sessionStorage.setItem(SESSION_KEY, token)
+}
+
+/**
+ * Returns the user's decoded payload if the token exists and has not expired.
+ * or null if it has expired / does not exist / is invalid.
+ * @returns {object|null}
+ */
+export function obtenerSesion() {
+  const token = sessionStorage.getItem(SESSION_KEY)
+  if (!token) return null
+
+  const payload = decodificarPayload(token)
+  if (!payload) {
+    sessionStorage.removeItem(SESSION_KEY)
+    return null
+  }
+
+  // exp comes in seconds (epoch), Date.now() in milliseconds
+  if (typeof payload.exp === 'number' && Date.now() >= payload.exp * 1000) {
+    sessionStorage.removeItem(SESSION_KEY)
+    return null
+  }
+
+  return payload
+}
+
+/**
+ * Returns the raw JWT token (to send in the Authorization header),
+ * or null if it does not exist or has expired.
+ * @returns {string|null}
+ */
+export function obtenerToken() {
+  const token = sessionStorage.getItem(SESSION_KEY)
+  if (!token) return null
+  // reuses expiration validation
+  if (!obtenerSesion()) return null
+  return token
+}
+
+/**
+ * End the active session.
  */
 export function cerrarSesion() {
   sessionStorage.removeItem(SESSION_KEY)
