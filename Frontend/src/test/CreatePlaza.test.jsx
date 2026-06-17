@@ -174,7 +174,7 @@ describe('CreatePositions Page', () => {
     )
   })
 
-  it('mantiene la unidad seleccionada cuando el area se infiere desde su departamento', async () => {
+  it('mantiene la unidad seleccionada cuando el área se infiere desde su departamento', async () => {
     unitService.obtenerUnidades.mockResolvedValueOnce([
       { id: 1, nombre: 'Portal', idDepartamento: 1 },
     ])
@@ -192,17 +192,42 @@ describe('CreatePositions Page', () => {
       expect(screen.getByRole('heading', { name: /Crear Plaza/i })).toBeInTheDocument()
     })
 
-    const unidadSelect = document.querySelector('select[name="idUnidad"]')
-    const departamentoSelect = document.querySelector('select[name="idDepartamento"]')
-    const areaSelect = document.querySelector('select[name="idArea"]')
-
+    const unidadSelect = screen.getByLabelText(/Unidad/i)
     fireEvent.change(unidadSelect, { target: { value: '1' } })
 
     await waitFor(() => {
       expect(unidadSelect.value).toBe('1')
-      expect(departamentoSelect.value).toBe('1')
-      expect(areaSelect.value).toBe('1')
+      expect(screen.getByLabelText(/Departamento/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Departamento/i).value).toBe('1')
+      expect(screen.getByLabelText(/Área/i).value).toBe('1')
     })
+  })
+
+  it('muestra el selector de tipo de dependencia y alterna entre departamento y sección', async () => {
+    render(
+      <BrowserRouter>
+        <CreatePositions />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Crear Plaza/i })).toBeInTheDocument()
+    })
+
+    const parentTypeSelect = screen.getByLabelText(/Tipo de dependencia/i)
+
+    expect(screen.queryByLabelText(/Departamento/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/Sección/i)).not.toBeInTheDocument()
+
+    fireEvent.change(parentTypeSelect, { target: { value: 'departamento' } })
+
+    expect(screen.getByLabelText(/Departamento/i)).toBeInTheDocument()
+    expect(screen.queryByLabelText(/Sección/i)).not.toBeInTheDocument()
+
+    fireEvent.change(parentTypeSelect, { target: { value: 'seccion' } })
+
+    expect(screen.getByLabelText(/Sección/i)).toBeInTheDocument()
+    expect(screen.queryByLabelText(/Departamento/i)).not.toBeInTheDocument()
   })
 
   it('envía null en campos opcionales no seleccionados', async () => {
