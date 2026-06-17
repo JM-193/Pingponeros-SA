@@ -1,4 +1,3 @@
-// QueryPositions.jsx
 import { useCallback } from 'react'
 import EntityListPage from '../components/EntityListPage'
 import { obtenerPlazas } from '../services/positionService'
@@ -7,6 +6,8 @@ import { obtenerDepartamentos } from '../services/departmentService'
 import { obtenerSecciones } from '../services/sectionService'
 import { obtenerAreas } from '../services/areaService'
 import { buildNameMap, resolveOptionValueKey } from '../utils/organizationOptions'
+import CreatePositions from './CreatePositions'
+import EditPositions from './EditPositions'
 
 export default function QueryPositions() {
   const fetchItems = useCallback(async () => {
@@ -94,13 +95,17 @@ export default function QueryPositions() {
     <EntityListPage
       title="Plazas"
       entityLabel="plazas"
-      createPath="/organizacion/plazas/crear"
-      editPath={(plaza) => `/organizacion/plazas/editar/${plaza.numeroPlaza}`}
       fetchItems={fetchItems}
       columns={columns}
       matchesSearch={matchesSearch}
       getRowId={(plaza) => plaza.numeroPlaza}
       searchPlaceholder="Ingrese el número de plaza, unidad, departamento, sección o área"
+      renderCreateModal={({ isOpen, onClose, onSuccess }) => (
+        <CreatePositions isModal isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
+      )}
+      renderEditModal={({ isOpen, onClose, onSuccess, item }) =>
+        item && <EditPositions isModal isOpen={isOpen} entityId={String(item.numeroPlaza)} onClose={onClose} onSuccess={onSuccess} />
+      }
     />
   )
 }

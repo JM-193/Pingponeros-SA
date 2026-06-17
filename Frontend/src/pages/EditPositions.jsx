@@ -1,6 +1,6 @@
-// EditPositions.jsx
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import PropTypes from 'prop-types'
 import { actualizarPlaza, obtenerPlazaPorNumero } from '../services/positionService'
 import { obtenerUnidades } from '../services/unitService'
 import { obtenerDepartamentos } from '../services/departmentService'
@@ -9,6 +9,7 @@ import { obtenerAreas } from '../services/areaService'
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import Modal from '../components/Modal'
 import FormContainer from '../components/FormContainer'
 import FormSelect from '../components/FormSelect'
 import FormButton from '../components/FormButton'
@@ -30,12 +31,13 @@ const initialFormData = {
   idUnidad: '',
 }
 
-export default function EditPositions() {
+export default function EditPositions({ isModal, isOpen, onSuccess, onClose, entityId }) {
   const navigate = useNavigate()
-  const { numeroPlaza } = useParams()
+  const params = useParams()
+  const numeroPlaza = entityId ?? params.numeroPlaza
 
   const [formData, setFormData] = useState(initialFormData)
-  const [parentType, setParentType] = useState('') // 'departamento' | 'seccion' | ''
+  const [parentType, setParentType] = useState('')
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
@@ -91,15 +93,18 @@ export default function EditPositions() {
         })
       } catch (err) {
         setLoadError(err.message)
-        setTimeout(() => navigate('/organizacion/plazas/consultar'), 2000)
+        if (isModal && onClose) {
+          setTimeout(() => onClose(), 2000)
+        } else {
+          setTimeout(() => navigate('/organizacion/plazas/consultar'), 2000)
+        }
       } finally {
         setLoading(false)
       }
     }
     cargarDatos()
-  }, [numeroPlaza, navigate])
+  }, [numeroPlaza, navigate, isModal, onClose])
 
-  // --- Filtered options driven by selected area ---
   const filteredDepartamentosOptions = useMemo(() => {
     if (!formData.idArea) return allDepartamentosOptions
     return rawDepartamentos
@@ -127,7 +132,6 @@ export default function EditPositions() {
       .map((u) => ({ value: String(u.id ?? u.idUnidad), label: `Unidad de ${u.nombre}` }))
   }, [formData.idArea, formData.idUnidad, rawDepartamentos, rawSecciones, rawUnidades, allUnidadOptions])
 
-  // --- Handlers ---
   const clearFeedback = useCallback(() => {
     setSuccessMsg('')
     setErrorMsg('')
@@ -229,7 +233,11 @@ export default function EditPositions() {
       }
       await actualizarPlaza(numeroPlaza, payload)
       setSuccessMsg(`Plaza '${numeroPlaza}' actualizada correctamente.`)
-      setTimeout(() => navigate(-1), 1500)
+      if (isModal && onSuccess) {
+        setTimeout(() => onSuccess(), 1200)
+      } else {
+        setTimeout(() => navigate(-1), 1500)
+      }
     } catch (err) {
       setErrorMsg(err.message)
     } finally {
@@ -237,11 +245,138 @@ export default function EditPositions() {
     }
   }
 
+  const handleCancel = () => {
+    if (isModal && onClose) {
+      onClose()
+    } else {
+      navigate(-1)
+    }
+  }
+
+  const formContent = (
+    <FormContainer
+      onSubmit={handleSubmit}
+      title={isModal ? undefined : 'Editar Plaza'}
+      subtitle={isModal ? undefined : 'Modificar asignaciones de la plaza'}
+    >
+      <p
+        style={{
+          textAlign: 'center',
+          margin: '-16px 0 24px',
+          fontSize: '15px',
+          fontWeight: 600,
+          color: COLORS.textMuted,
+          letterSpacing: '0.03em',
+        }}
+      >
+        N.° de Plaza:{' '}
+        <span
+          style={{
+            fontSize: '20px',
+            fontWeight: 800,
+            color: COLORS.primaryBtn,
+          }}
+        >
+          {numeroPlaza}
+        </span>
+      </p>
+
+      {loadError && <StatusMessage variant="error" message={`Error al cargar datos: ${loadError}`} />}
+
+      <FormSelect
+        label="Área"
+        id="idArea"
+        name="idArea"
+        value={formData.idArea}
+        onChange={handleFieldChange}
+        options={areaOptions}
+        defaultLabel="-- Sin asignación --"
+      />
+
+      <FormSelect
+        label="Tipo de dependencia"
+        id="parentType"
+        name="parentType"
+        value={parentType}
+        onChange={handleParentTypeChange}
+        options={PARENT_TYPE_OPTIONS}
+        defaultLabel="-- Sin asignación --"
+      />
+
+      {parentType === 'departamento' && (
+        <FormSelect
+          label="Departamento"
+          id="idDepartamento"
+          name="idDepartamento"
+          value={formData.idDepartamento}
+          onChange={handleFieldChange}
+          options={filteredDepartamentosOptions}
+          defaultLabel="-- Sin asignación --"
+        />
+      )}
+
+      {parentType === 'seccion' && (
+        <FormSelect
+          label="Sección"
+          id="idSeccion"
+          name="idSeccion"
+          value={formData.idSeccion}
+          onChange={handleFieldChange}
+          options={filteredSeccionesOptions}
+          defaultLabel="-- Sin asignación --"
+        />
+      )}
+
+      <FormSelect
+        label="Unidad"
+        id="idUnidad"
+        name="idUnidad"
+        value={formData.idUnidad}
+        onChange={handleFieldChange}
+        options={filteredUnidadOptions}
+        defaultLabel="-- Sin asignación --"
+      />
+
+      {successMsg && <StatusMessage variant="success" message={successMsg} style={{ marginBottom: '20px' }} />}
+      {(conflictError || errorMsg) && <StatusMessage variant="error" message={conflictError || errorMsg} style={{ marginBottom: '20px' }} />}
+
+      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '8px' }}>
+        <FormButton
+          type="button"
+          variant="secondary"
+          label="Cancelar"
+          onClick={handleCancel}
+        />
+        <FormButton
+          type="submit"
+          label={isSubmitting ? 'Actualizando...' : 'Actualizar'}
+          variant="primary"
+          disabled={isSubmitting}
+        />
+      </div>
+    </FormContainer>
+  )
+
   if (loading) {
+    if (isModal) {
+      return (
+        <Modal isOpen={isOpen} title="Editar Plaza" onClose={handleCancel}>
+          <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando datos de la plaza...</p>
+        </Modal>
+      )
+    }
     return (
       <PageLayout mainStyle={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <p style={{ color: COLORS.textSubtle }}>Cargando datos de la plaza...</p>
       </PageLayout>
+    )
+  }
+
+  if (isModal) {
+    return (
+      <Modal isOpen={isOpen} title="Editar Plaza" onClose={handleCancel}>
+        {formContent}
+      </Modal>
     )
   }
 
@@ -259,109 +394,25 @@ export default function EditPositions() {
           boxSizing: 'border-box',
         }}
       >
-        <FormContainer
-          onSubmit={handleSubmit}
-          title="Editar Plaza"
-          subtitle="Modificar asignaciones de la plaza"
-        >
-          <p
-            style={{
-              textAlign: 'center',
-              margin: '-16px 0 24px',
-              fontSize: '15px',
-              fontWeight: 600,
-              color: COLORS.textMuted,
-              letterSpacing: '0.03em',
-            }}
-          >
-            N.° de Plaza:{' '}
-            <span
-              style={{
-                fontSize: '20px',
-                fontWeight: 800,
-                color: COLORS.primaryBtn,
-              }}
-            >
-              {numeroPlaza}
-            </span>
-          </p>
-
-          {loadError && <StatusMessage variant="error" message={`Error al cargar datos: ${loadError}`} />}
-
-          <FormSelect
-            label="Área"
-            id="idArea"
-            name="idArea"
-            value={formData.idArea}
-            onChange={handleFieldChange}
-            options={areaOptions}
-            defaultLabel="-- Sin asignación --"
-          />
-
-          <FormSelect
-            label="Tipo de dependencia"
-            id="parentType"
-            name="parentType"
-            value={parentType}
-            onChange={handleParentTypeChange}
-            options={PARENT_TYPE_OPTIONS}
-            defaultLabel="-- Sin asignación --"
-          />
-
-          {parentType === 'departamento' && (
-            <FormSelect
-              label="Departamento"
-              id="idDepartamento"
-              name="idDepartamento"
-              value={formData.idDepartamento}
-              onChange={handleFieldChange}
-              options={filteredDepartamentosOptions}
-              defaultLabel="-- Sin asignación --"
-            />
-          )}
-
-          {parentType === 'seccion' && (
-            <FormSelect
-              label="Sección"
-              id="idSeccion"
-              name="idSeccion"
-              value={formData.idSeccion}
-              onChange={handleFieldChange}
-              options={filteredSeccionesOptions}
-              defaultLabel="-- Sin asignación --"
-            />
-          )}
-
-          <FormSelect
-            label="Unidad"
-            id="idUnidad"
-            name="idUnidad"
-            value={formData.idUnidad}
-            onChange={handleFieldChange}
-            options={filteredUnidadOptions}
-            defaultLabel="-- Sin asignación --"
-          />
-
-          {successMsg && <StatusMessage variant="success" message={successMsg} style={{ marginBottom: '20px' }} />}
-          {(conflictError || errorMsg) && <StatusMessage variant="error" message={conflictError || errorMsg} style={{ marginBottom: '20px' }} />}
-
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '8px' }}>
-            <FormButton
-              type="button"
-              variant="secondary"
-              label="Regresar"
-              onClick={() => navigate(-1)}
-            />
-            <FormButton
-              type="submit"
-              label={isSubmitting ? 'Actualizando...' : 'Actualizar'}
-              variant="primary"
-              disabled={isSubmitting}
-            />
-          </div>
-        </FormContainer>
+        {formContent}
       </main>
       <Footer />
     </div>
   )
+}
+
+EditPositions.propTypes = {
+  isModal: PropTypes.bool,
+  isOpen: PropTypes.bool,
+  onSuccess: PropTypes.func,
+  onClose: PropTypes.func,
+  entityId: PropTypes.string,
+}
+
+EditPositions.defaultProps = {
+  isModal: false,
+  isOpen: false,
+  onSuccess: null,
+  onClose: null,
+  entityId: null,
 }
