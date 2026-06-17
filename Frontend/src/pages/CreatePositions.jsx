@@ -32,6 +32,7 @@ const NUMERO_REGEX = /\D/g
 export default function CreatePositions() {
   const navigate = useNavigate()
   const [formData, setFormData] = useState(initialFormData)
+  const [parentType, setParentType] = useState('')
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
@@ -106,6 +107,37 @@ export default function CreatePositions() {
       .map((s) => ({ value: String(s.id ?? s.idSeccion), label: `Sección de ${s.nombre}` }))
   }, [formData.idArea, rawSecciones, seccionOptions])
 
+  const handleParentTypeChange = (e) => {
+    const { value } = e.target
+    setSuccessMsg('')
+    setErrorMsg('')
+    setParentType(value)
+
+    let conflict = ''
+    let clearUnidad = false
+
+    if (formData.idUnidad) {
+      const unidad = rawUnidades.find((u) => String(u.id ?? u.idUnidad) === formData.idUnidad)
+      if (value === 'seccion' && formData.idDepartamento && unidad?.idDepartamento != null) {
+        clearUnidad = true
+        conflict = 'La unidad seleccionada no es compatible con el tipo de dependencia elegido. Seleccione una unidad válida.'
+      }
+      if (value === 'departamento' && formData.idSeccion && unidad?.idSeccion != null) {
+        clearUnidad = true
+        conflict = 'La unidad seleccionada no es compatible con el tipo de dependencia elegido. Seleccione una unidad válida.'
+      }
+    }
+
+    if (conflict) setErrorMsg(conflict)
+
+    setFormData((prev) => ({
+      ...prev,
+      idDepartamento: value === 'departamento' ? prev.idDepartamento : '',
+      idSeccion: value === 'seccion' ? prev.idSeccion : '',
+      idUnidad: clearUnidad ? '' : prev.idUnidad,
+    }))
+  }
+
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setSuccessMsg('')
@@ -127,6 +159,9 @@ export default function CreatePositions() {
 
     if (resolved.conflict) {
       setErrorMsg(resolved.conflict)
+    }
+    if (resolved.parentType !== undefined) {
+      setParentType(resolved.parentType)
     }
     setFormData(resolved.formData)
   }
@@ -217,42 +252,59 @@ export default function CreatePositions() {
           />
 
           <FormSelect
-            label="Unidad"
-            id="idUnidad"
-            name="idUnidad"
-            value={formData.idUnidad}
-            onChange={handleInputChange}
-            options={filteredUnidadOptions}
-            defaultLabel="-- Sin asignación --"
-          />
-
-          <FormSelect
-            label="Departamento"
-            id="idDepartamento"
-            name="idDepartamento"
-            value={formData.idDepartamento}
-            onChange={handleInputChange}
-            options={filteredDepartamentoOptions}
-            defaultLabel="-- Sin asignación --"
-          />
-
-          <FormSelect
-            label="Sección"
-            id="idSeccion"
-            name="idSeccion"
-            value={formData.idSeccion}
-            onChange={handleInputChange}
-            options={filteredSeccionOptions}
-            defaultLabel="-- Sin asignación --"
-          />
-
-          <FormSelect
             label="Área"
             id="idArea"
             name="idArea"
             value={formData.idArea}
             onChange={handleInputChange}
             options={areaOptions}
+            defaultLabel="-- Sin asignación --"
+          />
+
+          <FormSelect
+            label="Tipo de dependencia"
+            id="parentType"
+            name="parentType"
+            value={parentType}
+            onChange={handleParentTypeChange}
+            options={[
+              { value: 'departamento', label: 'Departamento' },
+              { value: 'seccion', label: 'Sección' },
+            ]}
+            defaultLabel="-- Sin asignación --"
+          />
+
+          {parentType === 'departamento' && (
+            <FormSelect
+              label="Departamento"
+              id="idDepartamento"
+              name="idDepartamento"
+              value={formData.idDepartamento}
+              onChange={handleInputChange}
+              options={filteredDepartamentoOptions}
+              defaultLabel="-- Sin asignación --"
+            />
+          )}
+
+          {parentType === 'seccion' && (
+            <FormSelect
+              label="Sección"
+              id="idSeccion"
+              name="idSeccion"
+              value={formData.idSeccion}
+              onChange={handleInputChange}
+              options={filteredSeccionOptions}
+              defaultLabel="-- Sin asignación --"
+            />
+          )}
+
+          <FormSelect
+            label="Unidad"
+            id="idUnidad"
+            name="idUnidad"
+            value={formData.idUnidad}
+            onChange={handleInputChange}
+            options={filteredUnidadOptions}
             defaultLabel="-- Sin asignación --"
           />
 
