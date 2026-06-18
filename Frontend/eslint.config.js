@@ -29,6 +29,7 @@ export default defineConfig([
     rules: {
       'react/react-in-jsx-scope': 'off',
       'react/jsx-uses-react': 'off',
+      "react-hooks/set-state-in-effect": "off",
     },
   },
   {

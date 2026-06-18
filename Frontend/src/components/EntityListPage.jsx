@@ -82,7 +82,6 @@ export default function EntityListPage({
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [allItems, setAllItems] = useState([])
-  const [results, setResults] = useState([])
   const [loading, setLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
@@ -93,19 +92,28 @@ export default function EntityListPage({
 
   const matches = matchesSearch ?? defaultSearch
   const resolveRowId = useMemo(() => getRowId ?? ((item) => item.id), [getRowId])
-  const sortedResults = useMemo(
-    () => sortRowsByColumn(results, columns, sortConfig),
-    [results, columns, sortConfig]
-  )
+const filteredResults = useMemo(() => {
+  if (!searchTerm.trim()) {
+    return allItems
+  }
+
+  return allItems.filter((item) => matches(item, searchTerm))
+}, [allItems, matches, searchTerm])
+
+const sortedResults = useMemo(
+  () => sortRowsByColumn(filteredResults, columns, sortConfig),
+  [filteredResults, columns, sortConfig]
+)
 
   const loadItems = useCallback(async () => {
     setLoading(true)
     setErrorMsg('')
+
     try {
       const data = await fetchItems()
       setAllItems(data)
-      setResults(data)
       setSearchTerm('')
+      setCurrentPage(1)
     } catch (error) {
       setErrorMsg(error.message)
     } finally {
@@ -120,13 +128,6 @@ export default function EntityListPage({
   const handleInputChange = (e) => {
     setSearchTerm(e.target.value)
     setCurrentPage(1)
-  }
-
-  const handleSearch = (e) => {
-    e.preventDefault()
-    setCurrentPage(1)
-    const filtered = allItems.filter((item) => matches(item, searchTerm))
-    setResults(filtered)
   }
 
   const handleEdit = (item) => {
@@ -146,11 +147,12 @@ export default function EntityListPage({
     }
   }
 
-  const handleModalSuccess = useCallback(() => {
+  const handleModalSuccess = useCallback(async () => {
     setCreateModalOpen(false)
     setEditModalOpen(false)
     setEditingItem(null)
-    loadItems()
+
+    await loadItems()
   }, [loadItems])
 
   const handleSort = (columnKey) => {
@@ -221,7 +223,7 @@ export default function EntityListPage({
           marginBottom: '32px',
         }}
       >
-        <form onSubmit={handleSearch}>
+        <form onSubmit={(e) => e.preventDefault()}>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: '240px' }}>
               <label
