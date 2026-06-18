@@ -9,7 +9,7 @@
 
 | Layer | Technology |
 | --- | --- |
-| Frontend | React 19 + TypeScript 6 |
+| Frontend | React 19 + JavaScript (.jsx) |
 | Backend | ASP.NET Core 10 (.NET 10 LTS) + C# 14 |
 | Database | Oracle Database (via ODP.NET) |
 | Static Analysis | ESLint/Prettier + Roslyn Analyzers + SonarCloud |
@@ -21,7 +21,7 @@
 | Tool | Version | Purpose |
 | --- | --- | --- |
 | React | **19.2.5** | Core UI library |
-| TypeScript | **6.0** | Static typing across all frontend code |
+| JavaScript (.jsx) | latest | React component files — no TypeScript compilation step |
 | Tailwind CSS | latest | Responsive design and styling system |
 | React Router | latest | Client-side navigation and protected routes |
 | React Hook Form | latest | Form handling + real-time validation |
@@ -31,9 +31,9 @@
 
 ### Notes
 
-- React 19 is now stable and fully ecosystem-supported as of 2026.
-- TypeScript 6.0 enables strict mode by default — keep it on.
-- Vite is the recommended way to scaffold a React + TypeScript project (`npm create vite@latest`).
+- React 19 is stable and fully ecosystem-supported.
+- Using `.jsx` files with plain JavaScript instead of TypeScript — simpler setup, no compile-time type checking but still gets full React IDE support and autocomplete.
+- Vite is the recommended way to scaffold a React project (`npm create vite@latest`).
 
 ---
 
@@ -76,15 +76,15 @@
 
 | Tool | Version | Scope | Purpose |
 | --- | --- | --- | --- |
-| ESLint + Prettier | latest | Frontend (TypeScript/React) | Linting and consistent formatting |
+| ESLint + Prettier | latest | Frontend (JavaScript/React) | Linting and consistent formatting |
 | Roslyn Analyzers | bundled with .NET 10 | Backend (C#) | Security and code quality at compile time |
 | SonarCloud | hosted / free | Both | Unified quality dashboard, detects code smells, duplication, vulnerabilities |
 
 ### Justification (for deliverable)
 
-- **ESLint + Prettier** — industry standard for TypeScript/React projects; enforces consistent code style across the team, catches common React bugs (e.g. missing `useEffect` dependencies via `eslint-plugin-react-hooks`).
+- **ESLint + Prettier** — industry standard for JavaScript/React projects; enforces consistent code style across the team, catches common React bugs (e.g. missing `useEffect` dependencies via `eslint-plugin-react-hooks`).
 - **Roslyn Analyzers** — built directly into the .NET 10 SDK, zero setup cost; flags C# security anti-patterns and bad practices at compile time before code ever runs.
-- **SonarCloud** — free for student/open-source projects; covers both C# and TypeScript in one dashboard, producing the kind of quality report that demonstrates good practices in a final presentation.
+- **SonarCloud** — free for student/open-source projects; covers both C# and JavaScript in one dashboard, producing the kind of quality report that demonstrates good practices in a final presentation.
 
 ---
 
@@ -93,7 +93,7 @@
 ```text
 ┌────────────────────────────────────────┐
 │           React Frontend               │
-│  (Vite + TypeScript + Tailwind CSS)    │
+│  (Vite + JavaScript/JSX + Tailwind CSS)│
 └──────────────┬─────────────────────────┘
                │ HTTP / REST (JSON)
 ┌──────────────▼─────────────────────────┐

@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Frontend - React + TypeScript (ESLint, Prettier, build, tests)
+  # Frontend - React + JavaScript (ESLint, Prettier, build, tests)
   # Skips gracefully when the frontend directory does not exist yet.
   # ---------------------------------------------------------------------------
   frontend:
