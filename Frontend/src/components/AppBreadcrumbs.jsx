@@ -5,47 +5,80 @@ import Typography from '@mui/material/Typography'
 import { COLORS } from '../constants/colors'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 
+const HOME = { label: 'Inicio', to: '/home' }
+const ORGANIZATION = { label: 'Organización' }
+
+const USERS = { label: 'Usuarios' }
+
+const AREAS = {
+  label: 'Áreas',
+  to: '/organizacion/areas/consultar',
+}
+
+const DEPARTMENTS = {
+  label: 'Departamentos',
+  to: '/organizacion/departamentos/consultar',
+}
+
+const SECTIONS = {
+  label: 'Secciones',
+  to: '/organizacion/secciones/consultar',
+}
+
+const UNITS = {
+  label: 'Unidades',
+  to: '/organizacion/unidades/consultar',
+}
+
+const POSITIONS = {
+  label: 'Plazas',
+  to: '/organizacion/plazas/consultar',
+}
+
 const BREADCRUMB_MAP = [
   {
     pattern: '/home',
     crumbs: [{ label: 'Inicio' }],
   },
+
   {
     pattern: '/cambiar-contrasena',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
+      HOME,
       { label: 'Cambiar Contraseña' },
     ],
   },
+
   {
     pattern: '/usuarios/consultar',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
-      { label: 'Usuarios' },
+      HOME,
+      USERS,
       { label: 'Consultar' },
     ],
   },
   {
     pattern: '/usuarios/crear',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
-      { label: 'Usuarios' },
+      HOME,
+      USERS,
       { label: 'Crear' },
     ],
   },
   {
     pattern: '/usuarios/editar/:correo',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
-      { label: 'Usuarios', to: '/usuarios/consultar' },
+      HOME,
+      { ...USERS, to: '/usuarios/consultar' },
       { label: 'Editar' },
     ],
   },
+
   {
     pattern: '/organizacion/areas/consultar',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
-      { label: 'Organización' },
+      HOME,
+      ORGANIZATION,
       { label: 'Áreas' },
       { label: 'Consultar' },
     ],
@@ -53,26 +86,27 @@ const BREADCRUMB_MAP = [
   {
     pattern: '/organizacion/areas/crear',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
-      { label: 'Organización' },
-      { label: 'Áreas', to: '/organizacion/areas/consultar' },
+      HOME,
+      ORGANIZATION,
+      AREAS,
       { label: 'Crear' },
     ],
   },
   {
     pattern: '/organizacion/areas/editar/:nombre',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
-      { label: 'Organización' },
-      { label: 'Áreas', to: '/organizacion/areas/consultar' },
+      HOME,
+      ORGANIZATION,
+      AREAS,
       { label: 'Editar' },
     ],
   },
+
   {
     pattern: '/organizacion/departamentos/consultar',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
-      { label: 'Organización' },
+      HOME,
+      ORGANIZATION,
       { label: 'Departamentos' },
       { label: 'Consultar' },
     ],
@@ -80,26 +114,27 @@ const BREADCRUMB_MAP = [
   {
     pattern: '/organizacion/departamentos/crear',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
-      { label: 'Organización' },
-      { label: 'Departamentos', to: '/organizacion/departamentos/consultar' },
+      HOME,
+      ORGANIZATION,
+      DEPARTMENTS,
       { label: 'Crear' },
     ],
   },
   {
     pattern: '/organizacion/departamentos/editar/:nombre',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
-      { label: 'Organización' },
-      { label: 'Departamentos', to: '/organizacion/departamentos/consultar' },
+      HOME,
+      ORGANIZATION,
+      DEPARTMENTS,
       { label: 'Editar' },
     ],
   },
+
   {
     pattern: '/organizacion/secciones/consultar',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
-      { label: 'Organización' },
+      HOME,
+      ORGANIZATION,
       { label: 'Secciones' },
       { label: 'Consultar' },
     ],
@@ -107,26 +142,27 @@ const BREADCRUMB_MAP = [
   {
     pattern: '/organizacion/secciones/crear',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
-      { label: 'Organización' },
-      { label: 'Secciones', to: '/organizacion/secciones/consultar' },
+      HOME,
+      ORGANIZATION,
+      SECTIONS,
       { label: 'Crear' },
     ],
   },
   {
     pattern: '/organizacion/secciones/editar/:nombre',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
-      { label: 'Organización' },
-      { label: 'Secciones', to: '/organizacion/secciones/consultar' },
+      HOME,
+      ORGANIZATION,
+      SECTIONS,
       { label: 'Editar' },
     ],
   },
+
   {
     pattern: '/organizacion/unidades/consultar',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
-      { label: 'Organización' },
+      HOME,
+      ORGANIZATION,
       { label: 'Unidades' },
       { label: 'Consultar' },
     ],
@@ -134,26 +170,27 @@ const BREADCRUMB_MAP = [
   {
     pattern: '/organizacion/unidades/crear',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
-      { label: 'Organización' },
-      { label: 'Unidades', to: '/organizacion/unidades/consultar' },
+      HOME,
+      ORGANIZATION,
+      UNITS,
       { label: 'Crear' },
     ],
   },
   {
     pattern: '/organizacion/unidades/editar/:nombre',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
-      { label: 'Organización' },
-      { label: 'Unidades', to: '/organizacion/unidades/consultar' },
+      HOME,
+      ORGANIZATION,
+      UNITS,
       { label: 'Editar' },
     ],
   },
+
   {
     pattern: '/organizacion/plazas/consultar',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
-      { label: 'Organización' },
+      HOME,
+      ORGANIZATION,
       { label: 'Plazas' },
       { label: 'Consultar' },
     ],
@@ -161,18 +198,18 @@ const BREADCRUMB_MAP = [
   {
     pattern: '/organizacion/plazas/crear',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
-      { label: 'Organización' },
-      { label: 'Plazas', to: '/organizacion/plazas/consultar' },
+      HOME,
+      ORGANIZATION,
+      POSITIONS,
       { label: 'Crear' },
     ],
   },
   {
     pattern: '/organizacion/plazas/editar/:numeroPlaza',
     crumbs: [
-      { label: 'Inicio', to: '/home' },
-      { label: 'Organización' },
-      { label: 'Plazas', to: '/organizacion/plazas/consultar' },
+      HOME,
+      ORGANIZATION,
+      POSITIONS,
       { label: 'Editar' },
     ],
   },
