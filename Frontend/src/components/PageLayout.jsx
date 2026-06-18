@@ -17,7 +17,6 @@ export default function PageLayout({ children, mainStyle }) {
     >
       <Header />
       <Navbar />
-      <AppBreadcrumbs />
       <main
         style={{
           flex: 1,
@@ -29,6 +28,7 @@ export default function PageLayout({ children, mainStyle }) {
           ...mainStyle,
         }}
       >
+        <AppBreadcrumbs />
         {children}
       </main>
       <Footer />

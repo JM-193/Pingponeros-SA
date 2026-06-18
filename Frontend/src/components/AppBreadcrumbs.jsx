@@ -228,17 +228,12 @@ export default function AppBreadcrumbs() {
   const { crumbs } = matched
 
   return (
-    <div
-      style={{
-        backgroundColor: '#f7f7f7',
-        borderBottom: `1px solid ${COLORS.borderLight}`,
-      }}
-    >
+    <div>
       <div
         style={{
           maxWidth: '1200px',
           margin: '0 auto',
-          padding: isMobile ? '6px 16px' : '6px 40px',
+          padding: '6px 0px',
           boxSizing: 'border-box',
         }}
       >
