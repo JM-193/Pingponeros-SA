@@ -13,6 +13,7 @@ function PasswordInput({
   error,
   required,
   disabled,
+  maxlength,
 }) {
   const [showPassword, setShowPassword] = useState(false)
 
@@ -40,6 +41,7 @@ function PasswordInput({
           onChange={onChange}
           placeholder={placeholder}
           disabled={disabled}
+          maxLength={maxlength || 30}
           style={{
             width: '100%',
             padding: '14px 18px 14px 18px',
@@ -95,6 +97,7 @@ PasswordInput.propTypes = {
   error: PropTypes.string,
   required: PropTypes.bool,
   disabled: PropTypes.bool,
+  maxlength: PropTypes.number,
 }
 
 PasswordInput.defaultProps = {

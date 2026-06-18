@@ -79,7 +79,7 @@ describe('ChangePassword Page', () => {
     const form = document.querySelector('form')
     await act(async () => { fireEvent.submit(form) })
 
-    expect(screen.getByText(/mínimo 12 caracteres/i)).toBeInTheDocument()
+    expect(screen.getByText(/La contraseña debe contener:/i)).toBeInTheDocument()
   })
 
   it('muestra error cuando las contraseñas no coinciden', async () => {
@@ -163,6 +163,77 @@ describe('ChangePassword Page', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Contraseña incorrecta')).toBeInTheDocument()
+    })
+  })
+
+  describe('checklist de requisitos de contraseña', () => {
+    it('no muestra el checklist cuando el campo está vacío', () => {
+      renderPage()
+
+      expect(screen.queryByText('Mínimo 12 caracteres')).not.toBeInTheDocument()
+    })
+
+    it('muestra el checklist cuando se escribe en el campo de nueva contraseña', () => {
+      renderPage()
+
+      fireEvent.change(screen.getByPlaceholderText('Ingresa tu nueva contraseña'), {
+        target: { value: 'a' },
+      })
+
+      expect(screen.getByText('Mínimo 12 caracteres')).toBeInTheDocument()
+      expect(screen.getByText('Una mayúscula')).toBeInTheDocument()
+      expect(screen.getByText('Una minúscula')).toBeInTheDocument()
+      expect(screen.getByText('Un número')).toBeInTheDocument()
+      expect(screen.getByText('Un carácter especial (!@#$%&*)')).toBeInTheDocument()
+    })
+
+    it('marca todos los requisitos como válidos con una contraseña fuerte', () => {
+      renderPage()
+
+      fireEvent.change(screen.getByPlaceholderText('Ingresa tu nueva contraseña'), {
+        target: { value: 'StrongPass1!' },
+      })
+
+      // All 5 checklist items rendered
+      expect(screen.getByText('Mínimo 12 caracteres')).toBeInTheDocument()
+      expect(screen.getByText('Una mayúscula')).toBeInTheDocument()
+      expect(screen.getByText('Una minúscula')).toBeInTheDocument()
+      expect(screen.getByText('Un número')).toBeInTheDocument()
+      expect(screen.getByText('Un carácter especial (!@#$%&*)')).toBeInTheDocument()
+
+      // The li elements with valid class (react-password-checklist marks valid items)
+      const validItems = document.querySelectorAll('li.valid')
+      expect(validItems.length).toBeGreaterThan(0)
+    })
+
+    it('cumple el requisito de longitud al llegar a 12 caracteres', () => {
+      renderPage()
+
+      fireEvent.change(screen.getByPlaceholderText('Ingresa tu nueva contraseña'), {
+        target: { value: 'ShortPass1!' },
+      })
+      expect(document.querySelectorAll('li.invalid').length).toBeGreaterThan(0)
+
+      fireEvent.change(screen.getByPlaceholderText('Ingresa tu nueva contraseña'), {
+        target: { value: 'LongEnoughP1!' },
+      })
+
+      const lengthItem = screen.getByText('Mínimo 12 caracteres').closest('li')
+      expect(lengthItem).toHaveClass('valid')
+    })
+
+    it('oculta el checklist cuando el campo se vacía', () => {
+      renderPage()
+
+      fireEvent.change(screen.getByPlaceholderText('Ingresa tu nueva contraseña'), {
+        target: { value: 'Something1!' },
+      })
+      expect(screen.getByText('Mínimo 12 caracteres')).toBeInTheDocument()
+
+      fireEvent.change(screen.getByPlaceholderText('Ingresa tu nueva contraseña'), {
+        target: { value: '' },
+      })
+      expect(screen.queryByText('Mínimo 12 caracteres')).not.toBeInTheDocument()
     })
   })
 

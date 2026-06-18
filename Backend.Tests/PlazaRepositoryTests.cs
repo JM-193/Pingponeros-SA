@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Backend.Tests;
 
-public sealed class PlazaRepositoryTests
+public sealed class PositionRepositoryTests
 {
     [Fact]
     public async Task ObtenerTodasAsync_ReturnsPlazasConRelacionesOpcionales()
@@ -18,16 +18,16 @@ public sealed class PlazaRepositoryTests
         table.Rows.Add(1002L, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value);
 
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<Plaza>>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<Position>>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<List<Plaza>>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<List<Position>>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
 
-        var repo = new PlazaRepository(q);
+        var repo = new PositionRepository(q);
         var plazas = await repo.ObtenerTodasAsync();
 
         Assert.Equal(2, plazas.Count);
@@ -48,16 +48,16 @@ public sealed class PlazaRepositoryTests
     {
         var table = CrearTablaPlazas();
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<Plaza>>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<Position>>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<List<Plaza>>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<List<Position>>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
 
-        var repo = new PlazaRepository(q);
+        var repo = new PositionRepository(q);
         var plazas = await repo.ObtenerTodasAsync();
 
         Assert.Empty(plazas);
@@ -74,7 +74,7 @@ public sealed class PlazaRepositoryTests
                 return Task.FromResult<object?>(1);
             });
 
-        var repo = new PlazaRepository(q);
+        var repo = new PositionRepository(q);
         var exists = await repo.ExisteNumeroPlazaAsync(1001);
 
         Assert.True(exists);
@@ -91,7 +91,7 @@ public sealed class PlazaRepositoryTests
                 return Task.FromResult<object?>(0);
             });
 
-        var repo = new PlazaRepository(q);
+        var repo = new PositionRepository(q);
         var exists = await repo.ExisteNumeroPlazaAsync(9999);
 
         Assert.False(exists);
@@ -109,8 +109,8 @@ public sealed class PlazaRepositoryTests
                 return Task.FromResult(1);
             });
 
-        var repo = new PlazaRepository(q);
-        await repo.InsertarAsync(new Plaza
+        var repo = new PositionRepository(q);
+        await repo.InsertarAsync(new Position
         {
             NumeroPlaza = 1001,
             IdUnidad = 1,
@@ -130,7 +130,7 @@ public sealed class PlazaRepositoryTests
     [Fact]
     public async Task InsertarAsync_LanzaExcepcionCuandoPlazaEsNull()
     {
-        var repo = new PlazaRepository(Substitute.For<IQueryExecutor>());
+        var repo = new PositionRepository(Substitute.For<IQueryExecutor>());
 
         await Assert.ThrowsAsync<ArgumentNullException>(() => repo.InsertarAsync(null!));
     }
@@ -142,16 +142,16 @@ public sealed class PlazaRepositoryTests
         table.Rows.Add(1001L, 1, DBNull.Value, 3, DBNull.Value);
 
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Plaza?>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Position?>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<Plaza?>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<Position?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
 
-        var repo = new PlazaRepository(q);
+        var repo = new PositionRepository(q);
         var plaza = await repo.ObtenerPorNumeroAsync(1001);
 
         Assert.NotNull(plaza);
@@ -169,16 +169,16 @@ public sealed class PlazaRepositoryTests
         table.Rows.Add(1002L, DBNull.Value, 2, DBNull.Value, 4);
 
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Plaza?>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Position?>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<Plaza?>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<Position?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
 
-        var repo = new PlazaRepository(q);
+        var repo = new PositionRepository(q);
         var plaza = await repo.ObtenerPorNumeroAsync(1002);
 
         Assert.NotNull(plaza);
@@ -194,16 +194,16 @@ public sealed class PlazaRepositoryTests
     {
         var table = CrearTablaPlazas();
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Plaza?>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Position?>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<Plaza?>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<Position?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
 
-        var repo = new PlazaRepository(q);
+        var repo = new PositionRepository(q);
         var plaza = await repo.ObtenerPorNumeroAsync(9999);
 
         Assert.Null(plaza);
@@ -220,8 +220,8 @@ public sealed class PlazaRepositoryTests
                 return Task.FromResult(1);
             });
 
-        var repo = new PlazaRepository(q);
-        var updated = await repo.ActualizarAsync(1001, new Plaza { NumeroPlaza = 1001, IdUnidad = 1, IdArea = 4 });
+        var repo = new PositionRepository(q);
+        var updated = await repo.ActualizarAsync(1001, new Position { NumeroPlaza = 1001, IdUnidad = 1, IdArea = 4 });
 
         Assert.True(updated);
     }
@@ -237,8 +237,8 @@ public sealed class PlazaRepositoryTests
                 return Task.FromResult(0);
             });
 
-        var repo = new PlazaRepository(q);
-        var updated = await repo.ActualizarAsync(9999, new Plaza { NumeroPlaza = 9999 });
+        var repo = new PositionRepository(q);
+        var updated = await repo.ActualizarAsync(9999, new Position { NumeroPlaza = 9999 });
 
         Assert.False(updated);
     }
@@ -246,7 +246,7 @@ public sealed class PlazaRepositoryTests
     [Fact]
     public async Task ActualizarAsync_LanzaExcepcionCuandoPlazaEsNull()
     {
-        var repo = new PlazaRepository(Substitute.For<IQueryExecutor>());
+        var repo = new PositionRepository(Substitute.For<IQueryExecutor>());
 
         await Assert.ThrowsAsync<ArgumentNullException>(() => repo.ActualizarAsync(1001, null!));
     }

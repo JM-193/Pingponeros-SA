@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { afterEach, vi } from 'vitest'
 import Navbar from '../components/Navbar'
+import { buildJWT, nowInSeconds } from './helpers/jwtTestHelper'
 
 function mockMatchMedia(matches) {
   Object.defineProperty(globalThis, 'matchMedia', {
@@ -21,6 +22,7 @@ function mockMatchMedia(matches) {
 }
 
 afterEach(() => {
+  sessionStorage.clear()
   mockMatchMedia(false)
   vi.clearAllMocks()
 })
@@ -56,25 +58,24 @@ describe('Navbar', () => {
     expect(screen.getByText('Organización')).toBeInTheDocument()
   })
 
-  it('renderiza submenu item de Ãreas', () => {
+  it('renderiza submenu item de Áreas', () => {
     render(
       <BrowserRouter>
         <Navbar />
       </BrowserRouter>,
     )
 
-    // El enlace puede estar oculto en un menÃº cerrado
+    // El enlace puede estar oculto en un menú cerrado
     expect(screen.getByText('Organización')).toBeInTheDocument()
   })
 
-  it('renderiza elementos de menÃº secundarios', () => {
+  it('renderiza elementos de menú secundarios', () => {
     render(
       <BrowserRouter>
         <Navbar />
       </BrowserRouter>,
     )
 
-    // Verificar que los elementos principales están presentes
     expect(screen.getByText('Página Principal')).toBeInTheDocument()
     expect(screen.getByText('Usuarios')).toBeInTheDocument()
   })
@@ -109,20 +110,24 @@ describe('Navbar', () => {
     )
 
     const orgButton = screen.getByText('Organización')
-    // abrir submenu
     fireEvent.click(orgButton)
     expect(screen.getByText('Áreas')).toBeInTheDocument()
 
-    // click en item submenu — debe cerrar el submenu
     const areasBtn = screen.getByText('Áreas')
     fireEvent.click(areasBtn)
     expect(screen.queryByText('Áreas')).not.toBeInTheDocument()
   })
 
   it('abre el menú de perfil y cierra sesión', () => {
-    // preparar sesión en sessionStorage (formato esperado por session.js)
-    const payload = { usuario: { primerNombre: 'Juan', primerApellido: 'Perez', correoInstitucional: 'juan@uni.edu' }, expira: Date.now() + 10000 }
-    sessionStorage.setItem('pingponeros_session', JSON.stringify(payload))
+    // Preparar un JWT válido con los campos que el Navbar necesita mostrar.
+    // exp en el futuro (formato segundos epoch, como espera session.js).
+    const token = buildJWT({
+      primerNombre: 'Juan',
+      primerApellido: 'Perez',
+      correoInstitucional: 'juan@uni.edu',
+      exp: nowInSeconds() + 3600,
+    })
+    sessionStorage.setItem('pingponeros_session', token)
 
     render(
       <BrowserRouter>
@@ -133,11 +138,11 @@ describe('Navbar', () => {
     const userMenuButton = screen.getByLabelText('User menu')
     fireEvent.click(userMenuButton)
 
-    // menú debe mostrarse con el nombre y correo
+    // El Navbar debe leer el payload del JWT y mostrar nombre y correo
     expect(screen.getByText('Juan Perez')).toBeInTheDocument()
     expect(screen.getByText('juan@uni.edu')).toBeInTheDocument()
 
-    // click en Cerrar Sesión -> sessionStorage debe limpiarse
+    // Cerrar sesión debe limpiar sessionStorage
     const cerrarBtn = screen.getByText('Cerrar Sesión')
     fireEvent.click(cerrarBtn)
 
@@ -178,4 +183,3 @@ describe('Navbar', () => {
     expect(screen.getByRole('button', { name: 'Abrir menú principal' })).toHaveAttribute('aria-expanded', 'false')
   })
 })
-

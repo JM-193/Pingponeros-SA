@@ -21,7 +21,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task GetUsuarios_Returns200ConLista()
     {
-        var lista = new List<Usuario>
+        var lista = new List<User>
         {
             new() { CorreoInstitucional = "ana@test.com", PrimerNombre = "Ana", PrimerApellido = "Lopez", Rol = 0, Estado = 1 }
         };
@@ -35,7 +35,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task GetUsuarioPorCorreo_Returns200CuandoExiste()
     {
-        var usuario = new Usuario { CorreoInstitucional = "ana@test.com", PrimerNombre = "Ana", PrimerApellido = "Lopez", Rol = 0, Estado = 1 };
+        var usuario = new User { CorreoInstitucional = "ana@test.com", PrimerNombre = "Ana", PrimerApellido = "Lopez", Rol = 0, Estado = 1 };
         _factory.UsuarioRepo.ObtenerPorCorreoAsync("ana@test.com").Returns(usuario);
 
         var response = await _client.GetAsync("/usuarios/ana%40test.com");
@@ -46,7 +46,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task GetUsuarioPorCorreo_Returns404CuandoNoExiste()
     {
-        _factory.UsuarioRepo.ObtenerPorCorreoAsync(Arg.Any<string>()).Returns((Usuario?)null);
+        _factory.UsuarioRepo.ObtenerPorCorreoAsync(Arg.Any<string>()).Returns((User?)null);
 
         var response = await _client.GetAsync("/usuarios/noexiste%40test.com");
 
@@ -107,7 +107,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     public async Task CrearUsuario_Returns201CuandoSeCreaCorrecto()
     {
         _factory.UsuarioRepo
-            .InsertarConContrasenaAsync(Arg.Any<Usuario>(), Arg.Any<string>())
+            .InsertarConContrasenaAsync(Arg.Any<User>(), Arg.Any<string>())
             .Returns(Task.CompletedTask);
         var dto = new { CorreoInstitucional = "nuevo.usuario@ucr.ac.cr", PrimerNombre = "Juan", PrimerApellido = "Perez", SegundoApellido = "Garcia", Rol = 0 };
 
@@ -119,11 +119,11 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task CrearUsuario_NormalizaCamposAntesDeInsertar()
     {
-        Usuario? capturado = null;
+        User? capturado = null;
         string? hashCapturado = null;
         _factory.UsuarioRepo
             .InsertarConContrasenaAsync(
-                Arg.Do<Usuario>(usuario => capturado = usuario),
+                Arg.Do<User>(usuario => capturado = usuario),
                 Arg.Do<string>(hash => hashCapturado = hash))
             .Returns(Task.CompletedTask);
         var dto = new
@@ -204,7 +204,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     public async Task CrearUsuario_Returns201CuandoSegundoNombreEsValidoOpcional()
     {
         _factory.UsuarioRepo
-            .InsertarConContrasenaAsync(Arg.Any<Usuario>(), Arg.Any<string>())
+            .InsertarConContrasenaAsync(Arg.Any<User>(), Arg.Any<string>())
             .Returns(Task.CompletedTask);
         var dto = new { CorreoInstitucional = "maria.garcia@ucr.ac.cr", PrimerNombre = "María", SegundoNombre = "José", PrimerApellido = "García", SegundoApellido = "López", Rol = 0 };
 
@@ -216,9 +216,9 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task CrearUsuario_ConvierteSegundoNombreEnNullCuandoVacio()
     {
-        Usuario? capturado = null;
+        User? capturado = null;
         _factory.UsuarioRepo
-            .InsertarConContrasenaAsync(Arg.Do<Usuario>(usuario => capturado = usuario), Arg.Any<string>())
+            .InsertarConContrasenaAsync(Arg.Do<User>(usuario => capturado = usuario), Arg.Any<string>())
             .Returns(Task.CompletedTask);
         var dto = new
         {
@@ -242,7 +242,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     public async Task ActualizarUsuario_Returns200CuandoSeActualiza()
     {
         _factory.UsuarioRepo
-            .ActualizarAsync(Arg.Any<string>(), Arg.Any<Usuario>())
+            .ActualizarAsync(Arg.Any<string>(), Arg.Any<User>())
             .Returns(true);
         var body = new { CorreoInstitucional = "ana@test.com", PrimerNombre = "Ana", PrimerApellido = "Lopez", Rol = 0, Estado = 1 };
 
@@ -255,7 +255,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     public async Task ActualizarUsuario_Returns404CuandoNoExiste()
     {
         _factory.UsuarioRepo
-            .ActualizarAsync(Arg.Any<string>(), Arg.Any<Usuario>())
+            .ActualizarAsync(Arg.Any<string>(), Arg.Any<User>())
             .Returns(false);
         var body = new { CorreoInstitucional = "noexiste@test.com", PrimerNombre = "Ana", PrimerApellido = "Lopez", Rol = 0, Estado = 1 };
 

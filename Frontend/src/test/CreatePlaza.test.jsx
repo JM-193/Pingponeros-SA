@@ -1,17 +1,17 @@
-// CreatePlaza.test.jsx
+// CreatePositions.test.jsx
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import CreatePlaza from '../pages/CreatePlaza'
-import * as plazaService from '../services/plazaService'
-import * as unidadService from '../services/unidadService'
-import * as departamentoService from '../services/departamentoService'
-import * as seccionService from '../services/seccionService'
+import CreatePositions from '../pages/CreatePositions'
+import * as positionService from '../services/positionService'
+import * as unitService from '../services/unitService'
+import * as departmentService from '../services/departmentService'
+import * as sectionService from '../services/sectionService'
 import * as areaService from '../services/areaService'
 
-vi.mock('../services/plazaService')
-vi.mock('../services/unidadService')
-vi.mock('../services/departamentoService')
-vi.mock('../services/seccionService')
+vi.mock('../services/positionService')
+vi.mock('../services/unitService')
+vi.mock('../services/departmentService')
+vi.mock('../services/sectionService')
 vi.mock('../services/areaService')
 
 const mockUnidades = [{ id: 1, nombre: 'Administración' }]
@@ -19,25 +19,25 @@ const mockDepartamentos = [{ id: 1, nombre: 'Compras' }]
 const mockSecciones = [{ id: 1, nombre: 'Soporte' }]
 const mockAreas = [{ id: 1, nombre: 'Central' }]
 
-describe('CreatePlaza Page', () => {
+describe('CreatePositions Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    unidadService.obtenerUnidades.mockResolvedValue(mockUnidades)
-    departamentoService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
-    seccionService.obtenerSecciones.mockResolvedValue(mockSecciones)
+    unitService.obtenerUnidades.mockResolvedValue(mockUnidades)
+    departmentService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
+    sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
   })
 
   it('muestra indicador de carga mientras carga opciones', () => {
     // Las mocks resuelven de forma asíncrona, así que al montar debería verse cargando
-    unidadService.obtenerUnidades.mockImplementation(() => new Promise(() => {}))
-    departamentoService.obtenerDepartamentos.mockImplementation(() => new Promise(() => {}))
-    seccionService.obtenerSecciones.mockImplementation(() => new Promise(() => {}))
+    unitService.obtenerUnidades.mockImplementation(() => new Promise(() => {}))
+    departmentService.obtenerDepartamentos.mockImplementation(() => new Promise(() => {}))
+    sectionService.obtenerSecciones.mockImplementation(() => new Promise(() => {}))
     areaService.obtenerAreas.mockImplementation(() => new Promise(() => {}))
 
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -47,7 +47,7 @@ describe('CreatePlaza Page', () => {
   it('renderiza formulario después de cargar opciones', async () => {
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -61,7 +61,7 @@ describe('CreatePlaza Page', () => {
   it('renderiza Header y Navbar', async () => {
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -73,7 +73,7 @@ describe('CreatePlaza Page', () => {
   it('muestra error cuando el número de plaza está vacío', async () => {
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -90,7 +90,7 @@ describe('CreatePlaza Page', () => {
   it('muestra error cuando el número de plaza es cero o negativo', async () => {
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -110,7 +110,7 @@ describe('CreatePlaza Page', () => {
   it('solo permite dígitos en el campo número de plaza', async () => {
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -127,7 +127,7 @@ describe('CreatePlaza Page', () => {
   it('limpia mensajes de error al cambiar el campo', async () => {
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -147,11 +147,11 @@ describe('CreatePlaza Page', () => {
   })
 
   it('crea plaza correctamente y muestra mensaje de éxito', async () => {
-    plazaService.crearPlaza.mockResolvedValueOnce({ numeroPlaza: 5 })
+    positionService.crearPlaza.mockResolvedValueOnce({ numeroPlaza: 5 })
 
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -169,22 +169,22 @@ describe('CreatePlaza Page', () => {
       expect(screen.getByText(/Plaza '5' creada correctamente/i)).toBeInTheDocument()
     })
 
-    expect(plazaService.crearPlaza).toHaveBeenCalledWith(
+    expect(positionService.crearPlaza).toHaveBeenCalledWith(
       expect.objectContaining({ numeroPlaza: 5 }),
     )
   })
 
-  it('mantiene la unidad seleccionada cuando el area se infiere desde su departamento', async () => {
-    unidadService.obtenerUnidades.mockResolvedValueOnce([
+  it('mantiene la unidad seleccionada cuando el área se infiere desde su departamento', async () => {
+    unitService.obtenerUnidades.mockResolvedValueOnce([
       { id: 1, nombre: 'Portal', idDepartamento: 1 },
     ])
-    departamentoService.obtenerDepartamentos.mockResolvedValueOnce([
+    departmentService.obtenerDepartamentos.mockResolvedValueOnce([
       { id: 1, nombre: 'ITI', idArea: 1 },
     ])
 
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -192,25 +192,50 @@ describe('CreatePlaza Page', () => {
       expect(screen.getByRole('heading', { name: /Crear Plaza/i })).toBeInTheDocument()
     })
 
-    const unidadSelect = document.querySelector('select[name="idUnidad"]')
-    const departamentoSelect = document.querySelector('select[name="idDepartamento"]')
-    const areaSelect = document.querySelector('select[name="idArea"]')
-
+    const unidadSelect = screen.getByLabelText(/Unidad/i)
     fireEvent.change(unidadSelect, { target: { value: '1' } })
 
     await waitFor(() => {
       expect(unidadSelect.value).toBe('1')
-      expect(departamentoSelect.value).toBe('1')
-      expect(areaSelect.value).toBe('1')
+      expect(screen.getByLabelText(/Departamento/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Departamento/i).value).toBe('1')
+      expect(screen.getByLabelText(/Área/i).value).toBe('1')
     })
   })
 
+  it('muestra el selector de tipo de dependencia y alterna entre departamento y sección', async () => {
+    render(
+      <BrowserRouter>
+        <CreatePositions />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Crear Plaza/i })).toBeInTheDocument()
+    })
+
+    const parentTypeSelect = screen.getByLabelText(/Tipo de dependencia/i)
+
+    expect(screen.queryByLabelText(/Departamento/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/Sección/i)).not.toBeInTheDocument()
+
+    fireEvent.change(parentTypeSelect, { target: { value: 'departamento' } })
+
+    expect(screen.getByLabelText(/Departamento/i)).toBeInTheDocument()
+    expect(screen.queryByLabelText(/Sección/i)).not.toBeInTheDocument()
+
+    fireEvent.change(parentTypeSelect, { target: { value: 'seccion' } })
+
+    expect(screen.getByLabelText(/Sección/i)).toBeInTheDocument()
+    expect(screen.queryByLabelText(/Departamento/i)).not.toBeInTheDocument()
+  })
+
   it('envía null en campos opcionales no seleccionados', async () => {
-    plazaService.crearPlaza.mockResolvedValueOnce({ numeroPlaza: 8 })
+    positionService.crearPlaza.mockResolvedValueOnce({ numeroPlaza: 8 })
 
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -225,7 +250,7 @@ describe('CreatePlaza Page', () => {
     await act(async () => { fireEvent.submit(form) })
 
     await waitFor(() => {
-      expect(plazaService.crearPlaza).toHaveBeenCalledWith({
+      expect(positionService.crearPlaza).toHaveBeenCalledWith({
         numeroPlaza: 8,
         idUnidad: null,
         idDepartamento: null,
@@ -236,11 +261,11 @@ describe('CreatePlaza Page', () => {
   })
 
   it('muestra mensaje de error cuando la creación falla', async () => {
-    plazaService.crearPlaza.mockRejectedValueOnce(new Error('La plaza ya existe'))
+    positionService.crearPlaza.mockRejectedValueOnce(new Error('La plaza ya existe'))
 
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 
@@ -260,11 +285,11 @@ describe('CreatePlaza Page', () => {
   })
 
   it('muestra error cuando falla la carga de opciones', async () => {
-    unidadService.obtenerUnidades.mockRejectedValueOnce(new Error('Error al cargar unidades'))
+    unitService.obtenerUnidades.mockRejectedValueOnce(new Error('Error al cargar unidades'))
 
     render(
       <BrowserRouter>
-        <CreatePlaza />
+        <CreatePositions />
       </BrowserRouter>,
     )
 

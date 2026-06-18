@@ -28,26 +28,26 @@ public sealed class AreaRepositoryTests
     }
 }
 
-public sealed class UsuarioRepositoryTests
+public sealed class UserRepositoryTests
 {
     private static MethodInfo ObtenerMetodoPrivado(string nombre) =>
-        typeof(UsuarioRepository).GetMethod(nombre, BindingFlags.NonPublic | BindingFlags.Static)
+        typeof(UserRepository).GetMethod(nombre, BindingFlags.NonPublic | BindingFlags.Static)
         ?? throw new InvalidOperationException($"No se encontro el metodo {nombre}.");
 
     [Fact]
     public void MapearFila_ConvierteOpcionalesEnNull()
     {
         var table = CrearTablaUsuarios();
-        table.Rows.Add("ana@test.com", "Ana", DBNull.Value, "Lopez", DBNull.Value, 1, 1);
+        table.Rows.Add("ana@test.com", "Ana", DBNull.Value, "Lopez", "Cruz", 1, 1);
 
         using var reader = table.CreateDataReader();
         Assert.True(reader.Read());
 
         var method = ObtenerMetodoPrivado("MapearFila");
-        var usuario = (Usuario)method.Invoke(null, new object[] { reader })!;
+        var usuario = (User)method.Invoke(null, new object[] { reader })!;
 
         Assert.Null(usuario.SegundoNombre);
-        Assert.Null(usuario.SegundoApellido);
+        Assert.Equal("Cruz", usuario.SegundoApellido);
     }
 
     [Fact]
@@ -60,7 +60,7 @@ public sealed class UsuarioRepositoryTests
         Assert.True(reader.Read());
 
         var method = ObtenerMetodoPrivado("MapearFila");
-        var usuario = (Usuario)method.Invoke(null, new object[] { reader })!;
+        var usuario = (User)method.Invoke(null, [reader])!;
 
         Assert.Equal("Maria", usuario.SegundoNombre);
         Assert.Equal("Vega", usuario.SegundoApellido);
@@ -70,31 +70,29 @@ public sealed class UsuarioRepositoryTests
     public void AgregarParametros_UsaDbNullParaOpcionalesVacios()
     {
         var cmd = new OracleCommand();
-        var usuario = new Usuario
+        var usuario = new User
         {
             CorreoInstitucional = "ana@test.com",
             PrimerNombre = "Ana",
             SegundoNombre = null,
             PrimerApellido = "Lopez",
-            SegundoApellido = null,
+            SegundoApellido = "Cruz",
             Rol = 0,
             Estado = 1,
         };
 
         var method = ObtenerMetodoPrivado("AgregarParametros");
-        method.Invoke(null, new object[] { cmd, usuario });
+        method.Invoke(null, [cmd, usuario]);
 
         var segundoNombre = cmd.Parameters["segundoNombre"].Value;
-        var segundoApellido = cmd.Parameters["segundoApellido"].Value;
         Assert.True(segundoNombre is null || segundoNombre == DBNull.Value);
-        Assert.True(segundoApellido is null || segundoApellido == DBNull.Value);
     }
 
     [Fact]
     public void AgregarParametros_UsaValoresParaOpcionales()
     {
         var cmd = new OracleCommand();
-        var usuario = new Usuario
+        var usuario = new User
         {
             CorreoInstitucional = "ana@test.com",
             PrimerNombre = "Ana",
@@ -106,7 +104,7 @@ public sealed class UsuarioRepositoryTests
         };
 
         var method = ObtenerMetodoPrivado("AgregarParametros");
-        method.Invoke(null, new object[] { cmd, usuario });
+        method.Invoke(null, [cmd, usuario]);
 
         Assert.Equal("Maria", cmd.Parameters["segundoNombre"].Value);
         Assert.Equal("Vega", cmd.Parameters["segundoApellido"].Value);

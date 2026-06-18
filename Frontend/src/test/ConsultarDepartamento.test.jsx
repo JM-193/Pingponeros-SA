@@ -1,20 +1,20 @@
-// ConsultarDepartamento.test.jsx
+// QueryDepartments.test.jsx
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import ConsultarDepartamento from '../pages/ConsultarDepartamento'
-import * as departamentoService from '../services/departamentoService'
+import QueryDepartments from '../pages/QueryDepartments'
+import * as departmentService from '../services/departmentService'
 import * as areaService from '../services/areaService'
 
-vi.mock('../services/departamentoService')
+vi.mock('../services/departmentService')
 vi.mock('../services/areaService')
 
-describe('ConsultarDepartamento Page', () => {
+describe('QueryDepartments Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    departamentoService.obtenerDepartamentos.mockResolvedValueOnce([
+    departmentService.obtenerDepartamentos.mockResolvedValue([
       { id: 10, nombre: 'Compras', descripcion: 'Departamento de compras', idArea: 1, estado: 1 },
     ])
-    areaService.obtenerAreas.mockResolvedValueOnce([
+    areaService.obtenerAreas.mockResolvedValue([
       { id: 1, nombre: 'Administración', descripcion: 'Área' },
     ])
   })
@@ -22,7 +22,7 @@ describe('ConsultarDepartamento Page', () => {
   it('carga y renderiza departamentos', async () => {
     render(
       <BrowserRouter>
-        <ConsultarDepartamento />
+        <QueryDepartments />
       </BrowserRouter>,
     )
 
@@ -35,17 +35,17 @@ describe('ConsultarDepartamento Page', () => {
   it('llama a obtenerDepartamentos al montar', () => {
     render(
       <BrowserRouter>
-        <ConsultarDepartamento />
+        <QueryDepartments />
       </BrowserRouter>,
     )
 
-    expect(departamentoService.obtenerDepartamentos).toHaveBeenCalled()
+    expect(departmentService.obtenerDepartamentos).toHaveBeenCalled()
   })
 
   it('filtra departamentos por nombre en el buscador', async () => {
     render(
       <BrowserRouter>
-        <ConsultarDepartamento />
+        <QueryDepartments />
       </BrowserRouter>,
     )
 
@@ -67,7 +67,7 @@ describe('ConsultarDepartamento Page', () => {
   it('filtra departamentos por área en el buscador', async () => {
     render(
       <BrowserRouter>
-        <ConsultarDepartamento />
+        <QueryDepartments />
       </BrowserRouter>,
     )
 
@@ -83,6 +83,53 @@ describe('ConsultarDepartamento Page', () => {
 
     await waitFor(() => {
       expect(searchInput.value).toBe('Central')
+    })
+  })
+
+  it('abre modal de crear al hacer clic en Crear', async () => {
+    render(
+      <BrowserRouter>
+        <QueryDepartments />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Compras')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
+
+    await waitFor(() => {
+      const dialog = document.querySelector('dialog')
+      expect(dialog).toBeInTheDocument()
+      expect(screen.getByText('Crear Departamento')).toBeInTheDocument()
+    })
+  })
+
+  it('abre modal de editar al hacer clic en Editar', async () => {
+    departmentService.obtenerDepartamentoPorNombre.mockResolvedValue({
+      nombre: 'Compras',
+      descripcion: 'Departamento de compras',
+      idArea: 1,
+      estado: 1,
+    })
+
+    render(
+      <BrowserRouter>
+        <QueryDepartments />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Compras')).toBeInTheDocument()
+    })
+
+    const editButtons = screen.getAllByRole('button', { name: /Editar/i })
+    fireEvent.click(editButtons[0])
+
+    await waitFor(() => {
+      const dialogs = document.querySelectorAll('dialog')
+      expect(dialogs.length).toBeGreaterThan(0)
     })
   })
 })

@@ -1,10 +1,10 @@
-// EditUser.test.jsx
+// EditUsers.test.jsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
-import EditUser from '../pages/EditUser'
-import * as usuarioService from '../services/usuarioService'
+import EditUsers from '../pages/EditUsers'
+import * as userService from '../services/userService'
 
-vi.mock('../services/usuarioService')
+vi.mock('../services/userService')
 
 const mockUser = {
   correoInstitucional: 'juan.perez@ucr.ac.cr',
@@ -20,13 +20,13 @@ const renderWithRoute = (correo) =>
   render(
     <MemoryRouter initialEntries={[`/usuarios/editar/${encodeURIComponent(correo)}`]}>
       <Routes>
-        <Route path="/usuarios/editar/:correo" element={<EditUser />} />
+        <Route path="/usuarios/editar/:correo" element={<EditUsers />} />
         <Route path="/usuarios/consultar" element={<div>Lista de usuarios</div>} />
       </Routes>
     </MemoryRouter>,
   )
 
-describe('EditUser Page', () => {
+describe('EditUsers Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
   })
@@ -34,7 +34,7 @@ describe('EditUser Page', () => {
   it('renderiza página en estado de carga sin parámetros de ruta', () => {
     render(
       <BrowserRouter>
-        <EditUser />
+        <EditUsers />
       </BrowserRouter>,
     )
 
@@ -44,7 +44,7 @@ describe('EditUser Page', () => {
   it('renderiza Header y Navbar', () => {
     render(
       <BrowserRouter>
-        <EditUser />
+        <EditUsers />
       </BrowserRouter>,
     )
 
@@ -54,7 +54,7 @@ describe('EditUser Page', () => {
   it('renderiza Footer', () => {
     render(
       <BrowserRouter>
-        <EditUser />
+        <EditUsers />
       </BrowserRouter>,
     )
 
@@ -63,7 +63,7 @@ describe('EditUser Page', () => {
   })
 
   it('carga y renderiza el formulario con los datos del usuario', async () => {
-    usuarioService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
 
     renderWithRoute('juan.perez@ucr.ac.cr')
 
@@ -79,8 +79,8 @@ describe('EditUser Page', () => {
   })
 
   it('actualiza usuario correctamente y redirige', async () => {
-    usuarioService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
-    usuarioService.actualizarUsuario.mockResolvedValueOnce({})
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    userService.actualizarUsuario.mockResolvedValueOnce({})
 
     renderWithRoute('juan.perez@ucr.ac.cr')
 
@@ -97,8 +97,8 @@ describe('EditUser Page', () => {
   })
 
   it('muestra error cuando la actualización falla', async () => {
-    usuarioService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
-    usuarioService.actualizarUsuario.mockRejectedValueOnce(new Error('Error al actualizar'))
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    userService.actualizarUsuario.mockRejectedValueOnce(new Error('Error al actualizar'))
 
     renderWithRoute('juan.perez@ucr.ac.cr')
 
@@ -115,7 +115,7 @@ describe('EditUser Page', () => {
   })
 
   it('muestra error cuando falla la carga del usuario', async () => {
-    usuarioService.obtenerUsuarioPorCorreo.mockRejectedValueOnce(new Error('Usuario no encontrado'))
+    userService.obtenerUsuarioPorCorreo.mockRejectedValueOnce(new Error('Usuario no encontrado'))
 
     renderWithRoute('no.existe@ucr.ac.cr')
 
@@ -125,7 +125,7 @@ describe('EditUser Page', () => {
   })
 
   it('cambia el estado del usuario con StateToggle', async () => {
-    usuarioService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
 
     renderWithRoute('juan.perez@ucr.ac.cr')
 
@@ -144,8 +144,8 @@ describe('EditUser Page', () => {
   })
 
   it('limpia mensajes de error al cambiar campos del formulario', async () => {
-    usuarioService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
-    usuarioService.actualizarUsuario.mockRejectedValueOnce(new Error('Error al actualizar'))
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    userService.actualizarUsuario.mockRejectedValueOnce(new Error('Error al actualizar'))
 
     renderWithRoute('juan.perez@ucr.ac.cr')
 
@@ -165,5 +165,111 @@ describe('EditUser Page', () => {
     fireEvent.change(firstNameInput, { target: { name: 'firstName', value: 'Juanito' } })
 
     expect(screen.queryByText('Error al actualizar')).not.toBeInTheDocument()
+  })
+})
+
+describe('EditUsers Modal Mode', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+  })
+
+  it('renderiza dentro de un modal cuando isModal es true', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+
+    render(
+      <BrowserRouter>
+        <EditUsers isModal isOpen={true} entityId="juan.perez@ucr.ac.cr" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Editar Usuario')).toBeInTheDocument()
+    })
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
+  })
+
+  it('muestra cargando dentro del modal', () => {
+    render(
+      <BrowserRouter>
+        <EditUsers isModal isOpen={true} entityId="test@ucr.ac.cr" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByText('Cargando usuario...')).toBeInTheDocument()
+  })
+
+  it('no renderiza Header ni Navbar en modo modal', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+
+    render(
+      <BrowserRouter>
+        <EditUsers isModal isOpen={true} entityId="juan.perez@ucr.ac.cr" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('Página Principal')).not.toBeInTheDocument()
+    expect(document.querySelector('footer')).not.toBeInTheDocument()
+  })
+
+  it('llama a onClose al hacer clic en Cancelar', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    const onClose = vi.fn()
+
+    render(
+      <BrowserRouter>
+        <EditUsers isModal isOpen={true} entityId="juan.perez@ucr.ac.cr" onClose={onClose} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('muestra éxito y llama al servicio en modo modal', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    userService.actualizarUsuario.mockResolvedValueOnce({})
+
+    render(
+      <BrowserRouter>
+        <EditUsers isModal isOpen={true} entityId="juan.perez@ucr.ac.cr" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Actualizar/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Usuario actualizado correctamente.')).toBeInTheDocument()
+    })
+
+    expect(userService.actualizarUsuario).toHaveBeenCalled()
+  })
+
+  it('usa entityId prop en lugar de useParams', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValue(mockUser)
+
+    render(
+      <BrowserRouter>
+        <EditUsers isModal isOpen={true} entityId="juan.perez@ucr.ac.cr" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(userService.obtenerUsuarioPorCorreo).toHaveBeenCalledWith('juan.perez@ucr.ac.cr')
+    })
   })
 })

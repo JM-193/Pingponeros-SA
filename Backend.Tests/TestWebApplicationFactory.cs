@@ -3,6 +3,7 @@ using Backend.Repositories;
 using Backend.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using NSubstitute;
@@ -12,12 +13,12 @@ namespace Backend.Tests;
 
 public sealed class TestWebApplicationFactory : WebApplicationFactory<TestEntryPoint>
 {
-    internal IUsuarioRepository UsuarioRepo { get; } = Substitute.For<IUsuarioRepository>();
+    internal IUserRepository UsuarioRepo { get; } = Substitute.For<IUserRepository>();
     internal IAreaRepository AreaRepo { get; } = Substitute.For<IAreaRepository>();
-    internal IDepartamentoRepository DepartamentoRepo { get; } = Substitute.For<IDepartamentoRepository>();
-    internal ISeccionRepository SeccionRepo { get; } = Substitute.For<ISeccionRepository>();
-    internal IUnidadRepository UnidadRepo { get; } = Substitute.For<IUnidadRepository>();
-    internal IPlazaRepository PlazaRepo { get; } = Substitute.For<IPlazaRepository>();
+    internal IDepartmentRepository DepartamentoRepo { get; } = Substitute.For<IDepartmentRepository>();
+    internal ISectionRepository SeccionRepo { get; } = Substitute.For<ISectionRepository>();
+    internal IUnitRepository UnidadRepo { get; } = Substitute.For<IUnitRepository>();
+    internal IPositionRepository PlazaRepo { get; } = Substitute.For<IPositionRepository>();
     internal IDbExecutor DbExecutor { get; } = Substitute.For<IDbExecutor>();
     internal IQueryExecutor QueryExecutor { get; } = Substitute.For<IQueryExecutor>();
     internal IEmailService EmailService { get; } = Substitute.For<IEmailService>();
@@ -25,26 +26,36 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<TestEntryP
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+        builder.ConfigureAppConfiguration(config =>
+        {
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Jwt:Key"] = "test-secret-key-for-unit-tests-at-least-32-chars",
+                ["Jwt:Issuer"] = "PingponerosApi",
+                ["Jwt:Audience"] = "PingponerosApp",
+                ["Jwt:MinutosExpiracion"] = "60",
+            });
+        });
         builder.ConfigureServices(services =>
         {
             services.RemoveAll<OracleConnection>();
             services.RemoveAll<IDbExecutor>();
             services.RemoveAll<IQueryExecutor>();
-            services.RemoveAll<IUsuarioRepository>();
+            services.RemoveAll<IUserRepository>();
             services.RemoveAll<IAreaRepository>();
-            services.RemoveAll<IDepartamentoRepository>();
-            services.RemoveAll<ISeccionRepository>();
-            services.RemoveAll<IUnidadRepository>();
-            services.RemoveAll<IPlazaRepository>();
+            services.RemoveAll<IDepartmentRepository>();
+            services.RemoveAll<ISectionRepository>();
+            services.RemoveAll<IUnitRepository>();
+            services.RemoveAll<IPositionRepository>();
             services.RemoveAll<IEmailService>();
             services.AddScoped<IDbExecutor>(_ => DbExecutor);
             services.AddScoped<IQueryExecutor>(_ => QueryExecutor);
-            services.AddScoped<IUsuarioRepository>(_ => UsuarioRepo);
+            services.AddScoped<IUserRepository>(_ => UsuarioRepo);
             services.AddScoped<IAreaRepository>(_ => AreaRepo);
-            services.AddScoped<IDepartamentoRepository>(_ => DepartamentoRepo);
-            services.AddScoped<ISeccionRepository>(_ => SeccionRepo);
-            services.AddScoped<IUnidadRepository>(_ => UnidadRepo);
-            services.AddScoped<IPlazaRepository>(_ => PlazaRepo);
+            services.AddScoped<IDepartmentRepository>(_ => DepartamentoRepo);
+            services.AddScoped<ISectionRepository>(_ => SeccionRepo);
+            services.AddScoped<IUnitRepository>(_ => UnidadRepo);
+            services.AddScoped<IPositionRepository>(_ => PlazaRepo);
             services.AddScoped<IEmailService>(_ => EmailService);
         });
     }

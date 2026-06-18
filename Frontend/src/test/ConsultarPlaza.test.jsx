@@ -1,17 +1,17 @@
-// ConsultarPlaza.test.jsx
+// QueryPositions.test.jsx
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import ConsultarPlaza from '../pages/ConsultarPlaza'
-import * as plazaService from '../services/plazaService'
-import * as unidadService from '../services/unidadService'
-import * as departamentoService from '../services/departamentoService'
-import * as seccionService from '../services/seccionService'
+import QueryPositions from '../pages/QueryPositions'
+import * as positionService from '../services/positionService'
+import * as unitService from '../services/unitService'
+import * as departmentService from '../services/departmentService'
+import * as sectionService from '../services/sectionService'
 import * as areaService from '../services/areaService'
 
-vi.mock('../services/plazaService')
-vi.mock('../services/unidadService')
-vi.mock('../services/departamentoService')
-vi.mock('../services/seccionService')
+vi.mock('../services/positionService')
+vi.mock('../services/unitService')
+vi.mock('../services/departmentService')
+vi.mock('../services/sectionService')
 vi.mock('../services/areaService')
 
 const mockPlazas = [
@@ -24,20 +24,20 @@ const mockDepartamentos = [{ id: 1, nombre: 'Compras', idArea: 1 }]
 const mockSecciones = [{ id: 1, nombre: 'Soporte', idArea: 1 }]
 const mockAreas = [{ id: 1, nombre: 'Central' }]
 
-describe('ConsultarPlaza Page', () => {
+describe('QueryPositions Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    plazaService.obtenerPlazas.mockResolvedValue(mockPlazas)
-    unidadService.obtenerUnidades.mockResolvedValue(mockUnidades)
-    departamentoService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
-    seccionService.obtenerSecciones.mockResolvedValue(mockSecciones)
+    positionService.obtenerPlazas.mockResolvedValue(mockPlazas)
+    unitService.obtenerUnidades.mockResolvedValue(mockUnidades)
+    departmentService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
+    sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
   })
 
   it('carga y renderiza plazas', async () => {
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
@@ -45,13 +45,13 @@ describe('ConsultarPlaza Page', () => {
       expect(screen.getByText('1')).toBeInTheDocument()
     })
 
-    expect(plazaService.obtenerPlazas).toHaveBeenCalled()
+    expect(positionService.obtenerPlazas).toHaveBeenCalled()
   })
 
   it('renderiza tabla con las columnas correctas', async () => {
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
@@ -66,7 +66,7 @@ describe('ConsultarPlaza Page', () => {
   it('resuelve etiquetas de unidad, departamento, sección y área', async () => {
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
@@ -80,7 +80,7 @@ describe('ConsultarPlaza Page', () => {
   it('muestra "Sin asignación" cuando la plaza no tiene unidad ni área', async () => {
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
@@ -93,7 +93,7 @@ describe('ConsultarPlaza Page', () => {
   it('renderiza botones de editar', async () => {
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
@@ -106,7 +106,7 @@ describe('ConsultarPlaza Page', () => {
   it('renderiza Header y Navbar', async () => {
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
@@ -116,7 +116,7 @@ describe('ConsultarPlaza Page', () => {
   it('renderiza footer', async () => {
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
@@ -127,7 +127,7 @@ describe('ConsultarPlaza Page', () => {
   it('filtra plazas por número en el buscador', async () => {
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
@@ -147,31 +147,73 @@ describe('ConsultarPlaza Page', () => {
   })
 
   it('muestra mensaje cuando no hay plazas', async () => {
-    plazaService.obtenerPlazas.mockResolvedValueOnce([])
+    positionService.obtenerPlazas.mockResolvedValueOnce([])
 
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
     await waitFor(() => {
-      expect(plazaService.obtenerPlazas).toHaveBeenCalled()
+      expect(positionService.obtenerPlazas).toHaveBeenCalled()
     })
   })
 
   it('llama a todos los servicios de organización al montar', async () => {
     render(
       <BrowserRouter>
-        <ConsultarPlaza />
+        <QueryPositions />
       </BrowserRouter>,
     )
 
     await waitFor(() => {
-      expect(unidadService.obtenerUnidades).toHaveBeenCalled()
-      expect(departamentoService.obtenerDepartamentos).toHaveBeenCalled()
-      expect(seccionService.obtenerSecciones).toHaveBeenCalled()
+      expect(unitService.obtenerUnidades).toHaveBeenCalled()
+      expect(departmentService.obtenerDepartamentos).toHaveBeenCalled()
+      expect(sectionService.obtenerSecciones).toHaveBeenCalled()
       expect(areaService.obtenerAreas).toHaveBeenCalled()
+    })
+  })
+
+  it('abre modal de crear al hacer clic en Crear', async () => {
+    render(
+      <BrowserRouter>
+        <QueryPositions />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('1')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
+
+    await waitFor(() => {
+      const dialog = document.querySelector('dialog')
+      expect(dialog).toBeInTheDocument()
+      expect(screen.getByText('Crear Plaza')).toBeInTheDocument()
+    })
+  })
+
+  it('abre modal de editar al hacer clic en Editar', async () => {
+    positionService.obtenerPlazaPorNumero.mockResolvedValue(mockPlazas[0])
+
+    render(
+      <BrowserRouter>
+        <QueryPositions />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('1')).toBeInTheDocument()
+    })
+
+    const editButtons = screen.getAllByRole('button', { name: /Editar/i })
+    fireEvent.click(editButtons[0])
+
+    await waitFor(() => {
+      const dialogs = document.querySelectorAll('dialog')
+      expect(dialogs.length).toBeGreaterThan(0)
     })
   })
 })

@@ -1,12 +1,12 @@
-// ConsultarUsuarios.test.jsx
+// QueryUsers.test.jsx
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import ConsultarUsuarios from '../pages/ConsultarUsuarios'
-import * as usuarioService from '../services/usuarioService'
+import QueryUsers from '../pages/QueryUsers'
+import * as userService from '../services/userService'
 
-vi.mock('../services/usuarioService')
+vi.mock('../services/userService')
 
-describe('ConsultarUsuarios Page', () => {
+describe('QueryUsers Page', () => {
   const mockUsuarios = [
     { correoInstitucional: 'juanito.perezperez@ucr.ac.cr', primerNombre: 'Juanito', primerApellido: 'Pérez', estado: 1 },
     { correoInstitucional: 'juanito.moraporras@ucr.ac.cr', primerNombre: 'Juanito', segundoNombre: 'Manuel', primerApellido: 'Mora', segundoApellido: 'Porras', estado: 1 },
@@ -15,13 +15,13 @@ describe('ConsultarUsuarios Page', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    usuarioService.obtenerUsuarios.mockResolvedValue(mockUsuarios)
+    userService.obtenerUsuarios.mockResolvedValue(mockUsuarios)
   })
 
   it('carga y renderiza usuarios', async () => {
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
@@ -34,7 +34,7 @@ describe('ConsultarUsuarios Page', () => {
   it('renderiza tabla con columnas correctas', async () => {
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
@@ -48,7 +48,7 @@ describe('ConsultarUsuarios Page', () => {
   it('renderiza campo de búsqueda', () => {
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
@@ -61,7 +61,7 @@ describe('ConsultarUsuarios Page', () => {
   it('renderiza Header y Navbar', () => {
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
@@ -71,7 +71,7 @@ describe('ConsultarUsuarios Page', () => {
   it('renderiza footer', () => {
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
@@ -82,19 +82,19 @@ describe('ConsultarUsuarios Page', () => {
   it('llama a obtenerUsuarios en mount', () => {
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
-    expect(usuarioService.obtenerUsuarios).toHaveBeenCalled()
+    expect(userService.obtenerUsuarios).toHaveBeenCalled()
   })
 
   it('muestra mensaje cuando no hay resultados', async () => {
-    usuarioService.obtenerUsuarios.mockResolvedValue([])
+    userService.obtenerUsuarios.mockResolvedValue([])
 
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
@@ -109,7 +109,7 @@ describe('ConsultarUsuarios Page', () => {
   it('filtra usuarios por nombre en el buscador', async () => {
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
@@ -131,7 +131,7 @@ describe('ConsultarUsuarios Page', () => {
   it('filtra usuarios por correo en el buscador', async () => {
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
@@ -153,13 +153,85 @@ describe('ConsultarUsuarios Page', () => {
   it('renderiza usuarios con segundo nombre y segundo apellido concatenados', async () => {
     render(
       <BrowserRouter>
-        <ConsultarUsuarios />
+        <QueryUsers />
       </BrowserRouter>,
     )
 
     await waitFor(() => {
       expect(screen.getByText('Juanito Manuel')).toBeInTheDocument()
       expect(screen.getByText('Mora Porras')).toBeInTheDocument()
+    })
+  })
+
+  it('abre modal de crear al hacer clic en Crear', async () => {
+    render(
+      <BrowserRouter>
+        <QueryUsers />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Juanito')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
+
+    await waitFor(() => {
+      const dialog = document.querySelector('dialog')
+      expect(dialog).toBeInTheDocument()
+      expect(screen.getByText('Crear Usuario')).toBeInTheDocument()
+    })
+  })
+
+  it('abre modal de editar al hacer clic en Editar', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValue({
+      correoInstitucional: 'juanito.perezperez@ucr.ac.cr',
+      primerNombre: 'Juanito',
+      primerApellido: 'Pérez',
+      rol: 1,
+      estado: 1,
+    })
+
+    render(
+      <BrowserRouter>
+        <QueryUsers />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Juanito')).toBeInTheDocument()
+    })
+
+    const editButtons = screen.getAllByRole('button', { name: /Editar/i })
+    fireEvent.click(editButtons[0])
+
+    await waitFor(() => {
+      const dialogs = document.querySelectorAll('dialog')
+      expect(dialogs.length).toBeGreaterThan(0)
+    })
+  })
+
+  it('cierra modal de crear al hacer clic en cerrar', async () => {
+    render(
+      <BrowserRouter>
+        <QueryUsers />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Juanito')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
+
+    await waitFor(() => {
+      expect(document.querySelector('dialog')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar modal' }))
+
+    await waitFor(() => {
+      expect(document.querySelector('dialog')).not.toBeInTheDocument()
     })
   })
 })

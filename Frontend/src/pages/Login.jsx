@@ -54,7 +54,7 @@ export default function Login() {
     setLoading(true)
 
     try {
-      const usuario = await login(email.trim().toLowerCase(), password)
+      const { token, ...usuario } = await login(email.trim().toLowerCase(), password)
       if (usuario.estado !== undefined && usuario.estado !== 1) {
         setServerError('La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte.')
         return
@@ -63,7 +63,15 @@ export default function Login() {
         setServerError(TEMP_PASSWORD_EXPIRED_MESSAGE)
         return
       }
-      guardarSesion(usuario)
+
+      if (!token) {
+        // Defensive: if the backend did not send a token for some reason, we 
+        // do not navigate to /home with a half-finished session.
+        setServerError('No se pudo iniciar sesión. Intente de nuevo.')
+        return
+      }
+
+      guardarSesion(token)
       navigate('/home')
     } catch (err) {
       setServerError(err.message)
@@ -130,6 +138,7 @@ export default function Login() {
               color: COLORS.textDark,
               transition: 'border-color 0.2s',
             }}
+            maxLength={100}
           />
           {errors.email && (
             <span style={{ fontSize: '12px', color: COLORS.danger }}>
@@ -165,6 +174,7 @@ export default function Login() {
               color: COLORS.textDark,
               transition: 'border-color 0.2s',
             }}
+            maxLength={30}
           />
           {errors.password && (
             <span style={{ fontSize: '12px', color: COLORS.danger }}>

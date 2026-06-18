@@ -57,19 +57,20 @@ internal static class Program
             new OracleConnection(builder.Configuration.GetConnectionString("OracleDB")));
         builder.Services.AddScoped<IDbExecutor, OracleDbExecutor>();
         builder.Services.AddScoped<IQueryExecutor, OracleQueryExecutor>();
-        builder.Services.AddScoped<IUsuarioRepository>(sp =>
-            new UsuarioRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<IUserRepository>(sp =>
+            new UserRepository(sp.GetRequiredService<IQueryExecutor>()));
         builder.Services.AddScoped<IAreaRepository>(sp =>
             new AreaRepository(sp.GetRequiredService<IQueryExecutor>()));
-        builder.Services.AddScoped<IDepartamentoRepository>(sp =>
-            new DepartamentoRepository(sp.GetRequiredService<IQueryExecutor>()));
-        builder.Services.AddScoped<ISeccionRepository>(sp =>
-            new SeccionRepository(sp.GetRequiredService<IQueryExecutor>()));
-        builder.Services.AddScoped<IUnidadRepository>(sp =>
-            new UnidadRepository(sp.GetRequiredService<IQueryExecutor>()));
-        builder.Services.AddScoped<IPlazaRepository>(sp =>
-            new PlazaRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<IDepartmentRepository>(sp =>
+            new DepartmentRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<ISectionRepository>(sp =>
+            new SectionRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<IUnitRepository>(sp =>
+            new UnitRepository(sp.GetRequiredService<IQueryExecutor>()));
+        builder.Services.AddScoped<IPositionRepository>(sp =>
+            new PositionRepository(sp.GetRequiredService<IQueryExecutor>()));
         builder.Services.AddScoped<IEmailService, EmailService>();
+        builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddOpenApi();
         builder.Services.AddCors(options =>
             options.AddPolicy("FrontendOrigin", policy =>
@@ -102,7 +103,7 @@ internal static class Program
     private static void MapUsuariosGetAll(RouteGroupBuilder usuarios)
     {
         // GET /usuarios — Lista todos los usuarios
-        usuarios.MapGet("/", async (IUsuarioRepository repo) =>
+        usuarios.MapGet("/", async (IUserRepository repo) =>
         {
             try
             {
@@ -119,7 +120,7 @@ internal static class Program
     private static void MapUsuariosGetByCorreo(RouteGroupBuilder usuarios)
     {
         // GET /usuarios/{correo} — Busca por clave primaria
-        usuarios.MapGet("/{correo}", async (string correo, IUsuarioRepository repo) =>
+        usuarios.MapGet("/{correo}", async (string correo, IUserRepository repo) =>
         {
             try
             {
@@ -138,7 +139,7 @@ internal static class Program
     private static void MapUsuariosCreate(RouteGroupBuilder usuarios, bool isDev)
     {
         // POST /usuarios — Crea un nuevo usuario con contraseña temporal
-        usuarios.MapPost("/", async (CrearUsuarioDto dto, IUsuarioRepository repo, IEmailService emailService) =>
+        usuarios.MapPost("/", async (CreateUserDto dto, IUserRepository repo, IEmailService emailService) =>
         {
             var validationResult = ValidarCrearUsuario(dto);
             if (validationResult is not null)
@@ -162,7 +163,7 @@ internal static class Program
         new(@"^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$",
             RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
 
-    private static IResult? ValidarCrearUsuario(CrearUsuarioDto dto)
+    private static IResult? ValidarCrearUsuario(CreateUserDto dto)
     {
         if (dto.Rol is not (0 or 1))
             return Results.BadRequest(new { mensaje = "Rol inválido. Use 0 (Funcionario) o 1 (Administrador)." });
@@ -200,14 +201,14 @@ internal static class Program
 
     [SuppressMessage("Globalization", "CA1308:NormalizeStringsToUppercase",
         Justification = "Los correos y nombres se normalizan a minúsculas por requisito de negocio.")]
-    private static Backend.Models.Usuario CrearUsuarioDesdeDto(CrearUsuarioDto dto)
+    private static Backend.Models.User CrearUsuarioDesdeDto(CreateUserDto dto)
     {
         // Función auxiliar para capitalizar (primera letra mayúscula, resto minúscula)
         static string Capitalizar(string? texto) =>
             string.IsNullOrWhiteSpace(texto) ? texto?.Trim() ?? "" :
             char.ToUpper(texto.Trim()[0], CultureInfo.InvariantCulture) + texto.Trim()[1..].ToLower(CultureInfo.InvariantCulture);
 
-        return new Backend.Models.Usuario
+        return new Backend.Models.User
         {
             CorreoInstitucional = dto.CorreoInstitucional.Trim().ToLowerInvariant(),
             PrimerNombre = Capitalizar(dto.PrimerNombre),
@@ -228,9 +229,9 @@ internal static class Program
     private static string NormalizarCorreo(string correo) => correo.Trim().ToLowerInvariant();
 
     private static async Task<IResult> CrearUsuarioAsync(
-        IUsuarioRepository repo,
+        IUserRepository repo,
         IEmailService emailService,
-        Backend.Models.Usuario usuario,
+        Backend.Models.User usuario,
         string contrasenaTemp,
         string hash,
         bool isDev)
@@ -271,7 +272,7 @@ internal static class Program
     private static void MapUsuariosUpdate(RouteGroupBuilder usuarios)
     {
         // PUT /usuarios/{correo} — Actualiza un usuario existente
-        usuarios.MapPut("/{correo}", async (string correo, Backend.Models.Usuario usuario, IUsuarioRepository repo) =>
+        usuarios.MapPut("/{correo}", async (string correo, Backend.Models.User usuario, IUserRepository repo) =>
         {
             try
             {
@@ -290,7 +291,7 @@ internal static class Program
     private static void MapUsuariosDelete(RouteGroupBuilder usuarios)
     {
         // DELETE /usuarios/{correo} — Elimina un usuario
-        usuarios.MapDelete("/{correo}", async (string correo, IUsuarioRepository repo) =>
+        usuarios.MapDelete("/{correo}", async (string correo, IUserRepository repo) =>
         {
             try
             {
@@ -340,7 +341,7 @@ internal static class Program
     private static void MapAreasCreate(RouteGroupBuilder areas, bool isDev)
     {
         // POST /areas — Crea una nueva área
-        areas.MapPost("/", async (CrearAreaDto dto, IAreaRepository repo) =>
+        areas.MapPost("/", async (CreateAreaDto dto, IAreaRepository repo) =>
         {
             var validationResult = ValidarCrearArea(dto);
             if (validationResult is not null)
@@ -406,7 +407,7 @@ internal static class Program
     private static void MapAreasUpdate(RouteGroupBuilder areas, bool isDev)
     {
         // PUT /areas/{nombre} — Actualiza un área
-        areas.MapPut("/{nombre}", async (string nombre, CrearAreaDto dto, IAreaRepository repo) =>
+        areas.MapPut("/{nombre}", async (string nombre, CreateAreaDto dto, IAreaRepository repo) =>
         {
             var validationResult = ValidarCrearArea(dto);
             if (validationResult is not null)
@@ -456,7 +457,7 @@ internal static class Program
         });
     }
 
-    private static IResult? ValidarCrearArea(CrearAreaDto dto)
+    private static IResult? ValidarCrearArea(CreateAreaDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.Nombre))
             return Results.BadRequest(new { mensaje = "El nombre del área es obligatorio." });
@@ -560,7 +561,7 @@ internal static class Program
     private static void MapDepartamentosGetAll(RouteGroupBuilder departamentos)
     {
         // GET /departamentos — Lista todos los departamentos
-        departamentos.MapGet("/", async (IDepartamentoRepository repo) =>
+        departamentos.MapGet("/", async (IDepartmentRepository repo) =>
         {
             try
             {
@@ -577,7 +578,7 @@ internal static class Program
     private static void MapDepartamentosCreate(RouteGroupBuilder departamentos, bool isDev)
     {
         // POST /departamentos — Crea un nuevo departamento
-        departamentos.MapPost("/", async (CrearDepartamentoDto dto, IDepartamentoRepository repo) =>
+        departamentos.MapPost("/", async (CreateDepartmentDto dto, IDepartmentRepository repo) =>
         {
             var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "del", "departamento");
             if (validationResult is not null)
@@ -594,7 +595,7 @@ internal static class Program
                 return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
             }
 
-            var departamento = new Backend.Models.Departamento
+            var departamento = new Backend.Models.Department
             {
                 Nombre = NormalizarNombre(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
@@ -606,7 +607,7 @@ internal static class Program
         });
     }
 
-    private static async Task<IResult> InsertarDepartamentoAsync(IDepartamentoRepository repo, Backend.Models.Departamento departamento, bool isDev)
+    private static async Task<IResult> InsertarDepartamentoAsync(IDepartmentRepository repo, Backend.Models.Department departamento, bool isDev)
     {
         try
         {
@@ -625,7 +626,7 @@ internal static class Program
     private static void MapDepartamentosGetByNombre(RouteGroupBuilder departamentos)
     {
         // GET /departamentos/{nombre} — Obtiene un departamento por nombre
-        departamentos.MapGet("/{nombre}", async (string nombre, IDepartamentoRepository repo) =>
+        departamentos.MapGet("/{nombre}", async (string nombre, IDepartmentRepository repo) =>
         {
             try
             {
@@ -644,7 +645,7 @@ internal static class Program
     private static void MapDepartamentosUpdate(RouteGroupBuilder departamentos, bool isDev)
     {
         // PUT /departamentos/{nombre} — Actualiza un departamento
-        departamentos.MapPut("/{nombre}", async (string nombre, CrearDepartamentoDto dto, IDepartamentoRepository repo) =>
+        departamentos.MapPut("/{nombre}", async (string nombre, CreateDepartmentDto dto, IDepartmentRepository repo) =>
         {
             var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "del", "departamento");
             if (validationResult is not null)
@@ -660,7 +661,7 @@ internal static class Program
             if (conflicto is not null)
                 return conflicto;
 
-            var departamento = new Backend.Models.Departamento
+            var departamento = new Backend.Models.Department
             {
                 Nombre = NormalizarNombre(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
@@ -679,7 +680,7 @@ internal static class Program
     private static void MapDepartamentosDelete(RouteGroupBuilder departamentos)
     {
         // DELETE /departamentos/{id} — Borrado lógico: pasa ESTADO de 1 a 0
-        departamentos.MapDelete("/{id:int}", async (int id, IDepartamentoRepository repo) =>
+        departamentos.MapDelete("/{id:int}", async (int id, IDepartmentRepository repo) =>
         {
             try
             {
@@ -712,7 +713,7 @@ internal static class Program
     private static void MapSeccionesGetAll(RouteGroupBuilder secciones)
     {
         // GET /secciones — Lista todas las secciones
-        secciones.MapGet("/", async (ISeccionRepository repo) =>
+        secciones.MapGet("/", async (ISectionRepository repo) =>
         {
             try
             {
@@ -729,7 +730,7 @@ internal static class Program
     private static void MapSeccionesCreate(RouteGroupBuilder secciones, bool isDev)
     {
         // POST /secciones — Crea una nueva sección
-        secciones.MapPost("/", async (CrearSeccionDto dto, ISeccionRepository repo) =>
+        secciones.MapPost("/", async (CreateSectionDto dto, ISectionRepository repo) =>
         {
             var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "sección");
             if (validationResult is not null)
@@ -746,7 +747,7 @@ internal static class Program
                 return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
             }
 
-            var seccion = new Backend.Models.Seccion
+            var seccion = new Backend.Models.Section
             {
                 Nombre = NormalizarNombre(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
@@ -758,7 +759,7 @@ internal static class Program
         });
     }
 
-    private static async Task<IResult> InsertarSeccionAsync(ISeccionRepository repo, Backend.Models.Seccion seccion, bool isDev)
+    private static async Task<IResult> InsertarSeccionAsync(ISectionRepository repo, Backend.Models.Section seccion, bool isDev)
     {
         try
         {
@@ -777,7 +778,7 @@ internal static class Program
     private static void MapSeccionesGetByNombre(RouteGroupBuilder secciones)
     {
         // GET /secciones/{nombre} — Obtiene una sección por nombre
-        secciones.MapGet("/{nombre}", async (string nombre, ISeccionRepository repo) =>
+        secciones.MapGet("/{nombre}", async (string nombre, ISectionRepository repo) =>
         {
             try
             {
@@ -796,7 +797,7 @@ internal static class Program
     private static void MapSeccionesUpdate(RouteGroupBuilder secciones, bool isDev)
     {
         // PUT /secciones/{nombre} — Actualiza una sección
-        secciones.MapPut("/{nombre}", async (string nombre, CrearSeccionDto dto, ISeccionRepository repo) =>
+        secciones.MapPut("/{nombre}", async (string nombre, CreateSectionDto dto, ISectionRepository repo) =>
         {
             var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "sección");
             if (validationResult is not null)
@@ -812,7 +813,7 @@ internal static class Program
             if (conflicto is not null)
                 return conflicto;
 
-            var seccion = new Backend.Models.Seccion
+            var seccion = new Backend.Models.Section
             {
                 Nombre = NormalizarNombre(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
@@ -831,7 +832,7 @@ internal static class Program
     private static void MapSeccionesDelete(RouteGroupBuilder secciones)
     {
         // DELETE /secciones/{id} — Borrado lógico: pasa ESTADO de 1 a 0
-        secciones.MapDelete("/{id:int}", async (int id, ISeccionRepository repo) =>
+        secciones.MapDelete("/{id:int}", async (int id, ISectionRepository repo) =>
         {
             try
             {
@@ -864,7 +865,7 @@ internal static class Program
     private static void MapUnidadesGetAll(RouteGroupBuilder unidades)
     {
         // GET /unidades — Lista todas las unidades
-        unidades.MapGet("/", async (IUnidadRepository repo) =>
+        unidades.MapGet("/", async (IUnitRepository repo) =>
         {
             try
             {
@@ -881,7 +882,7 @@ internal static class Program
     private static void MapUnidadesCreate(RouteGroupBuilder unidades, bool isDev)
     {
         // POST /unidades — Crea una nueva unidad
-        unidades.MapPost("/", async (CrearUnidadDto dto, IUnidadRepository repo) =>
+        unidades.MapPost("/", async (CreateUnitDto dto, IUnitRepository repo) =>
         {
             var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "unidad");
             if (validationResult is not null)
@@ -901,7 +902,7 @@ internal static class Program
                 return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
             }
 
-            var unidad = new Backend.Models.Unidad
+            var unidad = new Backend.Models.Unit
             {
                 Nombre = NormalizarNombre(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
@@ -915,7 +916,7 @@ internal static class Program
         });
     }
 
-    private static async Task<IResult> InsertarUnidadAsync(IUnidadRepository repo, Backend.Models.Unidad unidad, bool isDev)
+    private static async Task<IResult> InsertarUnidadAsync(IUnitRepository repo, Backend.Models.Unit unidad, bool isDev)
     {
         try
         {
@@ -934,7 +935,7 @@ internal static class Program
     private static void MapUnidadesGetByNombre(RouteGroupBuilder unidades)
     {
         // GET /unidades/{nombre} — Obtiene una unidad por nombre
-        unidades.MapGet("/{nombre}", async (string nombre, IUnidadRepository repo) =>
+        unidades.MapGet("/{nombre}", async (string nombre, IUnitRepository repo) =>
         {
             try
             {
@@ -953,7 +954,7 @@ internal static class Program
     private static void MapUnidadesUpdate(RouteGroupBuilder unidades, bool isDev)
     {
         // PUT /unidades/{nombre} — Actualiza una unidad
-        unidades.MapPut("/{nombre}", async (string nombre, CrearUnidadDto dto, IUnidadRepository repo) =>
+        unidades.MapPut("/{nombre}", async (string nombre, CreateUnitDto dto, IUnitRepository repo) =>
         {
             var validationResult = ValidarEntidadBase(dto.Nombre, dto.Descripcion, dto.Estado, "de la", "unidad");
             if (validationResult is not null)
@@ -972,7 +973,7 @@ internal static class Program
             if (conflicto is not null)
                 return conflicto;
 
-            var unidad = new Backend.Models.Unidad
+            var unidad = new Backend.Models.Unit
             {
                 Nombre = NormalizarNombre(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
@@ -993,7 +994,7 @@ internal static class Program
     private static void MapUnidadesDelete(RouteGroupBuilder unidades)
     {
         // DELETE /unidades/{id} — Borrado lógico: pasa ESTADO de 1 a 0
-        unidades.MapDelete("/{id:int}", async (int id, IUnidadRepository repo) =>
+        unidades.MapDelete("/{id:int}", async (int id, IUnitRepository repo) =>
         {
             try
             {
@@ -1025,7 +1026,7 @@ internal static class Program
     private static void MapPlazasGetAll(RouteGroupBuilder plazas)
     {
         // GET /plazas — Lista todas las plazas
-        plazas.MapGet("/", async (IPlazaRepository repo) =>
+        plazas.MapGet("/", async (IPositionRepository repo) =>
         {
             try
             {
@@ -1042,7 +1043,7 @@ internal static class Program
     private static void MapPlazasCreate(RouteGroupBuilder plazas, bool isDev)
     {
         // POST /plazas — Crea una nueva plaza
-        plazas.MapPost("/", async (CrearPlazaDto dto, IPlazaRepository repo) =>
+        plazas.MapPost("/", async (CreatePositionDto dto, IPositionRepository repo) =>
         {
             if (dto.NumeroPlaza <= 0)
                 return Results.BadRequest(new { mensaje = "El número de plaza debe ser un entero positivo." });
@@ -1058,7 +1059,7 @@ internal static class Program
                 return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
             }
 
-            var plaza = new Backend.Models.Plaza
+            var plaza = new Backend.Models.Position
             {
                 NumeroPlaza = dto.NumeroPlaza,
                 IdUnidad = dto.IdUnidad,
@@ -1071,7 +1072,7 @@ internal static class Program
         });
     }
 
-    private static async Task<IResult> InsertarPlazaAsync(IPlazaRepository repo, Backend.Models.Plaza plaza, bool isDev)
+    private static async Task<IResult> InsertarPlazaAsync(IPositionRepository repo, Backend.Models.Position plaza, bool isDev)
     {
         try
         {
@@ -1090,7 +1091,7 @@ internal static class Program
     private static void MapPlazasGetByNumero(RouteGroupBuilder plazas)
     {
         // GET /plazas/{numeroPlaza} — Obtiene una plaza por número
-        plazas.MapGet("/{numeroPlaza:long}", async (long numeroPlaza, IPlazaRepository repo) =>
+        plazas.MapGet("/{numeroPlaza:long}", async (long numeroPlaza, IPositionRepository repo) =>
         {
             try
             {
@@ -1109,7 +1110,7 @@ internal static class Program
     private static void MapPlazasUpdate(RouteGroupBuilder plazas, bool isDev)
     {
         // PUT /plazas/{numeroPlaza} — Actualiza las asignaciones de una plaza existente
-        plazas.MapPut("/{numeroPlaza:long}", async (long numeroPlaza, CrearPlazaDto dto, IPlazaRepository repo) =>
+        plazas.MapPut("/{numeroPlaza:long}", async (long numeroPlaza, CreatePositionDto dto, IPositionRepository repo) =>
         {
             try
             {
@@ -1122,7 +1123,7 @@ internal static class Program
                 return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
             }
 
-            var plaza = new Backend.Models.Plaza
+            var plaza = new Backend.Models.Position
             {
                 NumeroPlaza = numeroPlaza,
                 IdUnidad = dto.IdUnidad,
@@ -1147,17 +1148,21 @@ internal static class Program
 
     private static void MapAuth(WebApplication app, bool isDev)
     {
-        app.MapPost("/auth/login", async (LoginDto dto, IUsuarioRepository repo) =>
-            await HandleAuthLogin(dto, repo, isDev).ConfigureAwait(false));
+        app.MapPost("/auth/login", async (LoginDto dto, IUserRepository repo, IJwtService jwtService) =>
+            await HandleAuthLogin(dto, repo, jwtService, isDev).ConfigureAwait(false));
 
-        app.MapPost("/auth/recuperar-contrasena", async (RecuperarContraseñaDto dto, IUsuarioRepository repo, IEmailService emailService) =>
+        app.MapPost("/auth/recuperar-contrasena", async (ResetPasswordDto dto, IUserRepository repo, IEmailService emailService) =>
             await HandleRecuperarContrasena(dto.CorreoInstitucional, repo, emailService, isDev).ConfigureAwait(false));
 
-        app.MapPost("/auth/cambiar-contrasena", async (CambiarContraseñaDto dto, IUsuarioRepository repo, IEmailService emailService) =>
+        app.MapPost("/auth/cambiar-contrasena", async (ChangePasswordDto dto, IUserRepository repo, IEmailService emailService) =>
             await HandleCambiarContrasena(dto, repo, emailService, isDev).ConfigureAwait(false));
     }
 
-    private static async Task<IResult> HandleAuthLogin(LoginDto dto, IUsuarioRepository repo, bool isDev)
+    private static async Task<IResult> HandleAuthLogin(
+    LoginDto dto,
+    IUserRepository repo,
+    IJwtService jwtService,
+    bool isDev)
     {
         if (string.IsNullOrWhiteSpace(dto.CorreoInstitucional) ||
             string.IsNullOrWhiteSpace(dto.Contrasena))
@@ -1168,7 +1173,7 @@ internal static class Program
         try
         {
             var contrasena = await repo.ObtenerContrasenaMasRecienteAsync(correo)
-                                       .ConfigureAwait(false);
+                                    .ConfigureAwait(false);
 
             if (contrasena is null || !BCrypt.Net.BCrypt.Verify(dto.Contrasena, contrasena.Hash))
                 return Results.Json(new { mensaje = "Correo o contraseña incorrectos." }, statusCode: 401);
@@ -1181,21 +1186,27 @@ internal static class Program
             if (ContrasenaTemporalExpirada(contrasena))
             {
                 await repo.DesactivarPorContrasenaTemporalExpiradaAsync(usuario.CorreoInstitucional)
-                          .ConfigureAwait(false);
+                        .ConfigureAwait(false);
                 return RespuestaContrasenaTemporalExpirada();
             }
 
             if (usuario.Estado != 1)
                 return Results.Json(new { mensaje = "La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
 
+            // If the password is temporary, the frontend needs to know this to 
+            // force the change, so that data goes outside the token, next to 
+            // the token, not inside the claims.
+            var token = jwtService.GenerarToken(
+                usuario.CorreoInstitucional,
+                usuario.PrimerNombre,
+                usuario.SegundoNombre,
+                usuario.PrimerApellido,
+                usuario.SegundoApellido,
+                usuario.Rol);
+
             return Results.Ok(new
             {
-                correoInstitucional = usuario.CorreoInstitucional,
-                primerNombre = usuario.PrimerNombre,
-                segundoNombre = usuario.SegundoNombre,
-                primerApellido = usuario.PrimerApellido,
-                segundoApellido = usuario.SegundoApellido,
-                rol = usuario.Rol,
+                token,
                 estado = usuario.Estado,
                 contrasenaTemporal = contrasena.EsTemporal,
                 fechaExpiracionContrasena = contrasena.FechaExpiracion,
@@ -1212,7 +1223,7 @@ internal static class Program
 
     private static async Task<IResult> HandleRecuperarContrasena(
         string correoInstitucional,
-        IUsuarioRepository repo,
+        IUserRepository repo,
         IEmailService emailService,
         bool isDev)
     {
@@ -1261,7 +1272,7 @@ internal static class Program
         }
     }
 
-    private static void EnviarCorreoRecuperacion(IEmailService emailService, Backend.Models.Usuario usuario, string contrasenaTemporal)
+    private static void EnviarCorreoRecuperacion(IEmailService emailService, Backend.Models.User usuario, string contrasenaTemporal)
     {
         var asunto = "Recuperación de Contraseña - Pingponeros";
         var apellidos = $"{usuario.PrimerApellido} {usuario.SegundoApellido}";
@@ -1297,7 +1308,7 @@ internal static class Program
         return error is not null ? Results.BadRequest(new { mensaje = error }) : null;
     }
 
-    private static bool ContrasenaTemporalExpirada(Backend.Models.Contrasena contrasena) =>
+    private static bool ContrasenaTemporalExpirada(Backend.Models.Password contrasena) =>
         contrasena.EsTemporal && contrasena.FechaExpiracion <= DateTime.Now;
 
     private static IResult RespuestaContrasenaTemporalExpirada() =>
@@ -1310,24 +1321,24 @@ internal static class Program
             statusCode: 403);
 
     private static async Task<IResult> HandleCambiarContrasena(
-        CambiarContraseñaDto dto,
-        IUsuarioRepository repo,
+        ChangePasswordDto dto,
+        IUserRepository repo,
         IEmailService emailService,
         bool isDev)
     {
         if (string.IsNullOrWhiteSpace(dto.CorreoInstitucional))
             return Results.BadRequest(new { mensaje = "El correo institucional es obligatorio." });
 
-        if (string.IsNullOrWhiteSpace(dto.ContraseñaActual))
+        if (string.IsNullOrWhiteSpace(dto.ContrasenaActual))
             return Results.BadRequest(new { mensaje = "La contraseña actual es obligatoria." });
 
-        if (string.IsNullOrWhiteSpace(dto.ContraseñaNueva))
+        if (string.IsNullOrWhiteSpace(dto.ContrasenaNueva))
             return Results.BadRequest(new { mensaje = "La nueva contraseña es obligatoria." });
 
-        if (dto.ContraseñaNueva.Equals(dto.ContraseñaActual, StringComparison.Ordinal))
+        if (dto.ContrasenaNueva.Equals(dto.ContrasenaActual, StringComparison.Ordinal))
             return Results.BadRequest(new { mensaje = "La nueva contraseña debe ser diferente a la actual." });
 
-        var validacionContrasena = ValidarComplejidadContraseñaResult(dto.ContraseñaNueva);
+        var validacionContrasena = ValidarComplejidadContraseñaResult(dto.ContrasenaNueva);
         if (validacionContrasena is not null)
             return validacionContrasena;
 
@@ -1343,7 +1354,7 @@ internal static class Program
             var contrasenaActual = await repo.ObtenerContrasenaMasRecienteAsync(correo)
                                              .ConfigureAwait(false);
 
-            if (contrasenaActual is null || !BCrypt.Net.BCrypt.Verify(dto.ContraseñaActual, contrasenaActual.Hash))
+            if (contrasenaActual is null || !BCrypt.Net.BCrypt.Verify(dto.ContrasenaActual, contrasenaActual.Hash))
                 return Results.Json(new { mensaje = "La contraseña actual es incorrecta." }, statusCode: 401);
 
             if (ContrasenaTemporalExpirada(contrasenaActual))
@@ -1356,8 +1367,8 @@ internal static class Program
             if (usuario.Estado != 1)
                 return Results.Json(new { mensaje = "La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
 
-            var hashNueva = BCrypt.Net.BCrypt.HashPassword(dto.ContraseñaNueva);
-            await repo.CambiarContraseñaAsync(usuario.CorreoInstitucional, hashNueva).ConfigureAwait(false);
+            var hashNueva = BCrypt.Net.BCrypt.HashPassword(dto.ContrasenaNueva);
+            await repo.ChangePasswordAsync(usuario.CorreoInstitucional, hashNueva).ConfigureAwait(false);
 
             // Enviar correo de confirmación (sin contraseña)
             EnviarCorreoCambioContrasena(emailService, usuario);
@@ -1373,7 +1384,7 @@ internal static class Program
         }
     }
 
-    private static void EnviarCorreoCambioContrasena(IEmailService emailService, Backend.Models.Usuario usuario)
+    private static void EnviarCorreoCambioContrasena(IEmailService emailService, Backend.Models.User usuario)
     {
         var asunto = "Contraseña Actualizada - Pingponeros";
         var apellidos = $"{usuario.PrimerApellido} {usuario.SegundoApellido}";

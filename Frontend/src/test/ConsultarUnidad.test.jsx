@@ -1,29 +1,21 @@
-// ConsultarUnidad.test.jsx
+// QueryUnits.test.jsx
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import ConsultarUnidad from '../pages/ConsultarUnidad'
-import * as unidadService from '../services/unidadService'
+import QueryUnits from '../pages/QueryUnits'
+import * as unitService from '../services/unitService'
 import * as areaService from '../services/areaService'
-import * as departamentoService from '../services/departamentoService'
-import * as seccionService from '../services/seccionService'
+import * as departmentService from '../services/departmentService'
+import * as sectionService from '../services/sectionService'
 
-vi.mock('../services/unidadService', () => ({
-  obtenerUnidades: vi.fn(),
-}))
-vi.mock('../services/areaService', () => ({
-  obtenerAreas: vi.fn(),
-}))
-vi.mock('../services/departamentoService', () => ({
-  obtenerDepartamentos: vi.fn(),
-}))
-vi.mock('../services/seccionService', () => ({
-  obtenerSecciones: vi.fn(),
-}))
+vi.mock('../services/unitService')
+vi.mock('../services/areaService')
+vi.mock('../services/departmentService')
+vi.mock('../services/sectionService')
 
-describe('ConsultarUnidad Page', () => {
+describe('QueryUnits Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    unidadService.obtenerUnidades.mockResolvedValue([
+    unitService.obtenerUnidades.mockResolvedValue([
       {
         id: 30,
         nombre: 'Unidad Técnica',
@@ -36,16 +28,16 @@ describe('ConsultarUnidad Page', () => {
     areaService.obtenerAreas.mockResolvedValue([
       { id: 1, nombre: 'Administración', descripcion: 'Área' },
     ])
-    departamentoService.obtenerDepartamentos.mockResolvedValue([
+    departmentService.obtenerDepartamentos.mockResolvedValue([
       { id: 2, nombre: 'Compras', descripcion: 'Departamento' },
     ])
-    seccionService.obtenerSecciones.mockResolvedValue([])
+    sectionService.obtenerSecciones.mockResolvedValue([])
   })
 
   it('carga y renderiza unidades', async () => {
     render(
       <BrowserRouter>
-        <ConsultarUnidad />
+        <QueryUnits />
       </BrowserRouter>,
     )
 
@@ -58,17 +50,17 @@ describe('ConsultarUnidad Page', () => {
   it('llama a obtenerUnidades al montar', () => {
     render(
       <BrowserRouter>
-        <ConsultarUnidad />
+        <QueryUnits />
       </BrowserRouter>,
     )
 
-    expect(unidadService.obtenerUnidades).toHaveBeenCalled()
+    expect(unitService.obtenerUnidades).toHaveBeenCalled()
   })
 
   it('filtra unidades por nombre en el buscador', async () => {
     render(
       <BrowserRouter>
-        <ConsultarUnidad />
+        <QueryUnits />
       </BrowserRouter>,
     )
 
@@ -90,7 +82,7 @@ describe('ConsultarUnidad Page', () => {
   it('filtra unidades por área en el buscador', async () => {
     render(
       <BrowserRouter>
-        <ConsultarUnidad />
+        <QueryUnits />
       </BrowserRouter>,
     )
 
@@ -112,7 +104,7 @@ describe('ConsultarUnidad Page', () => {
   it('muestra dependencia de departamento correctamente', async () => {
     render(
       <BrowserRouter>
-        <ConsultarUnidad />
+        <QueryUnits />
       </BrowserRouter>,
     )
 
@@ -122,7 +114,7 @@ describe('ConsultarUnidad Page', () => {
   })
 
   it('muestra dependencia de sección cuando la unidad tiene idSeccion', async () => {
-    unidadService.obtenerUnidades.mockResolvedValue([
+    unitService.obtenerUnidades.mockResolvedValue([
       {
         id: 31,
         nombre: 'Unidad Logística',
@@ -132,18 +124,66 @@ describe('ConsultarUnidad Page', () => {
         estado: 1,
       },
     ])
-    seccionService.obtenerSecciones.mockResolvedValue([
+    sectionService.obtenerSecciones.mockResolvedValue([
       { id: 1, nombre: 'Sección A', descripcion: 'Sección' },
     ])
 
     render(
       <BrowserRouter>
-        <ConsultarUnidad />
+        <QueryUnits />
       </BrowserRouter>,
     )
 
     await waitFor(() => {
       expect(screen.getByText('Sección de Sección A')).toBeInTheDocument()
+    })
+  })
+
+  it('abre modal de crear al hacer clic en Crear', async () => {
+    render(
+      <BrowserRouter>
+        <QueryUnits />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Unidad Técnica')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
+
+    await waitFor(() => {
+      const dialog = document.querySelector('dialog')
+      expect(dialog).toBeInTheDocument()
+      expect(screen.getByText('Crear Unidad')).toBeInTheDocument()
+    })
+  })
+
+  it('abre modal de editar al hacer clic en Editar', async () => {
+    unitService.obtenerUnidadPorNombre.mockResolvedValue({
+      nombre: 'Unidad Técnica',
+      descripcion: 'Unidad de soporte',
+      idArea: 1,
+      idDepartamento: 2,
+      estado: 1,
+    })
+
+    render(
+      <BrowserRouter>
+        <QueryUnits />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Unidad Técnica')).toBeInTheDocument()
+    })
+
+    const editButtons = screen.getAllByRole('button', { name: /Editar/i })
+    fireEvent.click(editButtons[0])
+
+    await waitFor(() => {
+      const dialogs = document.querySelectorAll('dialog')
+      expect(dialogs.length).toBeGreaterThan(0)
     })
   })
 })

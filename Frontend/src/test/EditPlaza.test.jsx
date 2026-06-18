@@ -1,17 +1,17 @@
-// EditPlaza.test.jsx
+// EditPositions.test.jsx
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import EditPlaza from '../pages/EditPlaza'
-import * as plazaService from '../services/plazaService'
-import * as unidadService from '../services/unidadService'
-import * as departamentoService from '../services/departamentoService'
-import * as seccionService from '../services/seccionService'
+import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
+import EditPositions from '../pages/EditPositions'
+import * as positionService from '../services/positionService'
+import * as unitService from '../services/unitService'
+import * as departmentService from '../services/departmentService'
+import * as sectionService from '../services/sectionService'
 import * as areaService from '../services/areaService'
 
-vi.mock('../services/plazaService')
-vi.mock('../services/unidadService')
-vi.mock('../services/departamentoService')
-vi.mock('../services/seccionService')
+vi.mock('../services/positionService')
+vi.mock('../services/unitService')
+vi.mock('../services/departmentService')
+vi.mock('../services/sectionService')
 vi.mock('../services/areaService')
 
 const mockPlaza = {
@@ -40,24 +40,24 @@ const renderWithRoute = (numeroPlaza = '7') =>
   render(
     <MemoryRouter initialEntries={[`/organizacion/plazas/editar/${numeroPlaza}`]}>
       <Routes>
-        <Route path="/organizacion/plazas/editar/:numeroPlaza" element={<EditPlaza />} />
+        <Route path="/organizacion/plazas/editar/:numeroPlaza" element={<EditPositions />} />
         <Route path="/organizacion/plazas/consultar" element={<div>Lista de plazas</div>} />
       </Routes>
     </MemoryRouter>,
   )
 
-describe('EditPlaza Page', () => {
+describe('EditPositions Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    plazaService.obtenerPlazaPorNumero.mockResolvedValue(mockPlaza)
+    positionService.obtenerPlazaPorNumero.mockResolvedValue(mockPlaza)
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
-    departamentoService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
-    seccionService.obtenerSecciones.mockResolvedValue(mockSecciones)
-    unidadService.obtenerUnidades.mockResolvedValue(mockUnidades)
+    departmentService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
+    sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
+    unitService.obtenerUnidades.mockResolvedValue(mockUnidades)
   })
 
   it('muestra indicador de carga mientras carga datos', () => {
-    plazaService.obtenerPlazaPorNumero.mockImplementation(() => new Promise(() => {}))
+    positionService.obtenerPlazaPorNumero.mockImplementation(() => new Promise(() => {}))
 
     renderWithRoute()
 
@@ -94,7 +94,7 @@ describe('EditPlaza Page', () => {
   })
 
   it('detecta el tipo de dependencia "seccion" según la plaza cargada', async () => {
-    plazaService.obtenerPlazaPorNumero.mockResolvedValueOnce({
+    positionService.obtenerPlazaPorNumero.mockResolvedValueOnce({
       ...mockPlaza,
       idDepartamento: null,
       idSeccion: 1,
@@ -111,7 +111,7 @@ describe('EditPlaza Page', () => {
   })
 
   it('actualiza la plaza correctamente y muestra mensaje de éxito', async () => {
-    plazaService.actualizarPlaza.mockResolvedValueOnce({})
+    positionService.actualizarPlaza.mockResolvedValueOnce({})
 
     renderWithRoute()
 
@@ -128,7 +128,7 @@ describe('EditPlaza Page', () => {
   })
 
   it('muestra error cuando la actualización falla', async () => {
-    plazaService.actualizarPlaza.mockRejectedValueOnce(new Error('Error al actualizar plaza'))
+    positionService.actualizarPlaza.mockRejectedValueOnce(new Error('Error al actualizar plaza'))
 
     renderWithRoute()
 
@@ -146,7 +146,7 @@ describe('EditPlaza Page', () => {
 
   it('muestra error si departamento y sección están seleccionados a la vez', async () => {
     // Plaza con ambos idDepartamento e idSeccion (estado inválido forzado)
-    plazaService.obtenerPlazaPorNumero.mockResolvedValueOnce({
+    positionService.obtenerPlazaPorNumero.mockResolvedValueOnce({
       ...mockPlaza,
       idDepartamento: 1,
       idSeccion: 1,
@@ -169,7 +169,7 @@ describe('EditPlaza Page', () => {
   })
 
   it('muestra error cuando falla la carga de datos', async () => {
-    plazaService.obtenerPlazaPorNumero.mockRejectedValueOnce(new Error('Plaza no encontrada'))
+    positionService.obtenerPlazaPorNumero.mockRejectedValueOnce(new Error('Plaza no encontrada'))
 
     renderWithRoute('999')
 
@@ -238,7 +238,7 @@ describe('EditPlaza Page', () => {
   })
 
   it('muestra conflicto al cambiar departamento cuando la unidad no pertenece a él', async () => {
-    plazaService.obtenerPlazaPorNumero.mockResolvedValueOnce({
+    positionService.obtenerPlazaPorNumero.mockResolvedValueOnce({
       ...mockPlaza,
       idDepartamento: 1,
       idUnidad: 1,
@@ -262,5 +262,88 @@ describe('EditPlaza Page', () => {
         }
       })
     }
+  })
+})
+
+describe('EditPositions Modal Mode', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+    positionService.obtenerPlazaPorNumero.mockResolvedValue(mockPlaza)
+    areaService.obtenerAreas.mockResolvedValue(mockAreas)
+    departmentService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
+    sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
+    unitService.obtenerUnidades.mockResolvedValue(mockUnidades)
+  })
+
+  it('renderiza dentro de un modal cuando isModal es true', async () => {
+    render(
+      <BrowserRouter>
+        <EditPositions isModal isOpen={true} entityId="7" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Editar Plaza/i })).toBeInTheDocument()
+    })
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByText('7')).toBeInTheDocument()
+  })
+
+  it('muestra cargando dentro del modal', () => {
+    positionService.obtenerPlazaPorNumero.mockImplementation(() => new Promise(() => {}))
+
+    render(
+      <BrowserRouter>
+        <EditPositions isModal isOpen={true} entityId="7" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByText(/Cargando datos de la plaza/i)).toBeInTheDocument()
+  })
+
+  it('no renderiza Header ni Navbar en modo modal', async () => {
+    render(
+      <BrowserRouter>
+        <EditPositions isModal isOpen={true} entityId="7" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Editar Plaza/i })).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('Página Principal')).not.toBeInTheDocument()
+    expect(document.querySelector('footer')).not.toBeInTheDocument()
+  })
+
+  it('llama a onClose al hacer clic en Cancelar', async () => {
+    const onClose = vi.fn()
+
+    render(
+      <BrowserRouter>
+        <EditPositions isModal isOpen={true} entityId="7" onClose={onClose} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Editar Plaza/i })).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('usa entityId prop en lugar de useParams', async () => {
+    render(
+      <BrowserRouter>
+        <EditPositions isModal isOpen={true} entityId="7" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(positionService.obtenerPlazaPorNumero).toHaveBeenCalledWith('7')
+    })
   })
 })

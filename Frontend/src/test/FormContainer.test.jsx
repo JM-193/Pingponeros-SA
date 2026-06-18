@@ -80,6 +80,36 @@ describe('FormContainer', () => {
     expect(handleSubmit).toHaveBeenCalled()
   })
 
+  it('muestra nota de campos obligatorios cuando requiredNote es true', () => {
+    render(
+      <FormContainer onSubmit={() => {}} requiredNote>
+        <input placeholder="Campo requerido" />
+      </FormContainer>,
+    )
+
+    expect(screen.getByText(/Campos obligatorios/)).toBeInTheDocument()
+  })
+
+  it('oculta nota de campos obligatorios por defecto', () => {
+    render(
+      <FormContainer onSubmit={() => {}}>
+        <input placeholder="Campo opcional" />
+      </FormContainer>,
+    )
+
+    expect(screen.queryByText(/Campos obligatorios/)).not.toBeInTheDocument()
+  })
+
+  it('oculta nota de campos obligatorios cuando requiredNote es false', () => {
+    render(
+      <FormContainer onSubmit={() => {}} requiredNote={false}>
+        <input placeholder="Campo opcional" />
+      </FormContainer>,
+    )
+
+    expect(screen.queryByText(/Campos obligatorios/)).not.toBeInTheDocument()
+  })
+
   it('renderiza form element', () => {
     const { container } = render(
       <FormContainer onSubmit={() => {}}>

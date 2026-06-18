@@ -1,7 +1,7 @@
-// DepartamentoSeccionEditForm.test.jsx
+// DepartmentSectionEditForm.test.jsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
-import DepartamentoSeccionEditForm from '../components/DepartamentoSeccionEditForm'
+import DepartmentSectionEditForm from '../components/DepartmentSectionEditForm'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/areaService')
@@ -29,7 +29,7 @@ const renderDepartamentoWithRoute = (nombre, fetchByName, updateEntity) =>
         <Route
           path="/organizacion/departamentos/editar/:nombre"
           element={
-            <DepartamentoSeccionEditForm
+            <DepartmentSectionEditForm
               entityType="departamento"
               fetchByName={fetchByName}
               updateEntity={updateEntity}
@@ -48,7 +48,7 @@ const renderSeccionWithRoute = (nombre, fetchByName, updateEntity) =>
         <Route
           path="/organizacion/secciones/editar/:nombre"
           element={
-            <DepartamentoSeccionEditForm
+            <DepartmentSectionEditForm
               entityType="seccion"
               fetchByName={fetchByName}
               updateEntity={updateEntity}
@@ -60,7 +60,7 @@ const renderSeccionWithRoute = (nombre, fetchByName, updateEntity) =>
     </MemoryRouter>,
   )
 
-describe('DepartamentoSeccionEditForm', () => {
+describe('DepartmentSectionEditForm', () => {
   beforeEach(() => {
     vi.resetAllMocks()
   })
@@ -68,7 +68,7 @@ describe('DepartamentoSeccionEditForm', () => {
   it('muestra estado de carga para departamento sin nombre en ruta', () => {
     render(
       <BrowserRouter>
-        <DepartamentoSeccionEditForm
+        <DepartmentSectionEditForm
           entityType="departamento"
           fetchByName={vi.fn()}
           updateEntity={vi.fn()}
@@ -82,7 +82,7 @@ describe('DepartamentoSeccionEditForm', () => {
   it('muestra estado de carga para sección sin nombre en ruta', () => {
     render(
       <BrowserRouter>
-        <DepartamentoSeccionEditForm
+        <DepartmentSectionEditForm
           entityType="seccion"
           fetchByName={vi.fn()}
           updateEntity={vi.fn()}
@@ -177,6 +177,164 @@ describe('DepartamentoSeccionEditForm', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Activo' })).toBeInTheDocument()
+    })
+  })
+})
+
+describe('DepartmentSectionEditForm Modal Mode', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+  })
+
+  it('renderiza departamento dentro de un modal', async () => {
+    const fetchByName = vi.fn().mockResolvedValueOnce(mockEntityDepartamento)
+    areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
+
+    render(
+      <BrowserRouter>
+        <DepartmentSectionEditForm
+          entityType="departamento"
+          fetchByName={fetchByName}
+          updateEntity={vi.fn()}
+          isModal
+          isOpen={true}
+          entityName="Recursos Humanos"
+          onClose={() => {}}
+          onSuccess={() => {}}
+        />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Editar Departamento')).toBeInTheDocument()
+    })
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Recursos Humanos')).toBeInTheDocument()
+  })
+
+  it('renderiza sección dentro de un modal', async () => {
+    const fetchByName = vi.fn().mockResolvedValueOnce(mockEntitySeccion)
+    areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
+
+    render(
+      <BrowserRouter>
+        <DepartmentSectionEditForm
+          entityType="seccion"
+          fetchByName={fetchByName}
+          updateEntity={vi.fn()}
+          isModal
+          isOpen={true}
+          entityName="Contabilidad"
+          onClose={() => {}}
+          onSuccess={() => {}}
+        />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Editar Sección')).toBeInTheDocument()
+    })
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Contabilidad')).toBeInTheDocument()
+  })
+
+  it('muestra cargando dentro del modal para departamento', () => {
+    render(
+      <BrowserRouter>
+        <DepartmentSectionEditForm
+          entityType="departamento"
+          fetchByName={vi.fn()}
+          updateEntity={vi.fn()}
+          isModal
+          isOpen={true}
+          entityName="Test"
+          onClose={() => {}}
+          onSuccess={() => {}}
+        />
+      </BrowserRouter>,
+    )
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByText('Cargando departamento...')).toBeInTheDocument()
+  })
+
+  it('no renderiza Header ni Navbar en modo modal', async () => {
+    const fetchByName = vi.fn().mockResolvedValueOnce(mockEntityDepartamento)
+    areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
+
+    render(
+      <BrowserRouter>
+        <DepartmentSectionEditForm
+          entityType="departamento"
+          fetchByName={fetchByName}
+          updateEntity={vi.fn()}
+          isModal
+          isOpen={true}
+          entityName="Recursos Humanos"
+          onClose={() => {}}
+          onSuccess={() => {}}
+        />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Recursos Humanos')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('Página Principal')).not.toBeInTheDocument()
+  })
+
+  it('llama a onClose al hacer clic en Cancelar', async () => {
+    const fetchByName = vi.fn().mockResolvedValueOnce(mockEntityDepartamento)
+    areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
+    const onClose = vi.fn()
+
+    render(
+      <BrowserRouter>
+        <DepartmentSectionEditForm
+          entityType="departamento"
+          fetchByName={fetchByName}
+          updateEntity={vi.fn()}
+          isModal
+          isOpen={true}
+          entityName="Recursos Humanos"
+          onClose={onClose}
+          onSuccess={() => {}}
+        />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Recursos Humanos')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('usa entityName prop en lugar de useParams', async () => {
+    const fetchByName = vi.fn().mockResolvedValueOnce(mockEntityDepartamento)
+    areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
+
+    render(
+      <BrowserRouter>
+        <DepartmentSectionEditForm
+          entityType="departamento"
+          fetchByName={fetchByName}
+          updateEntity={vi.fn()}
+          isModal
+          isOpen={true}
+          entityName="Recursos Humanos"
+          onClose={() => {}}
+          onSuccess={() => {}}
+        />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(fetchByName).toHaveBeenCalledWith('Recursos Humanos')
     })
   })
 })

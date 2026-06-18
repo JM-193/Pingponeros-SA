@@ -3,24 +3,24 @@ import Login from '../pages/Login'
 import Home from '../pages/Home'
 import ForgotPassword from '../pages/ForgotPassword'
 import ChangePassword from '../pages/ChangePassword'
-import CreateUser from '../pages/CreateUser'
-import EditUser from '../pages/EditUser'
-import ConsultarUsuarios from '../pages/ConsultarUsuarios'
-import CreateArea from '../pages/CreateArea'
-import EditArea from '../pages/EditArea'
-import ConsultarArea from '../pages/ConsultarArea'
-import CreateDepartamento from '../pages/CreateDepartamento'
-import EditDepartamento from '../pages/EditDepartamento'
-import ConsultarDepartamento from '../pages/ConsultarDepartamento'
-import CreateSeccion from '../pages/CreateSeccion'
-import EditSeccion from '../pages/EditSeccion'
-import ConsultarSeccion from '../pages/ConsultarSeccion'
-import CreateUnidad from '../pages/CreateUnidad'
-import EditUnidad from '../pages/EditUnidad'
-import ConsultarUnidad from '../pages/ConsultarUnidad'
-import CreatePlaza from '../pages/CreatePlaza'
-import EditPlaza from '../pages/EditPlaza'
-import ConsultarPlaza from '../pages/ConsultarPlaza'
+import CreateUsers from '../pages/CreateUsers'
+import EditUsers from '../pages/EditUsers'
+import QueryUsers from '../pages/QueryUsers'
+import CreateAreas from '../pages/CreateAreas'
+import EditAreas from '../pages/EditAreas'
+import QueryAreas from '../pages/QueryAreas'
+import CreateDepartments from '../pages/CreateDepartments'
+import EditDepartments from '../pages/EditDepartments'
+import QueryDepartments from '../pages/QueryDepartments'
+import CreateSections from '../pages/CreateSections'
+import EditSections from '../pages/EditSections'
+import QuerySections from '../pages/QuerySections'
+import CreateUnits from '../pages/CreateUnits'
+import EditUnits from '../pages/EditUnits'
+import QueryUnits from '../pages/QueryUnits'
+import CreatePositions from '../pages/CreatePositions'
+import EditPositions from '../pages/EditPositions'
+import QueryPositions from '../pages/QueryPositions'
 import ProtectedRoute from '../components/ProtectedRoute'
 
 export default function AppRouter() {
@@ -31,24 +31,24 @@ export default function AppRouter() {
         <Route path="/recuperar-contrasena" element={<ForgotPassword />} />
         <Route path="/cambiar-contrasena" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
         <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-        <Route path="/usuarios/crear" element={<ProtectedRoute><CreateUser /></ProtectedRoute>} />
-        <Route path="/usuarios/editar/:correo" element={<ProtectedRoute><EditUser /></ProtectedRoute>} />
-        <Route path="/usuarios/consultar" element={<ProtectedRoute><ConsultarUsuarios /></ProtectedRoute>} />
-        <Route path="/organizacion/areas/crear" element={<ProtectedRoute><CreateArea /></ProtectedRoute>} />
-        <Route path="/organizacion/areas/editar/:nombre" element={<ProtectedRoute><EditArea /></ProtectedRoute>} />
-        <Route path="/organizacion/areas/consultar" element={<ProtectedRoute><ConsultarArea /></ProtectedRoute>} />
-        <Route path="/organizacion/departamentos/crear" element={<ProtectedRoute><CreateDepartamento /></ProtectedRoute>} />
-        <Route path="/organizacion/departamentos/editar/:nombre" element={<ProtectedRoute><EditDepartamento /></ProtectedRoute>} />
-        <Route path="/organizacion/departamentos/consultar" element={<ProtectedRoute><ConsultarDepartamento /></ProtectedRoute>} />
-        <Route path="/organizacion/secciones/crear" element={<ProtectedRoute><CreateSeccion /></ProtectedRoute>} />
-        <Route path="/organizacion/secciones/editar/:nombre" element={<ProtectedRoute><EditSeccion /></ProtectedRoute>} />
-        <Route path="/organizacion/secciones/consultar" element={<ProtectedRoute><ConsultarSeccion /></ProtectedRoute>} />
-        <Route path="/organizacion/unidades/crear" element={<ProtectedRoute><CreateUnidad /></ProtectedRoute>} />
-        <Route path="/organizacion/unidades/editar/:nombre" element={<ProtectedRoute><EditUnidad /></ProtectedRoute>} />
-        <Route path="/organizacion/unidades/consultar" element={<ProtectedRoute><ConsultarUnidad /></ProtectedRoute>} />
-        <Route path="/organizacion/plazas/crear" element={<ProtectedRoute><CreatePlaza /></ProtectedRoute>} />
-        <Route path="/organizacion/plazas/editar/:numeroPlaza" element={<ProtectedRoute><EditPlaza /></ProtectedRoute>} />
-        <Route path="/organizacion/plazas/consultar" element={<ProtectedRoute><ConsultarPlaza /></ProtectedRoute>} />
+        <Route path="/usuarios/crear" element={<ProtectedRoute><CreateUsers /></ProtectedRoute>} />
+        <Route path="/usuarios/editar/:correo" element={<ProtectedRoute><EditUsers /></ProtectedRoute>} />
+        <Route path="/usuarios/consultar" element={<ProtectedRoute><QueryUsers /></ProtectedRoute>} />
+        <Route path="/organizacion/areas/crear" element={<ProtectedRoute><CreateAreas /></ProtectedRoute>} />
+        <Route path="/organizacion/areas/editar/:nombre" element={<ProtectedRoute><EditAreas /></ProtectedRoute>} />
+        <Route path="/organizacion/areas/consultar" element={<ProtectedRoute><QueryAreas /></ProtectedRoute>} />
+        <Route path="/organizacion/departamentos/crear" element={<ProtectedRoute><CreateDepartments /></ProtectedRoute>} />
+        <Route path="/organizacion/departamentos/editar/:nombre" element={<ProtectedRoute><EditDepartments /></ProtectedRoute>} />
+        <Route path="/organizacion/departamentos/consultar" element={<ProtectedRoute><QueryDepartments /></ProtectedRoute>} />
+        <Route path="/organizacion/secciones/crear" element={<ProtectedRoute><CreateSections /></ProtectedRoute>} />
+        <Route path="/organizacion/secciones/editar/:nombre" element={<ProtectedRoute><EditSections /></ProtectedRoute>} />
+        <Route path="/organizacion/secciones/consultar" element={<ProtectedRoute><QuerySections /></ProtectedRoute>} />
+        <Route path="/organizacion/unidades/crear" element={<ProtectedRoute><CreateUnits /></ProtectedRoute>} />
+        <Route path="/organizacion/unidades/editar/:nombre" element={<ProtectedRoute><EditUnits /></ProtectedRoute>} />
+        <Route path="/organizacion/unidades/consultar" element={<ProtectedRoute><QueryUnits /></ProtectedRoute>} />
+        <Route path="/organizacion/plazas/crear" element={<ProtectedRoute><CreatePositions /></ProtectedRoute>} />
+        <Route path="/organizacion/plazas/editar/:numeroPlaza" element={<ProtectedRoute><EditPositions /></ProtectedRoute>} />
+        <Route path="/organizacion/plazas/consultar" element={<ProtectedRoute><QueryPositions /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   )

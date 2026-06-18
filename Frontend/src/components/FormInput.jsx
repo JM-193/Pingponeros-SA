@@ -11,6 +11,7 @@ function FormInput({
   required,
   placeholder,
   disabled,
+  maxLength,
   style,
 }) {
   return (
@@ -37,6 +38,7 @@ function FormInput({
         required={required}
         placeholder={placeholder}
         disabled={disabled}
+        maxLength={maxLength}
         style={{
           width: '100%',
           padding: '10px',
@@ -64,6 +66,7 @@ FormInput.propTypes = {
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   disabled: PropTypes.bool,
+  maxLength: PropTypes.number,
   style: PropTypes.object,
 }
 

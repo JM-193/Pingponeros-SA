@@ -1,17 +1,17 @@
-// CreateUnidad.test.jsx
+// CreateUnits.test.jsx
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import CreateUnidad from '../pages/CreateUnidad'
+import CreateUnits from '../pages/CreateUnits'
 import * as areaService from '../services/areaService'
-import * as departamentoService from '../services/departamentoService'
-import * as seccionService from '../services/seccionService'
+import * as departmentService from '../services/departmentService'
+import * as sectionService from '../services/sectionService'
 
-vi.mock('../services/unidadService')
+vi.mock('../services/unitService')
 vi.mock('../services/areaService')
-vi.mock('../services/departamentoService')
-vi.mock('../services/seccionService')
+vi.mock('../services/departmentService')
+vi.mock('../services/sectionService')
 
-describe('CreateUnidad Page', () => {
+describe('CreateUnits Page', () => {
   const mockAreas = [
     { id: 1, nombre: 'Administración' },
     { id: 2, nombre: 'Recursos Humanos' },
@@ -29,14 +29,14 @@ describe('CreateUnidad Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
-    departamentoService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
-    seccionService.obtenerSecciones.mockResolvedValue(mockSecciones)
+    departmentService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
+    sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
   })
 
   it('renderiza formulario de crear unidad', async () => {
     render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
@@ -47,7 +47,7 @@ describe('CreateUnidad Page', () => {
   it('renderiza Header y Navbar', async () => {
     render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
@@ -59,21 +59,21 @@ describe('CreateUnidad Page', () => {
   it('carga opciones de área, departamento y sección en el montaje', async () => {
     render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
     await waitFor(() => {
       expect(areaService.obtenerAreas).toHaveBeenCalled()
-      expect(departamentoService.obtenerDepartamentos).toHaveBeenCalled()
-      expect(seccionService.obtenerSecciones).toHaveBeenCalled()
+      expect(departmentService.obtenerDepartamentos).toHaveBeenCalled()
+      expect(sectionService.obtenerSecciones).toHaveBeenCalled()
     })
   })
 
   it('cambia el tipo de dependencia a departamento', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
@@ -92,7 +92,7 @@ describe('CreateUnidad Page', () => {
   it('cambia el tipo de dependencia a sección', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
@@ -111,7 +111,7 @@ describe('CreateUnidad Page', () => {
   it('filtra departamentos por área seleccionada', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
@@ -134,7 +134,7 @@ describe('CreateUnidad Page', () => {
   it('filtra secciones por área seleccionada', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
@@ -156,7 +156,7 @@ describe('CreateUnidad Page', () => {
   it('muestra error cuando el departamento seleccionado no pertenece al área', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
@@ -183,7 +183,7 @@ describe('CreateUnidad Page', () => {
   it('muestra error cuando la sección seleccionada no pertenece al área', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
@@ -210,7 +210,7 @@ describe('CreateUnidad Page', () => {
   it('limpia el error cuando se cambia el tipo de dependencia', async () => {
     const { container } = render(
       <BrowserRouter>
-        <CreateUnidad />
+        <CreateUnits />
       </BrowserRouter>,
     )
 
@@ -237,5 +237,82 @@ describe('CreateUnidad Page', () => {
     await waitFor(() => {
       expect(screen.queryByText(/El departamento seleccionado no pertenece al área elegida/)).not.toBeInTheDocument()
     })
+  })
+})
+
+describe('CreateUnits Modal Mode', () => {
+  const mockAreas = [
+    { id: 1, nombre: 'Administración' },
+  ]
+  const mockDepartamentos = [
+    { id: 1, idArea: 1, nombre: 'Compras' },
+  ]
+  const mockSecciones = [
+    { id: 1, idArea: 1, nombre: 'Soporte' },
+  ]
+
+  beforeEach(() => {
+    vi.resetAllMocks()
+    areaService.obtenerAreas.mockResolvedValue(mockAreas)
+    departmentService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
+    sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
+  })
+
+  it('renderiza dentro de un modal cuando isModal es true', async () => {
+    render(
+      <BrowserRouter>
+        <CreateUnits isModal isOpen={true} onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Nombre de la unidad')).toBeInTheDocument()
+    })
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByText('Crear Unidad')).toBeInTheDocument()
+  })
+
+  it('no renderiza Header ni Navbar en modo modal', async () => {
+    render(
+      <BrowserRouter>
+        <CreateUnits isModal isOpen={true} onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Nombre de la unidad')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('Página Principal')).not.toBeInTheDocument()
+  })
+
+  it('llama a onClose al hacer clic en Cancelar', async () => {
+    const onClose = vi.fn()
+    render(
+      <BrowserRouter>
+        <CreateUnits isModal isOpen={true} onClose={onClose} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Nombre de la unidad')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('muestra cargando dentro del modal', () => {
+    areaService.obtenerAreas.mockImplementation(() => new Promise(() => {}))
+
+    render(
+      <BrowserRouter>
+        <CreateUnits isModal isOpen={true} onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByText('Cargando datos de organización...')).toBeInTheDocument()
   })
 })

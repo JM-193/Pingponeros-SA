@@ -89,8 +89,14 @@ describe('Login Page', () => {
   })
 
   it('realiza login exitoso', async () => {
-    const mockUser = { id: 1, nombre: 'Test User', correoInstitucional: 'test.user@ucr.ac.cr' }
-    authService.login.mockResolvedValueOnce(mockUser)
+    // Login.jsx desestructura: const { token, ...usuario } = await login(...)
+    // El mock debe devolver un objeto con { token, estado, ... }
+    const mockToken = 'header.payload.signature'
+    authService.login.mockResolvedValueOnce({
+      token: mockToken,
+      estado: 1,
+      correoInstitucional: 'test.user@ucr.ac.cr',
+    })
     sessionService.guardarSesion.mockImplementation(() => {})
 
     render(
@@ -99,29 +105,29 @@ describe('Login Page', () => {
       </BrowserRouter>,
     )
 
-    const emailInput = screen.getByLabelText('Correo Institucional')
-    fireEvent.change(emailInput, { target: { value: 'test.user@ucr.ac.cr' } })
-
-    const passwordInput = screen.getByLabelText('Contraseña')
-    fireEvent.change(passwordInput, { target: { value: 'password123' } })
-
-    const submitButton = screen.getByRole('button', { name: /Iniciar Sesión/i })
-    fireEvent.click(submitButton)
+    fireEvent.change(screen.getByLabelText('Correo Institucional'), {
+      target: { value: 'test.user@ucr.ac.cr' },
+    })
+    fireEvent.change(screen.getByLabelText('Contraseña'), {
+      target: { value: 'password123' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /Iniciar Sesión/i }))
 
     await waitFor(() => {
       expect(authService.login).toHaveBeenCalledWith('test.user@ucr.ac.cr', 'password123')
-      expect(sessionService.guardarSesion).toHaveBeenCalledWith(mockUser)
+      expect(sessionService.guardarSesion).toHaveBeenCalledWith(mockToken)
     })
   })
 
   it('permite login con contraseña temporal vigente', async () => {
-    const mockUser = {
-      correoInstitucional: 'test.user@ucr.ac.cr',
+    // Login.jsx desestructura { token, ...usuario } y luego evalúa usuario.contrasenaTemporal
+    const mockToken = 'header.temporalpayload.signature'
+    authService.login.mockResolvedValueOnce({
+      token: mockToken,
       estado: 1,
       contrasenaTemporal: true,
-      fechaExpiracionContrasena: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-    }
-    authService.login.mockResolvedValueOnce(mockUser)
+      fechaExpiracionContrasena: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // vigente
+    })
     sessionService.guardarSesion.mockImplementation(() => {})
 
     render(
@@ -139,7 +145,7 @@ describe('Login Page', () => {
     fireEvent.click(screen.getByRole('button', { name: /Iniciar Sesión/i }))
 
     await waitFor(() => {
-      expect(sessionService.guardarSesion).toHaveBeenCalledWith(mockUser)
+      expect(sessionService.guardarSesion).toHaveBeenCalledWith(mockToken)
     })
   })
 
@@ -208,14 +214,13 @@ describe('Login Page', () => {
       </BrowserRouter>,
     )
 
-    const emailInput = screen.getByLabelText('Correo Institucional')
-    fireEvent.change(emailInput, { target: { value: 'test.user@ucr.ac.cr' } })
-
-    const passwordInput = screen.getByLabelText('Contraseña')
-    fireEvent.change(passwordInput, { target: { value: 'password123' } })
-
-    const submitButton = screen.getByRole('button', { name: /Iniciar Sesión/i })
-    fireEvent.click(submitButton)
+    fireEvent.change(screen.getByLabelText('Correo Institucional'), {
+      target: { value: 'test.user@ucr.ac.cr' },
+    })
+    fireEvent.change(screen.getByLabelText('Contraseña'), {
+      target: { value: 'password123' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /Iniciar Sesión/i }))
 
     await waitFor(() => {
       expect(screen.getByText((content) => content.includes('Usuario no encontrado'))).toBeInTheDocument()
@@ -223,7 +228,7 @@ describe('Login Page', () => {
   })
 
   it('convierte email a minúsculas', async () => {
-    authService.login.mockResolvedValueOnce({ id: 1 })
+    authService.login.mockResolvedValueOnce({ token: 'header.payload.signature', estado: 1 })
     sessionService.guardarSesion.mockImplementation(() => {})
 
     render(
@@ -232,14 +237,13 @@ describe('Login Page', () => {
       </BrowserRouter>,
     )
 
-    const emailInput = screen.getByLabelText('Correo Institucional')
-    fireEvent.change(emailInput, { target: { value: 'TEST.USER@UCR.AC.CR' } })
-
-    const passwordInput = screen.getByLabelText('Contraseña')
-    fireEvent.change(passwordInput, { target: { value: 'pass' } })
-
-    const submitButton = screen.getByRole('button', { name: /Iniciar Sesión/i })
-    fireEvent.click(submitButton)
+    fireEvent.change(screen.getByLabelText('Correo Institucional'), {
+      target: { value: 'TEST.USER@UCR.AC.CR' },
+    })
+    fireEvent.change(screen.getByLabelText('Contraseña'), {
+      target: { value: 'pass' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /Iniciar Sesión/i }))
 
     await waitFor(() => {
       expect(authService.login).toHaveBeenCalledWith('test.user@ucr.ac.cr', 'pass')
@@ -262,8 +266,9 @@ describe('Login Page', () => {
     })
 
     // Completar correo válido y volver a enviar: error de correo desaparece
-    const emailInput = screen.getByLabelText('Correo Institucional')
-    fireEvent.change(emailInput, { target: { value: 'test.user@ucr.ac.cr' } })
+    fireEvent.change(screen.getByLabelText('Correo Institucional'), {
+      target: { value: 'test.user@ucr.ac.cr' },
+    })
     fireEvent.click(submitButton)
 
     await waitFor(() => {

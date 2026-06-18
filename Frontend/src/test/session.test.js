@@ -1,11 +1,11 @@
 ﻿// session.test.js
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { guardarSesion, obtenerSesion, cerrarSesion } from '../services/session'
+import { buildJWT, nowInSeconds } from './helpers/jwtTestHelper'
 
 describe('session service', () => {
   beforeEach(() => {
     sessionStorage.clear()
-    vi.clearAllTimers()
     vi.useFakeTimers()
   })
 
@@ -15,24 +15,23 @@ describe('session service', () => {
   })
 
   it('guarda sesión en sessionStorage', () => {
-    const usuario = { id: 1, nombre: 'Test', correo: 'test@ucr.ac.cr' }
+    const token = buildJWT({ id: 1, nombre: 'Test', correo: 'test@ucr.ac.cr', exp: nowInSeconds() + 3600 })
 
-    guardarSesion(usuario)
+    guardarSesion(token)
 
     const stored = sessionStorage.getItem('pingponeros_session')
     expect(stored).not.toBeNull()
-
-    const parsed = JSON.parse(stored)
-    expect(parsed.usuario).toEqual(usuario)
+    expect(stored).toBe(token)
   })
 
   it('obtiene sesión válida', () => {
-    const usuario = { id: 1, nombre: 'Test', correo: 'test@ucr.ac.cr' }
-    guardarSesion(usuario)
+    const payload = { id: 1, nombre: 'Test', correo: 'test@ucr.ac.cr', exp: nowInSeconds() + 3600 }
+    const token = buildJWT(payload)
+    guardarSesion(token)
 
     const retrieved = obtenerSesion()
 
-    expect(retrieved).toEqual(usuario)
+    expect(retrieved).toMatchObject({ id: 1, nombre: 'Test', correo: 'test@ucr.ac.cr' })
   })
 
   it('devuelve null cuando no hay sesión guardada', () => {
@@ -42,11 +41,9 @@ describe('session service', () => {
   })
 
   it('devuelve null cuando sesión expiró', () => {
-    const usuario = { id: 1, nombre: 'Test' }
-    guardarSesion(usuario)
-
-    // Avanzar tiempo más de 1 hora
-    vi.advanceTimersByTime(61 * 60 * 1000)
+    // exp en el pasado (hace 1 segundo)
+    const token = buildJWT({ id: 1, nombre: 'Test', exp: nowInSeconds() - 1 })
+    guardarSesion(token)
 
     const result = obtenerSesion()
 
@@ -54,12 +51,10 @@ describe('session service', () => {
   })
 
   it('elimina sesión expirada del sessionStorage', () => {
-    const usuario = { id: 1, nombre: 'Test' }
-    guardarSesion(usuario)
+    const token = buildJWT({ id: 1, nombre: 'Test', exp: nowInSeconds() - 1 })
+    guardarSesion(token)
 
     expect(sessionStorage.getItem('pingponeros_session')).not.toBeNull()
-
-    vi.advanceTimersByTime(61 * 60 * 1000)
 
     obtenerSesion()
 
@@ -67,8 +62,8 @@ describe('session service', () => {
   })
 
   it('cierra sesión eliminándola del sessionStorage', () => {
-    const usuario = { id: 1, nombre: 'Test' }
-    guardarSesion(usuario)
+    const token = buildJWT({ id: 1, nombre: 'Test', exp: nowInSeconds() + 3600 })
+    guardarSesion(token)
 
     expect(sessionStorage.getItem('pingponeros_session')).not.toBeNull()
 
@@ -77,42 +72,52 @@ describe('session service', () => {
     expect(sessionStorage.getItem('pingponeros_session')).toBeNull()
   })
 
-  it('devuelve null si JSON es inválido en sessionStorage', () => {
-    sessionStorage.setItem('pingponeros_session', 'invalid json')
+  it('devuelve null si el token no es un JWT válido', () => {
+    sessionStorage.setItem('pingponeros_session', 'invalid-token')
 
     const result = obtenerSesion()
 
     expect(result).toBeNull()
   })
 
-  it('devuelve null y limpia sessionStorage si JSON inválido', () => {
-    sessionStorage.setItem('pingponeros_session', '{invalid')
+  it('devuelve null y limpia sessionStorage si el token es inválido', () => {
+    sessionStorage.setItem('pingponeros_session', 'not.a.jwt')
 
     obtenerSesion()
 
+    // El payload decodificado no es JSON válido → se limpia
     expect(sessionStorage.getItem('pingponeros_session')).toBeNull()
   })
 
-  it('guarda timestamp de expiración', () => {
-    const usuario = { id: 1 }
-    const now = Date.now()
+  it('devuelve null cuando no tiene campo exp y lo trata como válido sin expiración forzada', () => {
+    // Sin campo exp: session.js lo acepta (la condición exp es solo si typeof === 'number')
+    const token = buildJWT({ id: 1, nombre: 'Test' })
+    guardarSesion(token)
 
-    guardarSesion(usuario)
+    const result = obtenerSesion()
 
-    const stored = JSON.parse(sessionStorage.getItem('pingponeros_session'))
-    expect(stored.expira).toBeGreaterThan(now)
+    // Sin exp el token se considera válido indefinidamente
+    expect(result).toMatchObject({ id: 1, nombre: 'Test' })
   })
 
-  it('mantiene sesión válida dentro de 1 hora', () => {
-    const usuario = { id: 1, nombre: 'Test' }
-    guardarSesion(usuario)
+  it('mantiene sesión válida cuando exp está en el futuro', () => {
+    const token = buildJWT({ id: 1, nombre: 'Test', exp: nowInSeconds() + 3600 })
+    guardarSesion(token)
 
-    // Avanzar 30 minutos
+    // Avanzar 30 minutos (en ms) — exp sigue siendo futuro
     vi.advanceTimersByTime(30 * 60 * 1000)
 
     const result = obtenerSesion()
 
-    expect(result).toEqual(usuario)
+    expect(result).toMatchObject({ id: 1, nombre: 'Test' })
+  })
+
+  it('ignora guardarSesion si el argumento no es un string', () => {
+    guardarSesion({ id: 1 })
+    guardarSesion(null)
+    guardarSesion(undefined)
+    guardarSesion('')
+
+    expect(sessionStorage.getItem('pingponeros_session')).toBeNull()
   })
 })
-

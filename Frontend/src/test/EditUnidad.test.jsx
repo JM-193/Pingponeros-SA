@@ -1,16 +1,16 @@
-// EditUnidad.test.jsx
+// EditUnits.test.jsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
-import EditUnidad from '../pages/EditUnidad'
-import * as unidadService from '../services/unidadService'
+import EditUnits from '../pages/EditUnits'
+import * as unitService from '../services/unitService'
 import * as areaService from '../services/areaService'
-import * as departamentoService from '../services/departamentoService'
-import * as seccionService from '../services/seccionService'
+import * as departmentService from '../services/departmentService'
+import * as sectionService from '../services/sectionService'
 
-vi.mock('../services/unidadService')
+vi.mock('../services/unitService')
 vi.mock('../services/areaService')
-vi.mock('../services/departamentoService')
-vi.mock('../services/seccionService')
+vi.mock('../services/departmentService')
+vi.mock('../services/sectionService')
 
 const mockUnidad = {
   nombre: 'Unidad Administrativa',
@@ -29,13 +29,13 @@ const renderWithRoute = (nombre) =>
   render(
     <MemoryRouter initialEntries={[`/organizacion/unidades/editar/${nombre}`]}>
       <Routes>
-        <Route path="/organizacion/unidades/editar/:nombre" element={<EditUnidad />} />
+        <Route path="/organizacion/unidades/editar/:nombre" element={<EditUnits />} />
         <Route path="/organizacion/unidades/consultar" element={<div>Lista de unidades</div>} />
       </Routes>
     </MemoryRouter>,
   )
 
-describe('EditUnidad Page', () => {
+describe('EditUnits Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
   })
@@ -43,7 +43,7 @@ describe('EditUnidad Page', () => {
   it('renderiza página en estado de carga sin parámetros de ruta', () => {
     render(
       <BrowserRouter>
-        <EditUnidad />
+        <EditUnits />
       </BrowserRouter>,
     )
 
@@ -51,10 +51,10 @@ describe('EditUnidad Page', () => {
   })
 
   it('carga y renderiza el formulario con los datos de la unidad', async () => {
-    unidadService.obtenerUnidadPorNombre.mockResolvedValueOnce(mockUnidad)
+    unitService.obtenerUnidadPorNombre.mockResolvedValueOnce(mockUnidad)
     areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
-    departamentoService.obtenerDepartamentos.mockResolvedValueOnce(mockDepartamentos)
-    seccionService.obtenerSecciones.mockResolvedValueOnce(mockSecciones)
+    departmentService.obtenerDepartamentos.mockResolvedValueOnce(mockDepartamentos)
+    sectionService.obtenerSecciones.mockResolvedValueOnce(mockSecciones)
 
     renderWithRoute('Unidad Administrativa')
 
@@ -67,11 +67,11 @@ describe('EditUnidad Page', () => {
   })
 
   it('actualiza unidad correctamente y redirige', async () => {
-    unidadService.obtenerUnidadPorNombre.mockResolvedValueOnce(mockUnidad)
+    unitService.obtenerUnidadPorNombre.mockResolvedValueOnce(mockUnidad)
     areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
-    departamentoService.obtenerDepartamentos.mockResolvedValueOnce(mockDepartamentos)
-    seccionService.obtenerSecciones.mockResolvedValueOnce(mockSecciones)
-    unidadService.actualizarUnidad.mockResolvedValueOnce({})
+    departmentService.obtenerDepartamentos.mockResolvedValueOnce(mockDepartamentos)
+    sectionService.obtenerSecciones.mockResolvedValueOnce(mockSecciones)
+    unitService.actualizarUnidad.mockResolvedValueOnce({})
 
     renderWithRoute('Unidad Administrativa')
 
@@ -88,11 +88,11 @@ describe('EditUnidad Page', () => {
   })
 
   it('muestra error cuando falla la actualización', async () => {
-    unidadService.obtenerUnidadPorNombre.mockResolvedValue(mockUnidad)
+    unitService.obtenerUnidadPorNombre.mockResolvedValue(mockUnidad)
     areaService.obtenerAreas.mockResolvedValue(mockAreas)
-    departamentoService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
-    seccionService.obtenerSecciones.mockResolvedValue(mockSecciones)
-    unidadService.actualizarUnidad.mockRejectedValueOnce(new Error('Error al actualizar unidad'))
+    departmentService.obtenerDepartamentos.mockResolvedValue(mockDepartamentos)
+    sectionService.obtenerSecciones.mockResolvedValue(mockSecciones)
+    unitService.actualizarUnidad.mockRejectedValueOnce(new Error('Error al actualizar unidad'))
 
     renderWithRoute('Unidad Administrativa')
 
@@ -104,20 +104,114 @@ describe('EditUnidad Page', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(unidadService.actualizarUnidad).toHaveBeenCalledTimes(1)
+      expect(unitService.actualizarUnidad).toHaveBeenCalledTimes(1)
     })
   })
 
   it('muestra error cuando falla la carga', async () => {
-    unidadService.obtenerUnidadPorNombre.mockRejectedValueOnce(new Error('Unidad no encontrada'))
+    unitService.obtenerUnidadPorNombre.mockRejectedValueOnce(new Error('Unidad no encontrada'))
     areaService.obtenerAreas.mockResolvedValueOnce([])
-    departamentoService.obtenerDepartamentos.mockResolvedValueOnce([])
-    seccionService.obtenerSecciones.mockResolvedValueOnce([])
+    departmentService.obtenerDepartamentos.mockResolvedValueOnce([])
+    sectionService.obtenerSecciones.mockResolvedValueOnce([])
 
     renderWithRoute('Inexistente')
 
     await waitFor(() => {
       expect(screen.getByText('Unidad no encontrada')).toBeInTheDocument()
+    })
+  })
+})
+
+describe('EditUnits Modal Mode', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+  })
+
+  it('renderiza dentro de un modal cuando isModal es true', async () => {
+    unitService.obtenerUnidadPorNombre.mockResolvedValueOnce(mockUnidad)
+    areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
+    departmentService.obtenerDepartamentos.mockResolvedValueOnce(mockDepartamentos)
+    sectionService.obtenerSecciones.mockResolvedValueOnce(mockSecciones)
+
+    render(
+      <BrowserRouter>
+        <EditUnits isModal isOpen={true} entityName="Unidad Administrativa" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Editar Unidad/i })).toBeInTheDocument()
+    })
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Unidad Administrativa')).toBeInTheDocument()
+  })
+
+  it('muestra cargando dentro del modal', () => {
+    render(
+      <BrowserRouter>
+        <EditUnits isModal isOpen={true} entityName="Test" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByText('Cargando unidad...')).toBeInTheDocument()
+  })
+
+  it('no renderiza Header ni Navbar en modo modal', async () => {
+    unitService.obtenerUnidadPorNombre.mockResolvedValueOnce(mockUnidad)
+    areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
+    departmentService.obtenerDepartamentos.mockResolvedValueOnce(mockDepartamentos)
+    sectionService.obtenerSecciones.mockResolvedValueOnce(mockSecciones)
+
+    render(
+      <BrowserRouter>
+        <EditUnits isModal isOpen={true} entityName="Unidad Administrativa" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Unidad Administrativa')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('Página Principal')).not.toBeInTheDocument()
+  })
+
+  it('llama a onClose al hacer clic en Cancelar', async () => {
+    unitService.obtenerUnidadPorNombre.mockResolvedValueOnce(mockUnidad)
+    areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
+    departmentService.obtenerDepartamentos.mockResolvedValueOnce(mockDepartamentos)
+    sectionService.obtenerSecciones.mockResolvedValueOnce(mockSecciones)
+    const onClose = vi.fn()
+
+    render(
+      <BrowserRouter>
+        <EditUnits isModal isOpen={true} entityName="Unidad Administrativa" onClose={onClose} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Unidad Administrativa')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('usa entityName prop en lugar de useParams', async () => {
+    unitService.obtenerUnidadPorNombre.mockResolvedValueOnce(mockUnidad)
+    areaService.obtenerAreas.mockResolvedValueOnce(mockAreas)
+    departmentService.obtenerDepartamentos.mockResolvedValueOnce(mockDepartamentos)
+    sectionService.obtenerSecciones.mockResolvedValueOnce(mockSecciones)
+
+    render(
+      <BrowserRouter>
+        <EditUnits isModal isOpen={true} entityName="Unidad Administrativa" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(unitService.obtenerUnidadPorNombre).toHaveBeenCalledWith('Unidad Administrativa')
     })
   })
 })

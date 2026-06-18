@@ -33,7 +33,7 @@ public sealed class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory
     {
         _factory.UsuarioRepo
             .ObtenerContrasenaMasRecienteAsync(Arg.Any<string>())
-            .Returns((Contrasena?)null);
+            .Returns((Password?)null);
         var dto = new { CorreoInstitucional = "noexiste@test.com", Contrasena = "password123" };
 
         var response = await _client.PostAsJsonAsync("/auth/login", dto);
@@ -47,7 +47,7 @@ public sealed class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory
         var hash = BCrypt.Net.BCrypt.HashPassword("contrasenaCorrecta!");
         _factory.UsuarioRepo
             .ObtenerContrasenaMasRecienteAsync("test@test.com")
-            .Returns(new Contrasena { Hash = hash, EsTemporal = false, FechaExpiracion = DateTime.Now.AddDays(30) });
+            .Returns(new Password { Hash = hash, EsTemporal = false, FechaExpiracion = DateTime.Now.AddDays(30) });
         var dto = new { CorreoInstitucional = "test@test.com", Contrasena = "contrasenaIncorrecta" };
 
         var response = await _client.PostAsJsonAsync("/auth/login", dto);
@@ -60,7 +60,7 @@ public sealed class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory
     {
         const string password = "contrasenaCorrecta!";
         var hash = BCrypt.Net.BCrypt.HashPassword(password);
-        var usuario = new Usuario
+        var usuario = new User
         {
             CorreoInstitucional = "test@test.com",
             PrimerNombre = "Test",
@@ -70,7 +70,7 @@ public sealed class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory
         };
         _factory.UsuarioRepo
             .ObtenerContrasenaMasRecienteAsync("test@test.com")
-            .Returns(new Contrasena { Hash = hash, EsTemporal = false, FechaExpiracion = DateTime.Now.AddDays(30) });
+            .Returns(new Password { Hash = hash, EsTemporal = false, FechaExpiracion = DateTime.Now.AddDays(30) });
         _factory.UsuarioRepo
             .ObtenerPorCorreoAsync("test@test.com")
             .Returns(usuario);
@@ -86,7 +86,7 @@ public sealed class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory
     {
         const string password = "temporalVigente!";
         var hash = BCrypt.Net.BCrypt.HashPassword(password);
-        var usuario = new Usuario
+        var usuario = new User
         {
             CorreoInstitucional = "temp@test.com",
             PrimerNombre = "Temp",
@@ -96,7 +96,7 @@ public sealed class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory
         };
         _factory.UsuarioRepo
             .ObtenerContrasenaMasRecienteAsync("temp@test.com")
-            .Returns(new Contrasena { Hash = hash, EsTemporal = true, FechaExpiracion = DateTime.Now.AddHours(4) });
+            .Returns(new Password { Hash = hash, EsTemporal = true, FechaExpiracion = DateTime.Now.AddHours(4) });
         _factory.UsuarioRepo
             .ObtenerPorCorreoAsync("temp@test.com")
             .Returns(usuario);
@@ -115,7 +115,7 @@ public sealed class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory
     {
         const string password = "temporalVencida!";
         var hash = BCrypt.Net.BCrypt.HashPassword(password);
-        var usuario = new Usuario
+        var usuario = new User
         {
             CorreoInstitucional = "expirada@test.com",
             PrimerNombre = "Temp",
@@ -125,7 +125,7 @@ public sealed class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory
         };
         _factory.UsuarioRepo
             .ObtenerContrasenaMasRecienteAsync("expirada@test.com")
-            .Returns(new Contrasena { Hash = hash, EsTemporal = true, FechaExpiracion = DateTime.Now.AddMinutes(-1) });
+            .Returns(new Password { Hash = hash, EsTemporal = true, FechaExpiracion = DateTime.Now.AddMinutes(-1) });
         _factory.UsuarioRepo
             .ObtenerPorCorreoAsync("expirada@test.com")
             .Returns(usuario);
@@ -144,7 +144,7 @@ public sealed class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory
     [Fact]
     public async Task RecuperarContrasena_Returns403SiUsuarioFueDesactivadoPorTemporalVencida()
     {
-        var usuario = new Usuario
+        var usuario = new User
         {
             CorreoInstitucional = "expirada@test.com",
             PrimerNombre = "Temp",
@@ -157,7 +157,7 @@ public sealed class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory
             .Returns(usuario);
         _factory.UsuarioRepo
             .ObtenerContrasenaMasRecienteAsync("expirada@test.com")
-            .Returns(new Contrasena
+            .Returns(new Password
             {
                 Hash = BCrypt.Net.BCrypt.HashPassword("Temporal123!"),
                 EsTemporal = true,

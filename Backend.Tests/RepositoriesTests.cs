@@ -255,7 +255,7 @@ public sealed class RepositoriesTests
     }
 
     [Fact]
-    public async Task UsuarioRepository_ObtenerPorCorreoAsync_ReturnsUsuario()
+    public async Task UserRepository_ObtenerPorCorreoAsync_ReturnsUsuario()
     {
         var table = new DataTable();
         table.Columns.Add("CORREO_INSTITUCIONAL", typeof(string));
@@ -265,18 +265,18 @@ public sealed class RepositoriesTests
         table.Columns.Add("SEGUNDO_APELLIDO", typeof(string));
         table.Columns.Add("ROL", typeof(int));
         table.Columns.Add("ESTADO", typeof(int));
-        table.Rows.Add("u@test.com", "U", DBNull.Value, "T", DBNull.Value, 1, 1);
+        table.Rows.Add("u@test.com", "U", DBNull.Value, "T", "N", 1, 1);
 
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Usuario?>>>() )
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<User?>>>() )
             .Returns(ci =>
             {
-                var map = (Func<DbDataReader, Task<Usuario?>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<User?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
 
-        var repo = new UsuarioRepository(q);
+        var repo = new UserRepository(q);
         var usuario = await repo.ObtenerPorCorreoAsync("u@test.com");
 
         Assert.NotNull(usuario);
@@ -284,7 +284,7 @@ public sealed class RepositoriesTests
     }
 
     [Fact]
-    public async Task UsuarioRepository_ObtenerContrasenaMasRecienteAsync_ReturnsContrasena()
+    public async Task UserRepository_ObtenerContrasenaMasRecienteAsync_ReturnsContrasena()
     {
         var vencimiento = DateTime.Now.AddDays(2);
         var table = new DataTable();
@@ -294,15 +294,15 @@ public sealed class RepositoriesTests
         table.Rows.Add("hashvalue", vencimiento, 1);
 
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Contrasena?>>>() )
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Password?>>>() )
             .Returns(ci =>
             {
-                var map = (Func<DbDataReader, Task<Contrasena?>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<Password?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
 
-        var repo = new UsuarioRepository(q);
+        var repo = new UserRepository(q);
         var contrasena = await repo.ObtenerContrasenaMasRecienteAsync("u@test.com");
 
         Assert.NotNull(contrasena);
@@ -312,24 +312,24 @@ public sealed class RepositoriesTests
     }
 
     [Fact]
-    public async Task UsuarioRepository_ActualizarAsync_ReturnsTrueWhenUpdated()
+    public async Task UserRepository_ActualizarAsync_ReturnsTrueWhenUpdated()
     {
         var q = Substitute.For<IQueryExecutor>();
         q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>()).Returns(1);
 
-        var repo = new UsuarioRepository(q);
-        var updated = await repo.ActualizarAsync("u@test.com", new Usuario { CorreoInstitucional = "u@test.com", PrimerNombre = "A", PrimerApellido = "B", Rol = 0, Estado = 1 });
+        var repo = new UserRepository(q);
+        var updated = await repo.ActualizarAsync("u@test.com", new User { CorreoInstitucional = "u@test.com", PrimerNombre = "A", PrimerApellido = "B", Rol = 0, Estado = 1 });
 
         Assert.True(updated);
     }
 
     [Fact]
-    public async Task UsuarioRepository_EliminarAsync_ReturnsTrueWhenDeleted()
+    public async Task UserRepository_EliminarAsync_ReturnsTrueWhenDeleted()
     {
         var q = Substitute.For<IQueryExecutor>();
         q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>()).Returns(1);
 
-        var repo = new UsuarioRepository(q);
+        var repo = new UserRepository(q);
         var deleted = await repo.EliminarAsync("u@test.com");
 
         Assert.True(deleted);

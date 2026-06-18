@@ -21,7 +21,7 @@ public sealed class UnidadesEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task GetUnidades_Returns200ConLista()
     {
-        _factory.UnidadRepo.ObtenerTodasAsync().Returns(new List<Unidad>
+        _factory.UnidadRepo.ObtenerTodasAsync().Returns(new List<Unit>
         {
             new() { Id = 1, IdArea = 1, IdDepartamento = 1, IdSeccion = 1, Nombre = "infraestructura", Descripcion = "Unidad Infraestructura", Estado = 1 }
         });
@@ -34,7 +34,7 @@ public sealed class UnidadesEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task GetUnidadPorNombre_Returns200CuandoExiste()
     {
-        var unidad = new Unidad { Id = 1, IdArea = 1, IdDepartamento = 1, IdSeccion = 1, Nombre = "infraestructura", Descripcion = "Unidad Infraestructura", Estado = 1 };
+        var unidad = new Unit { Id = 1, IdArea = 1, IdDepartamento = 1, IdSeccion = 1, Nombre = "infraestructura", Descripcion = "Unidad Infraestructura", Estado = 1 };
         _factory.UnidadRepo.ObtenerPorNombreAsync("infraestructura").Returns(unidad);
 
         var response = await _client.GetAsync("/unidades/infraestructura");
@@ -45,7 +45,7 @@ public sealed class UnidadesEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task GetUnidadPorNombre_Returns404CuandoNoExiste()
     {
-        _factory.UnidadRepo.ObtenerPorNombreAsync(Arg.Any<string>()).Returns((Unidad?)null);
+        _factory.UnidadRepo.ObtenerPorNombreAsync(Arg.Any<string>()).Returns((Unit?)null);
 
         var response = await _client.GetAsync("/unidades/noexiste");
 
@@ -120,7 +120,7 @@ public sealed class UnidadesEndpointsTests : IClassFixture<TestWebApplicationFac
     public async Task CrearUnidad_Returns201CuandoSeCreaCorrecto()
     {
         _factory.UnidadRepo.ExisteNombreAsync(Arg.Any<string>()).Returns(false);
-        _factory.UnidadRepo.InsertarAsync(Arg.Any<Unidad>()).Returns(1);
+        _factory.UnidadRepo.InsertarAsync(Arg.Any<Unit>()).Returns(1);
         var dto = new { Nombre = "Redes", IdArea = 1, IdDepartamento = (int?)null, IdSeccion = 1, Descripcion = "Unidad Redes" };
 
         var response = await _client.PostAsJsonAsync("/unidades", dto);
@@ -131,9 +131,9 @@ public sealed class UnidadesEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task CrearUnidad_NormalizaNombreYDescripcionAntesDeInsertar()
     {
-        Unidad? capturada = null;
+        Unit? capturada = null;
         _factory.UnidadRepo.ExisteNombreAsync(Arg.Any<string>()).Returns(false);
-        _factory.UnidadRepo.InsertarAsync(Arg.Do<Unidad>(unidad => capturada = unidad)).Returns(1);
+        _factory.UnidadRepo.InsertarAsync(Arg.Do<Unit>(unidad => capturada = unidad)).Returns(1);
         var dto = new { Nombre = "  Redes  ", IdArea = 1, IdDepartamento = (int?)null, IdSeccion = 1, Descripcion = "  Unidad Redes  " };
 
         var response = await _client.PostAsJsonAsync("/unidades", dto);
@@ -148,7 +148,7 @@ public sealed class UnidadesEndpointsTests : IClassFixture<TestWebApplicationFac
     public async Task ActualizarUnidad_Returns200CuandoSeActualiza()
     {
         _factory.UnidadRepo.ExisteNombreAsync(Arg.Any<string>()).Returns(false);
-        _factory.UnidadRepo.ActualizarAsync(Arg.Any<string>(), Arg.Any<Unidad>()).Returns(true);
+        _factory.UnidadRepo.ActualizarAsync(Arg.Any<string>(), Arg.Any<Unit>()).Returns(true);
         var dto = new { Nombre = "infraestructura", IdArea = 1, IdDepartamento = (int?)null, IdSeccion = 1, Descripcion = "Descripción actualizada" };
 
         var response = await _client.PutAsJsonAsync("/unidades/infraestructura", dto);
@@ -171,7 +171,7 @@ public sealed class UnidadesEndpointsTests : IClassFixture<TestWebApplicationFac
     public async Task ActualizarUnidad_Returns404CuandoNoExiste()
     {
         _factory.UnidadRepo.ExisteNombreAsync(Arg.Any<string>()).Returns(false);
-        _factory.UnidadRepo.ActualizarAsync(Arg.Any<string>(), Arg.Any<Unidad>()).Returns(false);
+        _factory.UnidadRepo.ActualizarAsync(Arg.Any<string>(), Arg.Any<Unit>()).Returns(false);
         var dto = new { Nombre = "noexiste", IdArea = 1, IdDepartamento = (int?)null, IdSeccion = 1, Descripcion = "Descripción" };
 
         var response = await _client.PutAsJsonAsync("/unidades/noexiste", dto);

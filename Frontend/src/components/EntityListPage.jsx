@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useNavigate } from 'react-router-dom'
 import { FaSearch } from 'react-icons/fa'
@@ -70,65 +70,90 @@ export default function EntityListPage({
   entityLabel,
   createPath,
   editPath,
+  renderCreateModal,
+  renderEditModal,
   fetchItems,
   columns,
   matchesSearch,
   getRowId,
   searchPlaceholder = 'Ingrese el nombre o descripción',
   resultsPerPage = 10,
-  backPath = '/home',
 }) {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [allItems, setAllItems] = useState([])
-  const [results, setResults] = useState([])
   const [loading, setLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [sortConfig, setSortConfig] = useState(null)
+  const [createModalOpen, setCreateModalOpen] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [editingItem, setEditingItem] = useState(null)
 
   const matches = matchesSearch ?? defaultSearch
   const resolveRowId = useMemo(() => getRowId ?? ((item) => item.id), [getRowId])
-  const sortedResults = useMemo(
-    () => sortRowsByColumn(results, columns, sortConfig),
-    [results, columns, sortConfig]
-  )
+const filteredResults = useMemo(() => {
+  if (!searchTerm.trim()) {
+    return allItems
+  }
+
+  return allItems.filter((item) => matches(item, searchTerm))
+}, [allItems, matches, searchTerm])
+
+const sortedResults = useMemo(
+  () => sortRowsByColumn(filteredResults, columns, sortConfig),
+  [filteredResults, columns, sortConfig]
+)
+
+  const loadItems = useCallback(async () => {
+    setLoading(true)
+    setErrorMsg('')
+
+    try {
+      const data = await fetchItems()
+      setAllItems(data)
+      setSearchTerm('')
+      setCurrentPage(1)
+    } catch (error) {
+      setErrorMsg(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [fetchItems])
 
   useEffect(() => {
-    const loadItems = async () => {
-      setLoading(true)
-      setErrorMsg('')
-      try {
-        const data = await fetchItems()
-        setAllItems(data)
-        setResults(data)
-      } catch (error) {
-        setErrorMsg(error.message)
-      } finally {
-        setLoading(false)
-      }
-    }
-
     loadItems()
-  }, [fetchItems])
+  }, [loadItems])
 
   const handleInputChange = (e) => {
     setSearchTerm(e.target.value)
     setCurrentPage(1)
   }
 
-  const handleSearch = (e) => {
-    e.preventDefault()
-    setCurrentPage(1)
-    const filtered = allItems.filter((item) => matches(item, searchTerm))
-    setResults(filtered)
-  }
-
   const handleEdit = (item) => {
-    if (editPath) {
+    if (renderEditModal) {
+      setEditingItem(item)
+      setEditModalOpen(true)
+    } else if (editPath) {
       navigate(editPath(item))
     }
   }
+
+  const handleCreateClick = () => {
+    if (renderCreateModal) {
+      setCreateModalOpen(true)
+    } else if (createPath) {
+      navigate(createPath)
+    }
+  }
+
+  const handleModalSuccess = useCallback(async () => {
+    setCreateModalOpen(false)
+    setEditModalOpen(false)
+    setEditingItem(null)
+
+    await loadItems()
+  }, [loadItems])
 
   const handleSort = (columnKey) => {
     setSortConfig((currentSort) => ({
@@ -162,7 +187,7 @@ export default function EntityListPage({
         <EntityResultsTable
           columns={columns}
           rows={currentResults}
-          onEdit={editPath ? handleEdit : undefined}
+          onEdit={(editPath || renderEditModal) ? handleEdit : undefined}
           getRowId={resolveRowId}
           sortConfig={sortConfig}
           onSort={handleSort}
@@ -198,7 +223,7 @@ export default function EntityListPage({
           marginBottom: '32px',
         }}
       >
-        <form onSubmit={handleSearch}>
+        <form onSubmit={(e) => e.preventDefault()}>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: '240px' }}>
               <label
@@ -260,7 +285,7 @@ export default function EntityListPage({
             </div>
             <button
               type="button"
-              onClick={() => navigate(createPath)}
+              onClick={handleCreateClick}
               style={{
                 padding: '10px 32px',
                 backgroundColor: COLORS.primaryBtn,
@@ -296,10 +321,22 @@ export default function EntityListPage({
           label="Regresar"
           type="button"
           variant="secondary"
-          onClick={() => navigate(backPath)}
+          onClick={() => navigate(-1)}
           disabled={loading}
         />
       </div>
+
+      {renderCreateModal?.({
+        isOpen: createModalOpen,
+        onClose: () => setCreateModalOpen(false),
+        onSuccess: handleModalSuccess,
+      })}
+      {renderEditModal?.({
+        isOpen: editModalOpen,
+        onClose: () => { setEditModalOpen(false); setEditingItem(null) },
+        onSuccess: handleModalSuccess,
+        item: editingItem,
+      })}
     </PageLayout>
   )
 }
@@ -307,8 +344,10 @@ export default function EntityListPage({
 EntityListPage.propTypes = {
   title: PropTypes.string.isRequired,
   entityLabel: PropTypes.string.isRequired,
-  createPath: PropTypes.string.isRequired,
+  createPath: PropTypes.string,
   editPath: PropTypes.func,
+  renderCreateModal: PropTypes.func,
+  renderEditModal: PropTypes.func,
   fetchItems: PropTypes.func.isRequired,
   columns: PropTypes.arrayOf(
     PropTypes.shape({
@@ -324,11 +363,13 @@ EntityListPage.propTypes = {
   getRowId: PropTypes.func,
   searchPlaceholder: PropTypes.string,
   resultsPerPage: PropTypes.number,
-  backPath: PropTypes.string,
 }
 
 EntityListPage.defaultProps = {
+  createPath: null,
   editPath: null,
+  renderCreateModal: null,
+  renderEditModal: null,
   matchesSearch: null,
   getRowId: null,
 }

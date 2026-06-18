@@ -32,5 +32,20 @@ describe('FormInput', () => {
 
     expect(screen.getByLabelText('Correo')).toBeDisabled()
   })
+
+  it('aplica maxLength cuando se envía', () => {
+    render(
+      <FormInput
+        label="Usuario"
+        id="usuario"
+        name="usuario"
+        value=""
+        onChange={() => {}}
+        maxLength={12}
+      />,
+    )
+
+    expect(screen.getByLabelText('Usuario')).toHaveAttribute('maxLength', '12')
+  })
 })
 
