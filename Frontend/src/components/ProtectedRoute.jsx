@@ -8,19 +8,18 @@ import { obtenerSesion } from '../services/session'
  */
 export default function ProtectedRoute({
   children,
-  needAdmin = false
+  allowedRoles,
 }) {
   // Fetch session
   const sesion = obtenerSesion()
-  const isAdmin = sesion?.rol === 1
 
   // If no session, redirect to login
   if (!sesion) {
     return <Navigate to="/" replace />
   }
 
-  // Check for admin user
-  if (needAdmin && !isAdmin) {
+  // Check for allowed roles
+  if (allowedRoles && !allowedRoles.includes(sesion?.rol)) {
     return <Navigate to="/home" replace />
   }
 
@@ -30,5 +29,5 @@ export default function ProtectedRoute({
 
 ProtectedRoute.propTypes = {
   children: PropTypes.node,
-  needAdmin: PropTypes.bool,
+  allowedRoles: PropTypes.arrayOf(PropTypes.number),
 }
