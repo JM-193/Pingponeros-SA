@@ -6,7 +6,10 @@ import { obtenerSesion } from '../services/session'
  * Wraps protected routes and redirects to the login page if not logged in.
  * Also blocks non-admin users from accessing admin routes.
  */
-export default function ProtectedRoute({ needAdmin = false }) {
+export default function ProtectedRoute({
+  children,
+  needAdmin = false
+}) {
   // Fetch session
   const sesion = obtenerSesion()
   const isAdmin = sesion?.rol === 1
@@ -22,9 +25,10 @@ export default function ProtectedRoute({ needAdmin = false }) {
   }
 
   // Everything is fine, render outlet
-  return <Outlet />
+  return children ?? <Outlet />
 }
 
 ProtectedRoute.propTypes = {
+  children: PropTypes.node,
   needAdmin: PropTypes.bool,
 }
