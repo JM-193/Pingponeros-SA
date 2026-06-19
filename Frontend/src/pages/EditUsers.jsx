@@ -70,7 +70,7 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
     if (correo) {
       cargarUsuario()
     }
-  }, [correo, navigate, isModal, onClose])
+  }, [correo, navigate, isModal, onClose, delayedNavigate])
 
   const clearFeedback = () => {
     setSuccessMsg('')

@@ -55,7 +55,7 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
     if (nombre) {
       cargarArea()
     }
-  }, [nombre, navigate, isModal, onClose])
+  }, [nombre, navigate, isModal, onClose, delayedNavigate])
 
   const clearFeedback = () => {
     setSuccessMsg('')

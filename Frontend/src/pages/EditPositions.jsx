@@ -104,7 +104,7 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
       }
     }
     cargarDatos()
-  }, [numeroPlaza, navigate, isModal, onClose])
+  }, [numeroPlaza, navigate, isModal, onClose, delayedNavigate])
 
   const filteredDepartamentosOptions = useMemo(() => {
     if (!formData.idArea) return allDepartamentosOptions
