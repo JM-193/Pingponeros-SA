@@ -52,7 +52,7 @@ internal class JwtService : IJwtService
         {
             new(JwtRegisteredClaimNames.Sub, correoInstitucional),
             new("correoInstitucional", correoInstitucional),
-            new("rol", rol.ToString(CultureInfo.InvariantCulture)),
+            new("rol", rol.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer32),
             new("primerNombre", primerNombre),
             new("primerApellido", primerApellido),
             new("segundoApellido", segundoApellido),

@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   {
     label: 'Usuarios',
     activeOn: '/usuarios',
+    roles: [1],
     submenu: [
       { label: 'Consultar', path: '/usuarios/consultar' },
       /*{ label: 'Asignar N° de plaza', path: '/usuarios/asignar-plaza' },*/
@@ -19,6 +20,7 @@ const NAV_ITEMS = [
   {
     label: 'Organización',
     activeOn: '/organizacion',
+    roles: [1],
     submenu: [
       {
         label: 'Áreas',
@@ -61,6 +63,31 @@ const NAV_ITEMS = [
     ],
   },*/
 ]
+
+const filterNavItems = (items, sesion) =>
+  items.reduce((filtered, item) => {
+    if (
+      item.roles &&
+      !item.roles.includes(sesion?.rol)
+    ) {
+      return filtered
+    }
+
+    const newItem = {
+      ...item,
+      submenu: item.submenu
+        ? filterNavItems(item.submenu, sesion)
+        : undefined,
+    }
+
+    if (newItem.submenu?.length === 0) {
+      delete newItem.submenu
+    }
+
+    filtered.push(newItem)
+
+    return filtered
+  }, [])
 
 const buildNombreCompleto = (sesion) =>
   [
@@ -170,6 +197,7 @@ const getNavbarMenuButtonProps = ({
 })
 
 function NavbarMenu({
+  items,
   clearCloseTimer,
   getMenuButtonProps,
   isMobile,
@@ -223,10 +251,11 @@ function NavbarMenu({
     })
   }
 
-  return renderMenuItems(NAV_ITEMS)
+  return renderMenuItems(items)
 }
 
 NavbarMenu.propTypes = {
+  items: PropTypes.arrayOf(navItemPropType).isRequired,
   clearCloseTimer: PropTypes.func.isRequired,
   getMenuButtonProps: PropTypes.func.isRequired,
   isMobile: PropTypes.bool.isRequired,
@@ -593,6 +622,7 @@ export default function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
   const sesion = obtenerSesion()
+  const visibleNavItems = filterNavItems(NAV_ITEMS, sesion)
   const isMobile = useMediaQuery('(max-width: 768px)')
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -743,6 +773,7 @@ export default function Navbar() {
         }}
       >
         <NavbarMenu
+          items={visibleNavItems}
           clearCloseTimer={clearCloseTimer}
           getMenuButtonProps={getMenuButtonProps}
           isMobile={isMobile}
