@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export function useDelayedNavigate() {
@@ -9,7 +9,7 @@ export function useDelayedNavigate() {
     return () => clearTimeout(timeoutRef.current)
   }, [])
 
-  return (path, delay) => {
+  return useCallback((path, delay) => {
     timeoutRef.current = setTimeout(() => navigate(path), delay)
-  }
+  }, [navigate])
 }
