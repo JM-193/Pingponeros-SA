@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import { crearPlaza } from '../services/positionService'
 import { obtenerUnidades } from '../services/unitService'
@@ -29,6 +30,9 @@ const NUMERO_REGEX = /\D/g
 
 export default function CreatePositions({ isModal, isOpen, onSuccess, onClose }) {
   const navigate = useNavigate()
+  const delayedNavigate = useDelayedNavigate()
+  const callbackTimeoutRef = useRef(null)
+  useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
   const [formData, setFormData] = useState(initialFormData)
   const [parentType, setParentType] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -192,9 +196,9 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
       setSuccessMsg(`Plaza '${numero}' creada correctamente.`)
       setFormData(initialFormData)
       if (isModal && onSuccess) {
-        setTimeout(() => onSuccess(), 1200)
+        callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
       } else {
-        setTimeout(() => navigate(-1), 1500)
+        delayedNavigate(-1, 1500)
       }
     } catch (err) {
       setErrorMsg(err.message)

@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import { crearUsuario } from '../services/userService'
 import Modal from '../components/Modal'
@@ -13,6 +14,9 @@ import StatusMessage from '../components/StatusMessage'
 
 export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
   const navigate = useNavigate()
+  const delayedNavigate = useDelayedNavigate()
+  const callbackTimeoutRef = useRef(null)
+  useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
   const [formData, setFormData] = useState({
     firstName: '',
     secondName: '',
@@ -68,9 +72,9 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
       setSuccessMsg(data.mensaje ?? 'Usuario creado correctamente.')
       handleReset()
       if (isModal && onSuccess) {
-        setTimeout(() => onSuccess(), 1200)
+        callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
       } else {
-        setTimeout(() => navigate(-1), 1500)
+        delayedNavigate(-1, 1500)
       }
     } catch (err) {
       setErrorMsg(err.message)

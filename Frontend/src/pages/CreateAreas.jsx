@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import { crearArea } from '../services/areaService'
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
@@ -9,6 +10,9 @@ import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormEr
 
 export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
   const navigate = useNavigate()
+  const delayedNavigate = useDelayedNavigate()
+  const callbackTimeoutRef = useRef(null)
+  useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
@@ -46,9 +50,9 @@ export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
       setSuccessMsg('Área creada correctamente')
       handleReset()
       if (isModal && onSuccess) {
-        setTimeout(() => onSuccess(), 1200)
+        callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
       } else {
-        setTimeout(() => navigate('/organizacion/areas/consultar'), 1500)
+        delayedNavigate('/organizacion/areas/consultar', 1500)
       }
     } catch (err) {
       setErrorMsg(err.message)

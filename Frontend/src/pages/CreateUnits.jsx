@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
 import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
@@ -29,6 +30,9 @@ const initialFormData = {
 
 export default function CreateUnits({ isModal, isOpen, onSuccess, onClose }) {
   const navigate = useNavigate()
+  const delayedNavigate = useDelayedNavigate()
+  const callbackTimeoutRef = useRef(null)
+  useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
   const [parentType, setParentType] = useState('')
   const [areaOptions, setAreaOptions] = useState([])
   const [departmentOptions, setDepartmentOptions] = useState([])
@@ -71,12 +75,12 @@ export default function CreateUnits({ isModal, isOpen, onSuccess, onClose }) {
       resetFormData()
       setParentType('')
       if (isModal && onSuccess) {
-        setTimeout(() => onSuccess(), 1200)
+        callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
       } else {
-        setTimeout(() => navigate('/organizacion/unidades/consultar'), 1500)
+        delayedNavigate('/organizacion/unidades/consultar', 1500)
       }
     },
-    [navigate, setParentType, isModal, onSuccess],
+    [delayedNavigate, setParentType, isModal, onSuccess],
   )
 
   const {

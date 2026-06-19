@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
@@ -14,6 +15,7 @@ import StatusMessage from '../components/StatusMessage'
 
 export default function ChangePassword() {
   const navigate = useNavigate()
+  const delayedNavigate = useDelayedNavigate()
   const [userEmail] = useState(() => {
     const sesion = obtenerSesion()
     return sesion?.correoInstitucional ?? ''
@@ -89,9 +91,7 @@ export default function ChangePassword() {
     try {
       await cambiarContrasena(userEmail, formData.currentPassword, formData.newPassword)
       setSuccess(true)
-      setTimeout(() => {
-        navigate('/home')
-      }, 1500)
+      delayedNavigate('/home', 1500)
     } catch (err) {
       setErrors({ submit: err.message })
     } finally {

@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import { actualizarPlaza, obtenerPlazaPorNumero } from '../services/positionService'
 import { obtenerUnidades } from '../services/unitService'
@@ -30,6 +31,9 @@ const initialFormData = {
 
 export default function EditPositions({ isModal, isOpen, onSuccess, onClose, entityId }) {
   const navigate = useNavigate()
+  const delayedNavigate = useDelayedNavigate()
+  const callbackTimeoutRef = useRef(null)
+  useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
   const params = useParams()
   const numeroPlaza = entityId ?? params.numeroPlaza
 
@@ -91,9 +95,9 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
       } catch (err) {
         setLoadError(err.message)
         if (isModal && onClose) {
-          setTimeout(() => onClose(), 2000)
+          callbackTimeoutRef.current = setTimeout(() => onClose(), 2000)
         } else {
-          setTimeout(() => navigate('/organizacion/plazas/consultar'), 2000)
+          delayedNavigate('/organizacion/plazas/consultar', 2000)
         }
       } finally {
         setIsLoading(false)
@@ -231,9 +235,9 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
       await actualizarPlaza(numeroPlaza, payload)
       setSuccessMsg(`Plaza '${numeroPlaza}' actualizada correctamente.`)
       if (isModal && onSuccess) {
-        setTimeout(() => onSuccess(), 1200)
+        callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
       } else {
-        setTimeout(() => navigate(-1), 1500)
+        delayedNavigate(-1, 1500)
       }
     } catch (err) {
       setErrorMsg(err.message)
