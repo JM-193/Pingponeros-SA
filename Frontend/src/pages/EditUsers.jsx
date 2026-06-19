@@ -2,10 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { obtenerUsuarioPorCorreo, actualizarUsuario } from '../services/userService'
-import Header from '../components/Header'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
 import Modal from '../components/Modal'
+import PageLayout from '../components/PageLayout'
 import FormContainer from '../components/FormContainer'
 import FormRow from '../components/FormRow'
 import FormInput from '../components/FormInput'
@@ -29,8 +27,8 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
     estado: 1,
   })
   const [correoOriginal, setCorreoOriginal] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
 
@@ -39,7 +37,7 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
 
   useEffect(() => {
     const cargarUsuario = async () => {
-      setLoading(true)
+      setIsLoading(true)
       setErrorMsg('')
       try {
         const user = await obtenerUsuarioPorCorreo(correo)
@@ -61,7 +59,7 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
           setTimeout(() => navigate('/usuarios/consultar'), 2000)
         }
       } finally {
-        setLoading(false)
+        setIsLoading(false)
       }
     }
 
@@ -92,7 +90,7 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setSubmitting(true)
+    setIsSubmitting(true)
     clearFeedback()
 
     try {
@@ -114,7 +112,7 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
     } catch (err) {
       setErrorMsg(err.message)
     } finally {
-      setSubmitting(false)
+      setIsSubmitting(false)
     }
   }
 
@@ -197,13 +195,13 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
         ]}
         defaultLabel="Seleccione un rol"
         required
-        disabled={submitting}
+        disabled={isSubmitting}
       />
 
       <StateToggle
         currentState={formData.estado}
         onStateChange={handleStateChange}
-        disabled={submitting}
+        disabled={isSubmitting}
       />
 
       {successMsg && (
@@ -219,64 +217,30 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
           type="button"
           variant="secondary"
           onClick={handleCancel}
-          disabled={submitting}
+          disabled={isSubmitting}
         />
         <FormButton
-          label={submitting ? 'Guardando...' : 'Actualizar'}
+          label={isSubmitting ? 'Guardando...' : 'Actualizar'}
           type="submit"
           variant="primary"
-          disabled={submitting}
+          disabled={isSubmitting}
         />
       </div>
     </FormContainer>
   )
 
-  if (loading && !formData.email) {
-    if (isModal) {
-      return (
-        <Modal isOpen={isOpen} title="Editar Usuario" onClose={handleCancel}>
-          <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando usuario...</p>
-        </Modal>
-      )
-    }
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: COLORS.bodyBg }}>
-        <Header />
-        <Navbar />
-        <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <p style={{ color: COLORS.textSubtle }}>Cargando usuario...</p>
-        </main>
-        <Footer />
-      </div>
-    )
-  }
+  const formBody = isLoading && !formData.email
+    ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando usuario...</p>
+    : formContent
 
-  if (isModal) {
-    return (
-      <Modal isOpen={isOpen} title="Editar Usuario" onClose={handleCancel}>
-        {formContent}
-      </Modal>
-    )
-  }
-
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: COLORS.bodyBg }}>
-      <Header />
-      <Navbar />
-      <main
-        style={{
-          flex: 1,
-          padding: '40px 40px 60px',
-          maxWidth: '1200px',
-          width: '100%',
-          margin: '0 auto',
-          boxSizing: 'border-box',
-        }}
-      >
-        {formContent}
-      </main>
-      <Footer />
-    </div>
+  return isModal ? (
+    <Modal isOpen={isOpen} title="Editar Usuario" onClose={handleCancel}>
+      {formBody}
+    </Modal>
+  ) : (
+    <PageLayout>
+      {formBody}
+    </PageLayout>
   )
 }
 

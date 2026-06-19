@@ -6,9 +6,6 @@ import { obtenerUnidades } from '../services/unitService'
 import { obtenerDepartamentos } from '../services/departmentService'
 import { obtenerSecciones } from '../services/sectionService'
 import { obtenerAreas } from '../services/areaService'
-import Header from '../components/Header'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
 import Modal from '../components/Modal'
 import FormContainer from '../components/FormContainer'
 import FormSelect from '../components/FormSelect'
@@ -38,7 +35,7 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
 
   const [formData, setFormData] = useState(initialFormData)
   const [parentType, setParentType] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
@@ -55,7 +52,7 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
 
   useEffect(() => {
     const cargarDatos = async () => {
-      setLoading(true)
+      setIsLoading(true)
       setLoadError('')
       try {
         const [plaza, areas, departamentos, secciones, unidades] = await Promise.all([
@@ -99,7 +96,7 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
           setTimeout(() => navigate('/organizacion/plazas/consultar'), 2000)
         }
       } finally {
-        setLoading(false)
+        setIsLoading(false)
       }
     }
     cargarDatos()
@@ -357,47 +354,18 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
     </FormContainer>
   )
 
-  if (loading) {
-    if (isModal) {
-      return (
-        <Modal isOpen={isOpen} title="Editar Plaza" onClose={handleCancel}>
-          <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando datos de la plaza...</p>
-        </Modal>
-      )
-    }
-    return (
-      <PageLayout mainStyle={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: COLORS.textSubtle }}>Cargando datos de la plaza...</p>
-      </PageLayout>
-    )
-  }
+  const formBody = isLoading
+    ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando datos de la plaza...</p>
+    : formContent
 
-  if (isModal) {
-    return (
-      <Modal isOpen={isOpen} title="Editar Plaza" onClose={handleCancel}>
-        {formContent}
-      </Modal>
-    )
-  }
-
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: COLORS.bodyBg }}>
-      <Header />
-      <Navbar />
-      <main
-        style={{
-          flex: 1,
-          padding: '40px 40px 60px',
-          maxWidth: '1200px',
-          width: '100%',
-          margin: '0 auto',
-          boxSizing: 'border-box',
-        }}
-      >
-        {formContent}
-      </main>
-      <Footer />
-    </div>
+  return isModal ? (
+    <Modal isOpen={isOpen} title="Editar Plaza" onClose={handleCancel}>
+      {formBody}
+    </Modal>
+  ) : (
+    <PageLayout>
+      {formBody}
+    </PageLayout>
   )
 }
 

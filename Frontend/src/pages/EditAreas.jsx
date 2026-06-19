@@ -5,7 +5,6 @@ import { actualizarArea, obtenerAreaPorNombre } from '../services/areaService'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
 import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
-import PageLayout from '../components/PageLayout'
 import StateToggle from '../components/StateToggle'
 import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormError, getOrganizationEntityPayload } from '../utils/organizationEntityForm'
 import { COLORS } from '../constants/colors'
@@ -124,52 +123,24 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
     </>
   )
 
-  if (isLoading && !formData.nombre) {
-    if (isModal) {
-      return (
-        <OrganizationEntityFormModal
-          isOpen={isOpen}
-          title="Editar Área"
-          onSubmit={(e) => e.preventDefault()}
-          onClose={handleCancel}
-          primaryLabel="Actualizar"
-        >
-          <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando área...</p>
-        </OrganizationEntityFormModal>
-      )
-    }
-    return (
-      <PageLayout
-        mainStyle={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <p style={{ color: COLORS.textSubtle }}>Cargando área...</p>
-      </PageLayout>
-    )
-  }
+  const formBody = isLoading && !formData.nombre
+    ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando área...</p>
+    : formFields
 
-  if (isModal) {
-    return (
-      <OrganizationEntityFormModal
-        isOpen={isOpen}
-        title="Editar Área"
-        subtitle="Formulario de Actualización"
-        onSubmit={handleSubmit}
-        onClose={handleCancel}
-        isBusy={isSubmitting}
-        successMsg={successMsg}
-        errorMsg={errorMsg}
-        primaryLabel="Actualizar"
-      >
-        {formFields}
-      </OrganizationEntityFormModal>
-    )
-  }
-
-  return (
+  return isModal ? (
+    <OrganizationEntityFormModal
+      isOpen={isOpen}
+      title="Editar Área"
+      onSubmit={handleSubmit}
+      onClose={handleCancel}
+      isBusy={isSubmitting}
+      successMsg={successMsg}
+      errorMsg={errorMsg}
+      primaryLabel="Actualizar"
+    >
+      {formBody}
+    </OrganizationEntityFormModal>
+  ) : (
     <OrganizationEntityFormPage
       title="Editar Área"
       subtitle="Formulario de Actualización"
@@ -180,7 +151,7 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
       errorMsg={errorMsg}
       primaryLabel="Actualizar"
     >
-      {formFields}
+      {formBody}
     </OrganizationEntityFormPage>
   )
 }

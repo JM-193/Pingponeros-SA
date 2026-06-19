@@ -4,8 +4,6 @@ import PropTypes from 'prop-types'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
 import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
-import PageLayout from '../components/PageLayout'
-import Modal from '../components/Modal'
 import StateToggle from '../components/StateToggle'
 import { actualizarUnidad, obtenerUnidadPorNombre } from '../services/unitService'
 import { obtenerAreas } from '../services/areaService'
@@ -200,46 +198,24 @@ export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityN
     </>
   )
 
-  if (isLoading && !formData.nombre) {
-    if (isModal) {
-      return (
-        <Modal isOpen={isOpen} title="Editar Unidad" onClose={handleCancel}>
-          <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando unidad...</p>
-        </Modal>
-      )
-    }
-    return (
-      <PageLayout
-        mainStyle={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <p style={{ color: COLORS.textSubtle }}>Cargando unidad...</p>
-      </PageLayout>
-    )
-  }
+  const formBody = isLoading && !formData.nombre
+    ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando unidad...</p>
+    : formFields
 
-  if (isModal) {
-    return (
-      <OrganizationEntityFormModal
-        isOpen={isOpen}
-        title="Editar Unidad"
-        subtitle="Formulario de Actualización"
-        onSubmit={handleSubmit}
-        onClose={handleCancel}
-        isBusy={isSubmitting}
-        successMsg={successMsg}
-        errorMsg={conflictError || errorMsg}
-        primaryLabel="Actualizar"
-      >
-        {formFields}
-      </OrganizationEntityFormModal>
-    )
-  }
-
-  return (
+  return isModal ? (
+    <OrganizationEntityFormModal
+      isOpen={isOpen}
+      title="Editar Unidad"
+      onSubmit={handleSubmit}
+      onClose={handleCancel}
+      isBusy={isSubmitting}
+      successMsg={successMsg}
+      errorMsg={conflictError || errorMsg}
+      primaryLabel="Actualizar"
+    >
+      {formBody}
+    </OrganizationEntityFormModal>
+  ) : (
     <OrganizationEntityFormPage
       title="Editar Unidad"
       subtitle="Formulario de Actualización"
@@ -250,7 +226,7 @@ export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityN
       errorMsg={conflictError || errorMsg}
       primaryLabel="Actualizar"
     >
-      {formFields}
+      {formBody}
     </OrganizationEntityFormPage>
   )
 }
