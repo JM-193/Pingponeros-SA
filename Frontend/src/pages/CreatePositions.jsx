@@ -6,9 +6,6 @@ import { obtenerUnidades } from '../services/unitService'
 import { obtenerDepartamentos } from '../services/departmentService'
 import { obtenerSecciones } from '../services/sectionService'
 import { obtenerAreas } from '../services/areaService'
-import Header from '../components/Header'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
 import Modal from '../components/Modal'
 import FormContainer from '../components/FormContainer'
 import FormInput from '../components/FormInput'
@@ -34,7 +31,7 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
   const navigate = useNavigate()
   const [formData, setFormData] = useState(initialFormData)
   const [parentType, setParentType] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
@@ -49,7 +46,7 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
 
   useEffect(() => {
     const cargarOpciones = async () => {
-      setLoading(true)
+      setIsLoading(true)
       setLoadError('')
       try {
         const [unidades, departamentos, secciones, areas] = await Promise.all([
@@ -74,7 +71,7 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
       } catch (err) {
         setLoadError(err.message)
       } finally {
-        setLoading(false)
+        setIsLoading(false)
       }
     }
 
@@ -315,53 +312,18 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
     </FormContainer>
   )
 
-  if (loading) {
-    if (isModal) {
-      return (
-        <Modal isOpen={isOpen} title="Crear Plaza" onClose={handleCancel}>
-          <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando datos de organización...</p>
-        </Modal>
-      )
-    }
-    return (
-      <PageLayout
-        mainStyle={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <p style={{ color: COLORS.textSubtle }}>Cargando datos de organización...</p>
-      </PageLayout>
-    )
-  }
+  const formBody = isLoading
+    ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando datos de organización...</p>
+    : formContent
 
-  if (isModal) {
-    return (
-      <Modal isOpen={isOpen} title="Crear Plaza" onClose={handleCancel}>
-        {formContent}
-      </Modal>
-    )
-  }
-
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: COLORS.bodyBg }}>
-      <Header />
-      <Navbar />
-      <main
-        style={{
-          flex: 1,
-          padding: '40px 40px 60px',
-          maxWidth: '1200px',
-          width: '100%',
-          margin: '0 auto',
-          boxSizing: 'border-box',
-        }}
-      >
-        {formContent}
-      </main>
-      <Footer />
-    </div>
+  return isModal ? (
+    <Modal isOpen={isOpen} title="Crear Plaza" onClose={handleCancel}>
+      {formBody}
+    </Modal>
+  ) : (
+    <PageLayout>
+      {formBody}
+    </PageLayout>
   )
 }
 

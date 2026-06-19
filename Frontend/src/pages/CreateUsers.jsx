@@ -2,17 +2,14 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { crearUsuario } from '../services/userService'
-import Header from '../components/Header'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
 import Modal from '../components/Modal'
+import PageLayout from '../components/PageLayout'
 import FormContainer from '../components/FormContainer'
 import FormRow from '../components/FormRow'
 import FormInput from '../components/FormInput'
 import FormSelect from '../components/FormSelect'
 import FormButton from '../components/FormButton'
 import StatusMessage from '../components/StatusMessage'
-import { COLORS } from '../constants/colors'
 
 export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
   const navigate = useNavigate()
@@ -24,7 +21,7 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
     email: '',
     role: '',
   })
-  const [loading, setLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
 
@@ -44,18 +41,18 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
+    setIsSubmitting(true)
     setSuccessMsg('')
     setErrorMsg('')
 
     if (!formData.email.trim()) {
       setErrorMsg('El correo es requerido')
-      setLoading(false)
+      setIsSubmitting(false)
       return
     }
     if (!/^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$/.test(formData.email.trim())) {
       setErrorMsg('El correo debe ser válido. Formato: nombre@ucr.ac.cr (solo letras antes de @)')
-      setLoading(false)
+      setIsSubmitting(false)
       return
     }
 
@@ -78,7 +75,7 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
     } catch (err) {
       setErrorMsg(err.message)
     } finally {
-      setLoading(false)
+      setIsSubmitting(false)
     }
   }
 
@@ -187,44 +184,26 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
           type="button"
           variant="secondary"
           onClick={handleCancel}
-          disabled={loading}
+          disabled={isSubmitting}
         />
         <FormButton
-          label={loading ? 'Guardando...' : 'Crear'}
+          label={isSubmitting ? 'Guardando...' : 'Crear'}
           type="submit"
           variant="primary"
-          disabled={loading}
+          disabled={isSubmitting}
         />
       </div>
     </FormContainer>
   )
 
-  if (isModal) {
-    return (
-      <Modal isOpen={isOpen} title="Crear Usuario" onClose={handleCancel}>
-        {formContent}
-      </Modal>
-    )
-  }
-
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: COLORS.bodyBg }}>
-      <Header />
-      <Navbar />
-      <main
-        style={{
-          flex: 1,
-          padding: '40px 40px 60px',
-          maxWidth: '1200px',
-          width: '100%',
-          margin: '0 auto',
-          boxSizing: 'border-box',
-        }}
-      >
-        {formContent}
-      </main>
-      <Footer />
-    </div>
+  return isModal ? (
+    <Modal isOpen={isOpen} title="Crear Usuario" onClose={handleCancel}>
+      {formContent}
+    </Modal>
+  ) : (
+    <PageLayout>
+      {formContent}
+    </PageLayout>
   )
 }
 

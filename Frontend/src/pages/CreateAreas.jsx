@@ -85,25 +85,20 @@ export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
     />
   )
 
-  if (isModal) {
-    return (
-      <OrganizationEntityFormModal
-        isOpen={isOpen}
-        title="Crear Área"
-        subtitle="Formulario de Registro"
-        onSubmit={handleSubmit}
-        onClose={handleCancel}
-        isBusy={isSubmitting}
-        successMsg={successMsg}
-        errorMsg={errorMsg}
-        primaryLabel="Crear"
-      >
-        {formFields}
-      </OrganizationEntityFormModal>
-    )
-  }
-
-  return (
+  return isModal ? (
+    <OrganizationEntityFormModal
+      isOpen={isOpen}
+      title="Crear Área"
+      onSubmit={handleSubmit}
+      onClose={handleCancel}
+      isBusy={isSubmitting}
+      successMsg={successMsg}
+      errorMsg={errorMsg}
+      primaryLabel="Crear"
+    >
+      {formFields}
+    </OrganizationEntityFormModal>
+  ) : (
     <OrganizationEntityFormPage
       title="Crear Área"
       subtitle="Formulario de Registro"

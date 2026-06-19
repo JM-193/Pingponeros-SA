@@ -33,6 +33,16 @@ describe('CreateAreas Page', () => {
     expect(screen.getByText('Página Principal')).toBeInTheDocument()
   })
 
+  it('muestra el subtítulo en la versión de página', () => {
+    render(
+      <BrowserRouter>
+        <CreateAreas />
+      </BrowserRouter>,
+    )
+
+    expect(screen.getByText('Formulario de Registro')).toBeInTheDocument()
+  })
+
   it('valida que nombre sea requerido', async () => {
     const { container } = render(
       <BrowserRouter>
@@ -214,6 +224,16 @@ describe('CreateAreas Modal Mode', () => {
 
     expect(screen.queryByText('Página Principal')).not.toBeInTheDocument()
     expect(document.querySelector('footer')).not.toBeInTheDocument()
+  })
+
+  it('no muestra el subtítulo en modo modal', () => {
+    render(
+      <BrowserRouter>
+        <CreateAreas isModal isOpen={true} onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    expect(screen.queryByText('Formulario de Registro')).not.toBeInTheDocument()
   })
 
   it('no renderiza nada cuando isOpen es false', () => {

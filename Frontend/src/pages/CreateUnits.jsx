@@ -4,8 +4,6 @@ import PropTypes from 'prop-types'
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
 import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
-import PageLayout from '../components/PageLayout'
-import Modal from '../components/Modal'
 import { crearUnidad } from '../services/unitService'
 import { obtenerAreas } from '../services/areaService'
 import { obtenerDepartamentos } from '../services/departmentService'
@@ -153,46 +151,24 @@ export default function CreateUnits({ isModal, isOpen, onSuccess, onClose }) {
     />
   )
 
-  if (isLoading) {
-    if (isModal) {
-      return (
-        <Modal isOpen={isOpen} title="Crear Unidad" onClose={handleCancel}>
-          <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando datos de organización...</p>
-        </Modal>
-      )
-    }
-    return (
-      <PageLayout
-        mainStyle={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <p style={{ color: COLORS.textSubtle }}>Cargando datos de organización...</p>
-      </PageLayout>
-    )
-  }
+  const formBody = isLoading
+    ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando datos de organización...</p>
+    : formFields
 
-  if (isModal) {
-    return (
-      <OrganizationEntityFormModal
-        isOpen={isOpen}
-        title="Crear Unidad"
-        subtitle="Formulario de Registro"
-        onSubmit={handleSubmit}
-        onClose={handleCancel}
-        isBusy={isSubmitting}
-        successMsg={successMsg}
-        errorMsg={conflictError || errorMsg}
-        primaryLabel="Crear"
-      >
-        {formFields}
-      </OrganizationEntityFormModal>
-    )
-  }
-
-  return (
+  return isModal ? (
+    <OrganizationEntityFormModal
+      isOpen={isOpen}
+      title="Crear Unidad"
+      onSubmit={handleSubmit}
+      onClose={handleCancel}
+      isBusy={isSubmitting}
+      successMsg={successMsg}
+      errorMsg={conflictError || errorMsg}
+      primaryLabel="Crear"
+    >
+      {formBody}
+    </OrganizationEntityFormModal>
+  ) : (
     <OrganizationEntityFormPage
       title="Crear Unidad"
       subtitle="Formulario de Registro"
@@ -203,7 +179,7 @@ export default function CreateUnits({ isModal, isOpen, onSuccess, onClose }) {
       errorMsg={conflictError || errorMsg}
       primaryLabel="Crear"
     >
-      {formFields}
+      {formBody}
     </OrganizationEntityFormPage>
   )
 }
