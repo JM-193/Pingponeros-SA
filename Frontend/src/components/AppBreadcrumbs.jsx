@@ -228,7 +228,11 @@ export default function AppBreadcrumbs() {
   const { crumbs } = matched
 
   return (
-    <div>
+    <div
+      style={{
+        marginBottom: '16px',
+      }}
+    >
       <div
         style={{
           maxWidth: '1200px',
