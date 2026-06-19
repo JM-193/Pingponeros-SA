@@ -8,6 +8,15 @@ import { useMediaQuery } from '../hooks/useMediaQuery'
 
 const NAV_ITEMS = [
   { label: 'Página Principal', path: '/home', activeOn: '/home' },
+  { label: 'Declaraciones', /* path: '/declaraciones', */ activeOn: '/declaraciones' },
+  /*{
+    label: 'Consultas',
+    activeOn: '/consultas',
+    submenu: [
+      { label: 'Diagnostico de carga', path: '/organizacion/consultas/diagnostico' },
+      { label: 'Consultas adicionales', path: '/organizacion/consultas/adicionales' },
+    ],
+  },*/
   {
     label: 'Usuarios',
     activeOn: '/usuarios',
@@ -45,21 +54,10 @@ const NAV_ITEMS = [
     ],
   },
   /*{
-    label: 'Consultas',
-    activeOn: '/consultas',
-    submenu: [
-      { label: 'Diagnostico de carga', path: '/organizacion/consultas/diagnostico' },
-      { label: 'Consultas adicionales', path: '/organizacion/consultas/adicionales' },
-    ],
-  },*/
-  /*{
     label: 'Funciones',
     activeOn: '/funciones',
     submenu: [
-      { label: 'Crear', path: '/organizacion/funciones/crear' },
       { label: 'Consultar', path: '/organizacion/funciones/consultar' },
-      { label: 'Modificar', path: '/organizacion/funciones/modificar' },
-      { label: 'Eliminar', path: '/organizacion/funciones/eliminar' },
     ],
   },*/
 ]
