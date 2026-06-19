@@ -7,7 +7,6 @@ import StatusMessage from './StatusMessage'
 export default function OrganizationEntityFormModal({
   isOpen,
   title,
-  subtitle,
   onSubmit,
   onClose,
   isBusy,
@@ -22,7 +21,6 @@ export default function OrganizationEntityFormModal({
     <Modal isOpen={isOpen} title={title} onClose={onClose}>
       <FormContainer
         onSubmit={onSubmit}
-        subtitle={subtitle}
         requiredNote
       >
         {children}
@@ -66,7 +64,6 @@ export default function OrganizationEntityFormModal({
 OrganizationEntityFormModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   title: PropTypes.string.isRequired,
-  subtitle: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   isBusy: PropTypes.bool,
@@ -79,7 +76,6 @@ OrganizationEntityFormModal.propTypes = {
 }
 
 OrganizationEntityFormModal.defaultProps = {
-  subtitle: '',
   isBusy: false,
   successMsg: '',
   errorMsg: '',

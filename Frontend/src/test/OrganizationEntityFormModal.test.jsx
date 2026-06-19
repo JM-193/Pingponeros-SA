@@ -32,14 +32,14 @@ describe('OrganizationEntityFormModal', () => {
     expect(screen.getByText('Campos del formulario')).toBeInTheDocument()
   })
 
-  it('renderiza subtítulo cuando se proporciona', () => {
+  it('no renderiza subtítulo en el modal', () => {
     render(
       <OrganizationEntityFormModal {...defaultProps} subtitle="Formulario de Registro">
         <p>Campos</p>
       </OrganizationEntityFormModal>,
     )
 
-    expect(screen.getByText('Formulario de Registro')).toBeInTheDocument()
+    expect(screen.queryByText('Formulario de Registro')).not.toBeInTheDocument()
   })
 
   it('renderiza botones de Cancelar y el primary label', () => {

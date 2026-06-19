@@ -92,18 +92,18 @@ export default function EntityListPage({
 
   const matches = matchesSearch ?? defaultSearch
   const resolveRowId = useMemo(() => getRowId ?? ((item) => item.id), [getRowId])
-const filteredResults = useMemo(() => {
-  if (!searchTerm.trim()) {
-    return allItems
-  }
+  const filteredResults = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return allItems
+    }
 
-  return allItems.filter((item) => matches(item, searchTerm))
-}, [allItems, matches, searchTerm])
+    return allItems.filter((item) => matches(item, searchTerm))
+  }, [allItems, matches, searchTerm])
 
-const sortedResults = useMemo(
-  () => sortRowsByColumn(filteredResults, columns, sortConfig),
-  [filteredResults, columns, sortConfig]
-)
+  const sortedResults = useMemo(
+    () => sortRowsByColumn(filteredResults, columns, sortConfig),
+    [filteredResults, columns, sortConfig]
+  )
 
   const loadItems = useCallback(async () => {
     setLoading(true)
@@ -327,11 +327,13 @@ const sortedResults = useMemo(
       </div>
 
       {renderCreateModal?.({
+        isModal: true,
         isOpen: createModalOpen,
         onClose: () => setCreateModalOpen(false),
         onSuccess: handleModalSuccess,
       })}
       {renderEditModal?.({
+        isModal: true,
         isOpen: editModalOpen,
         onClose: () => { setEditModalOpen(false); setEditingItem(null) },
         onSuccess: handleModalSuccess,
