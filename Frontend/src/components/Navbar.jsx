@@ -7,8 +7,16 @@ import { COLORS } from '../constants/colors'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 
 const NAV_ITEMS = [
-  { label: 'Página Principal', path: '/home', activeOn: '/home' },
-  { label: 'Declaraciones', /* path: '/declaraciones', */ activeOn: '/declaraciones' },
+  {
+    label: 'Página Principal',
+    path: '/home',
+    activeOn: '/home'
+  },
+  {
+    label: 'Declaraciones',
+    /* path: '/declaraciones/consultar',*/
+    activeOn: '/declaraciones'
+  },
   /*{
     label: 'Consultas',
     activeOn: '/consultas',
@@ -19,12 +27,18 @@ const NAV_ITEMS = [
   },*/
   {
     label: 'Usuarios',
-    activeOn: '/usuarios',
+    path: '/usuarios/consultar',
+    activeOn: '/usuarios/consultar',
+    roles: [1],
+  },
+  {
+    label: 'Plazas',
+    activeOn: '/plazas',
     roles: [1],
     submenu: [
-      { label: 'Consultar', path: '/usuarios/consultar' },
-      /*{ label: 'Asignar N° de plaza', path: '/usuarios/asignar-plaza' },*/
-    ],
+      { label: 'Consultar', path: '/plazas/consultar'},
+      { label: 'Asignar', /* path: '/plazas/asignar' */ },
+    ]
   },
   {
     label: 'Organización',
@@ -46,10 +60,6 @@ const NAV_ITEMS = [
       {
         label: 'Unidades',
         path: '/organizacion/unidades/consultar',
-      },
-      {
-        label: 'Plazas',
-        path: '/organizacion/plazas/consultar',
       },
     ],
   },

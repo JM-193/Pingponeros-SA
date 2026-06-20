@@ -35,12 +35,16 @@ export default function AppRouter() {
         <Route element={<ProtectedRoute />}>
           <Route path="/cambiar-contrasena" element={<ChangePassword />} />
           <Route path="/home" element={<Home />} />
+          {/* <Route path="/declaraciones/consultar" element={<QueryDeclarations />} /> */}
 
           {/* Admin-only routes */}
           <Route element={<ProtectedRoute needAdmin={true} />}>
             <Route path="/usuarios/crear" element={<CreateUsers />} />
             <Route path="/usuarios/editar/:correo" element={<EditUsers />} />
             <Route path="/usuarios/consultar" element={<QueryUsers />} />
+            <Route path="/plazas/crear" element={<CreatePositions />} />
+            <Route path="/plazas/editar/:numeroPlaza" element={<EditPositions />} />
+            <Route path="/plazas/consultar" element={<QueryPositions />} />
             <Route path="/organizacion/areas/crear" element={<CreateAreas />} />
             <Route path="/organizacion/areas/editar/:nombre" element={<EditAreas />} />
             <Route path="/organizacion/areas/consultar" element={<QueryAreas />} />
@@ -53,9 +57,6 @@ export default function AppRouter() {
             <Route path="/organizacion/unidades/crear" element={<CreateUnits />} />
             <Route path="/organizacion/unidades/editar/:nombre" element={<EditUnits />} />
             <Route path="/organizacion/unidades/consultar" element={<QueryUnits />} />
-            <Route path="/organizacion/plazas/crear" element={<CreatePositions />} />
-            <Route path="/organizacion/plazas/editar/:numeroPlaza" element={<EditPositions />} />
-            <Route path="/organizacion/plazas/consultar" element={<QueryPositions />} />
           </Route>
         </Route>
       </Routes>
