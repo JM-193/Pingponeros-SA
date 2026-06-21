@@ -1,21 +1,13 @@
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5119'
+import { apiFetch } from './apiClient'
+
+const JSON_HEADERS = { 'Content-Type': 'application/json' }
 
 /**
  * Obtiene todas las áreas de la base de datos.
  * @returns {Promise<Array>} Lista de áreas.
  */
 export async function obtenerAreas() {
-  const response = await fetch(`${API_URL}/areas`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
+  return apiFetch('/areas', { method: 'GET', headers: JSON_HEADERS })
 }
 
 /**
@@ -24,17 +16,7 @@ export async function obtenerAreas() {
  * @returns {Promise<object>} El área encontrada.
  */
 export async function obtenerAreaPorNombre(nombre) {
-  const response = await fetch(`${API_URL}/areas/${encodeURIComponent(nombre)}`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
+  return apiFetch(`/areas/${encodeURIComponent(nombre)}`, { method: 'GET', headers: JSON_HEADERS })
 }
 
 /**
@@ -43,18 +25,11 @@ export async function obtenerAreaPorNombre(nombre) {
  * @returns {Promise<object>} El área creada.
  */
 export async function crearArea(datos) {
-  const response = await fetch(`${API_URL}/areas`, {
+  return apiFetch('/areas', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: JSON_HEADERS,
     body: JSON.stringify(datos),
   })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
 }
 
 /**
@@ -63,14 +38,7 @@ export async function crearArea(datos) {
  * @returns {Promise<void>}
  */
 export async function eliminarArea(id) {
-  const response = await fetch(`${API_URL}/areas/${id}`, {
-    method: 'DELETE',
-  })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
+  await apiFetch(`/areas/${id}`, { method: 'DELETE' })
 }
 
 /**
@@ -80,16 +48,9 @@ export async function eliminarArea(id) {
  * @returns {Promise<object>} El área actualizada.
  */
 export async function actualizarArea(nombreOriginal, datos) {
-  const response = await fetch(`${API_URL}/areas/${encodeURIComponent(nombreOriginal)}`, {
+  return apiFetch(`/areas/${encodeURIComponent(nombreOriginal)}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: JSON_HEADERS,
     body: JSON.stringify(datos),
   })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
 }

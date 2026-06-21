@@ -1,25 +1,13 @@
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5119'
+import { apiFetch } from './apiClient'
+
+const JSON_HEADERS = { 'Content-Type': 'application/json' }
 
 /**
  * Obtiene todas las unidades.
  * @returns {Promise<Array>} Lista de unidades.
  */
 export async function obtenerUnidades() {
-  const response = await fetch(`${API_URL}/unidades`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  })
-
-  if (response.status === 404) {
-    return []
-  }
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
+  return apiFetch('/unidades', { method: 'GET', headers: JSON_HEADERS }, { emptyArrayOn404: true })
 }
 
 /**
@@ -28,17 +16,7 @@ export async function obtenerUnidades() {
  * @returns {Promise<object>} La unidad encontrada.
  */
 export async function obtenerUnidadPorNombre(nombre) {
-  const response = await fetch(`${API_URL}/unidades/${encodeURIComponent(nombre)}`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
+  return apiFetch(`/unidades/${encodeURIComponent(nombre)}`, { method: 'GET', headers: JSON_HEADERS })
 }
 
 /**
@@ -47,18 +25,11 @@ export async function obtenerUnidadPorNombre(nombre) {
  * @returns {Promise<object>} La unidad creada.
  */
 export async function crearUnidad(datos) {
-  const response = await fetch(`${API_URL}/unidades`, {
+  return apiFetch('/unidades', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: JSON_HEADERS,
     body: JSON.stringify(datos),
   })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
 }
 
 /**
@@ -67,14 +38,7 @@ export async function crearUnidad(datos) {
  * @returns {Promise<void>}
  */
 export async function eliminarUnidad(id) {
-  const response = await fetch(`${API_URL}/unidades/${id}`, {
-    method: 'DELETE',
-  })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
+  await apiFetch(`/unidades/${id}`, { method: 'DELETE' })
 }
 
 /**
@@ -84,16 +48,9 @@ export async function eliminarUnidad(id) {
  * @returns {Promise<object>} La unidad actualizada.
  */
 export async function actualizarUnidad(nombreOriginal, datos) {
-  const response = await fetch(`${API_URL}/unidades/${encodeURIComponent(nombreOriginal)}`, {
+  return apiFetch(`/unidades/${encodeURIComponent(nombreOriginal)}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: JSON_HEADERS,
     body: JSON.stringify(datos),
   })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
 }

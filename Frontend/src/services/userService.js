@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5119'
+import { apiFetch } from './apiClient'
+
+const JSON_HEADERS = { 'Content-Type': 'application/json' }
 
 /**
  * Crea un nuevo usuario en el backend.
@@ -7,21 +9,11 @@ const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5119'
  * @returns {Promise<object>} El usuario creado devuelto por el servidor.
  */
 export async function crearUsuario(datos) {
-  const response = await fetch(`${API_URL}/usuarios`, {
+  return apiFetch('/usuarios', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: JSON_HEADERS,
     body: JSON.stringify(datos),
   })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    // El backend devuelve { mensaje } en errores controlados, o { detail } en ProblemDetails
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  const data = await response.json()
-  // Devuelve el objeto completo (incluye mensaje y contrasenaTemporal en creación)
-  return data
 }
 
 /**
@@ -29,14 +21,7 @@ export async function crearUsuario(datos) {
  * @returns {Promise<Array>} Lista de usuarios.
  */
 export async function obtenerUsuarios() {
-  const response = await fetch(`${API_URL}/usuarios`)
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return response.json()
+  return apiFetch('/usuarios')
 }
 
 /**
@@ -45,14 +30,7 @@ export async function obtenerUsuarios() {
  * @returns {Promise<void>}
  */
 export async function eliminarUsuario(correo) {
-  const response = await fetch(`${API_URL}/usuarios/${encodeURIComponent(correo)}`, {
-    method: 'DELETE',
-  })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
+  await apiFetch(`/usuarios/${encodeURIComponent(correo)}`, { method: 'DELETE' })
 }
 
 /**
@@ -61,17 +39,10 @@ export async function eliminarUsuario(correo) {
  * @returns {Promise<object>} El usuario encontrado.
  */
 export async function obtenerUsuarioPorCorreo(correo) {
-  const response = await fetch(`${API_URL}/usuarios/${encodeURIComponent(correo)}`, {
+  return apiFetch(`/usuarios/${encodeURIComponent(correo)}`, {
     method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
+    headers: JSON_HEADERS,
   })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
 }
 
 /**
@@ -82,18 +53,9 @@ export async function obtenerUsuarioPorCorreo(correo) {
  * @returns {Promise<object>} El usuario actualizado devuelvo por el servidor.
  */
 export async function actualizarUsuario(correo, datos) {
-  const response = await fetch(`${API_URL}/usuarios/${encodeURIComponent(correo)}`, {
+  return apiFetch(`/usuarios/${encodeURIComponent(correo)}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: JSON_HEADERS,
     body: JSON.stringify(datos),
   })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
 }
-
-
