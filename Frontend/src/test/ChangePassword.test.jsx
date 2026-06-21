@@ -140,7 +140,10 @@ describe('ChangePassword Page', () => {
     fireEvent.submit(form)
 
     await waitFor(() => {
-      expect(screen.getByText('Contraseña Actualizada')).toBeInTheDocument()
+      expect(toast.success).toHaveBeenCalledWith(
+        expect.stringContaining('Contraseña actualizada correctamente'),
+        expect.anything()
+      )
     })
   })
 
