@@ -6,7 +6,7 @@ import React from 'react'
 globalThis.React = React
 
 // react-toastify y sweetalert2 tocan APIs del DOM/timers que jsdom no implementa
-// del todo; se mockean globalmente para que las pruebas no dependan de su render real.
+// en su totalidad; se mockean globalmente para que las pruebas no dependan de su render real.
 vi.mock('react-toastify', () => ({
   toast: {
     success: vi.fn(),
