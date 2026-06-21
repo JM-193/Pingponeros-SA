@@ -47,11 +47,7 @@ public sealed class ProgramHelpersTests
     }
 
     private static string TraducirErrorOracle(int numero)
-    {
-        var method = typeof(Backend.Program)
-            .GetMethod("TraducirErrorOracle", BindingFlags.NonPublic | BindingFlags.Static);
-        return (string)method!.Invoke(null, [numero])!;
-    }
+        => Backend.Helpers.OracleErrorMapper.Traducir(numero);
 
     private static string GenerarContrasenaTemporal()
     {
