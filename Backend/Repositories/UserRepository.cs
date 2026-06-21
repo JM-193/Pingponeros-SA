@@ -273,20 +273,4 @@ internal sealed class UserRepository : IUserRepository
         }).ConfigureAwait(false);
         return filas > 0;
     }
-
-    public async Task<bool> DesactivarPorContrasenaTemporalExpiradaAsync(string correo)
-    {
-        const string sqlUsuario = "UPDATE USUARIOS SET ESTADO = 0 WHERE CORREO_INSTITUCIONAL = :correo AND ESTADO = 1";
-
-        var filas = await _q.ExecuteAsync(connection =>
-        {
-            var cmd = new OracleCommand(sqlUsuario, connection)
-            {
-                BindByName = true,
-            };
-            OracleCommandHelpers.AddStringParam(cmd, nameof(correo), correo);
-            return cmd;
-        }).ConfigureAwait(false);
-        return filas > 0;
-    }
 }

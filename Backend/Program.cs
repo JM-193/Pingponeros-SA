@@ -1171,15 +1171,8 @@ internal static class Program
             if (usuario is null)
                 return Results.Json(new { mensaje = "Correo o contraseña incorrectos." }, statusCode: 401);
 
-            if (ContrasenaTemporalExpirada(contrasena))
-            {
-                await repo.DesactivarPorContrasenaTemporalExpiradaAsync(usuario.CorreoInstitucional)
-                        .ConfigureAwait(false);
-                return RespuestaContrasenaTemporalExpirada();
-            }
-
             if (usuario.Estado != 1)
-                return Results.Json(new { mensaje = "La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
+                return Results.Json(new { mensaje = "La cuenta del usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
 
             // If the password is temporary, the frontend needs to know this to 
             // force the change, so that data goes outside the token, next to 
@@ -1221,31 +1214,21 @@ internal static class Program
         {
             var usuario = await repo.ObtenerPorCorreoAsync(correo).ConfigureAwait(false);
 
-            if (usuario is null)
-                // No revelar si el correo existe o no por seguridad
-                return Results.Ok(new { mensaje = "Si el correo existe en nuestro sistema, recibirás una nueva contraseña temporal." });
-
-            var contrasenaActual = await repo.ObtenerContrasenaMasRecienteAsync(usuario.CorreoInstitucional)
-                                             .ConfigureAwait(false);
-
-            if (contrasenaActual is not null && ContrasenaTemporalExpirada(contrasenaActual))
+            if (usuario is not null)
             {
-                await repo.DesactivarPorContrasenaTemporalExpiradaAsync(usuario.CorreoInstitucional)
-                          .ConfigureAwait(false);
-                return RespuestaContrasenaTemporalExpirada();
+                if (usuario.Estado != 1)
+                    return Results.Json(new { mensaje = "La cuenta del usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
+
+                var contrasenaTemporal = EmailTemplateHelper.GenerarContrasenaTemporal();
+                var hash = BCrypt.Net.BCrypt.HashPassword(contrasenaTemporal);
+
+                await repo.InsertarContraseñaAsync(usuario.CorreoInstitucional, hash).ConfigureAwait(false);
+
+                // Enviar correo con contraseña temporal (en background, sin esperar)
+                EnviarCorreoRecuperacion(emailService, usuario, contrasenaTemporal);
             }
 
-            if (usuario.Estado != 1)
-                return Results.Json(new { mensaje = "La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
-
-            var contrasenaTemporal = EmailTemplateHelper.GenerarContrasenaTemporal();
-            var hash = BCrypt.Net.BCrypt.HashPassword(contrasenaTemporal);
-
-            await repo.InsertarContraseñaAsync(usuario.CorreoInstitucional, hash).ConfigureAwait(false);
-
-            // Enviar correo con contraseña temporal (en background, sin esperar)
-            EnviarCorreoRecuperacion(emailService, usuario, contrasenaTemporal);
-
+            // No revelar si el correo existe o no por seguridad
             return Results.Ok(new { mensaje = "Si el correo existe en nuestro sistema, recibirás una nueva contraseña temporal." });
         }
         catch (OracleException ex)
@@ -1339,15 +1322,8 @@ internal static class Program
             if (contrasenaActual is null || !BCrypt.Net.BCrypt.Verify(dto.ContrasenaActual, contrasenaActual.Hash))
                 return Results.Json(new { mensaje = "La contraseña actual es incorrecta." }, statusCode: 401);
 
-            if (ContrasenaTemporalExpirada(contrasenaActual))
-            {
-                await repo.DesactivarPorContrasenaTemporalExpiradaAsync(usuario.CorreoInstitucional)
-                          .ConfigureAwait(false);
-                return RespuestaContrasenaTemporalExpirada();
-            }
-
             if (usuario.Estado != 1)
-                return Results.Json(new { mensaje = "La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
+                return Results.Json(new { mensaje = "La cuenta del usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
 
             var hashNueva = BCrypt.Net.BCrypt.HashPassword(dto.ContrasenaNueva);
             await repo.ChangePasswordAsync(usuario.CorreoInstitucional, hashNueva).ConfigureAwait(false);

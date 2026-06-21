@@ -63,7 +63,7 @@ export default function ForgotPassword() {
           lineHeight: 1.5,
         }}
       >
-        Se enviará la información necesaria para restablecer su contraseña al correo institucional proporcionado.
+        Se le enviará su nueva contraseña temporal al correo institucional proporcionado.
       </p>
 
       {sent ? (

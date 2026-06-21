@@ -14,5 +14,4 @@ internal interface IUserRepository
     Task<string?> ObtenerHashMasRecienteAsync(string correo);
     Task<bool> ActualizarAsync(string correo, User usuario);
     Task<bool> EliminarAsync(string correo);
-    Task<bool> DesactivarPorContrasenaTemporalExpiradaAsync(string correo);
 }
