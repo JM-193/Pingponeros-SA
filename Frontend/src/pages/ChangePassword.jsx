@@ -26,7 +26,6 @@ export default function ChangePassword() {
     confirmPassword: '',
   })
   const [errors, setErrors] = useState({})
-  const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const handleInputChange = (e) => {
@@ -90,7 +89,6 @@ export default function ChangePassword() {
 
     try {
       await cambiarContrasena(userEmail, formData.currentPassword, formData.newPassword)
-      setSuccess(true)
       notifySuccess('Contraseña actualizada correctamente.')
       delayedNavigate('/home', 1500)
     } catch (err) {
@@ -122,115 +120,97 @@ export default function ChangePassword() {
         }}
       >
         <div style={{ width: '100%', maxWidth: '500px' }}>
-          {success ? (
-            <div
-              style={{
-                textAlign: 'center',
-                color: COLORS.successStrong,
-                backgroundColor: COLORS.successSoftBg,
-                border: `1px solid ${COLORS.successSoftBorder}`,
-                borderRadius: '6px',
-                padding: '16px',
-              }}
-            >
-              <strong style={{ fontSize: '15px' }}>Contraseña Actualizada</strong>
-              <p style={{ margin: '8px 0 0', fontSize: '14px' }}>
-                Tu contraseña ha sido cambiada exitosamente. Redirigiendo...
-              </p>
-            </div>
-          ) : (
-            <FormContainer
-              title="Cambiar Contraseña"
-              onSubmit={handleSubmit}
-            >
-              <PasswordInput
-                label="Contraseña Actual"
-                id="currentPassword"
-                name="currentPassword"
-                value={formData.currentPassword}
-                onChange={handleInputChange}
-                placeholder="Ingresa tu contraseña actual"
-                error={errors.currentPassword}
-                required
-              />
+          <FormContainer
+            title="Cambiar Contraseña"
+            onSubmit={handleSubmit}
+          >
+            <PasswordInput
+              label="Contraseña Actual"
+              id="currentPassword"
+              name="currentPassword"
+              value={formData.currentPassword}
+              onChange={handleInputChange}
+              placeholder="Ingresa tu contraseña actual"
+              error={errors.currentPassword}
+              required
+            />
 
-              <PasswordInput
-                label="Nueva Contraseña"
-                id="newPassword"
-                name="newPassword"
-                value={formData.newPassword}
-                onChange={handleInputChange}
-                placeholder="Ingresa tu nueva contraseña"
-                error={errors.newPassword}
-                required
-              />
+            <PasswordInput
+              label="Nueva Contraseña"
+              id="newPassword"
+              name="newPassword"
+              value={formData.newPassword}
+              onChange={handleInputChange}
+              placeholder="Ingresa tu nueva contraseña"
+              error={errors.newPassword}
+              required
+            />
 
-              {formData.newPassword && (
-                <div style={{ marginTop: '-12px', marginBottom: '20px' }}>
-                  <PasswordChecklist
-                    rules={['minLength', 'capital', 'lowercase', 'number', 'specialChar']}
-                    minLength={12}
-                    value={formData.newPassword}
-                    validColor={COLORS.successColor}
-                    invalidColor={COLORS.danger}
-                    messages={{
-                      minLength: 'Mínimo 12 caracteres',
-                      capital: 'Una mayúscula',
-                      lowercase: 'Una minúscula',
-                      number: 'Un número',
-                      specialChar: 'Un carácter especial (!@#$%&*)',
-                    }}
-                    iconSize={13}
-                    style={{ fontSize: '13px' }}
-                  />
-                </div>
-              )}
-
-              <PasswordInput
-                label="Confirmar Nueva Contraseña"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                placeholder="Confirma tu nueva contraseña"
-                error={errors.confirmPassword}
-                required
-              />
-
-              <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-                <FormButton
-                  label={loading ? 'Cambiando contraseña...' : 'Cambiar Contraseña'}
-                  type="submit"
-                  disabled={loading}
-                  variant="primary"
-                  width="100%"
+            {formData.newPassword && (
+              <div style={{ marginTop: '-12px', marginBottom: '20px' }}>
+                <PasswordChecklist
+                  rules={['minLength', 'capital', 'lowercase', 'number', 'specialChar']}
+                  minLength={12}
+                  value={formData.newPassword}
+                  validColor={COLORS.successColor}
+                  invalidColor={COLORS.danger}
+                  messages={{
+                    minLength: 'Mínimo 12 caracteres',
+                    capital: 'Una mayúscula',
+                    lowercase: 'Una minúscula',
+                    number: 'Un número',
+                    specialChar: 'Un carácter especial (!@#$%&*)',
+                  }}
+                  iconSize={13}
+                  style={{ fontSize: '13px' }}
                 />
               </div>
+            )}
 
-              <button
-                onClick={() => navigate(-1)}
-                type="button"
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  marginTop: '16px',
-                  padding: '12px',
-                  background: 'none',
-                  border: `1px solid ${COLORS.borderLight}`,
-                  borderRadius: '4px',
-                  color: COLORS.textDark,
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  transition: 'border-color 0.2s',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.02)')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-              >
-                Cancelar
-              </button>
-            </FormContainer>
-          )}
+            <PasswordInput
+              label="Confirmar Nueva Contraseña"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              placeholder="Confirma tu nueva contraseña"
+              error={errors.confirmPassword}
+              required
+            />
+
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+              <FormButton
+                label={loading ? 'Cambiando contraseña...' : 'Cambiar Contraseña'}
+                type="submit"
+                disabled={loading}
+                variant="primary"
+                width="100%"
+              />
+            </div>
+
+            <button
+              onClick={() => navigate(-1)}
+              type="button"
+              style={{
+                display: 'block',
+                width: '100%',
+                marginTop: '16px',
+                padding: '12px',
+                background: 'none',
+                border: `1px solid ${COLORS.borderLight}`,
+                borderRadius: '4px',
+                color: COLORS.textDark,
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: 600,
+                transition: 'border-color 0.2s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.02)')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+            >
+              Cancelar
+            </button>
+          </FormContainer>
         </div>
       </main>
 
