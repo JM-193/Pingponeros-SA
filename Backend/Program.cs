@@ -1131,8 +1131,6 @@ internal static class Program
     // ---------------------------------------------------------------- //
     // Auth                                                              //
     // ---------------------------------------------------------------- //
-    private const string MensajeContrasenaTemporalExpirada =
-        "La contraseña temporal ha expirado. Contacte al equipo de soporte para recuperar el acceso.";
 
     private static void MapAuth(WebApplication app, bool isDev)
     {
@@ -1272,18 +1270,6 @@ internal static class Program
         var error = ValidarComplejidadContrasena(contrasena);
         return error is not null ? Results.BadRequest(new { mensaje = error }) : null;
     }
-
-    private static bool ContrasenaTemporalExpirada(Backend.Models.Password contrasena) =>
-        contrasena.EsTemporal && contrasena.FechaExpiracion <= DateTime.Now;
-
-    private static IResult RespuestaContrasenaTemporalExpirada() =>
-        Results.Json(
-            new
-            {
-                codigo = "TEMP_PASSWORD_EXPIRED",
-                mensaje = MensajeContrasenaTemporalExpirada,
-            },
-            statusCode: 403);
 
     private static async Task<IResult> HandleCambiarContrasena(
         ChangePasswordDto dto,
