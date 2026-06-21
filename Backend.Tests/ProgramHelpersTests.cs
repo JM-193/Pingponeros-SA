@@ -57,11 +57,7 @@ public sealed class ProgramHelpersTests
     }
 
     private static string? ValidarComplejidadContrasena(string contrasena)
-    {
-        var method = typeof(Backend.Program)
-            .GetMethod("ValidarComplejidadContrasena", BindingFlags.NonPublic | BindingFlags.Static);
-        return (string?)method!.Invoke(null, [contrasena]);
-    }
+        => Backend.Helpers.PasswordPolicy.Validar(contrasena);
 
     [Fact]
     public void GenerarCuerpoCorreoBienvenida_ContieneNombreCorreoYContrasena()
