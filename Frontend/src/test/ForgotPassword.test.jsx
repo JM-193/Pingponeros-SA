@@ -73,21 +73,6 @@ describe('ForgotPassword Page', () => {
     })
   })
 
-  it('muestra bloqueo cuando la temporal vencida impide recuperación', async () => {
-    authService.recuperarContrasena.mockRejectedValueOnce(
-      new Error('La contraseña temporal ha expirado. Contacte al equipo de soporte para recuperar el acceso.'),
-    )
-    renderPage()
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'nombre.apellidos@ucr.ac.cr' } })
-    fireEvent.click(screen.getByRole('button', { name: /Restablecer Contraseña/i }))
-    await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith(
-        'La contraseña temporal ha expirado. Contacte al equipo de soporte para recuperar el acceso.',
-        expect.anything(),
-      )
-    })
-  })
-
   it('muestra estado de carga durante el envío', async () => {
     let resolveCall
     authService.recuperarContrasena.mockReturnValueOnce(

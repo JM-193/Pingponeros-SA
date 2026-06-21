@@ -51,13 +51,16 @@ describe('apiClient', () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 403,
-      json: async () => ({ codigo: 'TEMP_PASSWORD_EXPIRED', mensaje: 'La contraseña temporal ha expirado' }),
+      json: async () => ({
+        codigo: 'CUENTA_INACTIVA',
+        mensaje: 'La cuenta del usuario se encuentra inactiva. Contacte al equipo de soporte.',
+      }),
     })
 
     await expect(apiFetch('/auth/login', { method: 'POST' })).rejects.toMatchObject({
-      message: 'La contraseña temporal ha expirado',
+      message: 'La cuenta del usuario se encuentra inactiva. Contacte al equipo de soporte.',
       status: 403,
-      codigo: 'TEMP_PASSWORD_EXPIRED',
+      codigo: 'CUENTA_INACTIVA',
     })
   })
 

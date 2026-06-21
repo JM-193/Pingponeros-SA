@@ -84,15 +84,15 @@ describe('authService', () => {
       ok: false,
       status: 403,
       json: async () => ({
-        codigo: 'TEMP_PASSWORD_EXPIRED',
-        mensaje: 'La contraseña temporal ha expirado',
+        codigo: 'CUENTA_INACTIVA',
+        mensaje: 'La cuenta del usuario se encuentra inactiva. Contacte al equipo de soporte.',
       }),
     })
 
     await expect(login('test@ucr.ac.cr', 'Temporal123!')).rejects.toMatchObject({
-      message: 'La contraseña temporal ha expirado',
+      message: 'La cuenta del usuario se encuentra inactiva. Contacte al equipo de soporte.',
       status: 403,
-      codigo: 'TEMP_PASSWORD_EXPIRED',
+      codigo: 'CUENTA_INACTIVA',
     })
   })
 
