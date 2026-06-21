@@ -9,11 +9,16 @@ using Backend.DTOs;
 using Backend.Repositories;
 using Backend.Services;
 using Backend.Helpers;
+using Backend.Middleware;
 
 namespace Backend;
 
 internal static class Program
 {
+    // Bandera de entorno fijada una sola vez al arrancar; la usan los manejadores
+    // de error de las rutas que no reciben isDev por parámetro (GET/UPDATE/DELETE).
+    private static bool _isDev;
+
     public static void Main(string[] args)
     {
         Env.Load();
@@ -25,6 +30,7 @@ internal static class Program
 
         var app = builder.Build();
         var isDev = app.Environment.IsDevelopment();
+        _isDev = isDev;
 
         ConfigureMiddleware(app);
         MapUsuarioRoutes(app, isDev);
@@ -71,6 +77,8 @@ internal static class Program
             new PositionRepository(sp.GetRequiredService<IQueryExecutor>()));
         builder.Services.AddScoped<IEmailService, EmailService>();
         builder.Services.AddScoped<IJwtService, JwtService>();
+        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+        builder.Services.AddProblemDetails();
         builder.Services.AddOpenApi();
         builder.Services.AddCors(options =>
             options.AddPolicy("FrontendOrigin", policy =>
@@ -81,6 +89,7 @@ internal static class Program
 
     private static void ConfigureMiddleware(WebApplication app)
     {
+        app.UseExceptionHandler();
         app.MapOpenApi();
         app.MapScalarApiReference();
         app.UseCors("FrontendOrigin");
@@ -112,7 +121,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Problem(detail: ex.Message, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
         });
     }
@@ -131,7 +140,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Problem(detail: ex.Message, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
         });
     }
@@ -262,10 +271,7 @@ internal static class Program
         }
         catch (OracleException ex)
         {
-            var msg = isDev
-                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                : TraducirErrorOracle(ex.Number);
-            return Results.Json(new { mensaje = msg }, statusCode: 500);
+            return OracleErrorMapper.ToResult(ex, isDev);
         }
     }
 
@@ -283,7 +289,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
         });
     }
@@ -302,7 +308,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
         });
     }
@@ -333,7 +339,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Problem(detail: ex.Message, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
         });
     }
@@ -355,7 +361,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
 
             var area = new Backend.Models.Area
@@ -378,10 +384,7 @@ internal static class Program
         }
         catch (OracleException ex)
         {
-            var msg = isDev
-                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                : TraducirErrorOracle(ex.Number);
-            return Results.Json(new { mensaje = msg }, statusCode: 500);
+            return OracleErrorMapper.ToResult(ex, isDev);
         }
     }
 
@@ -399,7 +402,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Problem(detail: ex.Message, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
         });
     }
@@ -452,7 +455,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
         });
     }
@@ -496,7 +499,7 @@ internal static class Program
         }
         catch (OracleException ex)
         {
-            return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+            return OracleErrorMapper.ToResult(ex, _isDev);
         }
 
         return null;
@@ -520,10 +523,7 @@ internal static class Program
         }
         catch (OracleException ex)
         {
-            var msg = isDev
-                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                : TraducirErrorOracle(ex.Number);
-            return Results.Json(new { mensaje = msg }, statusCode: 500);
+            return OracleErrorMapper.ToResult(ex, isDev);
         }
     }
 
@@ -570,7 +570,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Problem(detail: ex.Message, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
         });
     }
@@ -592,7 +592,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
 
             var departamento = new Backend.Models.Department
@@ -616,10 +616,7 @@ internal static class Program
         }
         catch (OracleException ex)
         {
-            var msg = isDev
-                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                : TraducirErrorOracle(ex.Number);
-            return Results.Json(new { mensaje = msg }, statusCode: 500);
+            return OracleErrorMapper.ToResult(ex, isDev);
         }
     }
 
@@ -637,7 +634,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Problem(detail: ex.Message, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
         });
     }
@@ -691,7 +688,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
         });
     }
@@ -722,7 +719,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Problem(detail: ex.Message, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
         });
     }
@@ -744,7 +741,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
 
             var seccion = new Backend.Models.Section
@@ -768,10 +765,7 @@ internal static class Program
         }
         catch (OracleException ex)
         {
-            var msg = isDev
-                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                : TraducirErrorOracle(ex.Number);
-            return Results.Json(new { mensaje = msg }, statusCode: 500);
+            return OracleErrorMapper.ToResult(ex, isDev);
         }
     }
 
@@ -789,7 +783,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Problem(detail: ex.Message, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
         });
     }
@@ -843,7 +837,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
         });
     }
@@ -874,7 +868,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Problem(detail: ex.Message, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
         });
     }
@@ -899,7 +893,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
 
             var unidad = new Backend.Models.Unit
@@ -925,10 +919,7 @@ internal static class Program
         }
         catch (OracleException ex)
         {
-            var msg = isDev
-                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                : TraducirErrorOracle(ex.Number);
-            return Results.Json(new { mensaje = msg }, statusCode: 500);
+            return OracleErrorMapper.ToResult(ex, isDev);
         }
     }
 
@@ -946,7 +937,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Problem(detail: ex.Message, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
         });
     }
@@ -1005,7 +996,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
         });
     }
@@ -1035,7 +1026,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Problem(detail: ex.Message, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
         });
     }
@@ -1056,7 +1047,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
 
             var plaza = new Backend.Models.Position
@@ -1081,10 +1072,7 @@ internal static class Program
         }
         catch (OracleException ex)
         {
-            var msg = isDev
-                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                : TraducirErrorOracle(ex.Number);
-            return Results.Json(new { mensaje = msg }, statusCode: 500);
+            return OracleErrorMapper.ToResult(ex, isDev);
         }
     }
 
@@ -1102,7 +1090,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Problem(detail: ex.Message, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
         });
     }
@@ -1120,7 +1108,7 @@ internal static class Program
             }
             catch (OracleException ex)
             {
-                return Results.Json(new { mensaje = TraducirErrorOracle(ex.Number) }, statusCode: 500);
+                return OracleErrorMapper.ToResult(ex, _isDev);
             }
 
             var plaza = new Backend.Models.Position
@@ -1214,10 +1202,7 @@ internal static class Program
         }
         catch (OracleException ex)
         {
-            var msg = isDev
-                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                : TraducirErrorOracle(ex.Number);
-            return Results.Json(new { mensaje = msg }, statusCode: 500);
+            return OracleErrorMapper.ToResult(ex, isDev);
         }
     }
 
@@ -1265,10 +1250,7 @@ internal static class Program
         }
         catch (OracleException ex)
         {
-            var msg = isDev
-                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                : TraducirErrorOracle(ex.Number);
-            return Results.Json(new { mensaje = msg }, statusCode: 500);
+            return OracleErrorMapper.ToResult(ex, isDev);
         }
     }
 
@@ -1377,10 +1359,7 @@ internal static class Program
         }
         catch (OracleException ex)
         {
-            var msg = isDev
-                ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
-                : TraducirErrorOracle(ex.Number);
-            return Results.Json(new { mensaje = msg }, statusCode: 500);
+            return OracleErrorMapper.ToResult(ex, isDev);
         }
     }
 
@@ -1391,20 +1370,4 @@ internal static class Program
         var cuerpo = EmailTemplateHelper.GenerarCuerpoCorreoCambioContrasena(usuario.PrimerNombre, apellidos);
         _ = emailService.EnviarAsync(usuario.CorreoInstitucional, asunto, cuerpo);
     }
-
-    private static string TraducirErrorOracle(int numero) => numero switch
-    {
-        1 => "El registro ya existe en el sistema.",
-        2289 => "Error de configuración interna: objeto de base de datos no encontrado.",
-        2291 => "Operación rechazada: referencia a un registro que no existe.",
-        2292 => "No se puede eliminar: el registro tiene datos relacionados.",
-        1400 => "Hay campos obligatorios sin valor.",
-        1438 => "El valor ingresado es demasiado grande para el campo.",
-        12541 => "No se pudo conectar a la base de datos. Intente más tarde.",
-        12170 => "La conexión a la base de datos expiró. Intente más tarde.",
-        1017 => "Error de autenticación con la base de datos.",
-        _ => "No se pudo completar la operación. Intente nuevamente.",
-    };
-
-
 }
