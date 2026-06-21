@@ -7,6 +7,7 @@ import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage
 import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
 import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormError, getOrganizationEntityPayload } from '../utils/organizationEntityForm'
+import { notifySuccess, reportApiError } from '../utils/notify'
 
 export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
   const navigate = useNavigate()
@@ -48,6 +49,7 @@ export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
       await crearArea(getOrganizationEntityPayload(formData, { includeEstado: true }))
 
       setSuccessMsg('Área creada correctamente')
+      notifySuccess('Área creada correctamente')
       handleReset()
       if (isModal && onSuccess) {
         callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
@@ -55,7 +57,9 @@ export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
         delayedNavigate('/organizacion/areas/consultar', 1500)
       }
     } catch (err) {
-      setErrorMsg(err.message)
+      if (!reportApiError(err)) {
+        setErrorMsg(err.message)
+      }
     } finally {
       setIsSubmitting(false)
     }

@@ -11,6 +11,7 @@ import FormInput from '../components/FormInput'
 import FormSelect from '../components/FormSelect'
 import FormButton from '../components/FormButton'
 import StatusMessage from '../components/StatusMessage'
+import { notifySuccess, reportApiError } from '../utils/notify'
 
 export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
   const navigate = useNavigate()
@@ -69,7 +70,9 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
         segundoApellido:     formData.secondName_surname || null,
         rol:                 Number.parseInt(formData.role, 10),
       })
-      setSuccessMsg(data.mensaje ?? 'Usuario creado correctamente.')
+      const mensaje = data.mensaje ?? 'Usuario creado correctamente.'
+      setSuccessMsg(mensaje)
+      notifySuccess(mensaje)
       handleReset()
       if (isModal && onSuccess) {
         callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
@@ -77,7 +80,9 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
         delayedNavigate(-1, 1500)
       }
     } catch (err) {
-      setErrorMsg(err.message)
+      if (!reportApiError(err)) {
+        setErrorMsg(err.message)
+      }
     } finally {
       setIsSubmitting(false)
     }

@@ -5,6 +5,7 @@ function FormContainer({ children, onSubmit, title, subtitle, requiredNote }) {
   return (
     <form
       onSubmit={onSubmit}
+      noValidate
       style={{
         maxWidth: '700px',
         margin: '0 auto',

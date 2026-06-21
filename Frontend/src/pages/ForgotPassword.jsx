@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
 import { recuperarContrasena } from '../services/authService'
+import { reportApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 
 export default function ForgotPassword() {
@@ -33,7 +34,9 @@ export default function ForgotPassword() {
       await recuperarContrasena(email.trim().toLowerCase())
       setSent(true)
     } catch (err) {
-      setErrors({ submit: err.message })
+      if (!reportApiError(err)) {
+        setErrors({ submit: err.message })
+      }
     } finally {
       setLoading(false)
     }
@@ -80,6 +83,7 @@ export default function ForgotPassword() {
       ) : (
         <form
           onSubmit={handleSubmit}
+          noValidate
           style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' }}>

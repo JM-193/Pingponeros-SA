@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
 import { login } from '../services/authService'
 import { guardarSesion } from '../services/session'
+import { reportApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 
 /* UCR brand palette
@@ -74,7 +75,9 @@ export default function Login() {
       guardarSesion(token)
       navigate('/home')
     } catch (err) {
-      setServerError(err.message)
+      if (!reportApiError(err)) {
+        setServerError(err.message)
+      }
     } finally {
       setLoading(false)
     }
@@ -109,6 +112,7 @@ export default function Login() {
 
       <form
         onSubmit={handleSubmit}
+        noValidate
         style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' }}>

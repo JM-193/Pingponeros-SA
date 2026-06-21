@@ -8,6 +8,7 @@ import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage
 import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
 import StateToggle from '../components/StateToggle'
 import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormError, getOrganizationEntityPayload } from '../utils/organizationEntityForm'
+import { notifySuccess, reportApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 
 export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityName }) {
@@ -83,13 +84,16 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
       await actualizarArea(nombreOriginal, getOrganizationEntityPayload(formData, { includeEstado: true }))
 
       setSuccessMsg('Área actualizada correctamente')
+      notifySuccess('Área actualizada correctamente')
       if (isModal && onSuccess) {
         callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
       } else {
         delayedNavigate('/organizacion/areas/consultar', 1500)
       }
     } catch (err) {
-      setErrorMsg(err.message)
+      if (!reportApiError(err)) {
+        setErrorMsg(err.message)
+      }
     } finally {
       setIsSubmitting(false)
     }

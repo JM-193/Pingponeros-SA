@@ -15,6 +15,7 @@ import StatusMessage from '../components/StatusMessage'
 import PageLayout from '../components/PageLayout'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
 import { isUnidadInArea, resolvePlazaFieldChange } from '../utils/organizationHierarchy'
+import { notifySuccess, reportApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 
 const PARENT_TYPE_OPTIONS = [
@@ -234,13 +235,16 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
       }
       await actualizarPlaza(numeroPlaza, payload)
       setSuccessMsg(`Plaza '${numeroPlaza}' actualizada correctamente.`)
+      notifySuccess(`Plaza '${numeroPlaza}' actualizada correctamente.`)
       if (isModal && onSuccess) {
         callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
       } else {
         delayedNavigate(-1, 1500)
       }
     } catch (err) {
-      setErrorMsg(err.message)
+      if (!reportApiError(err)) {
+        setErrorMsg(err.message)
+      }
     } finally {
       setIsSubmitting(false)
     }

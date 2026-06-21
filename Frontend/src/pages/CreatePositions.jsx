@@ -16,6 +16,7 @@ import StatusMessage from '../components/StatusMessage'
 import PageLayout from '../components/PageLayout'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
 import { isUnidadInArea, resolvePlazaFieldChange } from '../utils/organizationHierarchy'
+import { notifySuccess, reportApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 
 const initialFormData = {
@@ -194,6 +195,7 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
       }
       await crearPlaza(payload)
       setSuccessMsg(`Plaza '${numero}' creada correctamente.`)
+      notifySuccess(`Plaza '${numero}' creada correctamente.`)
       setFormData(initialFormData)
       if (isModal && onSuccess) {
         callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
@@ -201,7 +203,9 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
         delayedNavigate(-1, 1500)
       }
     } catch (err) {
-      setErrorMsg(err.message)
+      if (!reportApiError(err)) {
+        setErrorMsg(err.message)
+      }
     } finally {
       setIsSubmitting(false)
     }

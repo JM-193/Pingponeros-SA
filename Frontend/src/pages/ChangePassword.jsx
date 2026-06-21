@@ -7,6 +7,7 @@ import Footer from '../components/Footer'
 import PasswordChecklist from 'react-password-checklist'
 import { obtenerSesion } from '../services/session'
 import { cambiarContrasena } from '../services/authService'
+import { notifySuccess, reportApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 import FormContainer from '../components/FormContainer'
 import PasswordInput from '../components/PasswordInput'
@@ -91,9 +92,12 @@ export default function ChangePassword() {
     try {
       await cambiarContrasena(userEmail, formData.currentPassword, formData.newPassword)
       setSuccess(true)
+      notifySuccess('Contraseña actualizada correctamente.')
       delayedNavigate('/home', 1500)
     } catch (err) {
-      setErrors({ submit: err.message })
+      if (!reportApiError(err)) {
+        setErrors({ submit: err.message })
+      }
     } finally {
       setLoading(false)
     }

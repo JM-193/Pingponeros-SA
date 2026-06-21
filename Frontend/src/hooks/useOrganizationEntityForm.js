@@ -4,6 +4,7 @@ import {
   getOrganizationEntityFormError,
   getOrganizationEntityPayload,
 } from '../utils/organizationEntityForm'
+import { notifySuccess, reportApiError } from '../utils/notify'
 
 export function useOrganizationEntityForm({
   initialFormData,
@@ -59,7 +60,9 @@ export function useOrganizationEntityForm({
         }
       } catch (err) {
         if (!isActive) return
-        setErrorMsg(err.message)
+        if (!reportApiError(err)) {
+          setErrorMsg(err.message)
+        }
         if (onLoadError) {
           onLoadError(err)
         }
@@ -108,13 +111,16 @@ export function useOrganizationEntityForm({
 
         if (successMessage) {
           setSuccessMsg(successMessage)
+          notifySuccess(successMessage)
         }
 
         if (onSuccess) {
           onSuccess({ resetFormData, setFormData })
         }
       } catch (err) {
-        setErrorMsg(err.message)
+        if (!reportApiError(err)) {
+          setErrorMsg(err.message)
+        }
       } finally {
         setIsSubmitting(false)
       }

@@ -12,6 +12,7 @@ import FormSelect from '../components/FormSelect'
 import FormButton from '../components/FormButton'
 import StatusMessage from '../components/StatusMessage'
 import StateToggle from '../components/StateToggle'
+import { notifySuccess, reportApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 
 export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityId }) {
@@ -108,13 +109,16 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
         estado:              formData.estado,
       })
       setSuccessMsg('Usuario actualizado correctamente.')
+      notifySuccess('Usuario actualizado correctamente.')
       if (isModal && onSuccess) {
         callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
       } else {
         delayedNavigate(-1, 1500)
       }
     } catch (err) {
-      setErrorMsg(err.message)
+      if (!reportApiError(err)) {
+        setErrorMsg(err.message)
+      }
     } finally {
       setIsSubmitting(false)
     }

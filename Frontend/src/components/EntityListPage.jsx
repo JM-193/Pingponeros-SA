@@ -10,6 +10,7 @@ import EmptyResults from './EmptyResults'
 import PaginationControls from './PaginationControls'
 import EntityResultsTable from './EntityResultsTable'
 import { COLORS } from '../constants/colors'
+import { reportApiError } from '../utils/notify'
 
 const defaultSearch = (item, term) => {
   const lowerTerm = term.toLowerCase()
@@ -115,7 +116,9 @@ export default function EntityListPage({
       setSearchTerm('')
       setCurrentPage(1)
     } catch (error) {
-      setErrorMsg(error.message)
+      if (!reportApiError(error)) {
+        setErrorMsg(error.message)
+      }
     } finally {
       setLoading(false)
     }
