@@ -1,6 +1,7 @@
 // EditUnits.test.jsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import EditUnits from '../pages/EditUnits'
 import * as unitService from '../services/unitService'
 import * as areaService from '../services/areaService'
@@ -83,7 +84,7 @@ describe('EditUnits Page', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Unidad actualizada correctamente')).toBeInTheDocument()
+      expect(toast.success).toHaveBeenCalledWith('Unidad actualizada correctamente', expect.anything())
     })
   })
 
@@ -117,7 +118,7 @@ describe('EditUnits Page', () => {
     renderWithRoute('Inexistente')
 
     await waitFor(() => {
-      expect(screen.getByText('Unidad no encontrada')).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('Unidad no encontrada', expect.anything())
     })
   })
 })

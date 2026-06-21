@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import Modal from './Modal'
 import FormContainer from './FormContainer'
 import FormButton from './FormButton'
-import StatusMessage from './StatusMessage'
 
 export default function OrganizationEntityFormModal({
   isOpen,
@@ -10,8 +9,6 @@ export default function OrganizationEntityFormModal({
   onSubmit,
   onClose,
   isBusy,
-  successMsg,
-  errorMsg,
   primaryLabel,
   primaryLoadingLabel,
   extraActions,
@@ -24,21 +21,6 @@ export default function OrganizationEntityFormModal({
         requiredNote
       >
         {children}
-
-        {successMsg && (
-          <StatusMessage
-            variant="success"
-            message={successMsg}
-            style={{ marginBottom: '20px' }}
-          />
-        )}
-        {errorMsg && (
-          <StatusMessage
-            variant="error"
-            message={errorMsg}
-            style={{ marginBottom: '20px' }}
-          />
-        )}
 
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
           <FormButton
@@ -67,8 +49,6 @@ OrganizationEntityFormModal.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   isBusy: PropTypes.bool,
-  successMsg: PropTypes.string,
-  errorMsg: PropTypes.string,
   primaryLabel: PropTypes.string.isRequired,
   primaryLoadingLabel: PropTypes.string,
   extraActions: PropTypes.node,
@@ -77,8 +57,6 @@ OrganizationEntityFormModal.propTypes = {
 
 OrganizationEntityFormModal.defaultProps = {
   isBusy: false,
-  successMsg: '',
-  errorMsg: '',
   primaryLoadingLabel: 'Guardando...',
   extraActions: null,
 }

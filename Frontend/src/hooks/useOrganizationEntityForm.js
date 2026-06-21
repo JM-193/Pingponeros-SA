@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   createOrganizationEntityInputChangeHandler,
-  getOrganizationEntityFormError,
+  getOrganizationEntityFormErrors,
   getOrganizationEntityPayload,
 } from '../utils/organizationEntityForm'
-import { notifySuccess, reportApiError } from '../utils/notify'
+import { notifySuccess, notifyApiError } from '../utils/notify'
 
 export function useOrganizationEntityForm({
   initialFormData,
@@ -22,12 +22,11 @@ export function useOrganizationEntityForm({
   const [formData, setFormData] = useState(initialFormData)
   const [isLoading, setIsLoading] = useState(Boolean(loadData))
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [successMsg, setSuccessMsg] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
+  // Errores de validación por campo: { nombre?, descripcion?, idArea?, ... }
+  const [errors, setErrors] = useState({})
 
   const clearFeedback = useCallback(() => {
-    setSuccessMsg('')
-    setErrorMsg('')
+    setErrors({})
   }, [])
 
   const handleInputChange = useMemo(
@@ -48,7 +47,6 @@ export function useOrganizationEntityForm({
 
     const runLoad = async () => {
       setIsLoading(true)
-      setErrorMsg('')
       try {
         const result = await loadData()
         if (!isActive) return
@@ -60,9 +58,7 @@ export function useOrganizationEntityForm({
         }
       } catch (err) {
         if (!isActive) return
-        if (!reportApiError(err)) {
-          setErrorMsg(err.message)
-        }
+        notifyApiError(err)
         if (onLoadError) {
           onLoadError(err)
         }
@@ -92,13 +88,13 @@ export function useOrganizationEntityForm({
     async (event) => {
       event.preventDefault()
       setIsSubmitting(true)
-      clearFeedback()
+      setErrors({})
 
       const validationOptions = resolveOptions(getValidationOptions)
-      const validationError = getOrganizationEntityFormError(formData, validationOptions)
+      const validationErrors = getOrganizationEntityFormErrors(formData, validationOptions)
 
-      if (validationError) {
-        setErrorMsg(validationError)
+      if (Object.keys(validationErrors).length > 0) {
+        setErrors(validationErrors)
         setIsSubmitting(false)
         return
       }
@@ -110,7 +106,6 @@ export function useOrganizationEntityForm({
         await onSubmit(payload, formData)
 
         if (successMessage) {
-          setSuccessMsg(successMessage)
           notifySuccess(successMessage)
         }
 
@@ -118,15 +113,12 @@ export function useOrganizationEntityForm({
           onSuccess({ resetFormData, setFormData })
         }
       } catch (err) {
-        if (!reportApiError(err)) {
-          setErrorMsg(err.message)
-        }
+        notifyApiError(err)
       } finally {
         setIsSubmitting(false)
       }
     },
     [
-      clearFeedback,
       formData,
       getPayloadOptions,
       getValidationOptions,
@@ -143,8 +135,7 @@ export function useOrganizationEntityForm({
     setFormData,
     isLoading,
     isSubmitting,
-    successMsg,
-    errorMsg,
+    errors,
     clearFeedback,
     handleInputChange,
     handleSubmit,

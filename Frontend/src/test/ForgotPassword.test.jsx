@@ -1,6 +1,7 @@
 ﻿// ForgotPassword.test.jsx
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import ForgotPassword from '../pages/ForgotPassword'
 import * as authService from '../services/authService'
 
@@ -68,7 +69,7 @@ describe('ForgotPassword Page', () => {
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'nombre.apellidos@ucr.ac.cr' } })
     fireEvent.click(screen.getByRole('button', { name: /Restablecer Contraseña/i }))
     await waitFor(() => {
-      expect(screen.getByText('Correo no encontrado')).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('Correo no encontrado', expect.anything())
     })
   })
 
@@ -80,7 +81,10 @@ describe('ForgotPassword Page', () => {
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'nombre.apellidos@ucr.ac.cr' } })
     fireEvent.click(screen.getByRole('button', { name: /Restablecer Contraseña/i }))
     await waitFor(() => {
-      expect(screen.getByText(/contraseña temporal ha expirado/i)).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith(
+        'La contraseña temporal ha expirado. Contacte al equipo de soporte para recuperar el acceso.',
+        expect.anything(),
+      )
     })
   })
 

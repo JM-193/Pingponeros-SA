@@ -83,8 +83,7 @@ export default function DepartmentSectionEditForm({
     setFormData,
     isLoading,
     isSubmitting,
-    successMsg,
-    errorMsg,
+    errors,
     clearFeedback,
     handleInputChange,
     handleSubmit,
@@ -124,6 +123,7 @@ export default function DepartmentSectionEditForm({
       <OrganizationEntityFormFields
         formData={formData}
         onChange={handleInputChange}
+        errors={errors}
         namePrefix={config.namePrefix}
         namePlaceholder={config.namePlaceholder}
         descriptionPlaceholder={config.descriptionPlaceholder}
@@ -150,8 +150,6 @@ export default function DepartmentSectionEditForm({
       onSubmit={handleSubmit}
       onClose={handleCancel}
       isBusy={isSubmitting}
-      successMsg={successMsg}
-      errorMsg={errorMsg}
       primaryLabel="Actualizar"
     >
       {formBody}
@@ -163,8 +161,6 @@ export default function DepartmentSectionEditForm({
       onSubmit={handleSubmit}
       onCancel={handleCancel}
       isBusy={isSubmitting}
-      successMsg={successMsg}
-      errorMsg={errorMsg}
       primaryLabel="Actualizar"
     >
       {formBody}

@@ -11,11 +11,10 @@ import Modal from '../components/Modal'
 import FormContainer from '../components/FormContainer'
 import FormSelect from '../components/FormSelect'
 import FormButton from '../components/FormButton'
-import StatusMessage from '../components/StatusMessage'
 import PageLayout from '../components/PageLayout'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
 import { isUnidadInArea, resolvePlazaFieldChange } from '../utils/organizationHierarchy'
-import { notifySuccess, reportApiError } from '../utils/notify'
+import { notifySuccess, notifyError, notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 
 const PARENT_TYPE_OPTIONS = [
@@ -42,10 +41,6 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
   const [parentType, setParentType] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [successMsg, setSuccessMsg] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
-  const [conflictError, setConflictError] = useState('')
-  const [loadError, setLoadError] = useState('')
 
   const [rawDepartamentos, setRawDepartamentos] = useState([])
   const [rawSecciones, setRawSecciones] = useState([])
@@ -58,7 +53,6 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
   useEffect(() => {
     const cargarDatos = async () => {
       setIsLoading(true)
-      setLoadError('')
       try {
         const [plaza, areas, departamentos, secciones, unidades] = await Promise.all([
           obtenerPlazaPorNumero(numeroPlaza),
@@ -94,7 +88,7 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
           idUnidad:       plaza.idUnidad         ? String(plaza.idUnidad)        : '',
         })
       } catch (err) {
-        setLoadError(err.message)
+        notifyApiError(err)
         if (isModal && onClose) {
           callbackTimeoutRef.current = setTimeout(() => onClose(), 2000)
         } else {
@@ -134,15 +128,8 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
       .map((u) => ({ value: String(u.id ?? u.idUnidad), label: `Unidad de ${u.nombre}` }))
   }, [formData.idArea, formData.idUnidad, rawDepartamentos, rawSecciones, rawUnidades, allUnidadOptions])
 
-  const clearFeedback = useCallback(() => {
-    setSuccessMsg('')
-    setErrorMsg('')
-    setConflictError('')
-  }, [])
-
   const applyHierarchyChange = useCallback(
     (name, value) => {
-      clearFeedback()
       const resolved = resolvePlazaFieldChange({
         formData,
         name,
@@ -153,14 +140,14 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
       })
 
       if (resolved.conflict) {
-        setConflictError(resolved.conflict)
+        notifyError(resolved.conflict)
       }
       if (resolved.parentType !== undefined) {
         setParentType(resolved.parentType)
       }
       setFormData(resolved.formData)
     },
-    [clearFeedback, formData, rawDepartamentos, rawSecciones, rawUnidades],
+    [formData, rawDepartamentos, rawSecciones, rawUnidades],
   )
 
   const handleAreaChange = useCallback(
@@ -173,7 +160,6 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
   const handleParentTypeChange = useCallback(
     (e) => {
       const { value } = e.target
-      clearFeedback()
       setParentType(value)
 
       let conflict = ''
@@ -191,7 +177,7 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
         }
       }
 
-      if (conflict) setConflictError(conflict)
+      if (conflict) notifyError(conflict)
       setFormData((prev) => ({
         ...prev,
         idDepartamento: value === 'departamento' ? prev.idDepartamento : '',
@@ -199,7 +185,7 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
         idUnidad:       clearUnidad              ? ''                  : prev.idUnidad,
       }))
     },
-    [clearFeedback, formData, rawUnidades],
+    [formData, rawUnidades],
   )
 
   const handleFieldChange = useCallback(
@@ -217,10 +203,9 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    clearFeedback()
 
     if (formData.idDepartamento && formData.idSeccion) {
-      setConflictError('Una plaza no puede pertenecer a un departamento y a una sección al mismo tiempo.')
+      notifyError('Una plaza no puede pertenecer a un departamento y a una sección al mismo tiempo.')
       return
     }
 
@@ -234,7 +219,6 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
         idArea:         formData.idArea          ? Number.parseInt(formData.idArea,          10) : null,
       }
       await actualizarPlaza(numeroPlaza, payload)
-      setSuccessMsg(`Plaza '${numeroPlaza}' actualizada correctamente.`)
       notifySuccess(`Plaza '${numeroPlaza}' actualizada correctamente.`)
       if (isModal && onSuccess) {
         callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
@@ -242,9 +226,7 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
         delayedNavigate(-1, 1500)
       }
     } catch (err) {
-      if (!reportApiError(err)) {
-        setErrorMsg(err.message)
-      }
+      notifyApiError(err)
     } finally {
       setIsSubmitting(false)
     }
@@ -285,8 +267,6 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
           {numeroPlaza}
         </span>
       </p>
-
-      {loadError && <StatusMessage variant="error" message={`Error al cargar datos: ${loadError}`} />}
 
       <FormSelect
         label="Área"
@@ -341,9 +321,6 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
         options={filteredUnidadOptions}
         defaultLabel="-- Sin asignación --"
       />
-
-      {successMsg && <StatusMessage variant="success" message={successMsg} style={{ marginBottom: '20px' }} />}
-      {(conflictError || errorMsg) && <StatusMessage variant="error" message={conflictError || errorMsg} style={{ marginBottom: '20px' }} />}
 
       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '8px' }}>
         <FormButton

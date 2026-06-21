@@ -1,6 +1,7 @@
 // ChangePassword.test.jsx
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import ChangePassword from '../pages/ChangePassword'
 import * as authService from '../services/authService'
 import * as sessionService from '../services/session'
@@ -162,7 +163,7 @@ describe('ChangePassword Page', () => {
     await act(async () => { fireEvent.submit(form) })
 
     await waitFor(() => {
-      expect(screen.getByText('Contraseña incorrecta')).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('Contraseña incorrecta', expect.anything())
     })
   })
 

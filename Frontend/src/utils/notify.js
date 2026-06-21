@@ -58,18 +58,19 @@ export function notifyInfo(mensaje, options = {}) {
 }
 
 /**
- * Reporta un error proveniente de la API según su gravedad:
+ * Manejador estándar para errores de la API en bloques catch. Decide la
+ * superficie según la gravedad:
  *  - status 0 (red caída) o >= 500: diálogo bloqueante (criticalError).
- *  - resto (4xx, errores de negocio): se delega al llamador para que lo
- *    muestre en línea (inline). Devuelve true si ya se manejó como crítico.
+ *  - resto (4xx / errores de negocio): toast rojo (notifyError).
+ * Reemplaza el antiguo patrón de mostrar el error en una caja StatusMessage.
  * @param {Error & { status?: number }} err
- * @returns {boolean} true si el error se mostró como crítico (bloqueante).
  */
-export function reportApiError(err) {
+export function notifyApiError(err) {
+  const mensaje = err?.message ?? 'No se pudo completar la operación. Intente nuevamente.'
   const status = err?.status
   if (status === 0 || status >= 500) {
-    criticalError(err?.message ?? 'No se pudo completar la operación. Intente nuevamente.')
-    return true
+    criticalError(mensaje)
+  } else {
+    notifyError(mensaje)
   }
-  return false
 }

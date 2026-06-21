@@ -6,8 +6,8 @@ import { crearArea } from '../services/areaService'
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
 import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
-import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormError, getOrganizationEntityPayload } from '../utils/organizationEntityForm'
-import { notifySuccess, reportApiError } from '../utils/notify'
+import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormErrors, getOrganizationEntityPayload } from '../utils/organizationEntityForm'
+import { notifySuccess, notifyApiError } from '../utils/notify'
 
 export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
   const navigate = useNavigate()
@@ -20,12 +20,10 @@ export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
     estado: 1,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [successMsg, setSuccessMsg] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
+  const [errors, setErrors] = useState({})
 
   const clearFeedback = () => {
-    setSuccessMsg('')
-    setErrorMsg('')
+    setErrors({})
   }
 
   const handleInputChange = createOrganizationEntityInputChangeHandler(setFormData, clearFeedback)
@@ -33,14 +31,14 @@ export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
-    clearFeedback()
+    setErrors({})
 
-    const validationError = getOrganizationEntityFormError(formData, {
+    const validationErrors = getOrganizationEntityFormErrors(formData, {
       entityLabel: 'área',
       nameArticle: 'del',
     })
-    if (validationError) {
-      setErrorMsg(validationError)
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
       setIsSubmitting(false)
       return
     }
@@ -48,7 +46,6 @@ export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
     try {
       await crearArea(getOrganizationEntityPayload(formData, { includeEstado: true }))
 
-      setSuccessMsg('Área creada correctamente')
       notifySuccess('Área creada correctamente')
       handleReset()
       if (isModal && onSuccess) {
@@ -57,9 +54,7 @@ export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
         delayedNavigate('/organizacion/areas/consultar', 1500)
       }
     } catch (err) {
-      if (!reportApiError(err)) {
-        setErrorMsg(err.message)
-      }
+      notifyApiError(err)
     } finally {
       setIsSubmitting(false)
     }
@@ -85,6 +80,7 @@ export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
     <OrganizationEntityFormFields
       formData={formData}
       onChange={handleInputChange}
+      errors={errors}
       namePrefix="Área de"
       namePlaceholder="Nombre del área"
       descriptionPlaceholder="Ingrese la descripción del área"
@@ -100,8 +96,6 @@ export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
       onSubmit={handleSubmit}
       onClose={handleCancel}
       isBusy={isSubmitting}
-      successMsg={successMsg}
-      errorMsg={errorMsg}
       primaryLabel="Crear"
     >
       {formFields}
@@ -113,8 +107,6 @@ export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
       onSubmit={handleSubmit}
       onCancel={handleCancel}
       isBusy={isSubmitting}
-      successMsg={successMsg}
-      errorMsg={errorMsg}
       primaryLabel="Crear"
     >
       {formFields}

@@ -1,6 +1,7 @@
 ﻿// CreateAreas.test.jsx
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import CreateAreas from '../pages/CreateAreas'
 import * as areaService from '../services/areaService'
 
@@ -118,7 +119,7 @@ describe('CreateAreas Page', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Área creada correctamente')).toBeInTheDocument()
+      expect(toast.success).toHaveBeenCalledWith('Área creada correctamente', expect.anything())
     })
   })
 
@@ -141,7 +142,7 @@ describe('CreateAreas Page', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Área ya existe')).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('Área ya existe', expect.anything())
     })
   })
 
@@ -272,7 +273,7 @@ describe('CreateAreas Modal Mode', () => {
     fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('Área creada correctamente')).toBeInTheDocument()
+      expect(toast.success).toHaveBeenCalledWith('Área creada correctamente', expect.anything())
     })
 
     expect(areaService.crearArea).toHaveBeenCalledWith({

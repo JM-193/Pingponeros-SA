@@ -7,8 +7,8 @@ import OrganizationEntityFormFields from '../components/OrganizationEntityFormFi
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
 import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
 import StateToggle from '../components/StateToggle'
-import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormError, getOrganizationEntityPayload } from '../utils/organizationEntityForm'
-import { notifySuccess, reportApiError } from '../utils/notify'
+import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormErrors, getOrganizationEntityPayload } from '../utils/organizationEntityForm'
+import { notifySuccess, notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 
 export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityName }) {
@@ -26,13 +26,11 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
   const [nombreOriginal, setNombreOriginal] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [successMsg, setSuccessMsg] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
+  const [errors, setErrors] = useState({})
 
   useEffect(() => {
     const cargarArea = async () => {
       setIsLoading(true)
-      setErrorMsg('')
       try {
         const area = await obtenerAreaPorNombre(nombre)
         setFormData({
@@ -42,7 +40,7 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
         })
         setNombreOriginal(area.nombre)
       } catch (err) {
-        setErrorMsg(err.message)
+        notifyApiError(err)
         if (isModal && onClose) {
           callbackTimeoutRef.current = setTimeout(() => onClose(), 2000)
         } else {
@@ -59,8 +57,7 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
   }, [nombre, navigate, isModal, onClose, delayedNavigate])
 
   const clearFeedback = () => {
-    setSuccessMsg('')
-    setErrorMsg('')
+    setErrors({})
   }
 
   const handleInputChange = createOrganizationEntityInputChangeHandler(setFormData, clearFeedback)
@@ -68,14 +65,14 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
-    clearFeedback()
+    setErrors({})
 
-    const validationError = getOrganizationEntityFormError(formData, {
+    const validationErrors = getOrganizationEntityFormErrors(formData, {
       entityLabel: 'área',
       nameArticle: 'del',
     })
-    if (validationError) {
-      setErrorMsg(validationError)
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
       setIsSubmitting(false)
       return
     }
@@ -83,7 +80,6 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
     try {
       await actualizarArea(nombreOriginal, getOrganizationEntityPayload(formData, { includeEstado: true }))
 
-      setSuccessMsg('Área actualizada correctamente')
       notifySuccess('Área actualizada correctamente')
       if (isModal && onSuccess) {
         callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
@@ -91,9 +87,7 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
         delayedNavigate('/organizacion/areas/consultar', 1500)
       }
     } catch (err) {
-      if (!reportApiError(err)) {
-        setErrorMsg(err.message)
-      }
+      notifyApiError(err)
     } finally {
       setIsSubmitting(false)
     }
@@ -117,6 +111,7 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
       <OrganizationEntityFormFields
         formData={formData}
         onChange={handleInputChange}
+        errors={errors}
         namePrefix="Área de"
         namePlaceholder="Nombre del área"
         descriptionPlaceholder="Ingrese la descripción del área"
@@ -142,8 +137,6 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
       onSubmit={handleSubmit}
       onClose={handleCancel}
       isBusy={isSubmitting}
-      successMsg={successMsg}
-      errorMsg={errorMsg}
       primaryLabel="Actualizar"
     >
       {formBody}
@@ -155,8 +148,6 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
       onSubmit={handleSubmit}
       onCancel={handleCancel}
       isBusy={isSubmitting}
-      successMsg={successMsg}
-      errorMsg={errorMsg}
       primaryLabel="Actualizar"
     >
       {formBody}

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
 import { recuperarContrasena } from '../services/authService'
-import { reportApiError } from '../utils/notify'
+import { notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 
 export default function ForgotPassword() {
@@ -34,9 +34,7 @@ export default function ForgotPassword() {
       await recuperarContrasena(email.trim().toLowerCase())
       setSent(true)
     } catch (err) {
-      if (!reportApiError(err)) {
-        setErrors({ submit: err.message })
-      }
+      notifyApiError(err)
     } finally {
       setLoading(false)
     }
@@ -140,11 +138,6 @@ export default function ForgotPassword() {
             {loading ? 'Enviando...' : 'Restablecer Contraseña'}
           </button>
 
-          {errors.submit && (
-            <div style={{ fontSize: '12px', color: COLORS.danger, marginTop: '8px' }}>
-              {errors.submit}
-            </div>
-          )}
         </form>
       )}
 

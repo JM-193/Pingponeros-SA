@@ -7,12 +7,11 @@ import Footer from '../components/Footer'
 import PasswordChecklist from 'react-password-checklist'
 import { obtenerSesion } from '../services/session'
 import { cambiarContrasena } from '../services/authService'
-import { notifySuccess, reportApiError } from '../utils/notify'
+import { notifySuccess, notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 import FormContainer from '../components/FormContainer'
 import PasswordInput from '../components/PasswordInput'
 import FormButton from '../components/FormButton'
-import StatusMessage from '../components/StatusMessage'
 
 export default function ChangePassword() {
   const navigate = useNavigate()
@@ -95,9 +94,7 @@ export default function ChangePassword() {
       notifySuccess('Contraseña actualizada correctamente.')
       delayedNavigate('/home', 1500)
     } catch (err) {
-      if (!reportApiError(err)) {
-        setErrors({ submit: err.message })
-      }
+      notifyApiError(err)
     } finally {
       setLoading(false)
     }
@@ -126,15 +123,21 @@ export default function ChangePassword() {
       >
         <div style={{ width: '100%', maxWidth: '500px' }}>
           {success ? (
-            <StatusMessage
-              variant="success"
-              message="Contraseña Actualizada"
-              style={{ textAlign: 'center' }}
+            <div
+              style={{
+                textAlign: 'center',
+                color: COLORS.successStrong,
+                backgroundColor: COLORS.successSoftBg,
+                border: `1px solid ${COLORS.successSoftBorder}`,
+                borderRadius: '6px',
+                padding: '16px',
+              }}
             >
+              <strong style={{ fontSize: '15px' }}>Contraseña Actualizada</strong>
               <p style={{ margin: '8px 0 0', fontSize: '14px' }}>
                 Tu contraseña ha sido cambiada exitosamente. Redirigiendo...
               </p>
-            </StatusMessage>
+            </div>
           ) : (
             <FormContainer
               title="Cambiar Contraseña"
@@ -193,16 +196,6 @@ export default function ChangePassword() {
                 error={errors.confirmPassword}
                 required
               />
-
-              {errors.submit && (
-                <StatusMessage
-                  variant="error"
-                  message="Error"
-                  style={{ marginBottom: '18px' }}
-                >
-                  {errors.submit}
-                </StatusMessage>
-              )}
 
               <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
                 <FormButton

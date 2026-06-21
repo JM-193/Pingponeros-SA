@@ -3,14 +3,13 @@ import PropTypes from 'prop-types'
 import { useNavigate } from 'react-router-dom'
 import { FaSearch } from 'react-icons/fa'
 import FormButton from './FormButton'
-import StatusMessage from './StatusMessage'
 import PageLayout from './PageLayout'
 import PageTitle from './PageTitle'
 import EmptyResults from './EmptyResults'
 import PaginationControls from './PaginationControls'
 import EntityResultsTable from './EntityResultsTable'
 import { COLORS } from '../constants/colors'
-import { reportApiError } from '../utils/notify'
+import { notifyApiError } from '../utils/notify'
 
 const defaultSearch = (item, term) => {
   const lowerTerm = term.toLowerCase()
@@ -84,7 +83,6 @@ export default function EntityListPage({
   const [searchTerm, setSearchTerm] = useState('')
   const [allItems, setAllItems] = useState([])
   const [loading, setLoading] = useState(true)
-  const [errorMsg, setErrorMsg] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [sortConfig, setSortConfig] = useState(null)
   const [createModalOpen, setCreateModalOpen] = useState(false)
@@ -108,7 +106,6 @@ export default function EntityListPage({
 
   const loadItems = useCallback(async () => {
     setLoading(true)
-    setErrorMsg('')
 
     try {
       const data = await fetchItems()
@@ -116,9 +113,7 @@ export default function EntityListPage({
       setSearchTerm('')
       setCurrentPage(1)
     } catch (error) {
-      if (!reportApiError(error)) {
-        setErrorMsg(error.message)
-      }
+      notifyApiError(error)
     } finally {
       setLoading(false)
     }
@@ -309,14 +304,6 @@ export default function EntityListPage({
           </div>
         </form>
       </div>
-
-      {errorMsg && (
-        <StatusMessage
-          variant="error"
-          message={errorMsg}
-          style={{ marginBottom: '20px' }}
-        />
-      )}
 
       <div id="results-section">{renderResultsContent()}</div>
       <div style={{ marginTop: '16px' }}>

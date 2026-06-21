@@ -56,8 +56,7 @@ export default function DepartmentSectionCreateForm({
     formData,
     isLoading,
     isSubmitting,
-    successMsg,
-    errorMsg,
+    errors,
     handleInputChange,
     handleSubmit,
   } = useOrganizationEntityForm({
@@ -87,6 +86,7 @@ export default function DepartmentSectionCreateForm({
     <OrganizationEntityFormFields
       formData={formData}
       onChange={handleInputChange}
+      errors={errors}
       namePrefix={config.namePrefix}
       namePlaceholder={config.namePlaceholder}
       descriptionPlaceholder={config.descriptionPlaceholder}
@@ -107,8 +107,6 @@ export default function DepartmentSectionCreateForm({
       onSubmit={handleSubmit}
       onClose={handleCancel}
       isBusy={isSubmitting}
-      successMsg={successMsg}
-      errorMsg={errorMsg}
       primaryLabel="Crear"
     >
       {formBody}
@@ -120,8 +118,6 @@ export default function DepartmentSectionCreateForm({
       onSubmit={handleSubmit}
       onCancel={handleCancel}
       isBusy={isSubmitting}
-      successMsg={successMsg}
-      errorMsg={errorMsg}
       primaryLabel="Crear"
     >
       {formBody}

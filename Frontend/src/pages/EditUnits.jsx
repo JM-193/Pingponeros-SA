@@ -120,8 +120,7 @@ export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityN
     setFormData,
     isLoading,
     isSubmitting,
-    successMsg,
-    errorMsg,
+    errors,
     clearFeedback,
     handleInputChange,
     handleSubmit,
@@ -148,7 +147,7 @@ export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityN
     onSuccess: handleSuccess,
   })
 
-  const { filteredDepartmentOptions, filteredSectionOptions, handleFieldChange, handleParentTypeChange, conflictError } =
+  const { filteredDepartmentOptions, filteredSectionOptions, handleFieldChange, handleParentTypeChange } =
     useUnitAreaFilters({
       formData,
       setFormData,
@@ -180,6 +179,7 @@ export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityN
       <OrganizationEntityFormFields
         formData={formData}
         onChange={handleFieldChange}
+        errors={errors}
         namePrefix="Unidad de"
         namePlaceholder="Nombre de la unidad"
         descriptionPlaceholder="Ingrese la descripción de la unidad"
@@ -213,8 +213,6 @@ export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityN
       onSubmit={handleSubmit}
       onClose={handleCancel}
       isBusy={isSubmitting}
-      successMsg={successMsg}
-      errorMsg={conflictError || errorMsg}
       primaryLabel="Actualizar"
     >
       {formBody}
@@ -226,8 +224,6 @@ export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityN
       onSubmit={handleSubmit}
       onCancel={handleCancel}
       isBusy={isSubmitting}
-      successMsg={successMsg}
-      errorMsg={conflictError || errorMsg}
       primaryLabel="Actualizar"
     >
       {formBody}

@@ -1,6 +1,7 @@
 // CreateUnits.test.jsx
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import CreateUnits from '../pages/CreateUnits'
 import * as areaService from '../services/areaService'
 import * as departmentService from '../services/departmentService'
@@ -176,7 +177,10 @@ describe('CreateUnits Page', () => {
     fireEvent.change(areaSelect, { target: { value: '2' } })
 
     await waitFor(() => {
-      expect(screen.getByText(/El departamento seleccionado no pertenece al área elegida/)).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith(
+        expect.stringMatching(/El departamento seleccionado no pertenece al área elegida/),
+        expect.anything(),
+      )
     })
   })
 
@@ -203,11 +207,14 @@ describe('CreateUnits Page', () => {
     fireEvent.change(areaSelect, { target: { value: '2' } })
 
     await waitFor(() => {
-      expect(screen.getByText(/La sección seleccionada no pertenece al área elegida/)).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith(
+        expect.stringMatching(/La sección seleccionada no pertenece al área elegida/),
+        expect.anything(),
+      )
     })
   })
 
-  it('limpia el error cuando se cambia el tipo de dependencia', async () => {
+  it('notifica con toast el conflicto de departamento y permite cambiar el tipo de dependencia', async () => {
     const { container } = render(
       <BrowserRouter>
         <CreateUnits />
@@ -229,14 +236,15 @@ describe('CreateUnits Page', () => {
     fireEvent.change(areaSelect, { target: { value: '2' } })
 
     await waitFor(() => {
-      expect(screen.getByText(/El departamento seleccionado no pertenece al área elegida/)).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith(
+        expect.stringMatching(/El departamento seleccionado no pertenece al área elegida/),
+        expect.anything(),
+      )
     })
 
+    // Cambiar el tipo de dependencia no debe lanzar errores
     fireEvent.change(parentTypeSelect, { target: { value: 'seccion' } })
-
-    await waitFor(() => {
-      expect(screen.queryByText(/El departamento seleccionado no pertenece al área elegida/)).not.toBeInTheDocument()
-    })
+    expect(container.querySelector('select[name="parentType"]').value).toBe('seccion')
   })
 })
 

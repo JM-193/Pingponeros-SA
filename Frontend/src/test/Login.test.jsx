@@ -1,6 +1,7 @@
 ﻿// Login.test.jsx
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import Login from '../pages/Login'
 import * as authService from '../services/authService'
 import * as sessionService from '../services/session'
@@ -223,7 +224,7 @@ describe('Login Page', () => {
     fireEvent.click(screen.getByRole('button', { name: /Iniciar Sesión/i }))
 
     await waitFor(() => {
-      expect(screen.getByText((content) => content.includes('Usuario no encontrado'))).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('Usuario no encontrado', expect.anything())
     })
   })
 

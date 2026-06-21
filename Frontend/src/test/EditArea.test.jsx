@@ -1,6 +1,7 @@
 ﻿// EditAreas.test.jsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import EditAreas from '../pages/EditAreas'
 import * as areaService from '../services/areaService'
 
@@ -128,7 +129,7 @@ describe('EditAreas Page', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Área actualizada correctamente')).toBeInTheDocument()
+      expect(toast.success).toHaveBeenCalledWith('Área actualizada correctamente', expect.anything())
     })
   })
 
@@ -146,7 +147,7 @@ describe('EditAreas Page', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Error al actualizar')).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('Error al actualizar', expect.anything())
     })
   })
 
@@ -156,7 +157,7 @@ describe('EditAreas Page', () => {
     renderWithRoute('Inexistente')
 
     await waitFor(() => {
-      expect(screen.getByText('Área no encontrada')).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('Área no encontrada', expect.anything())
     })
   })
 })
@@ -248,7 +249,7 @@ describe('EditAreas Modal Mode', () => {
     fireEvent.click(screen.getByRole('button', { name: /Actualizar/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('Área actualizada correctamente')).toBeInTheDocument()
+      expect(toast.success).toHaveBeenCalledWith('Área actualizada correctamente', expect.anything())
     })
 
     expect(areaService.actualizarArea).toHaveBeenCalled()

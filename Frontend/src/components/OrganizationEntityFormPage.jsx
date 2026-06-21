@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types'
 import FormContainer from './FormContainer'
 import FormButton from './FormButton'
-import StatusMessage from './StatusMessage'
 import PageLayout from './PageLayout'
 
 export default function OrganizationEntityFormPage({
@@ -10,8 +9,6 @@ export default function OrganizationEntityFormPage({
   onSubmit,
   onCancel,
   isBusy,
-  successMsg,
-  errorMsg,
   primaryLabel,
   primaryLoadingLabel,
   extraActions,
@@ -26,21 +23,6 @@ export default function OrganizationEntityFormPage({
         requiredNote
       >
         {children}
-
-        {successMsg && (
-          <StatusMessage
-            variant="success"
-            message={successMsg}
-            style={{ marginBottom: '20px' }}
-          />
-        )}
-        {errorMsg && (
-          <StatusMessage
-            variant="error"
-            message={errorMsg}
-            style={{ marginBottom: '20px' }}
-          />
-        )}
 
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
           <FormButton
@@ -69,8 +51,6 @@ OrganizationEntityFormPage.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   isBusy: PropTypes.bool,
-  successMsg: PropTypes.string,
-  errorMsg: PropTypes.string,
   primaryLabel: PropTypes.string.isRequired,
   primaryLoadingLabel: PropTypes.string,
   extraActions: PropTypes.node,
@@ -80,8 +60,6 @@ OrganizationEntityFormPage.propTypes = {
 OrganizationEntityFormPage.defaultProps = {
   subtitle: '',
   isBusy: false,
-  successMsg: '',
-  errorMsg: '',
   primaryLoadingLabel: 'Guardando...',
   extraActions: null,
 }

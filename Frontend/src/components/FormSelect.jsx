@@ -10,6 +10,7 @@ function FormSelect({
   options,
   required,
   defaultLabel,
+  error,
 }) {
   return (
     <div style={{ marginBottom: '20px' }}>
@@ -32,10 +33,11 @@ function FormSelect({
         value={value}
         onChange={onChange}
         required={required}
+        aria-invalid={error ? 'true' : undefined}
         style={{
           width: '100%',
           padding: '10px',
-          border: `1px solid ${COLORS.borderColor}`,
+          border: error ? `2px solid ${COLORS.danger}` : `1px solid ${COLORS.borderColor}`,
           borderRadius: '4px',
           fontSize: '14px',
           boxSizing: 'border-box',
@@ -50,6 +52,11 @@ function FormSelect({
           </option>
         ))}
       </select>
+      {error && (
+        <span style={{ fontSize: '12px', color: COLORS.danger, marginTop: '6px', display: 'block' }}>
+          {error}
+        </span>
+      )}
     </div>
   )
 }
@@ -68,12 +75,14 @@ FormSelect.propTypes = {
   ),
   required: PropTypes.bool,
   defaultLabel: PropTypes.string,
+  error: PropTypes.string,
 }
 
 FormSelect.defaultProps = {
   options: [],
   required: false,
   defaultLabel: 'Selecciona una opción',
+  error: '',
 }
 
 export default FormSelect

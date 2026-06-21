@@ -1,6 +1,7 @@
 // CreatePositions.test.jsx
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import CreatePositions from '../pages/CreatePositions'
 import * as positionService from '../services/positionService'
 import * as unitService from '../services/unitService'
@@ -166,7 +167,10 @@ describe('CreatePositions Page', () => {
     await act(async () => { fireEvent.submit(form) })
 
     await waitFor(() => {
-      expect(screen.getByText(/Plaza '5' creada correctamente/i)).toBeInTheDocument()
+      expect(toast.success).toHaveBeenCalledWith(
+        expect.stringContaining("Plaza '5' creada correctamente"),
+        expect.anything(),
+      )
     })
 
     expect(positionService.crearPlaza).toHaveBeenCalledWith(
@@ -280,7 +284,7 @@ describe('CreatePositions Page', () => {
     await act(async () => { fireEvent.submit(form) })
 
     await waitFor(() => {
-      expect(screen.getByText('La plaza ya existe')).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('La plaza ya existe', expect.anything())
     })
   })
 
@@ -294,7 +298,7 @@ describe('CreatePositions Page', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText(/Error al cargar opciones/i)).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('Error al cargar unidades', expect.anything())
     })
   })
 })

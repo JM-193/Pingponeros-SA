@@ -36,6 +36,21 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
             return true;
         }
 
+        // Fallo al enlazar/deserializar el cuerpo de la petición (p. ej. un campo
+        // numérico que llegó como null). ASP.NET lo lanza antes de ejecutar la ruta,
+        // así que lo traducimos a un 400 limpio en español en vez de un 500.
+        if (exception is BadHttpRequestException badReq)
+        {
+            httpContext.Response.StatusCode = badReq.StatusCode;
+            var mensajeSolicitud = isDev
+                ? badReq.Message
+                : "La solicitud contiene datos inválidos. Verifique la información ingresada.";
+            await httpContext.Response
+                .WriteAsJsonAsync(new { mensaje = mensajeSolicitud }, cancellationToken)
+                .ConfigureAwait(false);
+            return true;
+        }
+
         httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
         var generico = isDev
             ? exception.Message

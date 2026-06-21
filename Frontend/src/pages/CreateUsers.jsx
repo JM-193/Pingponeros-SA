@@ -10,8 +10,9 @@ import FormRow from '../components/FormRow'
 import FormInput from '../components/FormInput'
 import FormSelect from '../components/FormSelect'
 import FormButton from '../components/FormButton'
-import StatusMessage from '../components/StatusMessage'
-import { notifySuccess, reportApiError } from '../utils/notify'
+import { notifySuccess, notifyApiError } from '../utils/notify'
+
+const EMAIL_REGEX = /^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$/
 
 export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
   const navigate = useNavigate()
@@ -27,16 +28,15 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
     role: '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [successMsg, setSuccessMsg] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
+  // Errores de validación por campo (se muestran bajo cada control).
+  const [errors, setErrors] = useState({})
 
   const NAME_FIELDS = new Set(['firstName', 'secondName', 'firstName_surname', 'secondName_surname'])
   const NAME_REGEX = /[^A-Za-záéíóúÁÉÍÓÚñÑüÜ]/g
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    setSuccessMsg('')
-    setErrorMsg('')
+    setErrors((prev) => (prev[name] ? { ...prev, [name]: undefined } : prev))
     const sanitizedValue = NAME_FIELDS.has(name) ? value.replace(NAME_REGEX, '') : value
     setFormData((prev) => ({
       ...prev,
@@ -44,23 +44,33 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
     }))
   }
 
+  const validate = () => {
+    const newErrors = {}
+    if (!formData.firstName.trim()) newErrors.firstName = 'El primer nombre es requerido'
+    if (!formData.firstName_surname.trim()) newErrors.firstName_surname = 'El primer apellido es requerido'
+    if (!formData.secondName_surname.trim()) newErrors.secondName_surname = 'El segundo apellido es requerido'
+    if (!formData.email.trim()) {
+      newErrors.email = 'El correo es requerido'
+    } else if (!EMAIL_REGEX.test(formData.email.trim())) {
+      newErrors.email = 'El correo debe ser válido. Formato: nombre@ucr.ac.cr (solo letras antes de @)'
+    }
+    if (formData.role !== '0' && formData.role !== '1') {
+      newErrors.role = 'Debe seleccionar un rol'
+    }
+    return newErrors
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    const validationErrors = validate()
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
+      return
+    }
+
+    setErrors({})
     setIsSubmitting(true)
-    setSuccessMsg('')
-    setErrorMsg('')
-
-    if (!formData.email.trim()) {
-      setErrorMsg('El correo es requerido')
-      setIsSubmitting(false)
-      return
-    }
-    if (!/^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$/.test(formData.email.trim())) {
-      setErrorMsg('El correo debe ser válido. Formato: nombre@ucr.ac.cr (solo letras antes de @)')
-      setIsSubmitting(false)
-      return
-    }
-
     try {
       const data = await crearUsuario({
         correoInstitucional: formData.email,
@@ -70,9 +80,7 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
         segundoApellido:     formData.secondName_surname || null,
         rol:                 Number.parseInt(formData.role, 10),
       })
-      const mensaje = data.mensaje ?? 'Usuario creado correctamente.'
-      setSuccessMsg(mensaje)
-      notifySuccess(mensaje)
+      notifySuccess(data.mensaje ?? 'Usuario creado correctamente.')
       handleReset()
       if (isModal && onSuccess) {
         callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
@@ -80,9 +88,7 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
         delayedNavigate(-1, 1500)
       }
     } catch (err) {
-      if (!reportApiError(err)) {
-        setErrorMsg(err.message)
-      }
+      notifyApiError(err)
     } finally {
       setIsSubmitting(false)
     }
@@ -123,6 +129,7 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
           onChange={handleInputChange}
           maxLength={20}
           required
+          error={errors.firstName}
         />
         <FormInput
           label="Segundo Nombre"
@@ -131,6 +138,7 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
           value={formData.secondName}
           onChange={handleInputChange}
           maxLength={20}
+          error={errors.secondName}
         />
       </FormRow>
 
@@ -143,6 +151,7 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
           onChange={handleInputChange}
           maxLength={20}
           required
+          error={errors.firstName_surname}
         />
         <FormInput
           label="Segundo Apellido"
@@ -152,6 +161,7 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
           onChange={handleInputChange}
           maxLength={20}
           required
+          error={errors.secondName_surname}
         />
       </FormRow>
 
@@ -164,6 +174,7 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
         onChange={handleInputChange}
         maxLength={100}
         required
+        error={errors.email}
       />
 
       <FormSelect
@@ -178,14 +189,8 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
         ]}
         defaultLabel="-- Sin asignación --"
         required
+        error={errors.role}
       />
-
-      {successMsg && (
-        <StatusMessage variant="success" message={successMsg} />
-      )}
-      {errorMsg && (
-        <StatusMessage variant="error" message={errorMsg} />
-      )}
 
       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '16px' }}>
         <FormButton

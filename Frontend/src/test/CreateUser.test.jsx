@@ -1,6 +1,7 @@
 ﻿// CreateUsers.test.jsx
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import CreateUsers from '../pages/CreateUsers'
 import * as userService from '../services/userService'
 
@@ -150,16 +151,20 @@ describe('CreateUsers Page', () => {
     const emailInput = container.querySelector('input[name="email"]')
     const firstNameInput = container.querySelector('input[name="firstName"]')
     const surnameInput = container.querySelector('input[name="firstName_surname"]')
+    const secondSurnameInput = container.querySelector('input[name="secondName_surname"]')
+    const roleSelect = container.querySelector('select[name="role"]')
 
     fireEvent.change(firstNameInput, { target: { value: 'Juan' } })
     fireEvent.change(surnameInput, { target: { value: 'Pérez' } })
+    fireEvent.change(secondSurnameInput, { target: { value: 'Mora' } })
     fireEvent.change(emailInput, { target: { value: 'juan.perez@ucr.ac.cr' } })
+    fireEvent.change(roleSelect, { target: { value: '1' } })
 
     const form = container.querySelector('form')
     await act(async () => { fireEvent.submit(form) })
 
     await waitFor(() => {
-      expect(screen.getByText('Usuario creado exitosamente')).toBeInTheDocument()
+      expect(toast.success).toHaveBeenCalledWith('Usuario creado exitosamente', expect.anything())
     })
 
     // El formulario se resetea después del éxito
@@ -178,16 +183,20 @@ describe('CreateUsers Page', () => {
     const emailInput = container.querySelector('input[name="email"]')
     const firstNameInput = container.querySelector('input[name="firstName"]')
     const surnameInput = container.querySelector('input[name="firstName_surname"]')
+    const secondSurnameInput = container.querySelector('input[name="secondName_surname"]')
+    const roleSelect = container.querySelector('select[name="role"]')
 
     fireEvent.change(firstNameInput, { target: { value: 'Ana' } })
     fireEvent.change(surnameInput, { target: { value: 'López' } })
+    fireEvent.change(secondSurnameInput, { target: { value: 'Mora' } })
     fireEvent.change(emailInput, { target: { value: 'ana.lopez@ucr.ac.cr' } })
+    fireEvent.change(roleSelect, { target: { value: '0' } })
 
     const form = container.querySelector('form')
     await act(async () => { fireEvent.submit(form) })
 
     await waitFor(() => {
-      expect(screen.getByText('Usuario creado correctamente.')).toBeInTheDocument()
+      expect(toast.success).toHaveBeenCalledWith('Usuario creado correctamente.', expect.anything())
     })
   })
 
@@ -203,16 +212,20 @@ describe('CreateUsers Page', () => {
     const emailInput = container.querySelector('input[name="email"]')
     const firstNameInput = container.querySelector('input[name="firstName"]')
     const surnameInput = container.querySelector('input[name="firstName_surname"]')
+    const secondSurnameInput = container.querySelector('input[name="secondName_surname"]')
+    const roleSelect = container.querySelector('select[name="role"]')
 
     fireEvent.change(firstNameInput, { target: { value: 'Juan' } })
     fireEvent.change(surnameInput, { target: { value: 'Pérez' } })
+    fireEvent.change(secondSurnameInput, { target: { value: 'Mora' } })
     fireEvent.change(emailInput, { target: { value: 'juan.perez@ucr.ac.cr' } })
+    fireEvent.change(roleSelect, { target: { value: '1' } })
 
     const form = container.querySelector('form')
     await act(async () => { fireEvent.submit(form) })
 
     await waitFor(() => {
-      expect(screen.getByText('El correo ya existe')).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('El correo ya existe', expect.anything())
     })
   })
 
@@ -310,16 +323,20 @@ describe('CreateUsers Modal Mode', () => {
     const emailInput = container.querySelector('input[name="email"]')
     const firstNameInput = container.querySelector('input[name="firstName"]')
     const surnameInput = container.querySelector('input[name="firstName_surname"]')
+    const secondSurnameInput = container.querySelector('input[name="secondName_surname"]')
+    const roleSelect = container.querySelector('select[name="role"]')
 
     fireEvent.change(firstNameInput, { target: { value: 'Juan' } })
     fireEvent.change(surnameInput, { target: { value: 'Pérez' } })
+    fireEvent.change(secondSurnameInput, { target: { value: 'Mora' } })
     fireEvent.change(emailInput, { target: { value: 'juan.perez@ucr.ac.cr' } })
+    fireEvent.change(roleSelect, { target: { value: '1' } })
 
     const form = container.querySelector('form')
     await act(async () => { fireEvent.submit(form) })
 
     await waitFor(() => {
-      expect(screen.getByText('Usuario creado correctamente.')).toBeInTheDocument()
+      expect(toast.success).toHaveBeenCalledWith('Usuario creado correctamente.', expect.anything())
     })
 
     expect(userService.crearUsuario).toHaveBeenCalled()

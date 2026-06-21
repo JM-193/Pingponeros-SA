@@ -77,26 +77,6 @@ describe('OrganizationEntityFormModal', () => {
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
-  it('muestra mensaje de éxito', () => {
-    render(
-      <OrganizationEntityFormModal {...defaultProps} successMsg="Entidad creada correctamente">
-        <p>Campos</p>
-      </OrganizationEntityFormModal>,
-    )
-
-    expect(screen.getByText('Entidad creada correctamente')).toBeInTheDocument()
-  })
-
-  it('muestra mensaje de error', () => {
-    render(
-      <OrganizationEntityFormModal {...defaultProps} errorMsg="Error al crear entidad">
-        <p>Campos</p>
-      </OrganizationEntityFormModal>,
-    )
-
-    expect(screen.getByText('Error al crear entidad')).toBeInTheDocument()
-  })
-
   it('deshabilita botones cuando isBusy es true', () => {
     render(
       <OrganizationEntityFormModal {...defaultProps} isBusy={true} primaryLoadingLabel="Guardando...">

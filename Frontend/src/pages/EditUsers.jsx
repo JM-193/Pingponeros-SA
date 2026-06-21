@@ -10,9 +10,8 @@ import FormRow from '../components/FormRow'
 import FormInput from '../components/FormInput'
 import FormSelect from '../components/FormSelect'
 import FormButton from '../components/FormButton'
-import StatusMessage from '../components/StatusMessage'
 import StateToggle from '../components/StateToggle'
-import { notifySuccess, reportApiError } from '../utils/notify'
+import { notifySuccess, notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 
 export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityId }) {
@@ -34,8 +33,7 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
   const [correoOriginal, setCorreoOriginal] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [successMsg, setSuccessMsg] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
+  const [errors, setErrors] = useState({})
 
   const NAME_FIELDS = new Set(['firstName', 'secondName', 'firstName_surname', 'secondName_surname'])
   const NAME_REGEX = /[^A-Za-záéíóúÁÉÍÓÚñÑüÜ]/g
@@ -43,7 +41,6 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
   useEffect(() => {
     const cargarUsuario = async () => {
       setIsLoading(true)
-      setErrorMsg('')
       try {
         const user = await obtenerUsuarioPorCorreo(correo)
         setFormData({
@@ -57,7 +54,7 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
         })
         setCorreoOriginal(user.correoInstitucional)
       } catch (err) {
-        setErrorMsg(err.message)
+        notifyApiError(err)
         if (isModal && onClose) {
           callbackTimeoutRef.current = setTimeout(() => onClose(), 2000)
         } else {
@@ -74,13 +71,12 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
   }, [correo, navigate, isModal, onClose, delayedNavigate])
 
   const clearFeedback = () => {
-    setSuccessMsg('')
-    setErrorMsg('')
+    setErrors({})
   }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    clearFeedback()
+    setErrors((prev) => (prev[name] ? { ...prev, [name]: undefined } : prev))
     const sanitizedValue = NAME_FIELDS.has(name) ? value.replace(NAME_REGEX, '') : value
     setFormData((prev) => ({
       ...prev,
@@ -95,9 +91,14 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setIsSubmitting(true)
-    clearFeedback()
 
+    if (formData.role !== '0' && formData.role !== '1') {
+      setErrors({ role: 'Debe seleccionar un rol' })
+      return
+    }
+
+    setErrors({})
+    setIsSubmitting(true)
     try {
       await actualizarUsuario(correoOriginal, {
         correoInstitucional: formData.email,
@@ -108,7 +109,6 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
         rol:                 Number.parseInt(formData.role, 10),
         estado:              formData.estado,
       })
-      setSuccessMsg('Usuario actualizado correctamente.')
       notifySuccess('Usuario actualizado correctamente.')
       if (isModal && onSuccess) {
         callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
@@ -116,9 +116,7 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
         delayedNavigate(-1, 1500)
       }
     } catch (err) {
-      if (!reportApiError(err)) {
-        setErrorMsg(err.message)
-      }
+      notifyApiError(err)
     } finally {
       setIsSubmitting(false)
     }
@@ -204,6 +202,7 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
         defaultLabel="Seleccione un rol"
         required
         disabled={isSubmitting}
+        error={errors.role}
       />
 
       <StateToggle
@@ -211,13 +210,6 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
         onStateChange={handleStateChange}
         disabled={isSubmitting}
       />
-
-      {successMsg && (
-        <StatusMessage variant="success" message={successMsg} />
-      )}
-      {errorMsg && (
-        <StatusMessage variant="error" message={errorMsg} />
-      )}
 
       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
         <FormButton
