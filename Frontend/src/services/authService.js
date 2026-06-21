@@ -36,10 +36,10 @@ export async function recuperarContrasena(correoInstitucional) {
  * @param {string} contraseñaNueva
  * @returns {Promise<object>} Respuesta del servidor.
  */
-export async function cambiarContrasena(correoInstitucional, contraseñaActual, contraseñaNueva) {
+export async function cambiarContrasena(correoInstitucional, contrasenaActual, contrasenaNueva) {
   return apiFetch('/auth/cambiar-contrasena', {
     method: 'POST',
     headers: JSON_HEADERS,
-    body: JSON.stringify({ correoInstitucional, contraseñaActual, contraseñaNueva }),
+    body: JSON.stringify({ correoInstitucional, contrasenaActual, contrasenaNueva }),
   })
 }

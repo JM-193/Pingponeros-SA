@@ -208,8 +208,8 @@ describe('authService', () => {
       const body = JSON.parse(mockFetch.mock.calls[0][1].body)
       expect(body).toEqual({
         correoInstitucional: 'usuario@ucr.ac.cr',
-        contraseñaActual: 'oldPass',
-        contraseñaNueva: 'newPass',
+        contrasenaActual: 'oldPass',
+        contrasenaNueva: 'newPass',
       })
     })
 
