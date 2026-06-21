@@ -5,6 +5,7 @@ import PropTypes from 'prop-types'
 import { cerrarSesion, obtenerSesion } from '../services/session'
 import { COLORS } from '../constants/colors'
 import { useMediaQuery } from '../hooks/useMediaQuery'
+import { notifyInfo } from '../utils/notify'
 
 const NAV_ITEMS = [
   {
@@ -586,6 +587,7 @@ function ProfileDropdown({
           <button
             onClick={() => {
               cerrarSesion()
+              notifyInfo('Sesión cerrada.')
               navigate('/')
             }}
             style={{

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
 import { login } from '../services/authService'
 import { guardarSesion } from '../services/session'
-import { reportApiError } from '../utils/notify'
+import { notifySuccess, notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 
 /* UCR brand palette
@@ -73,11 +73,10 @@ export default function Login() {
       }
 
       guardarSesion(token)
+      notifySuccess('Sesión iniciada correctamente.')
       navigate('/home')
     } catch (err) {
-      if (!reportApiError(err)) {
-        setServerError(err.message)
-      }
+      notifyApiError(err)
     } finally {
       setLoading(false)
     }
