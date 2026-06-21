@@ -9,7 +9,7 @@ import { criticalError } from './alerts'
 // Para errores críticos/bloqueantes (5xx o backend caído) usar criticalError de ./alerts.
 
 const BASE_OPTIONS = {
-  position: 'top-right',
+  position: 'bottom-right',
   autoClose: 4000,
   closeOnClick: true,
   pauseOnHover: true,

@@ -6,7 +6,7 @@ export default function App() {
   return (
     <>
       <AppRouter />
-      <ToastContainer position="top-right" autoClose={4000} newestOnTop pauseOnFocusLoss={false} />
+      <ToastContainer position="bottom-right" autoClose={4000} newestOnTop pauseOnFocusLoss={false} />
     </>
   )
 }
