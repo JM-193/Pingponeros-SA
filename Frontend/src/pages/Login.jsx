@@ -14,7 +14,7 @@ import { COLORS } from '../constants/colors'
    */
 
 const TEMP_PASSWORD_EXPIRED_MESSAGE =
-  'La contraseña temporal ha expirado. Contacte al equipo de soporte para recuperar el acceso.'
+  'Contraseña expirada. Por favor realice el proceso de recuperación de contraseña.'
 
 function temporalPasswordExpired(usuario) {
   if (!usuario?.contrasenaTemporal || !usuario?.fechaExpiracionContrasena) return false

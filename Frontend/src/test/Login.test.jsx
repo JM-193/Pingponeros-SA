@@ -174,7 +174,7 @@ describe('Login Page', () => {
     fireEvent.click(screen.getByRole('button', { name: /Iniciar Sesión/i }))
 
     await waitFor(() => {
-      expect(screen.getByText(/contraseña temporal ha expirado/i)).toBeInTheDocument()
+      expect(screen.getByText(/contraseña expirada/i)).toBeInTheDocument()
       expect(sessionService.guardarSesion).not.toHaveBeenCalled()
     })
   })
