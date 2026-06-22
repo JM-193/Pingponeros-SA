@@ -5,6 +5,7 @@ import { login } from '../services/authService'
 import { guardarSesion } from '../services/session'
 import { notifySuccess, notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
+import { EMAIL_REGEX } from '../constants/regex'
 
 /* UCR brand palette
    Azul UCR  #00AEEF  (Pantone 299 C)
@@ -37,7 +38,7 @@ export default function Login() {
 
     if (!email.trim()) {
       newErrors.email = 'El correo es requerido'
-    } else if (!/^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$/.test(email.trim())) {
+    } else if (!EMAIL_REGEX.test(email.trim())) {
       newErrors.email = 'El correo debe ser válido. Formato: nombre.apellidos@ucr.ac.cr (solo letras antes de @)'
     }
 
