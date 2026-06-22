@@ -122,7 +122,7 @@ describe('Login Page', () => {
 
   it('permite login con contraseña temporal vigente', async () => {
     // Login.jsx desestructura { token, ...usuario } y luego evalúa usuario.contrasenaTemporal
-    const mockToken = 'header.temporalpayload.signature'
+    const mockToken = 'header.temporarypayload.signature'
     authService.login.mockResolvedValueOnce({
       token: mockToken,
       estado: 1,

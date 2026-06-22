@@ -17,7 +17,7 @@ import { EMAIL_REGEX } from '../constants/regex'
 const TEMP_PASSWORD_EXPIRED_MESSAGE =
   'Contraseña expirada. Por favor realice el proceso de recuperación de contraseña.'
 
-function temporalPasswordExpired(usuario) {
+function temporaryPasswordExpired(usuario) {
   if (!usuario?.contrasenaTemporal || !usuario?.fechaExpiracionContrasena) return false
 
   const expirationTime = new Date(usuario.fechaExpiracionContrasena).getTime()
@@ -61,7 +61,7 @@ export default function Login() {
         setServerError('La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte.')
         return
       }
-      if (temporalPasswordExpired(usuario)) {
+      if (temporaryPasswordExpired(usuario)) {
         setServerError(TEMP_PASSWORD_EXPIRED_MESSAGE)
         return
       }
