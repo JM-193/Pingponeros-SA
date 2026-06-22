@@ -47,11 +47,7 @@ public sealed class ProgramHelpersTests
     }
 
     private static string TraducirErrorOracle(int numero)
-    {
-        var method = typeof(Backend.Program)
-            .GetMethod("TraducirErrorOracle", BindingFlags.NonPublic | BindingFlags.Static);
-        return (string)method!.Invoke(null, [numero])!;
-    }
+        => Backend.Helpers.OracleErrorMapper.Traducir(numero);
 
     private static string GenerarContrasenaTemporal()
     {
@@ -61,11 +57,7 @@ public sealed class ProgramHelpersTests
     }
 
     private static string? ValidarComplejidadContrasena(string contrasena)
-    {
-        var method = typeof(Backend.Program)
-            .GetMethod("ValidarComplejidadContrasena", BindingFlags.NonPublic | BindingFlags.Static);
-        return (string?)method!.Invoke(null, [contrasena]);
-    }
+        => Backend.Helpers.PasswordPolicy.Validar(contrasena);
 
     [Fact]
     public void GenerarCuerpoCorreoBienvenida_ContieneNombreCorreoYContrasena()

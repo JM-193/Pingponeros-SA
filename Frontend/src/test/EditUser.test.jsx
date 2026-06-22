@@ -1,6 +1,7 @@
 // EditUsers.test.jsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import EditUsers from '../pages/EditUsers'
 import * as userService from '../services/userService'
 
@@ -92,7 +93,7 @@ describe('EditUsers Page', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Usuario actualizado correctamente.')).toBeInTheDocument()
+      expect(toast.success).toHaveBeenCalledWith('Usuario actualizado correctamente.', expect.anything())
     })
   })
 
@@ -110,7 +111,7 @@ describe('EditUsers Page', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Error al actualizar')).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('Error al actualizar', expect.anything())
     })
   })
 
@@ -120,7 +121,7 @@ describe('EditUsers Page', () => {
     renderWithRoute('no.existe@ucr.ac.cr')
 
     await waitFor(() => {
-      expect(screen.getByText('Usuario no encontrado')).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('Usuario no encontrado', expect.anything())
     })
   })
 
@@ -143,7 +144,7 @@ describe('EditUsers Page', () => {
     }
   })
 
-  it('limpia mensajes de error al cambiar campos del formulario', async () => {
+  it('notifica con toast cuando la actualización falla', async () => {
     userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
     userService.actualizarUsuario.mockRejectedValueOnce(new Error('Error al actualizar'))
 
@@ -157,14 +158,8 @@ describe('EditUsers Page', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Error al actualizar')).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('Error al actualizar', expect.anything())
     })
-
-    // Cambiar un campo debe limpiar el mensaje
-    const firstNameInput = screen.getByDisplayValue('Juan')
-    fireEvent.change(firstNameInput, { target: { name: 'firstName', value: 'Juanito' } })
-
-    expect(screen.queryByText('Error al actualizar')).not.toBeInTheDocument()
   })
 })
 
@@ -253,7 +248,7 @@ describe('EditUsers Modal Mode', () => {
     fireEvent.click(screen.getByRole('button', { name: /Actualizar/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('Usuario actualizado correctamente.')).toBeInTheDocument()
+      expect(toast.success).toHaveBeenCalledWith('Usuario actualizado correctamente.', expect.anything())
     })
 
     expect(userService.actualizarUsuario).toHaveBeenCalled()

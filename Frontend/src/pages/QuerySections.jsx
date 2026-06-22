@@ -3,6 +3,7 @@ import EntityListPage from '../components/EntityListPage'
 import { obtenerSecciones } from '../services/sectionService'
 import { obtenerAreas } from '../services/areaService'
 import { buildNameMap, formatStatusLabel, resolveOptionValueKey } from '../utils/organizationOptions'
+import { ENTITY_FORMS_AS_MODAL } from '../constants/uiMode'
 import CreateSections from './CreateSections'
 import EditSections from './EditSections'
 
@@ -62,6 +63,19 @@ export default function QuerySections() {
     )
   }
 
+  const formProps = ENTITY_FORMS_AS_MODAL
+    ? {
+        renderCreateModal: ({ isModal, isOpen, onClose, onSuccess }) => (
+          <CreateSections isModal={isModal} isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
+        ),
+        renderEditModal: ({ isModal, isOpen, onClose, onSuccess, item }) =>
+          item && <EditSections isModal={isModal} isOpen={isOpen} entityName={item.nombre} onClose={onClose} onSuccess={onSuccess} />,
+      }
+    : {
+        createPath: '/organizacion/secciones/crear',
+        editPath: (seccion) => `/organizacion/secciones/editar/${encodeURIComponent(seccion.nombre)}`,
+      }
+
   return (
     <EntityListPage
       title="Secciones"
@@ -71,12 +85,7 @@ export default function QuerySections() {
       matchesSearch={matchesSearch}
       getRowId={(seccion) => seccion.id ?? seccion.idSeccion}
       searchPlaceholder="Ingrese el nombre, descripción o área de la sección"
-      renderCreateModal={({ isOpen, onClose, onSuccess }) => (
-        <CreateSections isModal isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
-      )}
-      renderEditModal={({ isOpen, onClose, onSuccess, item }) =>
-        item && <EditSections isModal isOpen={isOpen} entityName={item.nombre} onClose={onClose} onSuccess={onSuccess} />
-      }
+      {...formProps}
     />
   )
 }

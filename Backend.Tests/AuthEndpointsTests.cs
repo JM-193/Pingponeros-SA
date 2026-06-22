@@ -105,13 +105,10 @@ public sealed class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory
         var response = await _client.PostAsJsonAsync("/auth/login", dto);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        await _factory.UsuarioRepo
-            .DidNotReceive()
-            .DesactivarPorContrasenaTemporalExpiradaAsync(Arg.Any<string>());
     }
 
     [Fact]
-    public async Task Login_Returns403YDesactivaConContrasenaTemporalVencida()
+    public async Task Login_Returns200ConContrasenaTemporalVencida()
     {
         const string password = "temporalVencida!";
         var hash = BCrypt.Net.BCrypt.HashPassword(password);
@@ -134,15 +131,13 @@ public sealed class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory
         var response = await _client.PostAsJsonAsync("/auth/login", dto);
         var body = await response.Content.ReadAsStringAsync();
 
-        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
-        Assert.Contains("contraseña temporal ha expirado", body, StringComparison.OrdinalIgnoreCase);
-        await _factory.UsuarioRepo
-            .Received(1)
-            .DesactivarPorContrasenaTemporalExpiradaAsync("expirada@test.com");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("contrasenaTemporal", body, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("fechaExpiracionContrasena", body, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
-    public async Task RecuperarContrasena_Returns403SiUsuarioFueDesactivadoPorTemporalVencida()
+    public async Task RecuperarContrasena_Returns200AunqueLaTemporalActualEsteVencida()
     {
         var usuario = new User
         {
@@ -150,7 +145,7 @@ public sealed class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory
             PrimerNombre = "Temp",
             PrimerApellido = "Expirada",
             Rol = 0,
-            Estado = 0
+            Estado = 1
         };
         _factory.UsuarioRepo
             .ObtenerPorCorreoAsync("expirada@test.com")
@@ -167,9 +162,9 @@ public sealed class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory
 
         var response = await _client.PostAsJsonAsync("/auth/recuperar-contrasena", dto);
 
-        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         await _factory.UsuarioRepo
-            .DidNotReceive()
+            .Received(1)
             .InsertarContraseñaAsync("expirada@test.com", Arg.Any<string>());
     }
 }

@@ -1,22 +1,20 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import { actualizarPlaza, obtenerPlazaPorNumero } from '../services/positionService'
 import { obtenerUnidades } from '../services/unitService'
 import { obtenerDepartamentos } from '../services/departmentService'
 import { obtenerSecciones } from '../services/sectionService'
 import { obtenerAreas } from '../services/areaService'
-import Header from '../components/Header'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
 import Modal from '../components/Modal'
 import FormContainer from '../components/FormContainer'
 import FormSelect from '../components/FormSelect'
 import FormButton from '../components/FormButton'
-import StatusMessage from '../components/StatusMessage'
 import PageLayout from '../components/PageLayout'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
 import { isUnidadInArea, resolvePlazaFieldChange } from '../utils/organizationHierarchy'
+import { notifySuccess, notifyError, notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 
 const PARENT_TYPE_OPTIONS = [
@@ -33,17 +31,16 @@ const initialFormData = {
 
 export default function EditPositions({ isModal, isOpen, onSuccess, onClose, entityId }) {
   const navigate = useNavigate()
+  const delayedNavigate = useDelayedNavigate()
+  const callbackTimeoutRef = useRef(null)
+  useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
   const params = useParams()
   const numeroPlaza = entityId ?? params.numeroPlaza
 
   const [formData, setFormData] = useState(initialFormData)
   const [parentType, setParentType] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [successMsg, setSuccessMsg] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
-  const [conflictError, setConflictError] = useState('')
-  const [loadError, setLoadError] = useState('')
 
   const [rawDepartamentos, setRawDepartamentos] = useState([])
   const [rawSecciones, setRawSecciones] = useState([])
@@ -55,8 +52,7 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
 
   useEffect(() => {
     const cargarDatos = async () => {
-      setLoading(true)
-      setLoadError('')
+      setIsLoading(true)
       try {
         const [plaza, areas, departamentos, secciones, unidades] = await Promise.all([
           obtenerPlazaPorNumero(numeroPlaza),
@@ -92,18 +88,18 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
           idUnidad:       plaza.idUnidad         ? String(plaza.idUnidad)        : '',
         })
       } catch (err) {
-        setLoadError(err.message)
+        notifyApiError(err)
         if (isModal && onClose) {
-          setTimeout(() => onClose(), 2000)
+          callbackTimeoutRef.current = setTimeout(() => onClose(), 2000)
         } else {
-          setTimeout(() => navigate('/organizacion/plazas/consultar'), 2000)
+          delayedNavigate('/organizacion/plazas/consultar', 2000)
         }
       } finally {
-        setLoading(false)
+        setIsLoading(false)
       }
     }
     cargarDatos()
-  }, [numeroPlaza, navigate, isModal, onClose])
+  }, [numeroPlaza, navigate, isModal, onClose, delayedNavigate])
 
   const filteredDepartamentosOptions = useMemo(() => {
     if (!formData.idArea) return allDepartamentosOptions
@@ -132,15 +128,8 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
       .map((u) => ({ value: String(u.id ?? u.idUnidad), label: `Unidad de ${u.nombre}` }))
   }, [formData.idArea, formData.idUnidad, rawDepartamentos, rawSecciones, rawUnidades, allUnidadOptions])
 
-  const clearFeedback = useCallback(() => {
-    setSuccessMsg('')
-    setErrorMsg('')
-    setConflictError('')
-  }, [])
-
   const applyHierarchyChange = useCallback(
     (name, value) => {
-      clearFeedback()
       const resolved = resolvePlazaFieldChange({
         formData,
         name,
@@ -151,14 +140,14 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
       })
 
       if (resolved.conflict) {
-        setConflictError(resolved.conflict)
+        notifyError(resolved.conflict)
       }
       if (resolved.parentType !== undefined) {
         setParentType(resolved.parentType)
       }
       setFormData(resolved.formData)
     },
-    [clearFeedback, formData, rawDepartamentos, rawSecciones, rawUnidades],
+    [formData, rawDepartamentos, rawSecciones, rawUnidades],
   )
 
   const handleAreaChange = useCallback(
@@ -171,7 +160,6 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
   const handleParentTypeChange = useCallback(
     (e) => {
       const { value } = e.target
-      clearFeedback()
       setParentType(value)
 
       let conflict = ''
@@ -189,7 +177,7 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
         }
       }
 
-      if (conflict) setConflictError(conflict)
+      if (conflict) notifyError(conflict)
       setFormData((prev) => ({
         ...prev,
         idDepartamento: value === 'departamento' ? prev.idDepartamento : '',
@@ -197,7 +185,7 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
         idUnidad:       clearUnidad              ? ''                  : prev.idUnidad,
       }))
     },
-    [clearFeedback, formData, rawUnidades],
+    [formData, rawUnidades],
   )
 
   const handleFieldChange = useCallback(
@@ -215,10 +203,9 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    clearFeedback()
 
     if (formData.idDepartamento && formData.idSeccion) {
-      setConflictError('Una plaza no puede pertenecer a un departamento y a una sección al mismo tiempo.')
+      notifyError('Una plaza no puede pertenecer a un departamento y a una sección al mismo tiempo.')
       return
     }
 
@@ -232,14 +219,14 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
         idArea:         formData.idArea          ? Number.parseInt(formData.idArea,          10) : null,
       }
       await actualizarPlaza(numeroPlaza, payload)
-      setSuccessMsg(`Plaza '${numeroPlaza}' actualizada correctamente.`)
+      notifySuccess(`Plaza '${numeroPlaza}' actualizada correctamente.`)
       if (isModal && onSuccess) {
-        setTimeout(() => onSuccess(), 1200)
+        callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
       } else {
-        setTimeout(() => navigate(-1), 1500)
+        delayedNavigate(-1, 1500)
       }
     } catch (err) {
-      setErrorMsg(err.message)
+      notifyApiError(err)
     } finally {
       setIsSubmitting(false)
     }
@@ -280,8 +267,6 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
           {numeroPlaza}
         </span>
       </p>
-
-      {loadError && <StatusMessage variant="error" message={`Error al cargar datos: ${loadError}`} />}
 
       <FormSelect
         label="Área"
@@ -337,9 +322,6 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
         defaultLabel="-- Sin asignación --"
       />
 
-      {successMsg && <StatusMessage variant="success" message={successMsg} style={{ marginBottom: '20px' }} />}
-      {(conflictError || errorMsg) && <StatusMessage variant="error" message={conflictError || errorMsg} style={{ marginBottom: '20px' }} />}
-
       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '8px' }}>
         <FormButton
           type="button"
@@ -357,47 +339,18 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
     </FormContainer>
   )
 
-  if (loading) {
-    if (isModal) {
-      return (
-        <Modal isOpen={isOpen} title="Editar Plaza" onClose={handleCancel}>
-          <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando datos de la plaza...</p>
-        </Modal>
-      )
-    }
-    return (
-      <PageLayout mainStyle={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: COLORS.textSubtle }}>Cargando datos de la plaza...</p>
-      </PageLayout>
-    )
-  }
+  const formBody = isLoading
+    ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando datos de la plaza...</p>
+    : formContent
 
-  if (isModal) {
-    return (
-      <Modal isOpen={isOpen} title="Editar Plaza" onClose={handleCancel}>
-        {formContent}
-      </Modal>
-    )
-  }
-
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: COLORS.bodyBg }}>
-      <Header />
-      <Navbar />
-      <main
-        style={{
-          flex: 1,
-          padding: '40px 40px 60px',
-          maxWidth: '1200px',
-          width: '100%',
-          margin: '0 auto',
-          boxSizing: 'border-box',
-        }}
-      >
-        {formContent}
-      </main>
-      <Footer />
-    </div>
+  return isModal ? (
+    <Modal isOpen={isOpen} title="Editar Plaza" onClose={handleCancel}>
+      {formBody}
+    </Modal>
+  ) : (
+    <PageLayout>
+      {formBody}
+    </PageLayout>
   )
 }
 

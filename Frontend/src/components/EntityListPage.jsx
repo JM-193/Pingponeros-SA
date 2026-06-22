@@ -3,13 +3,13 @@ import PropTypes from 'prop-types'
 import { useNavigate } from 'react-router-dom'
 import { FaSearch } from 'react-icons/fa'
 import FormButton from './FormButton'
-import StatusMessage from './StatusMessage'
 import PageLayout from './PageLayout'
 import PageTitle from './PageTitle'
 import EmptyResults from './EmptyResults'
 import PaginationControls from './PaginationControls'
 import EntityResultsTable from './EntityResultsTable'
 import { COLORS } from '../constants/colors'
+import { notifyApiError } from '../utils/notify'
 
 const defaultSearch = (item, term) => {
   const lowerTerm = term.toLowerCase()
@@ -83,7 +83,6 @@ export default function EntityListPage({
   const [searchTerm, setSearchTerm] = useState('')
   const [allItems, setAllItems] = useState([])
   const [loading, setLoading] = useState(true)
-  const [errorMsg, setErrorMsg] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [sortConfig, setSortConfig] = useState(null)
   const [createModalOpen, setCreateModalOpen] = useState(false)
@@ -92,22 +91,21 @@ export default function EntityListPage({
 
   const matches = matchesSearch ?? defaultSearch
   const resolveRowId = useMemo(() => getRowId ?? ((item) => item.id), [getRowId])
-const filteredResults = useMemo(() => {
-  if (!searchTerm.trim()) {
-    return allItems
-  }
+  const filteredResults = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return allItems
+    }
 
-  return allItems.filter((item) => matches(item, searchTerm))
-}, [allItems, matches, searchTerm])
+    return allItems.filter((item) => matches(item, searchTerm))
+  }, [allItems, matches, searchTerm])
 
-const sortedResults = useMemo(
-  () => sortRowsByColumn(filteredResults, columns, sortConfig),
-  [filteredResults, columns, sortConfig]
-)
+  const sortedResults = useMemo(
+    () => sortRowsByColumn(filteredResults, columns, sortConfig),
+    [filteredResults, columns, sortConfig]
+  )
 
   const loadItems = useCallback(async () => {
     setLoading(true)
-    setErrorMsg('')
 
     try {
       const data = await fetchItems()
@@ -115,7 +113,7 @@ const sortedResults = useMemo(
       setSearchTerm('')
       setCurrentPage(1)
     } catch (error) {
-      setErrorMsg(error.message)
+      notifyApiError(error)
     } finally {
       setLoading(false)
     }
@@ -307,14 +305,6 @@ const sortedResults = useMemo(
         </form>
       </div>
 
-      {errorMsg && (
-        <StatusMessage
-          variant="error"
-          message={errorMsg}
-          style={{ marginBottom: '20px' }}
-        />
-      )}
-
       <div id="results-section">{renderResultsContent()}</div>
       <div style={{ marginTop: '16px' }}>
         <FormButton
@@ -327,11 +317,13 @@ const sortedResults = useMemo(
       </div>
 
       {renderCreateModal?.({
+        isModal: true,
         isOpen: createModalOpen,
         onClose: () => setCreateModalOpen(false),
         onSuccess: handleModalSuccess,
       })}
       {renderEditModal?.({
+        isModal: true,
         isOpen: editModalOpen,
         onClose: () => { setEditModalOpen(false); setEditingItem(null) },
         onSuccess: handleModalSuccess,

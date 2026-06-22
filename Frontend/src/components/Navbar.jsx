@@ -5,20 +5,46 @@ import PropTypes from 'prop-types'
 import { cerrarSesion, obtenerSesion } from '../services/session'
 import { COLORS } from '../constants/colors'
 import { useMediaQuery } from '../hooks/useMediaQuery'
+import { notifyInfo } from '../utils/notify'
 
 const NAV_ITEMS = [
-  { label: 'Página Principal', path: '/home', activeOn: '/home' },
+  {
+    label: 'Página Principal',
+    path: '/home',
+    activeOn: '/home'
+  },
+  {
+    label: 'Declaraciones',
+    /* path: '/declaraciones/consultar',*/
+    activeOn: '/declaraciones'
+  },
+  /*{
+    label: 'Consultas',
+    activeOn: '/consultas',
+    submenu: [
+      { label: 'Diagnostico de carga', path: '/organizacion/consultas/diagnostico' },
+      { label: 'Consultas adicionales', path: '/organizacion/consultas/adicionales' },
+    ],
+  },*/
   {
     label: 'Usuarios',
-    activeOn: '/usuarios',
+    path: '/usuarios/consultar',
+    activeOn: '/usuarios/consultar',
+    roles: [1],
+  },
+  {
+    label: 'Plazas',
+    activeOn: '/plazas',
+    roles: [1],
     submenu: [
-      { label: 'Consultar', path: '/usuarios/consultar' },
-      /*{ label: 'Asignar N° de plaza', path: '/usuarios/asignar-plaza' },*/
-    ],
+      { label: 'Consultar', path: '/plazas/consultar'},
+      { label: 'Asignar', /* path: '/plazas/asignar' */ },
+    ]
   },
   {
     label: 'Organización',
     activeOn: '/organizacion',
+    roles: [1],
     submenu: [
       {
         label: 'Áreas',
@@ -36,31 +62,41 @@ const NAV_ITEMS = [
         label: 'Unidades',
         path: '/organizacion/unidades/consultar',
       },
-      {
-        label: 'Plazas',
-        path: '/organizacion/plazas/consultar',
-      },
     ],
   },
-  /*{
-    label: 'Consultas',
-    activeOn: '/consultas',
-    submenu: [
-      { label: 'Diagnostico de carga', path: '/organizacion/consultas/diagnostico' },
-      { label: 'Consultas adicionales', path: '/organizacion/consultas/adicionales' },
-    ],
-  },*/
   /*{
     label: 'Funciones',
     activeOn: '/funciones',
     submenu: [
-      { label: 'Crear', path: '/organizacion/funciones/crear' },
       { label: 'Consultar', path: '/organizacion/funciones/consultar' },
-      { label: 'Modificar', path: '/organizacion/funciones/modificar' },
-      { label: 'Eliminar', path: '/organizacion/funciones/eliminar' },
     ],
   },*/
 ]
+
+const filterNavItems = (items, sesion) =>
+  items.reduce((filtered, item) => {
+    if (
+      item.roles &&
+      !item.roles.includes(sesion?.rol)
+    ) {
+      return filtered
+    }
+
+    const newItem = {
+      ...item,
+      submenu: item.submenu
+        ? filterNavItems(item.submenu, sesion)
+        : undefined,
+    }
+
+    if (newItem.submenu?.length === 0) {
+      delete newItem.submenu
+    }
+
+    filtered.push(newItem)
+
+    return filtered
+  }, [])
 
 const buildNombreCompleto = (sesion) =>
   [
@@ -170,6 +206,7 @@ const getNavbarMenuButtonProps = ({
 })
 
 function NavbarMenu({
+  items,
   clearCloseTimer,
   getMenuButtonProps,
   isMobile,
@@ -223,10 +260,11 @@ function NavbarMenu({
     })
   }
 
-  return renderMenuItems(NAV_ITEMS)
+  return renderMenuItems(items)
 }
 
 NavbarMenu.propTypes = {
+  items: PropTypes.arrayOf(navItemPropType).isRequired,
   clearCloseTimer: PropTypes.func.isRequired,
   getMenuButtonProps: PropTypes.func.isRequired,
   isMobile: PropTypes.bool.isRequired,
@@ -549,6 +587,7 @@ function ProfileDropdown({
           <button
             onClick={() => {
               cerrarSesion()
+              notifyInfo('Sesión cerrada.')
               navigate('/')
             }}
             style={{
@@ -593,6 +632,7 @@ export default function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
   const sesion = obtenerSesion()
+  const visibleNavItems = filterNavItems(NAV_ITEMS, sesion)
   const isMobile = useMediaQuery('(max-width: 768px)')
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -743,6 +783,7 @@ export default function Navbar() {
         }}
       >
         <NavbarMenu
+          items={visibleNavItems}
           clearCloseTimer={clearCloseTimer}
           getMenuButtonProps={getMenuButtonProps}
           isMobile={isMobile}

@@ -32,14 +32,14 @@ describe('OrganizationEntityFormModal', () => {
     expect(screen.getByText('Campos del formulario')).toBeInTheDocument()
   })
 
-  it('renderiza subtítulo cuando se proporciona', () => {
+  it('no renderiza subtítulo en el modal', () => {
     render(
       <OrganizationEntityFormModal {...defaultProps} subtitle="Formulario de Registro">
         <p>Campos</p>
       </OrganizationEntityFormModal>,
     )
 
-    expect(screen.getByText('Formulario de Registro')).toBeInTheDocument()
+    expect(screen.queryByText('Formulario de Registro')).not.toBeInTheDocument()
   })
 
   it('renderiza botones de Cancelar y el primary label', () => {
@@ -75,26 +75,6 @@ describe('OrganizationEntityFormModal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Cerrar modal' }))
     expect(onClose).toHaveBeenCalledTimes(1)
-  })
-
-  it('muestra mensaje de éxito', () => {
-    render(
-      <OrganizationEntityFormModal {...defaultProps} successMsg="Entidad creada correctamente">
-        <p>Campos</p>
-      </OrganizationEntityFormModal>,
-    )
-
-    expect(screen.getByText('Entidad creada correctamente')).toBeInTheDocument()
-  })
-
-  it('muestra mensaje de error', () => {
-    render(
-      <OrganizationEntityFormModal {...defaultProps} errorMsg="Error al crear entidad">
-        <p>Campos</p>
-      </OrganizationEntityFormModal>,
-    )
-
-    expect(screen.getByText('Error al crear entidad')).toBeInTheDocument()
   })
 
   it('deshabilita botones cuando isBusy es true', () => {

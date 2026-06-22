@@ -1,6 +1,7 @@
 // EditPositions.test.jsx
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import EditPositions from '../pages/EditPositions'
 import * as positionService from '../services/positionService'
 import * as unitService from '../services/unitService'
@@ -123,7 +124,10 @@ describe('EditPositions Page', () => {
     await act(async () => { fireEvent.submit(form) })
 
     await waitFor(() => {
-      expect(screen.getByText(/Plaza '7' actualizada correctamente/i)).toBeInTheDocument()
+      expect(toast.success).toHaveBeenCalledWith(
+        expect.stringContaining("Plaza '7' actualizada correctamente"),
+        expect.anything(),
+      )
     })
   })
 
@@ -140,7 +144,7 @@ describe('EditPositions Page', () => {
     await act(async () => { fireEvent.submit(form) })
 
     await waitFor(() => {
-      expect(screen.getByText('Error al actualizar plaza')).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('Error al actualizar plaza', expect.anything())
     })
   })
 
@@ -162,9 +166,10 @@ describe('EditPositions Page', () => {
     await act(async () => { fireEvent.submit(form) })
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/Una plaza no puede pertenecer a un departamento y a una sección/i),
-      ).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith(
+        expect.stringContaining('Una plaza no puede pertenecer a un departamento y a una sección'),
+        expect.anything(),
+      )
     })
   })
 
@@ -174,7 +179,7 @@ describe('EditPositions Page', () => {
     renderWithRoute('999')
 
     await waitFor(() => {
-      expect(screen.getByText(/Plaza no encontrada/)).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('Plaza no encontrada', expect.anything())
     }, { timeout: 3000 })
   })
 

@@ -1,25 +1,13 @@
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5119'
+import { apiFetch } from './apiClient'
+
+const JSON_HEADERS = { 'Content-Type': 'application/json' }
 
 /**
  * Obtiene todos los departamentos.
  * @returns {Promise<Array>} Lista de departamentos.
  */
 export async function obtenerDepartamentos() {
-  const response = await fetch(`${API_URL}/departamentos`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  })
-
-  if (response.status === 404) {
-    return []
-  }
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
+  return apiFetch('/departamentos', { method: 'GET', headers: JSON_HEADERS }, { emptyArrayOn404: true })
 }
 
 /**
@@ -28,17 +16,7 @@ export async function obtenerDepartamentos() {
  * @returns {Promise<object>} El departamento encontrado.
  */
 export async function obtenerDepartamentoPorNombre(nombre) {
-  const response = await fetch(`${API_URL}/departamentos/${encodeURIComponent(nombre)}`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
+  return apiFetch(`/departamentos/${encodeURIComponent(nombre)}`, { method: 'GET', headers: JSON_HEADERS })
 }
 
 /**
@@ -47,18 +25,11 @@ export async function obtenerDepartamentoPorNombre(nombre) {
  * @returns {Promise<object>} El departamento creado.
  */
 export async function crearDepartamento(datos) {
-  const response = await fetch(`${API_URL}/departamentos`, {
+  return apiFetch('/departamentos', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: JSON_HEADERS,
     body: JSON.stringify(datos),
   })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
 }
 
 /**
@@ -67,14 +38,7 @@ export async function crearDepartamento(datos) {
  * @returns {Promise<void>}
  */
 export async function eliminarDepartamento(id) {
-  const response = await fetch(`${API_URL}/departamentos/${id}`, {
-    method: 'DELETE',
-  })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
+  await apiFetch(`/departamentos/${id}`, { method: 'DELETE' })
 }
 
 /**
@@ -84,16 +48,9 @@ export async function eliminarDepartamento(id) {
  * @returns {Promise<object>} El departamento actualizado.
  */
 export async function actualizarDepartamento(nombreOriginal, datos) {
-  const response = await fetch(`${API_URL}/departamentos/${encodeURIComponent(nombreOriginal)}`, {
+  return apiFetch(`/departamentos/${encodeURIComponent(nombreOriginal)}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: JSON_HEADERS,
     body: JSON.stringify(datos),
   })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
 }

@@ -1,8 +1,9 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import {
   clearAreaConflicts,
   resolveUnidadDependencyChange,
 } from '../utils/organizationHierarchy'
+import { notifyError } from '../utils/notify'
 
 export function useUnitAreaFilters({
   formData,
@@ -16,10 +17,6 @@ export function useUnitAreaFilters({
   clearFeedback,
   handleInputChange,
 }) {
-  const [conflictError, setConflictError] = useState('')
-
-  const clearConflictError = useCallback(() => setConflictError(''), [])
-
   const filteredDepartmentOptions = useMemo(() => {
     if (!formData.idArea) return departmentOptions
     return rawDepartamentos
@@ -38,7 +35,6 @@ export function useUnitAreaFilters({
     (event) => {
       const { value } = event.target
       clearFeedback()
-      setConflictError('')
 
       const result = clearAreaConflicts({
         formData: { ...formData, idArea: value },
@@ -48,7 +44,7 @@ export function useUnitAreaFilters({
       })
 
       if (result.conflict) {
-        setConflictError(result.conflict)
+        notifyError(result.conflict)
       }
       setFormData(result.formData)
     },
@@ -65,7 +61,6 @@ export function useUnitAreaFilters({
       const { name, value } = event.target
       if (name === 'idDepartamento' || name === 'idSeccion') {
         clearFeedback()
-        setConflictError('')
         setFormData((prev) =>
           resolveUnidadDependencyChange({
             formData: prev,
@@ -88,7 +83,6 @@ export function useUnitAreaFilters({
     (event) => {
       const { value } = event.target
       clearFeedback()
-      setConflictError('')
       setParentType(value)
       setFormData((prev) => ({
         ...prev,
@@ -104,7 +98,5 @@ export function useUnitAreaFilters({
     filteredSectionOptions,
     handleFieldChange,
     handleParentTypeChange,
-    conflictError,
-    clearConflictError,
   }
 }

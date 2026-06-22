@@ -4,8 +4,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import OrganizationEntityFormFields from './OrganizationEntityFormFields'
 import OrganizationEntityFormPage from './OrganizationEntityFormPage'
 import OrganizationEntityFormModal from './OrganizationEntityFormModal'
-import PageLayout from './PageLayout'
-import Modal from './Modal'
 import StateToggle from './StateToggle'
 import { obtenerAreas } from '../services/areaService'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
@@ -85,8 +83,7 @@ export default function DepartmentSectionEditForm({
     setFormData,
     isLoading,
     isSubmitting,
-    successMsg,
-    errorMsg,
+    errors,
     clearFeedback,
     handleInputChange,
     handleSubmit,
@@ -126,6 +123,7 @@ export default function DepartmentSectionEditForm({
       <OrganizationEntityFormFields
         formData={formData}
         onChange={handleInputChange}
+        errors={errors}
         namePrefix={config.namePrefix}
         namePlaceholder={config.namePlaceholder}
         descriptionPlaceholder={config.descriptionPlaceholder}
@@ -141,57 +139,31 @@ export default function DepartmentSectionEditForm({
     </>
   )
 
-  if (isLoading && !formData.nombre) {
-    if (isModal) {
-      return (
-        <Modal isOpen={isOpen} title={config.titleEdit} onClose={handleCancel}>
-          <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>{config.loadingEditLabel}</p>
-        </Modal>
-      )
-    }
-    return (
-      <PageLayout
-        mainStyle={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <p style={{ color: COLORS.textSubtle }}>{config.loadingEditLabel}</p>
-      </PageLayout>
-    )
-  }
+  const formBody = isLoading && !formData.nombre
+    ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>{config.loadingEditLabel}</p>
+    : formFields
 
-  if (isModal) {
-    return (
-      <OrganizationEntityFormModal
-        isOpen={isOpen}
-        title={config.titleEdit}
-        subtitle={subtitle}
-        onSubmit={handleSubmit}
-        onClose={handleCancel}
-        isBusy={isSubmitting}
-        successMsg={successMsg}
-        errorMsg={errorMsg}
-        primaryLabel="Actualizar"
-      >
-        {formFields}
-      </OrganizationEntityFormModal>
-    )
-  }
-
-  return (
+  return isModal ? (
+    <OrganizationEntityFormModal
+      isOpen={isOpen}
+      title={config.titleEdit}
+      onSubmit={handleSubmit}
+      onClose={handleCancel}
+      isBusy={isSubmitting}
+      primaryLabel="Actualizar"
+    >
+      {formBody}
+    </OrganizationEntityFormModal>
+  ) : (
     <OrganizationEntityFormPage
       title={config.titleEdit}
       subtitle={subtitle}
       onSubmit={handleSubmit}
       onCancel={handleCancel}
       isBusy={isSubmitting}
-      successMsg={successMsg}
-      errorMsg={errorMsg}
       primaryLabel="Actualizar"
     >
-      {formFields}
+      {formBody}
     </OrganizationEntityFormPage>
   )
 }

@@ -10,4 +10,11 @@ internal sealed record CreatePositionDto(
     int? IdUnidad,
     int? IdDepartamento,
     int? IdSeccion,
-    int? IdArea);
+    int? IdArea)
+{
+    /// <summary>
+    /// Devuelve <c>null</c> si el DTO es válido; en caso contrario, el mensaje de error.
+    /// </summary>
+    public string? Validar() =>
+        NumeroPlaza <= 0 ? "El número de plaza debe ser un entero positivo." : null;
+}

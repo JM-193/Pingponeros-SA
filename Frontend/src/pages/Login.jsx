@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
 import { login } from '../services/authService'
 import { guardarSesion } from '../services/session'
+import { notifySuccess, notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 
 /* UCR brand palette
@@ -13,7 +14,7 @@ import { COLORS } from '../constants/colors'
    */
 
 const TEMP_PASSWORD_EXPIRED_MESSAGE =
-  'La contraseña temporal ha expirado. Contacte al equipo de soporte para recuperar el acceso.'
+  'Contraseña expirada. Por favor realice el proceso de recuperación de contraseña.'
 
 function temporalPasswordExpired(usuario) {
   if (!usuario?.contrasenaTemporal || !usuario?.fechaExpiracionContrasena) return false
@@ -72,9 +73,10 @@ export default function Login() {
       }
 
       guardarSesion(token)
+      notifySuccess('Sesión iniciada correctamente.')
       navigate('/home')
     } catch (err) {
-      setServerError(err.message)
+      notifyApiError(err)
     } finally {
       setLoading(false)
     }
@@ -109,6 +111,7 @@ export default function Login() {
 
       <form
         onSubmit={handleSubmit}
+        noValidate
         style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' }}>

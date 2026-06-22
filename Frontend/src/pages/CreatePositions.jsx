@@ -1,23 +1,21 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import { crearPlaza } from '../services/positionService'
 import { obtenerUnidades } from '../services/unitService'
 import { obtenerDepartamentos } from '../services/departmentService'
 import { obtenerSecciones } from '../services/sectionService'
 import { obtenerAreas } from '../services/areaService'
-import Header from '../components/Header'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
 import Modal from '../components/Modal'
 import FormContainer from '../components/FormContainer'
 import FormInput from '../components/FormInput'
 import FormSelect from '../components/FormSelect'
 import FormButton from '../components/FormButton'
-import StatusMessage from '../components/StatusMessage'
 import PageLayout from '../components/PageLayout'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
 import { isUnidadInArea, resolvePlazaFieldChange } from '../utils/organizationHierarchy'
+import { notifySuccess, notifyError, notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 
 const initialFormData = {
@@ -32,12 +30,14 @@ const NUMERO_REGEX = /\D/g
 
 export default function CreatePositions({ isModal, isOpen, onSuccess, onClose }) {
   const navigate = useNavigate()
+  const delayedNavigate = useDelayedNavigate()
+  const callbackTimeoutRef = useRef(null)
+  useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
   const [formData, setFormData] = useState(initialFormData)
   const [parentType, setParentType] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [successMsg, setSuccessMsg] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
+  const [errors, setErrors] = useState({})
   const [unidadOptions, setUnidadOptions] = useState([])
   const [departamentoOptions, setDepartamentoOptions] = useState([])
   const [seccionOptions, setSeccionOptions] = useState([])
@@ -45,12 +45,9 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
   const [rawUnidades, setRawUnidades] = useState([])
   const [rawDepartamentos, setRawDepartamentos] = useState([])
   const [rawSecciones, setRawSecciones] = useState([])
-  const [loadError, setLoadError] = useState('')
-
   useEffect(() => {
     const cargarOpciones = async () => {
-      setLoading(true)
-      setLoadError('')
+      setIsLoading(true)
       try {
         const [unidades, departamentos, secciones, areas] = await Promise.all([
           obtenerUnidades(),
@@ -72,9 +69,9 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
         setSeccionOptions(buildLabeledOptions(secciones, { valueKey: seccionKey, labelPrefix: 'Sección de ' }))
         setAreaOptions(buildLabeledOptions(areas, { valueKey: areaKey, labelPrefix: 'Área de ' }))
       } catch (err) {
-        setLoadError(err.message)
+        notifyApiError(err)
       } finally {
-        setLoading(false)
+        setIsLoading(false)
       }
     }
 
@@ -110,8 +107,6 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
 
   const handleParentTypeChange = (e) => {
     const { value } = e.target
-    setSuccessMsg('')
-    setErrorMsg('')
     setParentType(value)
 
     let conflict = ''
@@ -129,7 +124,7 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
       }
     }
 
-    if (conflict) setErrorMsg(conflict)
+    if (conflict) notifyError(conflict)
 
     setFormData((prev) => ({
       ...prev,
@@ -141,10 +136,9 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    setSuccessMsg('')
-    setErrorMsg('')
 
     if (name === 'numeroPlaza') {
+      setErrors((prev) => (prev.numeroPlaza ? { ...prev, numeroPlaza: undefined } : prev))
       setFormData((prev) => ({ ...prev, numeroPlaza: value.replace(NUMERO_REGEX, '') }))
       return
     }
@@ -159,7 +153,7 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
     })
 
     if (resolved.conflict) {
-      setErrorMsg(resolved.conflict)
+      notifyError(resolved.conflict)
     }
     if (resolved.parentType !== undefined) {
       setParentType(resolved.parentType)
@@ -169,19 +163,18 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setSuccessMsg('')
-    setErrorMsg('')
 
     const numero = Number.parseInt(formData.numeroPlaza, 10)
     if (!formData.numeroPlaza.trim()) {
-      setErrorMsg('El número de plaza es obligatorio.')
+      setErrors({ numeroPlaza: 'El número de plaza es obligatorio.' })
       return
     }
     if (!Number.isInteger(numero) || numero <= 0) {
-      setErrorMsg('El número de plaza debe ser un entero positivo.')
+      setErrors({ numeroPlaza: 'El número de plaza debe ser un entero positivo.' })
       return
     }
 
+    setErrors({})
     setIsSubmitting(true)
     try {
       const payload = {
@@ -192,15 +185,15 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
         idArea:         formData.idArea          ? Number.parseInt(formData.idArea, 10)         : null,
       }
       await crearPlaza(payload)
-      setSuccessMsg(`Plaza '${numero}' creada correctamente.`)
+      notifySuccess(`Plaza '${numero}' creada correctamente.`)
       setFormData(initialFormData)
       if (isModal && onSuccess) {
-        setTimeout(() => onSuccess(), 1200)
+        callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
       } else {
-        setTimeout(() => navigate(-1), 1500)
+        delayedNavigate(-1, 1500)
       }
     } catch (err) {
-      setErrorMsg(err.message)
+      notifyApiError(err)
     } finally {
       setIsSubmitting(false)
     }
@@ -221,10 +214,6 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
       subtitle={isModal ? undefined : 'Formulario de Registro'}
       requiredNote
     >
-      {loadError && (
-        <StatusMessage variant="error" message={`Error al cargar opciones: ${loadError}`} />
-      )}
-
       <FormInput
         label="Número de Plaza"
         id="numeroPlaza"
@@ -235,6 +224,7 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
         onChange={handleInputChange}
         maxLength={20}
         required
+        error={errors.numeroPlaza}
       />
 
       <FormSelect
@@ -294,9 +284,6 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
         defaultLabel="-- Sin asignación --"
       />
 
-      {errorMsg && <StatusMessage variant="error" message={errorMsg} />}
-      {successMsg && <StatusMessage variant="success" message={successMsg} />}
-
       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '16px' }}>
         <FormButton
           label="Cancelar"
@@ -315,53 +302,18 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
     </FormContainer>
   )
 
-  if (loading) {
-    if (isModal) {
-      return (
-        <Modal isOpen={isOpen} title="Crear Plaza" onClose={handleCancel}>
-          <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando datos de organización...</p>
-        </Modal>
-      )
-    }
-    return (
-      <PageLayout
-        mainStyle={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <p style={{ color: COLORS.textSubtle }}>Cargando datos de organización...</p>
-      </PageLayout>
-    )
-  }
+  const formBody = isLoading
+    ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando datos de organización...</p>
+    : formContent
 
-  if (isModal) {
-    return (
-      <Modal isOpen={isOpen} title="Crear Plaza" onClose={handleCancel}>
-        {formContent}
-      </Modal>
-    )
-  }
-
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: COLORS.bodyBg }}>
-      <Header />
-      <Navbar />
-      <main
-        style={{
-          flex: 1,
-          padding: '40px 40px 60px',
-          maxWidth: '1200px',
-          width: '100%',
-          margin: '0 auto',
-          boxSizing: 'border-box',
-        }}
-      >
-        {formContent}
-      </main>
-      <Footer />
-    </div>
+  return isModal ? (
+    <Modal isOpen={isOpen} title="Crear Plaza" onClose={handleCancel}>
+      {formBody}
+    </Modal>
+  ) : (
+    <PageLayout>
+      {formBody}
+    </PageLayout>
   )
 }
 

@@ -4,8 +4,6 @@ import { useNavigate } from 'react-router-dom'
 import OrganizationEntityFormPage from './OrganizationEntityFormPage'
 import OrganizationEntityFormModal from './OrganizationEntityFormModal'
 import OrganizationEntityFormFields from './OrganizationEntityFormFields'
-import PageLayout from './PageLayout'
-import Modal from './Modal'
 import { obtenerAreas } from '../services/areaService'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
 import { useOrganizationEntityForm } from '../hooks/useOrganizationEntityForm'
@@ -58,8 +56,7 @@ export default function DepartmentSectionCreateForm({
     formData,
     isLoading,
     isSubmitting,
-    successMsg,
-    errorMsg,
+    errors,
     handleInputChange,
     handleSubmit,
   } = useOrganizationEntityForm({
@@ -89,6 +86,7 @@ export default function DepartmentSectionCreateForm({
     <OrganizationEntityFormFields
       formData={formData}
       onChange={handleInputChange}
+      errors={errors}
       namePrefix={config.namePrefix}
       namePlaceholder={config.namePlaceholder}
       descriptionPlaceholder={config.descriptionPlaceholder}
@@ -98,57 +96,31 @@ export default function DepartmentSectionCreateForm({
     />
   )
 
-  if (isLoading) {
-    if (isModal) {
-      return (
-        <Modal isOpen={isOpen} title={config.titleCreate} onClose={handleCancel}>
-          <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando áreas...</p>
-        </Modal>
-      )
-    }
-    return (
-      <PageLayout
-        mainStyle={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <p style={{ color: COLORS.textSubtle }}>Cargando áreas...</p>
-      </PageLayout>
-    )
-  }
+  const formBody = isLoading
+    ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando áreas...</p>
+    : formFields
 
-  if (isModal) {
-    return (
-      <OrganizationEntityFormModal
-        isOpen={isOpen}
-        title={config.titleCreate}
-        subtitle={subtitle}
-        onSubmit={handleSubmit}
-        onClose={handleCancel}
-        isBusy={isSubmitting}
-        successMsg={successMsg}
-        errorMsg={errorMsg}
-        primaryLabel="Crear"
-      >
-        {formFields}
-      </OrganizationEntityFormModal>
-    )
-  }
-
-  return (
+  return isModal ? (
+    <OrganizationEntityFormModal
+      isOpen={isOpen}
+      title={config.titleCreate}
+      onSubmit={handleSubmit}
+      onClose={handleCancel}
+      isBusy={isSubmitting}
+      primaryLabel="Crear"
+    >
+      {formBody}
+    </OrganizationEntityFormModal>
+  ) : (
     <OrganizationEntityFormPage
       title={config.titleCreate}
       subtitle={subtitle}
       onSubmit={handleSubmit}
       onCancel={handleCancel}
       isBusy={isSubmitting}
-      successMsg={successMsg}
-      errorMsg={errorMsg}
       primaryLabel="Crear"
     >
-      {formFields}
+      {formBody}
     </OrganizationEntityFormPage>
   )
 }

@@ -1,6 +1,7 @@
 ﻿// CreateAreas.test.jsx
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import CreateAreas from '../pages/CreateAreas'
 import * as areaService from '../services/areaService'
 
@@ -31,6 +32,16 @@ describe('CreateAreas Page', () => {
     )
 
     expect(screen.getByText('Página Principal')).toBeInTheDocument()
+  })
+
+  it('muestra el subtítulo en la versión de página', () => {
+    render(
+      <BrowserRouter>
+        <CreateAreas />
+      </BrowserRouter>,
+    )
+
+    expect(screen.getByText('Formulario de Registro')).toBeInTheDocument()
   })
 
   it('valida que nombre sea requerido', async () => {
@@ -108,7 +119,7 @@ describe('CreateAreas Page', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Área creada correctamente')).toBeInTheDocument()
+      expect(toast.success).toHaveBeenCalledWith('Área creada correctamente', expect.anything())
     })
   })
 
@@ -131,7 +142,7 @@ describe('CreateAreas Page', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Área ya existe')).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('Área ya existe', expect.anything())
     })
   })
 
@@ -216,6 +227,16 @@ describe('CreateAreas Modal Mode', () => {
     expect(document.querySelector('footer')).not.toBeInTheDocument()
   })
 
+  it('no muestra el subtítulo en modo modal', () => {
+    render(
+      <BrowserRouter>
+        <CreateAreas isModal isOpen={true} onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    expect(screen.queryByText('Formulario de Registro')).not.toBeInTheDocument()
+  })
+
   it('no renderiza nada cuando isOpen es false', () => {
     const { container } = render(
       <BrowserRouter>
@@ -252,7 +273,7 @@ describe('CreateAreas Modal Mode', () => {
     fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('Área creada correctamente')).toBeInTheDocument()
+      expect(toast.success).toHaveBeenCalledWith('Área creada correctamente', expect.anything())
     })
 
     expect(areaService.crearArea).toHaveBeenCalledWith({

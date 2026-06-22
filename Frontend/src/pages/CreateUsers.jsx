@@ -1,21 +1,24 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import { crearUsuario } from '../services/userService'
-import Header from '../components/Header'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
 import Modal from '../components/Modal'
+import PageLayout from '../components/PageLayout'
 import FormContainer from '../components/FormContainer'
 import FormRow from '../components/FormRow'
 import FormInput from '../components/FormInput'
 import FormSelect from '../components/FormSelect'
 import FormButton from '../components/FormButton'
-import StatusMessage from '../components/StatusMessage'
-import { COLORS } from '../constants/colors'
+import { notifySuccess, notifyApiError } from '../utils/notify'
+
+const EMAIL_REGEX = /^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$/
 
 export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
   const navigate = useNavigate()
+  const delayedNavigate = useDelayedNavigate()
+  const callbackTimeoutRef = useRef(null)
+  useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
   const [formData, setFormData] = useState({
     firstName: '',
     secondName: '',
@@ -24,17 +27,16 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
     email: '',
     role: '',
   })
-  const [loading, setLoading] = useState(false)
-  const [successMsg, setSuccessMsg] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  // Errores de validación por campo (se muestran bajo cada control).
+  const [errors, setErrors] = useState({})
 
   const NAME_FIELDS = new Set(['firstName', 'secondName', 'firstName_surname', 'secondName_surname'])
   const NAME_REGEX = /[^A-Za-záéíóúÁÉÍÓÚñÑüÜ]/g
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    setSuccessMsg('')
-    setErrorMsg('')
+    setErrors((prev) => (prev[name] ? { ...prev, [name]: undefined } : prev))
     const sanitizedValue = NAME_FIELDS.has(name) ? value.replace(NAME_REGEX, '') : value
     setFormData((prev) => ({
       ...prev,
@@ -42,23 +44,33 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
     }))
   }
 
+  const validate = () => {
+    const newErrors = {}
+    if (!formData.firstName.trim()) newErrors.firstName = 'El primer nombre es requerido'
+    if (!formData.firstName_surname.trim()) newErrors.firstName_surname = 'El primer apellido es requerido'
+    if (!formData.secondName_surname.trim()) newErrors.secondName_surname = 'El segundo apellido es requerido'
+    if (!formData.email.trim()) {
+      newErrors.email = 'El correo es requerido'
+    } else if (!EMAIL_REGEX.test(formData.email.trim())) {
+      newErrors.email = 'El correo debe ser válido. Formato: nombre@ucr.ac.cr (solo letras antes de @)'
+    }
+    if (formData.role !== '0' && formData.role !== '1') {
+      newErrors.role = 'Debe seleccionar un rol'
+    }
+    return newErrors
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
-    setSuccessMsg('')
-    setErrorMsg('')
 
-    if (!formData.email.trim()) {
-      setErrorMsg('El correo es requerido')
-      setLoading(false)
-      return
-    }
-    if (!/^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$/.test(formData.email.trim())) {
-      setErrorMsg('El correo debe ser válido. Formato: nombre@ucr.ac.cr (solo letras antes de @)')
-      setLoading(false)
+    const validationErrors = validate()
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
       return
     }
 
+    setErrors({})
+    setIsSubmitting(true)
     try {
       const data = await crearUsuario({
         correoInstitucional: formData.email,
@@ -68,17 +80,17 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
         segundoApellido:     formData.secondName_surname || null,
         rol:                 Number.parseInt(formData.role, 10),
       })
-      setSuccessMsg(data.mensaje ?? 'Usuario creado correctamente.')
+      notifySuccess(data.mensaje ?? 'Usuario creado correctamente.')
       handleReset()
       if (isModal && onSuccess) {
-        setTimeout(() => onSuccess(), 1200)
+        callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
       } else {
-        setTimeout(() => navigate(-1), 1500)
+        delayedNavigate(-1, 1500)
       }
     } catch (err) {
-      setErrorMsg(err.message)
+      notifyApiError(err)
     } finally {
-      setLoading(false)
+      setIsSubmitting(false)
     }
   }
 
@@ -117,6 +129,7 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
           onChange={handleInputChange}
           maxLength={20}
           required
+          error={errors.firstName}
         />
         <FormInput
           label="Segundo Nombre"
@@ -125,6 +138,7 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
           value={formData.secondName}
           onChange={handleInputChange}
           maxLength={20}
+          error={errors.secondName}
         />
       </FormRow>
 
@@ -137,6 +151,7 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
           onChange={handleInputChange}
           maxLength={20}
           required
+          error={errors.firstName_surname}
         />
         <FormInput
           label="Segundo Apellido"
@@ -146,6 +161,7 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
           onChange={handleInputChange}
           maxLength={20}
           required
+          error={errors.secondName_surname}
         />
       </FormRow>
 
@@ -158,6 +174,7 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
         onChange={handleInputChange}
         maxLength={100}
         required
+        error={errors.email}
       />
 
       <FormSelect
@@ -172,14 +189,8 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
         ]}
         defaultLabel="-- Sin asignación --"
         required
+        error={errors.role}
       />
-
-      {successMsg && (
-        <StatusMessage variant="success" message={successMsg} />
-      )}
-      {errorMsg && (
-        <StatusMessage variant="error" message={errorMsg} />
-      )}
 
       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '16px' }}>
         <FormButton
@@ -187,44 +198,26 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
           type="button"
           variant="secondary"
           onClick={handleCancel}
-          disabled={loading}
+          disabled={isSubmitting}
         />
         <FormButton
-          label={loading ? 'Guardando...' : 'Crear'}
+          label={isSubmitting ? 'Guardando...' : 'Crear'}
           type="submit"
           variant="primary"
-          disabled={loading}
+          disabled={isSubmitting}
         />
       </div>
     </FormContainer>
   )
 
-  if (isModal) {
-    return (
-      <Modal isOpen={isOpen} title="Crear Usuario" onClose={handleCancel}>
-        {formContent}
-      </Modal>
-    )
-  }
-
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: COLORS.bodyBg }}>
-      <Header />
-      <Navbar />
-      <main
-        style={{
-          flex: 1,
-          padding: '40px 40px 60px',
-          maxWidth: '1200px',
-          width: '100%',
-          margin: '0 auto',
-          boxSizing: 'border-box',
-        }}
-      >
-        {formContent}
-      </main>
-      <Footer />
-    </div>
+  return isModal ? (
+    <Modal isOpen={isOpen} title="Crear Usuario" onClose={handleCancel}>
+      {formContent}
+    </Modal>
+  ) : (
+    <PageLayout>
+      {formContent}
+    </PageLayout>
   )
 }
 

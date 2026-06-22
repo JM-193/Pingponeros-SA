@@ -1,26 +1,29 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import { crearArea } from '../services/areaService'
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
 import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
-import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormError, getOrganizationEntityPayload } from '../utils/organizationEntityForm'
+import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormErrors, getOrganizationEntityPayload } from '../utils/organizationEntityForm'
+import { notifySuccess, notifyApiError } from '../utils/notify'
 
 export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
   const navigate = useNavigate()
+  const delayedNavigate = useDelayedNavigate()
+  const callbackTimeoutRef = useRef(null)
+  useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
     estado: 1,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [successMsg, setSuccessMsg] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
+  const [errors, setErrors] = useState({})
 
   const clearFeedback = () => {
-    setSuccessMsg('')
-    setErrorMsg('')
+    setErrors({})
   }
 
   const handleInputChange = createOrganizationEntityInputChangeHandler(setFormData, clearFeedback)
@@ -28,14 +31,14 @@ export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
-    clearFeedback()
+    setErrors({})
 
-    const validationError = getOrganizationEntityFormError(formData, {
+    const validationErrors = getOrganizationEntityFormErrors(formData, {
       entityLabel: 'área',
       nameArticle: 'del',
     })
-    if (validationError) {
-      setErrorMsg(validationError)
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
       setIsSubmitting(false)
       return
     }
@@ -43,15 +46,15 @@ export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
     try {
       await crearArea(getOrganizationEntityPayload(formData, { includeEstado: true }))
 
-      setSuccessMsg('Área creada correctamente')
+      notifySuccess('Área creada correctamente')
       handleReset()
       if (isModal && onSuccess) {
-        setTimeout(() => onSuccess(), 1200)
+        callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
       } else {
-        setTimeout(() => navigate('/organizacion/areas/consultar'), 1500)
+        delayedNavigate('/organizacion/areas/consultar', 1500)
       }
     } catch (err) {
-      setErrorMsg(err.message)
+      notifyApiError(err)
     } finally {
       setIsSubmitting(false)
     }
@@ -77,6 +80,7 @@ export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
     <OrganizationEntityFormFields
       formData={formData}
       onChange={handleInputChange}
+      errors={errors}
       namePrefix="Área de"
       namePlaceholder="Nombre del área"
       descriptionPlaceholder="Ingrese la descripción del área"
@@ -85,33 +89,24 @@ export default function CreateAreas({ isModal, isOpen, onSuccess, onClose }) {
     />
   )
 
-  if (isModal) {
-    return (
-      <OrganizationEntityFormModal
-        isOpen={isOpen}
-        title="Crear Área"
-        subtitle="Formulario de Registro"
-        onSubmit={handleSubmit}
-        onClose={handleCancel}
-        isBusy={isSubmitting}
-        successMsg={successMsg}
-        errorMsg={errorMsg}
-        primaryLabel="Crear"
-      >
-        {formFields}
-      </OrganizationEntityFormModal>
-    )
-  }
-
-  return (
+  return isModal ? (
+    <OrganizationEntityFormModal
+      isOpen={isOpen}
+      title="Crear Área"
+      onSubmit={handleSubmit}
+      onClose={handleCancel}
+      isBusy={isSubmitting}
+      primaryLabel="Crear"
+    >
+      {formFields}
+    </OrganizationEntityFormModal>
+  ) : (
     <OrganizationEntityFormPage
       title="Crear Área"
       subtitle="Formulario de Registro"
       onSubmit={handleSubmit}
       onCancel={handleCancel}
       isBusy={isSubmitting}
-      successMsg={successMsg}
-      errorMsg={errorMsg}
       primaryLabel="Crear"
     >
       {formFields}

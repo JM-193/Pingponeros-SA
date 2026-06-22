@@ -29,7 +29,7 @@ export default function Home() {
             color: '#1a1a1a',
           }}
         >
-          La Aplicación de Cargas de Trabajo
+          Aplicación de Cargas de Trabajo
         </h2>
 
         <p

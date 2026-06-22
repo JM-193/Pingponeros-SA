@@ -84,7 +84,7 @@ export default function Modal({ isOpen, title, onClose, children, maxWidth }) {
           borderRadius: '10px',
           boxShadow: '0 12px 30px rgba(0,0,0,0.18)',
           maxWidth,
-          width: '100%',
+          width: '50%',
           padding: '24px',
           position: 'relative',
           zIndex: 1,

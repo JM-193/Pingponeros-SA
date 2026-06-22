@@ -1,11 +1,10 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
 import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
-import PageLayout from '../components/PageLayout'
-import Modal from '../components/Modal'
 import { crearUnidad } from '../services/unitService'
 import { obtenerAreas } from '../services/areaService'
 import { obtenerDepartamentos } from '../services/departmentService'
@@ -31,6 +30,9 @@ const initialFormData = {
 
 export default function CreateUnits({ isModal, isOpen, onSuccess, onClose }) {
   const navigate = useNavigate()
+  const delayedNavigate = useDelayedNavigate()
+  const callbackTimeoutRef = useRef(null)
+  useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
   const [parentType, setParentType] = useState('')
   const [areaOptions, setAreaOptions] = useState([])
   const [departmentOptions, setDepartmentOptions] = useState([])
@@ -73,12 +75,12 @@ export default function CreateUnits({ isModal, isOpen, onSuccess, onClose }) {
       resetFormData()
       setParentType('')
       if (isModal && onSuccess) {
-        setTimeout(() => onSuccess(), 1200)
+        callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
       } else {
-        setTimeout(() => navigate('/organizacion/unidades/consultar'), 1500)
+        delayedNavigate('/organizacion/unidades/consultar', 1500)
       }
     },
-    [navigate, setParentType, isModal, onSuccess],
+    [delayedNavigate, setParentType, isModal, onSuccess],
   )
 
   const {
@@ -86,8 +88,7 @@ export default function CreateUnits({ isModal, isOpen, onSuccess, onClose }) {
     setFormData,
     isLoading,
     isSubmitting,
-    successMsg,
-    errorMsg,
+    errors,
     clearFeedback,
     handleInputChange,
     handleSubmit,
@@ -111,7 +112,7 @@ export default function CreateUnits({ isModal, isOpen, onSuccess, onClose }) {
     onSuccess: handleSuccess,
   })
 
-  const { filteredDepartmentOptions, filteredSectionOptions, handleFieldChange, handleParentTypeChange, conflictError } =
+  const { filteredDepartmentOptions, filteredSectionOptions, handleFieldChange, handleParentTypeChange } =
     useUnitAreaFilters({
       formData,
       setFormData,
@@ -137,6 +138,7 @@ export default function CreateUnits({ isModal, isOpen, onSuccess, onClose }) {
     <OrganizationEntityFormFields
       formData={formData}
       onChange={handleFieldChange}
+      errors={errors}
       namePrefix="Unidad de"
       namePlaceholder="Nombre de la unidad"
       descriptionPlaceholder="Ingrese la descripción de la unidad"
@@ -153,57 +155,31 @@ export default function CreateUnits({ isModal, isOpen, onSuccess, onClose }) {
     />
   )
 
-  if (isLoading) {
-    if (isModal) {
-      return (
-        <Modal isOpen={isOpen} title="Crear Unidad" onClose={handleCancel}>
-          <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando datos de organización...</p>
-        </Modal>
-      )
-    }
-    return (
-      <PageLayout
-        mainStyle={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <p style={{ color: COLORS.textSubtle }}>Cargando datos de organización...</p>
-      </PageLayout>
-    )
-  }
+  const formBody = isLoading
+    ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando datos de organización...</p>
+    : formFields
 
-  if (isModal) {
-    return (
-      <OrganizationEntityFormModal
-        isOpen={isOpen}
-        title="Crear Unidad"
-        subtitle="Formulario de Registro"
-        onSubmit={handleSubmit}
-        onClose={handleCancel}
-        isBusy={isSubmitting}
-        successMsg={successMsg}
-        errorMsg={conflictError || errorMsg}
-        primaryLabel="Crear"
-      >
-        {formFields}
-      </OrganizationEntityFormModal>
-    )
-  }
-
-  return (
+  return isModal ? (
+    <OrganizationEntityFormModal
+      isOpen={isOpen}
+      title="Crear Unidad"
+      onSubmit={handleSubmit}
+      onClose={handleCancel}
+      isBusy={isSubmitting}
+      primaryLabel="Crear"
+    >
+      {formBody}
+    </OrganizationEntityFormModal>
+  ) : (
     <OrganizationEntityFormPage
       title="Crear Unidad"
       subtitle="Formulario de Registro"
       onSubmit={handleSubmit}
       onCancel={handleCancel}
       isBusy={isSubmitting}
-      successMsg={successMsg}
-      errorMsg={conflictError || errorMsg}
       primaryLabel="Crear"
     >
-      {formFields}
+      {formBody}
     </OrganizationEntityFormPage>
   )
 }

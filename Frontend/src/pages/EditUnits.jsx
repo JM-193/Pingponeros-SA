@@ -1,11 +1,10 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
 import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
 import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
-import PageLayout from '../components/PageLayout'
-import Modal from '../components/Modal'
 import StateToggle from '../components/StateToggle'
 import { actualizarUnidad, obtenerUnidadPorNombre } from '../services/unitService'
 import { obtenerAreas } from '../services/areaService'
@@ -32,6 +31,9 @@ const initialFormData = {
 
 export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityName }) {
   const navigate = useNavigate()
+  const delayedNavigate = useDelayedNavigate()
+  const callbackTimeoutRef = useRef(null)
+  useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
   const params = useParams()
   const nombre = entityName ?? params.nombre
   const [parentType, setParentType] = useState('')
@@ -94,19 +96,19 @@ export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityN
 
   const handleLoadError = useCallback(() => {
     if (isModal && onClose) {
-      setTimeout(() => onClose(), 2000)
+      callbackTimeoutRef.current = setTimeout(() => onClose(), 2000)
     } else {
-      setTimeout(() => navigate('/organizacion/unidades/consultar'), 2000)
+      delayedNavigate('/organizacion/unidades/consultar', 2000)
     }
-  }, [navigate, isModal, onClose])
+  }, [delayedNavigate, isModal, onClose])
 
   const handleSuccess = useCallback(() => {
     if (isModal && onSuccess) {
-      setTimeout(() => onSuccess(), 1200)
+      callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
     } else {
-      setTimeout(() => navigate('/organizacion/unidades/consultar'), 1500)
+      delayedNavigate('/organizacion/unidades/consultar', 1500)
     }
-  }, [navigate, isModal, onSuccess])
+  }, [delayedNavigate, isModal, onSuccess])
 
   const submitUpdate = useCallback(
     (payload) => actualizarUnidad(nombreOriginal, payload),
@@ -118,8 +120,7 @@ export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityN
     setFormData,
     isLoading,
     isSubmitting,
-    successMsg,
-    errorMsg,
+    errors,
     clearFeedback,
     handleInputChange,
     handleSubmit,
@@ -146,7 +147,7 @@ export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityN
     onSuccess: handleSuccess,
   })
 
-  const { filteredDepartmentOptions, filteredSectionOptions, handleFieldChange, handleParentTypeChange, conflictError } =
+  const { filteredDepartmentOptions, filteredSectionOptions, handleFieldChange, handleParentTypeChange } =
     useUnitAreaFilters({
       formData,
       setFormData,
@@ -178,6 +179,7 @@ export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityN
       <OrganizationEntityFormFields
         formData={formData}
         onChange={handleFieldChange}
+        errors={errors}
         namePrefix="Unidad de"
         namePlaceholder="Nombre de la unidad"
         descriptionPlaceholder="Ingrese la descripción de la unidad"
@@ -200,57 +202,31 @@ export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityN
     </>
   )
 
-  if (isLoading && !formData.nombre) {
-    if (isModal) {
-      return (
-        <Modal isOpen={isOpen} title="Editar Unidad" onClose={handleCancel}>
-          <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando unidad...</p>
-        </Modal>
-      )
-    }
-    return (
-      <PageLayout
-        mainStyle={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <p style={{ color: COLORS.textSubtle }}>Cargando unidad...</p>
-      </PageLayout>
-    )
-  }
+  const formBody = isLoading && !formData.nombre
+    ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando unidad...</p>
+    : formFields
 
-  if (isModal) {
-    return (
-      <OrganizationEntityFormModal
-        isOpen={isOpen}
-        title="Editar Unidad"
-        subtitle="Formulario de Actualización"
-        onSubmit={handleSubmit}
-        onClose={handleCancel}
-        isBusy={isSubmitting}
-        successMsg={successMsg}
-        errorMsg={conflictError || errorMsg}
-        primaryLabel="Actualizar"
-      >
-        {formFields}
-      </OrganizationEntityFormModal>
-    )
-  }
-
-  return (
+  return isModal ? (
+    <OrganizationEntityFormModal
+      isOpen={isOpen}
+      title="Editar Unidad"
+      onSubmit={handleSubmit}
+      onClose={handleCancel}
+      isBusy={isSubmitting}
+      primaryLabel="Actualizar"
+    >
+      {formBody}
+    </OrganizationEntityFormModal>
+  ) : (
     <OrganizationEntityFormPage
       title="Editar Unidad"
       subtitle="Formulario de Actualización"
       onSubmit={handleSubmit}
       onCancel={handleCancel}
       isBusy={isSubmitting}
-      successMsg={successMsg}
-      errorMsg={conflictError || errorMsg}
       primaryLabel="Actualizar"
     >
-      {formFields}
+      {formBody}
     </OrganizationEntityFormPage>
   )
 }

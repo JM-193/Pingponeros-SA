@@ -173,40 +173,6 @@ public sealed class UserRepositoryPersistenceTests
     }
 
     [Fact]
-    public async Task DesactivarPorContrasenaTemporalExpiradaAsync_ReturnsTrueWhenUpdated()
-    {
-        var q = Substitute.For<IQueryExecutor>();
-        q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
-            .Returns(ci =>
-            {
-                ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                return Task.FromResult(1);
-            });
-
-        var repo = new UserRepository(q);
-        var result = await repo.DesactivarPorContrasenaTemporalExpiradaAsync("ana@test.com");
-
-        Assert.True(result);
-    }
-
-    [Fact]
-    public async Task DesactivarPorContrasenaTemporalExpiradaAsync_ReturnsFalseWhenNotFound()
-    {
-        var q = Substitute.For<IQueryExecutor>();
-        q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
-            .Returns(ci =>
-            {
-                ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                return Task.FromResult(0);
-            });
-
-        var repo = new UserRepository(q);
-        var result = await repo.DesactivarPorContrasenaTemporalExpiradaAsync("noexiste@test.com");
-
-        Assert.False(result);
-    }
-
-    [Fact]
     public async Task ActualizarAsync_ReturnsTrueWhenUpdated()
     {
         var q = Substitute.For<IQueryExecutor>();

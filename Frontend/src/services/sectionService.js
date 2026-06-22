@@ -1,25 +1,13 @@
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5119'
+import { apiFetch } from './apiClient'
+
+const JSON_HEADERS = { 'Content-Type': 'application/json' }
 
 /**
  * Obtiene todas las secciones.
  * @returns {Promise<Array>} Lista de secciones.
  */
 export async function obtenerSecciones() {
-  const response = await fetch(`${API_URL}/secciones`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  })
-
-  if (response.status === 404) {
-    return []
-  }
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
+  return apiFetch('/secciones', { method: 'GET', headers: JSON_HEADERS }, { emptyArrayOn404: true })
 }
 
 /**
@@ -28,17 +16,7 @@ export async function obtenerSecciones() {
  * @returns {Promise<object>} La sección encontrada.
  */
 export async function obtenerSeccionPorNombre(nombre) {
-  const response = await fetch(`${API_URL}/secciones/${encodeURIComponent(nombre)}`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
+  return apiFetch(`/secciones/${encodeURIComponent(nombre)}`, { method: 'GET', headers: JSON_HEADERS })
 }
 
 /**
@@ -47,18 +25,11 @@ export async function obtenerSeccionPorNombre(nombre) {
  * @returns {Promise<object>} La sección creada.
  */
 export async function crearSeccion(datos) {
-  const response = await fetch(`${API_URL}/secciones`, {
+  return apiFetch('/secciones', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: JSON_HEADERS,
     body: JSON.stringify(datos),
   })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
 }
 
 /**
@@ -67,14 +38,7 @@ export async function crearSeccion(datos) {
  * @returns {Promise<void>}
  */
 export async function eliminarSeccion(id) {
-  const response = await fetch(`${API_URL}/secciones/${id}`, {
-    method: 'DELETE',
-  })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
+  await apiFetch(`/secciones/${id}`, { method: 'DELETE' })
 }
 
 /**
@@ -84,16 +48,9 @@ export async function eliminarSeccion(id) {
  * @returns {Promise<object>} La sección actualizada.
  */
 export async function actualizarSeccion(nombreOriginal, datos) {
-  const response = await fetch(`${API_URL}/secciones/${encodeURIComponent(nombreOriginal)}`, {
+  return apiFetch(`/secciones/${encodeURIComponent(nombreOriginal)}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: JSON_HEADERS,
     body: JSON.stringify(datos),
   })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.mensaje ?? err.detail ?? err.title ?? `Error inesperado (${response.status})`)
-  }
-
-  return await response.json()
 }

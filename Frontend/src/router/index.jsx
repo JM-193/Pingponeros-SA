@@ -27,28 +27,38 @@ export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<Login />} />
         <Route path="/recuperar-contrasena" element={<ForgotPassword />} />
-        <Route path="/cambiar-contrasena" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
-        <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-        <Route path="/usuarios/crear" element={<ProtectedRoute><CreateUsers /></ProtectedRoute>} />
-        <Route path="/usuarios/editar/:correo" element={<ProtectedRoute><EditUsers /></ProtectedRoute>} />
-        <Route path="/usuarios/consultar" element={<ProtectedRoute><QueryUsers /></ProtectedRoute>} />
-        <Route path="/organizacion/areas/crear" element={<ProtectedRoute><CreateAreas /></ProtectedRoute>} />
-        <Route path="/organizacion/areas/editar/:nombre" element={<ProtectedRoute><EditAreas /></ProtectedRoute>} />
-        <Route path="/organizacion/areas/consultar" element={<ProtectedRoute><QueryAreas /></ProtectedRoute>} />
-        <Route path="/organizacion/departamentos/crear" element={<ProtectedRoute><CreateDepartments /></ProtectedRoute>} />
-        <Route path="/organizacion/departamentos/editar/:nombre" element={<ProtectedRoute><EditDepartments /></ProtectedRoute>} />
-        <Route path="/organizacion/departamentos/consultar" element={<ProtectedRoute><QueryDepartments /></ProtectedRoute>} />
-        <Route path="/organizacion/secciones/crear" element={<ProtectedRoute><CreateSections /></ProtectedRoute>} />
-        <Route path="/organizacion/secciones/editar/:nombre" element={<ProtectedRoute><EditSections /></ProtectedRoute>} />
-        <Route path="/organizacion/secciones/consultar" element={<ProtectedRoute><QuerySections /></ProtectedRoute>} />
-        <Route path="/organizacion/unidades/crear" element={<ProtectedRoute><CreateUnits /></ProtectedRoute>} />
-        <Route path="/organizacion/unidades/editar/:nombre" element={<ProtectedRoute><EditUnits /></ProtectedRoute>} />
-        <Route path="/organizacion/unidades/consultar" element={<ProtectedRoute><QueryUnits /></ProtectedRoute>} />
-        <Route path="/organizacion/plazas/crear" element={<ProtectedRoute><CreatePositions /></ProtectedRoute>} />
-        <Route path="/organizacion/plazas/editar/:numeroPlaza" element={<ProtectedRoute><EditPositions /></ProtectedRoute>} />
-        <Route path="/organizacion/plazas/consultar" element={<ProtectedRoute><QueryPositions /></ProtectedRoute>} />
+        
+        {/* Protected routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/cambiar-contrasena" element={<ChangePassword />} />
+          <Route path="/home" element={<Home />} />
+          {/* <Route path="/declaraciones/consultar" element={<QueryDeclarations />} /> */}
+
+          {/* Admin-only routes */}
+          <Route element={<ProtectedRoute needAdmin={true} />}>
+            <Route path="/usuarios/crear" element={<CreateUsers />} />
+            <Route path="/usuarios/editar/:correo" element={<EditUsers />} />
+            <Route path="/usuarios/consultar" element={<QueryUsers />} />
+            <Route path="/plazas/crear" element={<CreatePositions />} />
+            <Route path="/plazas/editar/:numeroPlaza" element={<EditPositions />} />
+            <Route path="/plazas/consultar" element={<QueryPositions />} />
+            <Route path="/organizacion/areas/crear" element={<CreateAreas />} />
+            <Route path="/organizacion/areas/editar/:nombre" element={<EditAreas />} />
+            <Route path="/organizacion/areas/consultar" element={<QueryAreas />} />
+            <Route path="/organizacion/departamentos/crear" element={<CreateDepartments />} />
+            <Route path="/organizacion/departamentos/editar/:nombre" element={<EditDepartments />} />
+            <Route path="/organizacion/departamentos/consultar" element={<QueryDepartments />} />
+            <Route path="/organizacion/secciones/crear" element={<CreateSections />} />
+            <Route path="/organizacion/secciones/editar/:nombre" element={<EditSections />} />
+            <Route path="/organizacion/secciones/consultar" element={<QuerySections />} />
+            <Route path="/organizacion/unidades/crear" element={<CreateUnits />} />
+            <Route path="/organizacion/unidades/editar/:nombre" element={<EditUnits />} />
+            <Route path="/organizacion/unidades/consultar" element={<QueryUnits />} />
+          </Route>
+        </Route>
       </Routes>
     </BrowserRouter>
   )

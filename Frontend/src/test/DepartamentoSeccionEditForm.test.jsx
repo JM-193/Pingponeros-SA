@@ -1,6 +1,7 @@
 // DepartmentSectionEditForm.test.jsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import DepartmentSectionEditForm from '../components/DepartmentSectionEditForm'
 import * as areaService from '../services/areaService'
 
@@ -135,7 +136,7 @@ describe('DepartmentSectionEditForm', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Departamento actualizado correctamente')).toBeInTheDocument()
+      expect(toast.success).toHaveBeenCalledWith('Departamento actualizado correctamente', expect.anything())
     })
   })
 
@@ -165,7 +166,7 @@ describe('DepartmentSectionEditForm', () => {
     renderDepartamentoWithRoute('Inexistente', fetchByName, vi.fn())
 
     await waitFor(() => {
-      expect(screen.getByText('Departamento no encontrado')).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('Departamento no encontrado', expect.anything())
     })
   })
 
