@@ -1,13 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import PasswordChecklist from 'react-password-checklist'
-import { obtenerSesion } from '../services/session'
+import { obtenerSesion, esContrasenaTemporal, cerrarSesion } from '../services/session'
 import { cambiarContrasena } from '../services/authService'
 import { notifySuccess, notifyApiError } from '../utils/notify'
+import { blockingInfo } from '../utils/alerts'
 import { COLORS } from '../constants/colors'
 import FormContainer from '../components/FormContainer'
 import PasswordInput from '../components/PasswordInput'
@@ -20,6 +21,9 @@ export default function ChangePassword() {
     const sesion = obtenerSesion()
     return sesion?.correoInstitucional ?? ''
   })
+  // Forced mode: the user logged in with a temporary password and must change it
+  // before doing anything else.
+  const [forced] = useState(() => esContrasenaTemporal())
   const [formData, setFormData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -27,6 +31,15 @@ export default function ChangePassword() {
   })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (forced) {
+      blockingInfo(
+        'Contraseña temporal',
+        'Tu contraseña es temporal. Debes establecer una nueva para continuar.'
+      )
+    }
+  }, [forced])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -89,6 +102,16 @@ export default function ChangePassword() {
 
     try {
       await cambiarContrasena(userEmail, formData.currentPassword, formData.newPassword)
+
+      if (forced) {
+        // The session still carries the temporary-password flag (and a stale
+        // token), so re-login with the new password to get a clean session.
+        notifySuccess('Contraseña actualizada. Inicia sesión de nuevo.')
+        cerrarSesion()
+        delayedNavigate('/', 1500)
+        return
+      }
+
       notifySuccess('Contraseña actualizada correctamente.')
       delayedNavigate('/home', 1500)
     } catch (err) {
@@ -188,28 +211,30 @@ export default function ChangePassword() {
               />
             </div>
 
-            <button
-              onClick={() => navigate(-1)}
-              type="button"
-              style={{
-                display: 'block',
-                width: '100%',
-                marginTop: '16px',
-                padding: '12px',
-                background: 'none',
-                border: `1px solid ${COLORS.borderLight}`,
-                borderRadius: '4px',
-                color: COLORS.textDark,
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: 600,
-                transition: 'border-color 0.2s',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.02)')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-            >
-              Cancelar
-            </button>
+            {!forced && (
+              <button
+                onClick={() => navigate(-1)}
+                type="button"
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  marginTop: '16px',
+                  padding: '12px',
+                  background: 'none',
+                  border: `1px solid ${COLORS.borderLight}`,
+                  borderRadius: '4px',
+                  color: COLORS.textDark,
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  transition: 'border-color 0.2s',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.02)')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+              >
+                Cancelar
+              </button>
+            )}
           </FormContainer>
         </div>
       </main>

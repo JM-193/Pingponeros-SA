@@ -37,6 +37,22 @@ export async function confirmAction({
 }
 
 /**
+ * Muestra un diálogo informativo bloqueante de un solo botón que el usuario
+ * debe descartar. Útil para avisos obligatorios (p. ej. contraseña temporal).
+ * @param {string} title
+ * @param {string} [text]
+ * @returns {Promise<unknown>}
+ */
+export function blockingInfo(title, text = '') {
+  return baseSwal.fire({
+    title,
+    text,
+    icon: 'warning',
+    confirmButtonText: 'Entendido',
+  })
+}
+
+/**
  * Muestra un diálogo de error bloqueante para fallos críticos.
  * @param {string} mensaje
  * @returns {Promise<unknown>}

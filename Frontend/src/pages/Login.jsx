@@ -73,7 +73,15 @@ export default function Login() {
         return
       }
 
-      guardarSesion(token)
+      guardarSesion(token, usuario.contrasenaTemporal)
+
+      // A temporary password must be changed before anything else; send the user
+      // straight to the change page (the blocking alert is shown there).
+      if (usuario.contrasenaTemporal) {
+        navigate('/cambiar-contrasena')
+        return
+      }
+
       notifySuccess('Sesión iniciada correctamente.')
       navigate('/home')
     } catch (err) {

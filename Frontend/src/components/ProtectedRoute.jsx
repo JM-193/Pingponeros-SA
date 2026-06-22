@@ -1,6 +1,6 @@
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import { obtenerSesion } from '../services/session'
+import { obtenerSesion, esContrasenaTemporal } from '../services/session'
 
 /**
  * Wraps protected routes and redirects to the login page if not logged in.
@@ -10,12 +10,19 @@ export default function ProtectedRoute({
   children,
   allowedRoles,
 }) {
+  const { pathname } = useLocation()
+
   // Fetch session
   const sesion = obtenerSesion()
 
   // If no session, redirect to login
   if (!sesion) {
     return <Navigate to="/" replace />
+  }
+
+  // Force users with a temporary password to change it before doing anything else.
+  if (esContrasenaTemporal() && pathname !== '/cambiar-contrasena') {
+    return <Navigate to="/cambiar-contrasena" replace />
   }
 
   // Check for allowed roles
