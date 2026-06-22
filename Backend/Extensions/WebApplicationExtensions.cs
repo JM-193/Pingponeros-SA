@@ -20,12 +20,12 @@ internal static class WebApplicationExtensions
 
     public static void MapApiEndpoints(this WebApplication app, bool isDev)
     {
-        app.MapUsuarioEndpoints(isDev);
+        app.MapUserEndpoints(isDev);
         app.MapAreaEndpoints(isDev);
-        app.MapDepartamentoEndpoints(isDev);
-        app.MapSeccionEndpoints(isDev);
-        app.MapUnidadEndpoints(isDev);
-        app.MapPlazaEndpoints(isDev);
+        app.MapDepartmentEndpoints(isDev);
+        app.MapSectionEndpoints(isDev);
+        app.MapUnitEndpoints(isDev);
+        app.MapPositionEndpoints(isDev);
         app.MapAuthEndpoints(isDev);
     }
 }

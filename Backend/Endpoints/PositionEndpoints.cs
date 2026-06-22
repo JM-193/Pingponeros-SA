@@ -1,4 +1,4 @@
-// PlazaEndpoints.cs
+// PositionEndpoints.cs
 using Backend.DTOs;
 using Backend.Helpers;
 using Backend.Models;
@@ -8,12 +8,12 @@ using static Backend.Endpoints.Shared.CrudEndpointHelpers;
 
 namespace Backend.Endpoints;
 
-internal static class PlazaEndpoints
+internal static class PositionEndpoints
 {
     // ---------------------------------------------------------------- //
     // Rutas de Plazas                                                  //
     // ---------------------------------------------------------------- //
-    public static void MapPlazaEndpoints(this IEndpointRouteBuilder app, bool isDev)
+    public static void MapPositionEndpoints(this IEndpointRouteBuilder app, bool isDev)
     {
         var plazas = app.MapGroup("/plazas");
 

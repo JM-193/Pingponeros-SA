@@ -1,4 +1,4 @@
-// SeccionEndpoints.cs
+// DepartmentEndpoints.cs
 using Backend.DTOs;
 using Backend.Helpers;
 using Backend.Models;
@@ -8,21 +8,21 @@ using static Backend.Endpoints.Shared.CrudEndpointHelpers;
 
 namespace Backend.Endpoints;
 
-internal static class SeccionEndpoints
+internal static class DepartmentEndpoints
 {
     // ---------------------------------------------------------------- //
-    // Rutas de Secciones                                                //
+    // Rutas de Departamentos                                            //
     // ---------------------------------------------------------------- //
-    public static void MapSeccionEndpoints(this IEndpointRouteBuilder app, bool isDev)
+    public static void MapDepartmentEndpoints(this IEndpointRouteBuilder app, bool isDev)
     {
-        var secciones = app.MapGroup("/secciones");
+        var departamentos = app.MapGroup("/departamentos");
 
-        // GET /secciones — Lista todas las secciones
-        secciones.MapGet("/", async (ISectionRepository repo) =>
+        // GET /departamentos — Lista todos los departamentos
+        departamentos.MapGet("/", async (IDepartmentRepository repo) =>
         {
             try
             {
-                var lista = await repo.ObtenerTodasAsync().ConfigureAwait(false);
+                var lista = await repo.ObtenerTodosAsync().ConfigureAwait(false);
                 return Results.Ok(lista);
             }
             catch (OracleException ex)
@@ -31,8 +31,8 @@ internal static class SeccionEndpoints
             }
         });
 
-        // POST /secciones — Crea una nueva sección
-        secciones.MapPost("/", async (CreateSectionDto dto, ISectionRepository repo) =>
+        // POST /departamentos — Crea un nuevo departamento
+        departamentos.MapPost("/", async (CreateDepartmentDto dto, IDepartmentRepository repo) =>
         {
             if (dto.Validar() is { } error)
                 return Results.BadRequest(new { mensaje = error });
@@ -41,14 +41,14 @@ internal static class SeccionEndpoints
             {
                 var existe = await repo.ExisteNombreAsync(dto.Nombre).ConfigureAwait(false);
                 if (existe)
-                    return Results.Conflict(new { mensaje = $"Ya existe una sección con el nombre '{dto.Nombre}'." });
+                    return Results.Conflict(new { mensaje = $"Ya existe un departamento con el nombre '{dto.Nombre}'." });
             }
             catch (OracleException ex)
             {
                 return OracleErrorMapper.ToResult(ex, isDev);
             }
 
-            var seccion = new Section
+            var departamento = new Department
             {
                 Nombre = TextNormalizer.Nombre(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
@@ -58,8 +58,8 @@ internal static class SeccionEndpoints
 
             try
             {
-                var id = await repo.InsertarAsync(seccion).ConfigureAwait(false);
-                return Results.Created($"/secciones/{id}", new { mensaje = $"Sección '{seccion.Nombre}' creada correctamente." });
+                var id = await repo.InsertarAsync(departamento).ConfigureAwait(false);
+                return Results.Created($"/departamentos/{id}", new { mensaje = $"Departamento '{departamento.Nombre}' creado correctamente." });
             }
             catch (OracleException ex)
             {
@@ -67,15 +67,15 @@ internal static class SeccionEndpoints
             }
         });
 
-        // GET /secciones/{nombre} — Obtiene una sección por nombre
-        secciones.MapGet("/{nombre}", async (string nombre, ISectionRepository repo) =>
+        // GET /departamentos/{nombre} — Obtiene un departamento por nombre
+        departamentos.MapGet("/{nombre}", async (string nombre, IDepartmentRepository repo) =>
         {
             try
             {
-                var seccion = await repo.ObtenerPorNombreAsync(Uri.UnescapeDataString(nombre)).ConfigureAwait(false);
-                return seccion is null
-                    ? Results.NotFound(new { mensaje = $"No se encontró la sección '{nombre}'." })
-                    : Results.Ok(seccion);
+                var departamento = await repo.ObtenerPorNombreAsync(Uri.UnescapeDataString(nombre)).ConfigureAwait(false);
+                return departamento is null
+                    ? Results.NotFound(new { mensaje = $"No se encontró el departamento '{nombre}'." })
+                    : Results.Ok(departamento);
             }
             catch (OracleException ex)
             {
@@ -83,8 +83,8 @@ internal static class SeccionEndpoints
             }
         });
 
-        // PUT /secciones/{nombre} — Actualiza una sección
-        secciones.MapPut("/{nombre}", async (string nombre, CreateSectionDto dto, ISectionRepository repo) =>
+        // PUT /departamentos/{nombre} — Actualiza un departamento
+        departamentos.MapPut("/{nombre}", async (string nombre, CreateDepartmentDto dto, IDepartmentRepository repo) =>
         {
             if (dto.Validar() is { } error)
                 return Results.BadRequest(new { mensaje = error });
@@ -95,12 +95,12 @@ internal static class SeccionEndpoints
                 () => repo.ExisteNombreAsync(dto.Nombre),
                 dto.Nombre,
                 nombreDescodificado,
-                $"Ya existe una sección con el nombre '{dto.Nombre}'.",
+                $"Ya existe un departamento con el nombre '{dto.Nombre}'.",
                 isDev).ConfigureAwait(false);
             if (conflicto is not null)
                 return conflicto;
 
-            var seccion = new Section
+            var departamento = new Department
             {
                 Nombre = TextNormalizer.Nombre(dto.Nombre),
                 Descripcion = dto.Descripcion.Trim(),
@@ -109,21 +109,21 @@ internal static class SeccionEndpoints
             };
 
             return await EjecutarActualizacionAsync(
-                () => repo.ActualizarAsync(nombreDescodificado, seccion),
-                $"Sección '{seccion.Nombre}' actualizada correctamente.",
-                $"No se encontró la sección '{nombre}'.",
+                () => repo.ActualizarAsync(nombreDescodificado, departamento),
+                $"Departamento '{departamento.Nombre}' actualizado correctamente.",
+                $"No se encontró el departamento '{nombre}'.",
                 isDev).ConfigureAwait(false);
         });
 
-        // DELETE /secciones/{id} — Borrado lógico: pasa ESTADO de 1 a 0
-        secciones.MapDelete("/{id:int}", async (int id, ISectionRepository repo) =>
+        // DELETE /departamentos/{id} — Borrado lógico: pasa ESTADO de 1 a 0
+        departamentos.MapDelete("/{id:int}", async (int id, IDepartmentRepository repo) =>
         {
             try
             {
                 var desactivado = await repo.DesactivarAsync(id).ConfigureAwait(false);
                 return desactivado
                     ? Results.NoContent()
-                    : Results.NotFound(new { mensaje = $"No se encontró la sección activa con ID '{id}'." });
+                    : Results.NotFound(new { mensaje = $"No se encontró el departamento activo con ID '{id}'." });
             }
             catch (OracleException ex)
             {

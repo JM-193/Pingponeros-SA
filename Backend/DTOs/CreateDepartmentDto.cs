@@ -12,5 +12,5 @@ internal sealed record CreateDepartmentDto(string Nombre, string Descripcion, in
     /// de error encontrado (se preserva el orden de evaluación original).
     /// </summary>
     public string? Validar() =>
-        EntidadBaseValidator.Validar(Nombre, Descripcion, Estado, "del", "departamento");
+        BaseEntityValidator.Validar(Nombre, Descripcion, Estado, "del", "departamento");
 }

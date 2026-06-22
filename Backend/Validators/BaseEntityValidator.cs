@@ -1,4 +1,4 @@
-// EntidadBaseValidator.cs
+// BaseEntityValidator.cs
 namespace Backend.Validators;
 
 /// <summary>
@@ -7,7 +7,7 @@ namespace Backend.Validators;
 /// estado opcional restringido a 0/1. Cada DTO la invoca con su propio artículo y
 /// nombre de entidad para construir el mensaje exacto.
 /// </summary>
-internal static class EntidadBaseValidator
+internal static class BaseEntityValidator
 {
     /// <summary>
     /// Devuelve <c>null</c> si los datos son válidos; en caso contrario, el primer

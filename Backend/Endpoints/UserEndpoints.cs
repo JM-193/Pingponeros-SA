@@ -1,4 +1,4 @@
-// UsuarioEndpoints.cs
+// UserEndpoints.cs
 using Backend.DTOs;
 using Backend.Helpers;
 using Backend.Models;
@@ -8,12 +8,12 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace Backend.Endpoints;
 
-internal static class UsuarioEndpoints
+internal static class UserEndpoints
 {
     // ---------------------------------------------------------------- //
     // Rutas de Usuarios                                                 //
     // ---------------------------------------------------------------- //
-    public static void MapUsuarioEndpoints(this IEndpointRouteBuilder app, bool isDev)
+    public static void MapUserEndpoints(this IEndpointRouteBuilder app, bool isDev)
     {
         var usuarios = app.MapGroup("/usuarios");
 

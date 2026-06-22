@@ -12,5 +12,5 @@ internal sealed record CreateSectionDto(string Nombre, string Descripcion, int? 
     /// de error encontrado (se preserva el orden de evaluación original).
     /// </summary>
     public string? Validar() =>
-        EntidadBaseValidator.Validar(Nombre, Descripcion, Estado, "de la", "sección");
+        BaseEntityValidator.Validar(Nombre, Descripcion, Estado, "de la", "sección");
 }

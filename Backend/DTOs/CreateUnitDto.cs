@@ -19,7 +19,7 @@ internal sealed record CreateUnitDto(
     /// </summary>
     public string? Validar()
     {
-        var baseError = EntidadBaseValidator.Validar(Nombre, Descripcion, Estado, "de la", "unidad");
+        var baseError = BaseEntityValidator.Validar(Nombre, Descripcion, Estado, "de la", "unidad");
         if (baseError is not null)
             return baseError;
 
