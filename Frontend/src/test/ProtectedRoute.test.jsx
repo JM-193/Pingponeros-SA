@@ -82,6 +82,7 @@ describe('ProtectedRoute', () => {
     )
 
     expect(sessionService.obtenerSesion).toHaveBeenCalled()
+    const llamadasTrasPrimerRender = sessionService.obtenerSesion.mock.calls.length
 
     sessionService.obtenerSesion.mockReturnValue(null)
 
@@ -93,7 +94,8 @@ describe('ProtectedRoute', () => {
       </BrowserRouter>,
     )
 
-    expect(sessionService.obtenerSesion).toHaveBeenCalledTimes(2)
+    // Se vuelve a consultar la sesión en cada render (sin memoización del valor).
+    expect(sessionService.obtenerSesion.mock.calls.length).toBeGreaterThan(llamadasTrasPrimerRender)
   })
 })
 

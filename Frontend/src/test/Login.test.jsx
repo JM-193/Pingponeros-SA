@@ -116,7 +116,7 @@ describe('Login Page', () => {
 
     await waitFor(() => {
       expect(authService.login).toHaveBeenCalledWith('test.user@ucr.ac.cr', 'password123')
-      expect(sessionService.guardarSesion).toHaveBeenCalledWith(mockToken)
+      expect(sessionService.guardarSesion).toHaveBeenCalledWith(mockToken, undefined)
     })
   })
 
@@ -146,7 +146,7 @@ describe('Login Page', () => {
     fireEvent.click(screen.getByRole('button', { name: /Iniciar Sesión/i }))
 
     await waitFor(() => {
-      expect(sessionService.guardarSesion).toHaveBeenCalledWith(mockToken)
+      expect(sessionService.guardarSesion).toHaveBeenCalledWith(mockToken, true)
     })
   })
 
