@@ -38,7 +38,7 @@ export default function AppRouter() {
           {/* <Route path="/declaraciones/consultar" element={<QueryDeclarations />} /> */}
 
           {/* Admin-only routes */}
-          <Route element={<ProtectedRoute allowedRoles={['1']} />}>
+          <Route element={<ProtectedRoute allowedRoles={[1]} />}>
             <Route path="/usuarios/crear" element={<CreateUsers />} />
             <Route path="/usuarios/editar/:correo" element={<EditUsers />} />
             <Route path="/usuarios/consultar" element={<QueryUsers />} />
