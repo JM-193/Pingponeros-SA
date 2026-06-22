@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useNavigate } from 'react-router-dom'
 import { FaSearch } from 'react-icons/fa'
-import FormButton from './FormButton'
 import PageLayout from './PageLayout'
 import PageTitle from './PageTitle'
 import EmptyResults from './EmptyResults'
@@ -306,15 +305,6 @@ export default function EntityListPage({
       </div>
 
       <div id="results-section">{renderResultsContent()}</div>
-      <div style={{ marginTop: '16px' }}>
-        <FormButton
-          label="Regresar"
-          type="button"
-          variant="secondary"
-          onClick={() => navigate(-1)}
-          disabled={loading}
-        />
-      </div>
 
       {renderCreateModal?.({
         isModal: true,
