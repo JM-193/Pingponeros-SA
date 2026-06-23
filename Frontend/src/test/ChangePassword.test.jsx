@@ -85,7 +85,7 @@ describe('ChangePassword Page', () => {
     const form = document.querySelector('form')
     await act(async () => { fireEvent.submit(form) })
 
-    expect(screen.getByText(/La contraseña debe contener:/i)).toBeInTheDocument()
+    expect(screen.getByText(/no cumple los requisitos de complejidad/i)).toBeInTheDocument()
   })
 
   it('muestra error cuando las contraseñas no coinciden', async () => {

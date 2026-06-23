@@ -31,6 +31,7 @@ export default function ChangePassword() {
   })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
+  const [newPasswordValid, setNewPasswordValid] = useState(false)
 
   useEffect(() => {
     if (forced) {
@@ -49,17 +50,7 @@ export default function ChangePassword() {
     }))
   }
 
-  const validatePasswordComplexity = (password) => {
-    const requirements = []
-    if (password.length < 12) requirements.push('mínimo 12 caracteres')
-    if (!/[A-Z]/.test(password)) requirements.push('una mayúscula')
-    if (!/[a-z]/.test(password)) requirements.push('una minúscula')
-    if (!/\d/.test(password)) requirements.push('un número')
-    if (!/[!@#$%&*]/.test(password)) requirements.push('un carácter especial (!@#$%&*)')
-    return requirements
-  }
-
-  const validateForm = (data) => {
+  const validateForm = (data, isComplexityValid) => {
     const newErrors = {}
 
     if (!data.currentPassword) {
@@ -67,9 +58,8 @@ export default function ChangePassword() {
     }
 
     if (data.newPassword) {
-      const requirements = validatePasswordComplexity(data.newPassword)
-      if (requirements.length > 0) {
-        newErrors.newPassword = `La contraseña debe contener: ${requirements.join(', ')}`
+      if (!isComplexityValid) {
+        newErrors.newPassword = 'La nueva contraseña no cumple los requisitos de complejidad'
       }
     } else {
       newErrors.newPassword = 'La nueva contraseña es requerida'
@@ -90,7 +80,7 @@ export default function ChangePassword() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    const newErrors = validateForm(formData)
+    const newErrors = validateForm(formData, newPasswordValid)
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
@@ -174,7 +164,9 @@ export default function ChangePassword() {
                 <PasswordChecklist
                   rules={['minLength', 'capital', 'lowercase', 'number', 'specialChar']}
                   minLength={12}
+                  specialCharsRegex={/[!@#$%&*]/}
                   value={formData.newPassword}
+                  onChange={(isValid) => setNewPasswordValid(isValid)}
                   validColor={COLORS.successColor}
                   invalidColor={COLORS.danger}
                   messages={{
