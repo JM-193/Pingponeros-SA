@@ -1,12 +1,17 @@
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using Backend.Validators;
 
 namespace Backend.DTOs;
 
 [SuppressMessage("Performance", "CA1812:AvoidUninstantiatedInternalClasses",
     Justification = "Instanciado por el enlazador de modelos de ASP.NET Core.")]
 internal sealed record ChangePasswordDto(
+    [property: Required(ErrorMessage = "El correo institucional es obligatorio.")]
     string CorreoInstitucional,
+    [property: Required(ErrorMessage = "La contraseña actual es obligatoria.")]
     string ContrasenaActual,
+    [property: Required(ErrorMessage = "La nueva contraseña es obligatoria.")]
     string ContrasenaNueva)
 {
     /// <summary>
@@ -17,15 +22,11 @@ internal sealed record ChangePasswordDto(
     /// </summary>
     public string? Validar()
     {
-        if (string.IsNullOrWhiteSpace(CorreoInstitucional))
-            return "El correo institucional es obligatorio.";
+        // Campos obligatorios (anotaciones); tienen prioridad sobre la regla cruzada.
+        if (DtoValidator.PrimerError(this, nameof(CorreoInstitucional), nameof(ContrasenaActual), nameof(ContrasenaNueva)) is { } error)
+            return error;
 
-        if (string.IsNullOrWhiteSpace(ContrasenaActual))
-            return "La contraseña actual es obligatoria.";
-
-        if (string.IsNullOrWhiteSpace(ContrasenaNueva))
-            return "La nueva contraseña es obligatoria.";
-
+        // Regla cruzada: la nueva contraseña debe diferir de la actual.
         if (ContrasenaNueva.Equals(ContrasenaActual, StringComparison.Ordinal))
             return "La nueva contraseña debe ser diferente a la actual.";
 

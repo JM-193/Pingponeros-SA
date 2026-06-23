@@ -15,7 +15,7 @@ internal static class AuthEndpoints
             await authService.LoginAsync(dto, isDev).ConfigureAwait(false));
 
         app.MapPost("/auth/recuperar-contrasena", async (ResetPasswordDto dto, IAuthService authService) =>
-            await authService.RecuperarContrasenaAsync(dto.CorreoInstitucional, isDev).ConfigureAwait(false));
+            await authService.RecuperarContrasenaAsync(dto, isDev).ConfigureAwait(false));
 
         app.MapPost("/auth/cambiar-contrasena", async (ChangePasswordDto dto, IAuthService authService) =>
             await authService.CambiarContrasenaAsync(dto, isDev).ConfigureAwait(false));
