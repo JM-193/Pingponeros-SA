@@ -44,12 +44,7 @@ export function guardarSesion(token, esTemporal = false) {
   }
 }
 
-/**
- * Returns the user's decoded payload if the token exists and has not expired.
- * or null if it has expired / does not exist / is invalid.
- * @returns {object|null}
- */
-export function obtenerSesion() {
+function obtenerSesionValida() {
   const token = sessionStorage.getItem(SESSION_KEY)
   if (!token) return null
 
@@ -65,7 +60,16 @@ export function obtenerSesion() {
     return null
   }
 
-  return payload
+  return { payload, token }
+}
+
+/**
+ * Returns the user's decoded payload if the token exists and has not expired.
+ * or null if it has expired / does not exist / is invalid.
+ * @returns {object|null}
+ */
+export function obtenerSesion() {
+  return obtenerSesionValida()?.payload ?? null
 }
 
 /**
@@ -74,11 +78,7 @@ export function obtenerSesion() {
  * @returns {string|null}
  */
 export function obtenerToken() {
-  const token = sessionStorage.getItem(SESSION_KEY)
-  if (!token) return null
-  // reuses expiration validation
-  if (!obtenerSesion()) return null
-  return token
+  return obtenerSesionValida()?.token ?? null
 }
 
 /**
