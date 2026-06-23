@@ -8,9 +8,9 @@ vi.mock('../services/areaService')
 
 describe('QueryAreas Page', () => {
   const mockAreas = [
-    { id: 1, nombre: 'Administración', descripcion: 'Ãrea de administración', estado: 1 },
-    { id: 2, nombre: 'Contabilidad', descripcion: 'Ãrea de contabilidad', estado: 1 },
-    { id: 3, nombre: 'Recursos Humanos', descripcion: 'Ãrea de RRHH', estado: 0 },
+    { id: 1, nombre: 'Administración', descripcion: 'Área de administración', estado: 1 },
+    { id: 2, nombre: 'Contabilidad', descripcion: 'Área de contabilidad', estado: 1 },
+    { id: 3, nombre: 'Recursos Humanos', descripcion: 'Área de RRHH', estado: 0 },
   ]
 
   beforeEach(() => {
@@ -86,7 +86,7 @@ describe('QueryAreas Page', () => {
     })
   })
 
-  it('renderiza campo de bÃºsqueda', () => {
+  it('renderiza campo de búsqueda', () => {
     render(
       <BrowserRouter>
         <QueryAreas />

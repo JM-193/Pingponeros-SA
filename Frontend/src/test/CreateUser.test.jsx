@@ -76,7 +76,7 @@ describe('CreateUsers Page', () => {
       </BrowserRouter>,
     )
 
-    // Los campos exactos pueden variar segÃºn la implementación
+    // Los campos exactos pueden variar según la implementación
     // Buscamos inputs de email
     const emailInputs = screen.getAllByRole('textbox')
     expect(emailInputs.length).toBeGreaterThan(0)
