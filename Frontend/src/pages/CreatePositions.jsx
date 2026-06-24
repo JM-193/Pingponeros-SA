@@ -222,7 +222,7 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
         inputMode="numeric"
         value={formData.numeroPlaza}
         onChange={handleInputChange}
-        maxLength={20}
+        maxLength={19}
         required
         error={errors.numeroPlaza}
       />
