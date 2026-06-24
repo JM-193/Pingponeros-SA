@@ -8,7 +8,7 @@ namespace Backend.DTOs;
     Justification = "Instanciado por el enlazador de modelos de ASP.NET Core.")]
 internal sealed record CreateUnitDto(
     [property: Required(ErrorMessage = "El nombre de la unidad es obligatorio.")]
-    [property: MaxLength(50, ErrorMessage = "El nombre no puede superar los 50 caracteres.")]
+    [property: MaxLength(25, ErrorMessage = "El nombre no puede superar los 25 caracteres.")]
     string Nombre,
     [property: Required(ErrorMessage = "La descripción es obligatoria.")]
     [property: MaxLength(2048, ErrorMessage = "La descripción no puede superar los 2048 caracteres.")]
