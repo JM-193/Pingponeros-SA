@@ -102,6 +102,7 @@ export default function ForgotPassword() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Ingrese su correo institucional"
+              maxLength={100}
               style={{
                 padding: '14px 18px',
                 border: errors.email ? `2px solid ${COLORS.danger}` : `1px solid ${COLORS.borderLight}`,
