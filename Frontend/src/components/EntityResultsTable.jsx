@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import { FaPencilAlt, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa'
+import { FaPencilAlt, FaSort, FaSortDown, FaSortUp, FaTrash } from 'react-icons/fa'
 import { COLORS } from '../constants/colors'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 
@@ -20,11 +20,13 @@ export default function EntityResultsTable({
   columns,
   rows,
   onEdit,
+  onDelete,
+  deletingRowId,
   getRowId,
   sortConfig,
   onSort,
 }) {
-  const hasActions = Boolean(onEdit)
+  const hasActions = Boolean(onEdit) || Boolean(onDelete)
   const canSort = Boolean(onSort)
 
   const isMobile = useMediaQuery('(max-width: 768px)')
@@ -86,33 +88,63 @@ export default function EntityResultsTable({
                 </div>
               ))}
 
-              {hasActions && onEdit && (
-                <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '12px' }}>
-                  <button
-                    onClick={() => onEdit(row)}
-                    aria-label="Editar"
-                    title="Editar"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '8px 16px',
-                      backgroundColor: COLORS.primaryBtn,
-                      color: COLORS.white,
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      gap: '6px',
-                      transition: 'background-color 0.2s',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = COLORS.primaryBtnHover)}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = COLORS.primaryBtn)}
-                  >
-                    <FaPencilAlt size={14} aria-hidden="true" focusable="false" />
-                    Editar
-                  </button>
+              {hasActions && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '12px' }}>
+                  {onEdit && (
+                    <button
+                      onClick={() => onEdit(row)}
+                      aria-label="Editar"
+                      title="Editar"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '8px 16px',
+                        backgroundColor: COLORS.primaryBtn,
+                        color: COLORS.white,
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        gap: '6px',
+                        transition: 'background-color 0.2s',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = COLORS.primaryBtnHover)}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = COLORS.primaryBtn)}
+                    >
+                      <FaPencilAlt size={14} aria-hidden="true" focusable="false" />
+                      Editar
+                    </button>
+                  )}
+                  {onDelete && (
+                    <button
+                      onClick={() => onDelete(row)}
+                      disabled={deletingRowId === rowId}
+                      aria-label="Eliminar"
+                      title="Eliminar"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '8px 16px',
+                        backgroundColor: deletingRowId === rowId ? COLORS.disabledBg : COLORS.danger,
+                        color: deletingRowId === rowId ? COLORS.disabledColor : COLORS.white,
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: deletingRowId === rowId ? 'not-allowed' : 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        gap: '6px',
+                        transition: 'background-color 0.2s',
+                      }}
+                      onMouseEnter={(e) => deletingRowId !== rowId && (e.currentTarget.style.backgroundColor = COLORS.errorStrong)}
+                      onMouseLeave={(e) => deletingRowId !== rowId && (e.currentTarget.style.backgroundColor = COLORS.danger)}
+                    >
+                      <FaTrash size={14} aria-hidden="true" focusable="false" />
+                      Eliminar
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -271,6 +303,32 @@ export default function EntityResultsTable({
                             <FaPencilAlt size={14} aria-hidden="true" focusable="false" />
                           </button>
                         )}
+                        {onDelete && (
+                          <button
+                            onClick={() => onDelete(row)}
+                            disabled={deletingRowId === rowId}
+                            aria-label="Eliminar"
+                            title="Eliminar"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              padding: '8px 12px',
+                              backgroundColor: deletingRowId === rowId ? COLORS.disabledBg : COLORS.danger,
+                              color: deletingRowId === rowId ? COLORS.disabledColor : COLORS.white,
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: deletingRowId === rowId ? 'not-allowed' : 'pointer',
+                              fontSize: '12px',
+                              fontWeight: 600,
+                              transition: 'background-color 0.2s',
+                            }}
+                            onMouseEnter={(e) => deletingRowId !== rowId && (e.currentTarget.style.backgroundColor = COLORS.errorStrong)}
+                            onMouseLeave={(e) => deletingRowId !== rowId && (e.currentTarget.style.backgroundColor = COLORS.danger)}
+                          >
+                            <FaTrash size={14} aria-hidden="true" focusable="false" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   )}
@@ -297,6 +355,8 @@ EntityResultsTable.propTypes = {
   ).isRequired,
   rows: PropTypes.arrayOf(PropTypes.object).isRequired,
   onEdit: PropTypes.func,
+  onDelete: PropTypes.func,
+  deletingRowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   getRowId: PropTypes.func.isRequired,
   sortConfig: PropTypes.shape({
     key: PropTypes.string,
@@ -307,6 +367,8 @@ EntityResultsTable.propTypes = {
 
 EntityResultsTable.defaultProps = {
   onEdit: null,
+  onDelete: null,
+  deletingRowId: null,
   sortConfig: null,
   onSort: null,
 }
