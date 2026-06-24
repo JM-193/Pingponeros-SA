@@ -8,10 +8,13 @@ namespace Backend.DTOs;
     Justification = "Instanciado por el enlazador de modelos de ASP.NET Core.")]
 internal sealed record ChangePasswordDto(
     [property: Required(ErrorMessage = "El correo institucional es obligatorio.")]
+    [property: MaxLength(100, ErrorMessage = "El correo no puede superar los 100 caracteres.")]
     string CorreoInstitucional,
     [property: Required(ErrorMessage = "La contraseña actual es obligatoria.")]
+    [property: MaxLength(30, ErrorMessage = "La contraseña no puede superar los 30 caracteres.")]
     string ContrasenaActual,
     [property: Required(ErrorMessage = "La nueva contraseña es obligatoria.")]
+    [property: MaxLength(30, ErrorMessage = "La contraseña no puede superar los 30 caracteres.")]
     string ContrasenaNueva)
 {
     /// <summary>
