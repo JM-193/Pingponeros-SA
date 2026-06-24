@@ -7,7 +7,6 @@ import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage
 import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
 import { useOrganizationEntityForm } from '../hooks/useOrganizationEntityForm'
-import { getOrganizationEntityPayload } from '../utils/organizationEntityForm'
 
 export default function CreateWorkPositions({ isModal, isOpen, onSuccess, onClose }) {
   const navigate = useNavigate()
