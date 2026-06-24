@@ -45,6 +45,8 @@ internal static class ServiceCollectionExtensions
             new UnitRepository(sp.GetRequiredService<IQueryExecutor>()));
         services.AddScoped<IPositionRepository>(sp =>
             new PositionRepository(sp.GetRequiredService<IQueryExecutor>()));
+        services.AddScoped<IWorkPositionRepository>(sp =>
+            new WorkPositionRepository(sp.GetRequiredService<IQueryExecutor>()));
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IUserService, UserService>();
