@@ -21,6 +21,8 @@ import QueryUnits from '../pages/QueryUnits'
 import CreatePositions from '../pages/CreatePositions'
 import EditPositions from '../pages/EditPositions'
 import QueryPositions from '../pages/QueryPositions'
+import CreateWorkPositions from '../pages/CreateWorkPositions'
+import QueryWorkPositions from '../pages/QueryWorkPositions'
 import ProtectedRoute from '../components/ProtectedRoute'
 
 export default function AppRouter() {
@@ -57,6 +59,8 @@ export default function AppRouter() {
             <Route path="/organizacion/unidades/crear" element={<CreateUnits />} />
             <Route path="/organizacion/unidades/editar/:nombre" element={<EditUnits />} />
             <Route path="/organizacion/unidades/consultar" element={<QueryUnits />} />
+            <Route path="/organizacion/puestos-trabajo/crear" element={<CreateWorkPositions />} />
+            <Route path="/puestos-trabajo/consultar" element={<QueryWorkPositions />} />
           </Route>
         </Route>
       </Routes>
