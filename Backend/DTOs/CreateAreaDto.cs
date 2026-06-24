@@ -8,8 +8,10 @@ namespace Backend.DTOs;
     Justification = "Instanciado por el enlazador de modelos de ASP.NET Core.")]
 internal sealed record CreateAreaDto(
     [property: Required(ErrorMessage = "El nombre del área es obligatorio.")]
+    [property: MaxLength(50, ErrorMessage = "El nombre no puede superar los 50 caracteres.")]
     string Nombre,
     [property: Required(ErrorMessage = "La descripción es obligatoria.")]
+    [property: MaxLength(2048, ErrorMessage = "La descripción no puede superar los 2048 caracteres.")]
     string Descripcion,
     [property: Range(0, 1, ErrorMessage = "El estado debe ser 0 (Inactivo) o 1 (Activo).")]
     int? Estado)
