@@ -53,6 +53,16 @@ internal static class OracleErrorMapper
     /// </summary>
     public static IResult ToResult(OracleException ex, bool isDev)
     {
+        // Errores de usuario definidos con RAISE_APPLICATION_ERROR (-20000 a -20999)
+        if (ex.Number is >= 20000 and <= 20999)
+        {
+            var linea = ex.Message.Split('\n')[0];
+            // ODP.NET formatea la primera línea como "ORA-20001: <mensaje>"
+            var separador = linea.IndexOf(": ", StringComparison.Ordinal);
+            var mensajeUsuario = separador >= 0 ? linea[(separador + 2)..].Trim() : linea.Trim();
+            return Results.Conflict(new { mensaje = mensajeUsuario });
+        }
+
         var mensaje = isDev
             ? $"[ORA-{ex.Number}] {ex.Message.Split('\n')[0]}"
             : Traducir(ex.Number);
