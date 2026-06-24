@@ -13,6 +13,7 @@ internal sealed class ResetPasswordDto
     /// Correo institucional del usuario.
     /// </summary>
     [Required(ErrorMessage = "El correo institucional es obligatorio.")]
+    [MaxLength(100, ErrorMessage = "El correo no puede superar los 100 caracteres.")]
     public required string CorreoInstitucional { get; set; }
 
     /// <summary>
