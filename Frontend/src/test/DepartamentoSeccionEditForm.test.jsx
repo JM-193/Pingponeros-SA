@@ -102,10 +102,10 @@ describe('DepartmentSectionEditForm', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /Editar Departamento/i })).toBeInTheDocument()
+      
+      expect(screen.getByDisplayValue('Recursos Humanos')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('Departamento de RRHH')).toBeInTheDocument()
     })
-
-    expect(screen.getByDisplayValue('Recursos Humanos')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('Departamento de RRHH')).toBeInTheDocument()
   })
 
   it('carga y renderiza formulario de editar sección', async () => {
