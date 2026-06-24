@@ -26,6 +26,7 @@ internal static class WebApplicationExtensions
         app.MapSectionEndpoints(isDev);
         app.MapUnitEndpoints(isDev);
         app.MapPositionEndpoints(isDev);
+        app.MapWorkPositionEndpoints(isDev);
         app.MapAuthEndpoints(isDev);
     }
 }
