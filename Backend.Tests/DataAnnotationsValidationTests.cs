@@ -178,7 +178,7 @@ public sealed class DataAnnotationsValidationTests
     public void CreateDepartmentDto_DescripcionVacia_RetornaMensajeCompartido()
     {
         Assert.Equal("La descripción es obligatoria.",
-            new CreateDepartmentDto("Contabilidad", "", 1, 1).Validar());
+            new CreateDepartmentDto { Nombre = "Contabilidad", Descripcion = "", IdArea = 1, Estado = 1 }.Validar());
     }
 
     [Fact]
