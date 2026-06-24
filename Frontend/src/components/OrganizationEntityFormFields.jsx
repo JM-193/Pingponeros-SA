@@ -140,7 +140,7 @@ export default function OrganizationEntityFormFields({
             backgroundColor: COLORS.inputBg,
             color: COLORS.black,
           }}
-          maxLength={50}
+          maxLength={25}
         />
         {errors.nombre && <span style={fieldErrorStyle}>{errors.nombre}</span>}
       </div>
