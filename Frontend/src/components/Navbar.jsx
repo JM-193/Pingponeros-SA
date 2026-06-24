@@ -64,6 +64,14 @@ const NAV_ITEMS = [
       },
     ],
   },
+  {
+    label: 'Puestos de trabajo',
+    activeOn: '/puestos-trabajo',
+    roles: [1],
+    submenu: [
+      { label: 'Consultar', path: '/puestos-trabajo/consultar'},
+    ]
+  },
   /*{
     label: 'Funciones',
     activeOn: '/funciones',
