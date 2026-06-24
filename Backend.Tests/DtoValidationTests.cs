@@ -155,20 +155,20 @@ public sealed class DtoValidationTests
     public void CreateDepartmentDto_NombreVacio_UsaArticuloDelDepartamento()
     {
         Assert.Equal("El nombre del departamento es obligatorio.",
-            new CreateDepartmentDto("", "desc", 1, 1).Validar());
+            new CreateDepartmentDto { Nombre = "", Descripcion = "desc", IdArea = 1, Estado = 1 }.Validar());
     }
 
     [Fact]
     public void CreateDepartmentDto_Valido_RetornaNull()
     {
-        Assert.Null(new CreateDepartmentDto("Contabilidad", "desc", 1, 1).Validar());
+        Assert.Null(new CreateDepartmentDto { Nombre = "Contabilidad", Descripcion = "desc", IdArea = 1, Estado = 1 }.Validar());
     }
 
     [Fact]
     public void CreateSectionDto_NombreVacio_UsaArticuloDeLaSeccion()
     {
         Assert.Equal("El nombre de la sección es obligatorio.",
-            new CreateSectionDto("", "desc", 1, 1).Validar());
+            new CreateSectionDto { Nombre = "", Descripcion = "desc", IdArea = 1, Estado = 1 }.Validar());
     }
 
     [Fact]
