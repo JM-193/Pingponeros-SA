@@ -6,7 +6,7 @@ namespace Backend.DTOs;
 internal abstract record CreateOrganizationalUnitDto
 {
     // Solo MaxLength aquí; el mensaje de Required varía por entidad y se declara en cada subclase.
-    [MaxLength(25, ErrorMessage = "El nombre no puede superar los 25 caracteres.")]
+    [MaxLength(50, ErrorMessage = "El nombre no puede superar los 50 caracteres.")]
     public virtual string Nombre { get; init; } = null!;
 
     [Required(ErrorMessage = "La descripción es obligatoria.")]

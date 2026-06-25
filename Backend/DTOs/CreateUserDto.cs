@@ -18,22 +18,22 @@ internal sealed record CreateUserDto(
     string CorreoInstitucional,
 
     [property: Required(ErrorMessage = "El primer nombre es obligatorio.")]
-    [property: MaxLength(20, ErrorMessage = "El primer nombre no puede superar los 20 caracteres.")]
+    [property: MaxLength(25, ErrorMessage = "El primer nombre no puede superar los 25 caracteres.")]
     [property: RegularExpression(ValidationPatterns.SoloLetras, ErrorMessage = "El primer nombre solo debe contener letras.")]
     string PrimerNombre,
 
     // Opcional: sin [Required]. La anotación de formato ignora null/vacío/espacios.
-    [property: MaxLength(20, ErrorMessage = "El segundo nombre no puede superar los 20 caracteres.")]
+    [property: MaxLength(25, ErrorMessage = "El segundo nombre no puede superar los 25 caracteres.")]
     [property: RegularExpression(ValidationPatterns.SoloLetras, ErrorMessage = "El segundo nombre solo debe contener letras.")]
     string? SegundoNombre,
 
     [property: Required(ErrorMessage = "El primer apellido es obligatorio.")]
-    [property: MaxLength(20, ErrorMessage = "El primer apellido no puede superar los 20 caracteres.")]
+    [property: MaxLength(25, ErrorMessage = "El primer apellido no puede superar los 25 caracteres.")]
     [property: RegularExpression(ValidationPatterns.SoloLetras, ErrorMessage = "El primer apellido solo debe contener letras.")]
     string PrimerApellido,
 
     [property: Required(ErrorMessage = "El segundo apellido es obligatorio.")]
-    [property: MaxLength(20, ErrorMessage = "El segundo apellido no puede superar los 20 caracteres.")]
+    [property: MaxLength(25, ErrorMessage = "El segundo apellido no puede superar los 25 caracteres.")]
     [property: RegularExpression(ValidationPatterns.SoloLetras, ErrorMessage = "El segundo apellido solo debe contener letras.")]
     string SegundoApellido,
 

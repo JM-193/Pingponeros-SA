@@ -10,7 +10,7 @@ internal sealed record LoginDto(
     // Ambos campos comparten el mismo mensaje para conservar el texto combinado original
     // ("Correo y contraseña son obligatorios.") sea cual sea el campo que falte.
     [property: Required(ErrorMessage = "Correo y contraseña son obligatorios.")]
-    [property: MaxLength(100, ErrorMessage = "El correo no puede superar los 100 caracteres.")]
+    [property: MaxLength(190, ErrorMessage = "El correo no puede superar los 190 caracteres.")]
     string CorreoInstitucional,
     [property: Required(ErrorMessage = "Correo y contraseña son obligatorios.")]
     [property: MaxLength(30, ErrorMessage = "La contraseña no puede superar los 30 caracteres.")]
