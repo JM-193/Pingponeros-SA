@@ -20,14 +20,17 @@ internal static class PositionEndpoints
         // GET /plazas — Lista todas las plazas
         plazas.MapGet("/", (IPositionRepository repo) => ListarAsync(repo, isDev));
 
-        // GET /plazas/{numeroPlaza} — Obtiene una plaza por número
-        plazas.MapGet("/{numeroPlaza:long}", (long numeroPlaza, IPositionRepository repo) => ObtenerPorNumeroAsync(numeroPlaza, repo, isDev));
+        // GET /plazas/disponibles — Lista las plazas sin vinculación activa (disponibles para asignar)
+        plazas.MapGet("/disponibles", (IPositionAssignmentRepository repo) => ListarDisponiblesAsync(repo, isDev));
+
+        // GET /plazas/{numeroPlaza} — Obtiene una plaza por número (entero sin signo)
+        plazas.MapGet("/{numeroPlaza}", (ulong numeroPlaza, IPositionRepository repo) => ObtenerPorNumeroAsync(numeroPlaza, repo, isDev));
 
         // POST /plazas — Crea una nueva plaza
         plazas.MapPost("/", (CreatePositionDto dto, IPositionRepository repo) => CrearAsync(dto, repo, isDev));
 
         // PUT /plazas/{numeroPlaza} — Actualiza las asignaciones de una plaza existente
-        plazas.MapPut("/{numeroPlaza:long}", (long numeroPlaza, CreatePositionDto dto, IPositionRepository repo) => ActualizarAsync(numeroPlaza, dto, repo, isDev));
+        plazas.MapPut("/{numeroPlaza}", (ulong numeroPlaza, CreatePositionDto dto, IPositionRepository repo) => ActualizarAsync(numeroPlaza, dto, repo, isDev));
     }
 
     private static async Task<IResult> ListarAsync(IPositionRepository repo, bool isDev)
@@ -43,7 +46,20 @@ internal static class PositionEndpoints
         }
     }
 
-    private static async Task<IResult> ObtenerPorNumeroAsync(long numeroPlaza, IPositionRepository repo, bool isDev)
+    private static async Task<IResult> ListarDisponiblesAsync(IPositionAssignmentRepository repo, bool isDev)
+    {
+        try
+        {
+            var lista = await repo.ObtenerPlazasDisponiblesAsync().ConfigureAwait(false);
+            return Results.Ok(lista);
+        }
+        catch (OracleException ex)
+        {
+            return OracleErrorMapper.ToResult(ex, isDev);
+        }
+    }
+
+    private static async Task<IResult> ObtenerPorNumeroAsync(ulong numeroPlaza, IPositionRepository repo, bool isDev)
     {
         try
         {
@@ -94,7 +110,7 @@ internal static class PositionEndpoints
         }
     }
 
-    private static async Task<IResult> ActualizarAsync(long numeroPlaza, CreatePositionDto dto, IPositionRepository repo, bool isDev)
+    private static async Task<IResult> ActualizarAsync(ulong numeroPlaza, CreatePositionDto dto, IPositionRepository repo, bool isDev)
     {
         try
         {

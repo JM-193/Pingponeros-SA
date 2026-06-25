@@ -19,16 +19,16 @@ internal sealed class PositionRepository : IPositionRepository
 
     private static Position MapearFila(System.Data.Common.DbDataReader reader) => new()
     {
-        NumeroPlaza = reader.GetInt64(reader.GetOrdinal(ColumnNumeroPlaza)),
+        NumeroPlaza = Convert.ToUInt64(reader.GetValue(reader.GetOrdinal(ColumnNumeroPlaza)), CultureInfo.InvariantCulture),
         IdUnidad = reader.IsDBNull(reader.GetOrdinal(ColumnIdUnidad)) ? null : reader.GetInt32(reader.GetOrdinal(ColumnIdUnidad)),
         IdDepartamento = reader.IsDBNull(reader.GetOrdinal(ColumnIdDepartamento)) ? null : reader.GetInt32(reader.GetOrdinal(ColumnIdDepartamento)),
         IdSeccion = reader.IsDBNull(reader.GetOrdinal(ColumnIdSeccion)) ? null : reader.GetInt32(reader.GetOrdinal(ColumnIdSeccion)),
         IdArea = reader.IsDBNull(reader.GetOrdinal(ColumnIdArea)) ? null : reader.GetInt32(reader.GetOrdinal(ColumnIdArea)),
     };
 
-    private static void AgregarParamNumeroPlaza(OracleCommand cmd, long numeroPlaza)
+    private static void AgregarParamNumeroPlaza(OracleCommand cmd, ulong numeroPlaza)
     {
-        OracleCommandHelpers.AddInt64Param(cmd, ":numeroPlaza", numeroPlaza);
+        OracleCommandHelpers.AddUInt64Param(cmd, ":numeroPlaza", numeroPlaza);
     }
 
     private static void AgregarParametros(OracleCommand cmd, Position plaza)
@@ -62,7 +62,7 @@ internal sealed class PositionRepository : IPositionRepository
         }).ConfigureAwait(false);
     }
 
-    public async Task<bool> ExisteNumeroPlazaAsync(long numeroPlaza)
+    public async Task<bool> ExisteNumeroPlazaAsync(ulong numeroPlaza)
     {
         var result = await _q.ExecuteScalarAsync(connection =>
         {
@@ -95,7 +95,7 @@ internal sealed class PositionRepository : IPositionRepository
         }).ConfigureAwait(false);
     }
 
-    public async Task<Position?> ObtenerPorNumeroAsync(long numeroPlaza)
+    public async Task<Position?> ObtenerPorNumeroAsync(ulong numeroPlaza)
     {
         return await _q.QueryAsync(connection =>
         {
@@ -117,7 +117,7 @@ internal sealed class PositionRepository : IPositionRepository
         }).ConfigureAwait(false);
     }
 
-    public async Task<bool> ActualizarAsync(long numeroPlaza, Position plaza)
+    public async Task<bool> ActualizarAsync(ulong numeroPlaza, Position plaza)
     {
         ArgumentNullException.ThrowIfNull(plaza);
 

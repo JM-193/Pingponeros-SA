@@ -140,18 +140,16 @@ public sealed class DataAnnotationsValidationTests
     }
 
     [Theory]
-    [InlineData(1L)]
-    [InlineData(long.MaxValue)]
-    public void CreatePositionDto_NumeroPositivo_EsValido(long numero)
+    [InlineData(1UL)]
+    [InlineData(ulong.MaxValue)]
+    public void CreatePositionDto_NumeroPositivo_EsValido(ulong numero)
     {
         Assert.Null(new CreatePositionDto(numero, null, null, null, null).Validar());
     }
 
     [Theory]
-    [InlineData(0L)]
-    [InlineData(-1L)]
-    [InlineData(long.MinValue)]
-    public void CreatePositionDto_NumeroNoPositivo_RetornaMensaje(long numero)
+    [InlineData(0UL)]
+    public void CreatePositionDto_NumeroNoPositivo_RetornaMensaje(ulong numero)
     {
         Assert.Equal("El número de plaza debe ser un entero positivo.",
             new CreatePositionDto(numero, null, null, null, null).Validar());
