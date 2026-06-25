@@ -14,7 +14,7 @@ internal interface IAuthService
     Task<IResult> LoginAsync(LoginDto dto, bool isDev);
 
     /// <summary>Genera y envía una contraseña temporal sin revelar si el correo existe.</summary>
-    Task<IResult> RecuperarContrasenaAsync(string correoInstitucional, bool isDev);
+    Task<IResult> RecuperarContrasenaAsync(ResetPasswordDto dto, bool isDev);
 
     /// <summary>Cambia la contraseña del usuario tras verificar la actual y la política de complejidad.</summary>
     Task<IResult> CambiarContrasenaAsync(ChangePasswordDto dto, bool isDev);

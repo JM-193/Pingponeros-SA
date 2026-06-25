@@ -5,6 +5,7 @@ import { login } from '../services/authService'
 import { guardarSesion } from '../services/session'
 import { notifySuccess, notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
+import { EMAIL_REGEX } from '../constants/regex'
 
 /* UCR brand palette
    Azul UCR  #00AEEF  (Pantone 299 C)
@@ -16,7 +17,7 @@ import { COLORS } from '../constants/colors'
 const TEMP_PASSWORD_EXPIRED_MESSAGE =
   'Contraseña expirada. Por favor realice el proceso de recuperación de contraseña.'
 
-function temporalPasswordExpired(usuario) {
+function temporaryPasswordExpired(usuario) {
   if (!usuario?.contrasenaTemporal || !usuario?.fechaExpiracionContrasena) return false
 
   const expirationTime = new Date(usuario.fechaExpiracionContrasena).getTime()
@@ -37,7 +38,7 @@ export default function Login() {
 
     if (!email.trim()) {
       newErrors.email = 'El correo es requerido'
-    } else if (!/^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$/.test(email.trim())) {
+    } else if (!EMAIL_REGEX.test(email.trim())) {
       newErrors.email = 'El correo debe ser válido. Formato: nombre.apellidos@ucr.ac.cr (solo letras antes de @)'
     }
 
@@ -60,7 +61,7 @@ export default function Login() {
         setServerError('La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte.')
         return
       }
-      if (temporalPasswordExpired(usuario)) {
+      if (temporaryPasswordExpired(usuario)) {
         setServerError(TEMP_PASSWORD_EXPIRED_MESSAGE)
         return
       }
@@ -72,7 +73,15 @@ export default function Login() {
         return
       }
 
-      guardarSesion(token)
+      guardarSesion(token, usuario.contrasenaTemporal)
+
+      // A temporary password must be changed before anything else; send the user
+      // straight to the change page (the blocking alert is shown there).
+      if (usuario.contrasenaTemporal) {
+        navigate('/cambiar-contrasena')
+        return
+      }
+
       notifySuccess('Sesión iniciada correctamente.')
       navigate('/home')
     } catch (err) {

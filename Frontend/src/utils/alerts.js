@@ -37,6 +37,40 @@ export async function confirmAction({
 }
 
 /**
+ * Muestra un diálogo de confirmación de eliminación con botón de acción en rojo.
+ * @param {{ title: string, text?: string }} opciones
+ * @returns {Promise<boolean>}
+ */
+export async function confirmDelete({ title, text = '' }) {
+  const result = await baseSwal.fire({
+    title,
+    text,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Eliminar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: COLORS.danger,
+  })
+  return result.isConfirmed
+}
+
+/**
+ * Muestra un diálogo informativo bloqueante de un solo botón que el usuario
+ * debe descartar. Útil para avisos obligatorios (p. ej. contraseña temporal).
+ * @param {string} title
+ * @param {string} [text]
+ * @returns {Promise<unknown>}
+ */
+export function blockingInfo(title, text = '') {
+  return baseSwal.fire({
+    title,
+    text,
+    icon: 'warning',
+    confirmButtonText: 'Entendido',
+  })
+}
+
+/**
  * Muestra un diálogo de error bloqueante para fallos críticos.
  * @param {string} mensaje
  * @returns {Promise<unknown>}

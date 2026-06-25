@@ -4,6 +4,7 @@ import AuthLayout from '../components/AuthLayout'
 import { recuperarContrasena } from '../services/authService'
 import { notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
+import { EMAIL_REGEX } from '../constants/regex'
 
 export default function ForgotPassword() {
   const navigate = useNavigate()
@@ -18,7 +19,7 @@ export default function ForgotPassword() {
 
     if (!email.trim()) {
       newErrors.email = 'El correo es requerido'
-    } else if (!/^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$/.test(email.trim())) {
+    } else if (!EMAIL_REGEX.test(email.trim())) {
       newErrors.email = 'El correo debe ser válido. Formato: nombre.apellidos@ucr.ac.cr (solo letras antes de @)'
     }
 
@@ -101,6 +102,7 @@ export default function ForgotPassword() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Ingrese su correo institucional"
+              maxLength={100}
               style={{
                 padding: '14px 18px',
                 border: errors.email ? `2px solid ${COLORS.danger}` : `1px solid ${COLORS.borderLight}`,

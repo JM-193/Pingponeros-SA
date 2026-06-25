@@ -21,6 +21,8 @@ import QueryUnits from '../pages/QueryUnits'
 import CreatePositions from '../pages/CreatePositions'
 import EditPositions from '../pages/EditPositions'
 import QueryPositions from '../pages/QueryPositions'
+import CreateWorkPositions from '../pages/CreateWorkPositions'
+import QueryWorkPositions from '../pages/QueryWorkPositions'
 import ProtectedRoute from '../components/ProtectedRoute'
 
 export default function AppRouter() {
@@ -30,7 +32,7 @@ export default function AppRouter() {
         {/* Public routes */}
         <Route path="/" element={<Login />} />
         <Route path="/recuperar-contrasena" element={<ForgotPassword />} />
-        
+
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/cambiar-contrasena" element={<ChangePassword />} />
@@ -38,7 +40,7 @@ export default function AppRouter() {
           {/* <Route path="/declaraciones/consultar" element={<QueryDeclarations />} /> */}
 
           {/* Admin-only routes */}
-          <Route element={<ProtectedRoute needAdmin={true} />}>
+          <Route element={<ProtectedRoute allowedRoles={[1]} />}>
             <Route path="/usuarios/crear" element={<CreateUsers />} />
             <Route path="/usuarios/editar/:correo" element={<EditUsers />} />
             <Route path="/usuarios/consultar" element={<QueryUsers />} />
@@ -57,6 +59,8 @@ export default function AppRouter() {
             <Route path="/organizacion/unidades/crear" element={<CreateUnits />} />
             <Route path="/organizacion/unidades/editar/:nombre" element={<EditUnits />} />
             <Route path="/organizacion/unidades/consultar" element={<QueryUnits />} />
+            <Route path="/organizacion/puestos-trabajo/crear" element={<CreateWorkPositions />} />
+            <Route path="/puestos-trabajo/consultar" element={<QueryWorkPositions />} />
           </Route>
         </Route>
       </Routes>

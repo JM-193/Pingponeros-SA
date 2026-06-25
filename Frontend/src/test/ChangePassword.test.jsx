@@ -5,6 +5,11 @@ import { toast } from 'react-toastify'
 import ChangePassword from '../pages/ChangePassword'
 import * as authService from '../services/authService'
 import * as sessionService from '../services/session'
+import * as alertUtils from '../utils/alerts'
+
+vi.mock('../utils/alerts', () => ({
+  blockingInfo: vi.fn(),
+}))
 
 vi.mock('../services/authService')
 vi.mock('../services/session')
@@ -80,7 +85,7 @@ describe('ChangePassword Page', () => {
     const form = document.querySelector('form')
     await act(async () => { fireEvent.submit(form) })
 
-    expect(screen.getByText(/La contraseña debe contener:/i)).toBeInTheDocument()
+    expect(screen.getByText(/no cumple los requisitos de complejidad/i)).toBeInTheDocument()
   })
 
   it('muestra error cuando las contraseñas no coinciden', async () => {
@@ -267,5 +272,54 @@ describe('ChangePassword Page', () => {
     })
 
     await act(async () => { resolveCall({}) })
+  })
+
+  it('Muestra alerta bloqueante cuando el cambio de contraseña es forzado', async () => {
+    sessionService.obtenerSesion.mockReturnValue({ id: 1, nombre: 'User' })
+    sessionService.esContrasenaTemporal.mockReturnValue(true)
+
+    renderPage()
+
+    await waitFor(() =>{
+      expect(alertUtils.blockingInfo).toHaveBeenCalledWith(
+        'Contraseña temporal',
+        'Tu contraseña es temporal. Debes establecer una nueva para continuar.'
+      )
+    })
+
+  })
+
+  it('Cierra sesión luego de cambiar la contraseña temporal', async () => {
+    sessionService.obtenerSesion.mockReturnValue({ id: 1, nombre: 'User' })
+    sessionService.esContrasenaTemporal.mockReturnValue(true)
+
+    authService.cambiarContrasena.mockResolvedValueOnce({})
+
+    renderPage()
+
+    fireEvent.change(screen.getByPlaceholderText('Ingresa tu contraseña actual'), {
+      target: { value: 'OldPass12345!' },
+    })
+    fireEvent.change(screen.getByPlaceholderText('Ingresa tu nueva contraseña'), {
+      target: { value: 'NewPass12345!' },
+    })
+    fireEvent.change(screen.getByPlaceholderText('Confirma tu nueva contraseña'), {
+      target: { value: 'NewPass12345!' },
+    })
+
+    const form = document.querySelector('form')
+    await act(async () => { fireEvent.submit(form) })
+
+    await waitFor(() => {
+      // Verificar que el toast de éxito haya sido llamado
+      expect(toast.success).toHaveBeenCalledWith(
+        expect.stringContaining('Contraseña actualizada. Inicia sesión de nuevo'),
+        expect.anything()
+      )
+      // Verifica que la función cerrarSesion haya sido llamada después de un cambio exitoso de contraseña temporal
+      expect(sessionService.cerrarSesion).toHaveBeenCalled()
+      // Verifica que la redirección a la página de inicio de sesión haya ocurrido
+      expect(globalThis.location.pathname).toBe('/')
+    })
   })
 })

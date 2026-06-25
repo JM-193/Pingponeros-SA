@@ -116,13 +116,13 @@ describe('Login Page', () => {
 
     await waitFor(() => {
       expect(authService.login).toHaveBeenCalledWith('test.user@ucr.ac.cr', 'password123')
-      expect(sessionService.guardarSesion).toHaveBeenCalledWith(mockToken)
+      expect(sessionService.guardarSesion).toHaveBeenCalledWith(mockToken, undefined)
     })
   })
 
   it('permite login con contraseña temporal vigente', async () => {
     // Login.jsx desestructura { token, ...usuario } y luego evalúa usuario.contrasenaTemporal
-    const mockToken = 'header.temporalpayload.signature'
+    const mockToken = 'header.temporarypayload.signature'
     authService.login.mockResolvedValueOnce({
       token: mockToken,
       estado: 1,
@@ -146,7 +146,7 @@ describe('Login Page', () => {
     fireEvent.click(screen.getByRole('button', { name: /Iniciar Sesión/i }))
 
     await waitFor(() => {
-      expect(sessionService.guardarSesion).toHaveBeenCalledWith(mockToken)
+      expect(sessionService.guardarSesion).toHaveBeenCalledWith(mockToken, true)
     })
   })
 

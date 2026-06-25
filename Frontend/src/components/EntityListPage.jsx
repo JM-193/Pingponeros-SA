@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useNavigate } from 'react-router-dom'
 import { FaSearch } from 'react-icons/fa'
-import FormButton from './FormButton'
 import PageLayout from './PageLayout'
 import PageTitle from './PageTitle'
 import EmptyResults from './EmptyResults'
@@ -10,6 +9,7 @@ import PaginationControls from './PaginationControls'
 import EntityResultsTable from './EntityResultsTable'
 import { COLORS } from '../constants/colors'
 import { notifyApiError } from '../utils/notify'
+import { confirmDelete } from '../utils/alerts'
 
 const defaultSearch = (item, term) => {
   const lowerTerm = term.toLowerCase()
@@ -73,6 +73,8 @@ export default function EntityListPage({
   renderCreateModal,
   renderEditModal,
   fetchItems,
+  deleteItem,
+  deleteConfirmMessage,
   columns,
   matchesSearch,
   getRowId,
@@ -88,6 +90,7 @@ export default function EntityListPage({
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
 
   const matches = matchesSearch ?? defaultSearch
   const resolveRowId = useMemo(() => getRowId ?? ((item) => item.id), [getRowId])
@@ -153,6 +156,26 @@ export default function EntityListPage({
     await loadItems()
   }, [loadItems])
 
+  const handleDelete = useCallback(async (item) => {
+    const itemId = resolveRowId(item)
+    const text = deleteConfirmMessage
+      ? deleteConfirmMessage(item)
+      : `¿Está seguro de que desea eliminar "${item.nombre}"?`
+
+    const confirmed = await confirmDelete({ title: '¿Eliminar registro?', text })
+    if (!confirmed) return
+
+    setDeletingId(itemId)
+    try {
+      await deleteItem(item)
+      await loadItems()
+    } catch (error) {
+      notifyApiError(error)
+    } finally {
+      setDeletingId(null)
+    }
+  }, [deleteItem, deleteConfirmMessage, loadItems, resolveRowId])
+
   const handleSort = (columnKey) => {
     setSortConfig((currentSort) => ({
       key: columnKey,
@@ -186,6 +209,8 @@ export default function EntityListPage({
           columns={columns}
           rows={currentResults}
           onEdit={(editPath || renderEditModal) ? handleEdit : undefined}
+          onDelete={deleteItem ? handleDelete : undefined}
+          deletingRowId={deletingId}
           getRowId={resolveRowId}
           sortConfig={sortConfig}
           onSort={handleSort}
@@ -306,15 +331,6 @@ export default function EntityListPage({
       </div>
 
       <div id="results-section">{renderResultsContent()}</div>
-      <div style={{ marginTop: '16px' }}>
-        <FormButton
-          label="Regresar"
-          type="button"
-          variant="secondary"
-          onClick={() => navigate(-1)}
-          disabled={loading}
-        />
-      </div>
 
       {renderCreateModal?.({
         isModal: true,
@@ -341,6 +357,8 @@ EntityListPage.propTypes = {
   renderCreateModal: PropTypes.func,
   renderEditModal: PropTypes.func,
   fetchItems: PropTypes.func.isRequired,
+  deleteItem: PropTypes.func,
+  deleteConfirmMessage: PropTypes.func,
   columns: PropTypes.arrayOf(
     PropTypes.shape({
       key: PropTypes.string.isRequired,
@@ -362,6 +380,8 @@ EntityListPage.defaultProps = {
   editPath: null,
   renderCreateModal: null,
   renderEditModal: null,
+  deleteItem: null,
+  deleteConfirmMessage: null,
   matchesSearch: null,
   getRowId: null,
 }

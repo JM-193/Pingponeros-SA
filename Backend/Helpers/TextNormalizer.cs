@@ -5,15 +5,15 @@ using System.Globalization;
 namespace Backend.Helpers;
 
 /// <summary>
-/// Normalización de texto compartida por las rutas: minúsculas para correos y
-/// nombres de entidades, y capitalización de nombres propios. Centraliza la única
-/// supresión de CA1308 (paso a minúsculas exigido por requisito de negocio).
+/// Normalización de texto compartida por las rutas: minúsculas para correos,
+/// capitalización de nombres propios, y recorte de espacios para nombres de entidades.
 /// </summary>
 internal static class TextNormalizer
 {
-    [SuppressMessage("Globalization", "CA1308:NormalizeStringsToUppercase",
-        Justification = "Los nombres de entidades organizacionales se normalizan a minúsculas por requisito de negocio.")]
-    public static string Nombre(string nombre) => nombre.Trim().ToLowerInvariant();
+    /// <summary>
+    /// Recorta los espacios en blanco al inicio y al final del nombre.
+    /// </summary>
+    public static string Nombre(string nombre) => nombre.Trim();
 
     [SuppressMessage("Globalization", "CA1308:NormalizeStringsToUppercase",
         Justification = "Los correos se normalizan a minúsculas por requisito de negocio.")]

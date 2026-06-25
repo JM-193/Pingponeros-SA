@@ -11,8 +11,7 @@ import FormInput from '../components/FormInput'
 import FormSelect from '../components/FormSelect'
 import FormButton from '../components/FormButton'
 import { notifySuccess, notifyApiError } from '../utils/notify'
-
-const EMAIL_REGEX = /^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$/
+import { EMAIL_REGEX } from '../constants/regex'
 
 export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
   const navigate = useNavigate()

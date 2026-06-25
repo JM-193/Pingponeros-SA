@@ -26,7 +26,7 @@ describe('FormRow', () => {
     expect(div).toHaveStyle('grid-template-columns: repeat(1, 1fr)')
   })
 
-  it('aplica el nÃºmero correcto de columnas', () => {
+  it('aplica el número correcto de columnas', () => {
     const { container } = render(
       <FormRow columns={3}>
         <div>C1</div>
@@ -62,7 +62,7 @@ describe('FormRow', () => {
     expect(div).toHaveStyle('margin-bottom: 20px')
   })
 
-  it('maneja mÃºltiples hijos complejos', () => {
+  it('maneja múltiples hijos complejos', () => {
     render(
       <FormRow columns={4}>
         <input type="text" placeholder="Nombre" />

@@ -73,12 +73,12 @@ internal sealed class AuthService : IAuthService
         }
     }
 
-    public async Task<IResult> RecuperarContrasenaAsync(string correoInstitucional, bool isDev)
+    public async Task<IResult> RecuperarContrasenaAsync(ResetPasswordDto dto, bool isDev)
     {
-        if (string.IsNullOrWhiteSpace(correoInstitucional))
-            return Results.BadRequest(new { mensaje = "El correo institucional es obligatorio." });
+        if (dto.Validar() is { } error)
+            return Results.BadRequest(new { mensaje = error });
 
-        var correo = TextNormalizer.Correo(correoInstitucional);
+        var correo = TextNormalizer.Correo(dto.CorreoInstitucional);
 
         try
         {
