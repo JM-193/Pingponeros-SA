@@ -10,7 +10,7 @@ namespace Backend.DTOs;
 internal sealed record CreatePositionDto(
     // Entero positivo: rango [1, long.MaxValue]. Se usa el constructor por tipo de Range
     // porque no existe una sobrecarga (long, long).
-    [property: Range(typeof(long), "1", "9223372036854775807",
+    [property: Range(typeof(ulong), "1", "18446744073709551614",
         ErrorMessage = "El número de plaza debe ser un entero positivo.")]
     long NumeroPlaza,
     int? IdUnidad,
