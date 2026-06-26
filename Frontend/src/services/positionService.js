@@ -24,6 +24,14 @@ export async function crearPlaza(datos) {
 }
 
 /**
+ * Obtiene las plazas disponibles (sin vinculación activa a ningún usuario).
+ * @returns {Promise<Array>} Lista de plazas disponibles.
+ */
+export async function obtenerPlazasDisponibles() {
+  return apiFetch('/plazas/disponibles', { method: 'GET', headers: JSON_HEADERS }, { emptyArrayOn404: true })
+}
+
+/**
  * Obtiene una plaza por número.
  * @param {number} numeroPlaza
  * @returns {Promise<object>} Datos de la plaza.

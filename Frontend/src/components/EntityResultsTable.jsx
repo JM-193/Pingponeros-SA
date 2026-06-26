@@ -19,6 +19,7 @@ const getSortIcon = (isSorted, direction) => {
 function EditButton({ row, onEdit, showLabel }) {
   return (
     <button
+      type="button"
       onClick={() => onEdit(row)}
       aria-label="Editar"
       title="Editar"
@@ -56,6 +57,7 @@ function DeleteButton({ row, onDelete, deletingRowId, rowId, showLabel }) {
   const isDeleting = deletingRowId === rowId
   return (
     <button
+      type="button"
       onClick={() => onDelete(row)}
       disabled={isDeleting}
       aria-label="Eliminar"
