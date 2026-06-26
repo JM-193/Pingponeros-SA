@@ -283,4 +283,103 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    // ---------------------------------------------------------------- //
+    // Plazas vinculadas al usuario (PLAZAS_USUARIOS)                    //
+    // ---------------------------------------------------------------- //
+    [Fact]
+    public async Task GetPlazasUsuario_Returns200ConLista()
+    {
+        _factory.AsignacionRepo.ObtenerActivasPorUsuarioAsync("ana@test.com").Returns(new List<PositionAssignment>
+        {
+            new() { NumeroPlaza = 1001, CorreoInstitucional = "ana@test.com", IdPuesto = 5, PuestoNombre = "Analista", ClaseOcupacional = "Profesional 1", FechaInicio = new DateTime(2026, 1, 1) }
+        });
+
+        var response = await _client.GetAsync("/usuarios/ana%40test.com/plazas");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AsignarPlaza_Returns201CuandoSeVincula()
+    {
+        PositionAssignment? capturada = null;
+        _factory.PlazaRepo.ExisteNumeroPlazaAsync(1001).Returns(true);
+        _factory.AsignacionRepo.PlazaTieneAsignacionActivaAsync(1001).Returns(false);
+        _factory.AsignacionRepo.AsignarAsync(Arg.Do<PositionAssignment>(a => capturada = a)).Returns(Task.CompletedTask);
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, ClaseOcupacional = "Profesional 1", FechaInicio = "2026-01-01", FechaFinal = (string?)null };
+
+        var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Assert.NotNull(capturada);
+        Assert.Equal(1001UL, capturada!.NumeroPlaza);
+        Assert.Equal("ana@test.com", capturada.CorreoInstitucional);
+        Assert.Equal(5, capturada.IdPuesto);
+        Assert.Equal("Profesional 1", capturada.ClaseOcupacional);
+        Assert.Null(capturada.FechaFinal);
+    }
+
+    [Fact]
+    public async Task AsignarPlaza_Returns409CuandoPlazaYaOcupada()
+    {
+        _factory.PlazaRepo.ExisteNumeroPlazaAsync(1001).Returns(true);
+        _factory.AsignacionRepo.PlazaTieneAsignacionActivaAsync(1001).Returns(true);
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, ClaseOcupacional = "Profesional 1", FechaInicio = "2026-01-01", FechaFinal = (string?)null };
+
+        var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AsignarPlaza_Returns404CuandoPlazaNoExiste()
+    {
+        _factory.PlazaRepo.ExisteNumeroPlazaAsync(9999).Returns(false);
+        var dto = new { NumeroPlaza = 9999, IdPuesto = 5, ClaseOcupacional = "Profesional 1", FechaInicio = "2026-01-01", FechaFinal = (string?)null };
+
+        var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AsignarPlaza_Returns400CuandoFaltaFechaInicio()
+    {
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, ClaseOcupacional = "Profesional 1", FechaFinal = (string?)null };
+
+        var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AsignarPlaza_Returns400CuandoFaltaPuesto()
+    {
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 0, ClaseOcupacional = "Profesional 1", FechaInicio = "2026-01-01" };
+
+        var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DesasignarPlaza_Returns200CuandoSeDesvincula()
+    {
+        _factory.AsignacionRepo.DesasignarAsync(1001, "ana@test.com").Returns(true);
+
+        var response = await _client.DeleteAsync("/usuarios/ana%40test.com/plazas/1001");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DesasignarPlaza_Returns404CuandoNoHayVinculacionActiva()
+    {
+        _factory.AsignacionRepo.DesasignarAsync(9999, "ana@test.com").Returns(false);
+
+        var response = await _client.DeleteAsync("/usuarios/ana%40test.com/plazas/9999");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
 }

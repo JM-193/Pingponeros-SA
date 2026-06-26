@@ -31,6 +31,17 @@ internal static class UserEndpoints
 
         // DELETE /usuarios/{correo} — Elimina un usuario
         usuarios.MapDelete("/{correo}", (string correo, IUserRepository repo) => EliminarAsync(correo, repo, isDev));
+
+        // GET /usuarios/{correo}/plazas — Lista las plazas vinculadas (activas) del usuario
+        usuarios.MapGet("/{correo}/plazas", (string correo, IPositionAssignmentRepository repo) => ListarPlazasAsync(correo, repo, isDev));
+
+        // POST /usuarios/{correo}/plazas — Vincula una plaza disponible al usuario
+        usuarios.MapPost("/{correo}/plazas", (string correo, AssignPositionDto dto, IPositionAssignmentRepository asignacionRepo, IPositionRepository plazaRepo)
+            => AsignarPlazaAsync(correo, dto, asignacionRepo, plazaRepo, isDev));
+
+        // DELETE /usuarios/{correo}/plazas/{numeroPlaza} — Desvincula (libera) la plaza del usuario
+        usuarios.MapDelete("/{correo}/plazas/{numeroPlaza}", (string correo, ulong numeroPlaza, IPositionAssignmentRepository repo)
+            => DesasignarPlazaAsync(correo, numeroPlaza, repo, isDev));
     }
 
     private static async Task<IResult> ListarAsync(IUserRepository repo, bool isDev)
@@ -92,6 +103,80 @@ internal static class UserEndpoints
             return eliminado
                 ? Results.NoContent()
                 : Results.NotFound(new { mensaje = $"No se encontró el usuario '{correo}'." });
+        }
+        catch (OracleException ex)
+        {
+            return OracleErrorMapper.ToResult(ex, isDev);
+        }
+    }
+
+    // ---------------------------------------------------------------- //
+    // Plazas vinculadas al usuario (PLAZAS_USUARIOS)                    //
+    // ---------------------------------------------------------------- //
+    private static async Task<IResult> ListarPlazasAsync(string correo, IPositionAssignmentRepository repo, bool isDev)
+    {
+        try
+        {
+            var lista = await repo.ObtenerActivasPorUsuarioAsync(Uri.UnescapeDataString(correo)).ConfigureAwait(false);
+            return Results.Ok(lista);
+        }
+        catch (OracleException ex)
+        {
+            return OracleErrorMapper.ToResult(ex, isDev);
+        }
+    }
+
+    private static async Task<IResult> AsignarPlazaAsync(
+        string correo,
+        AssignPositionDto dto,
+        IPositionAssignmentRepository asignacionRepo,
+        IPositionRepository plazaRepo,
+        bool isDev)
+    {
+        if (dto.Validar() is { } error)
+            return Results.BadRequest(new { mensaje = error });
+
+        var correoDescodificado = Uri.UnescapeDataString(correo);
+
+        try
+        {
+            var existePlaza = await plazaRepo.ExisteNumeroPlazaAsync(dto.NumeroPlaza).ConfigureAwait(false);
+            if (!existePlaza)
+                return Results.NotFound(new { mensaje = $"No se encontró la plaza '{dto.NumeroPlaza}'." });
+
+            var ocupada = await asignacionRepo.PlazaTieneAsignacionActivaAsync(dto.NumeroPlaza).ConfigureAwait(false);
+            if (ocupada)
+                return Results.Conflict(new { mensaje = $"La plaza '{dto.NumeroPlaza}' ya está vinculada a otro usuario." });
+
+            var asignacion = new PositionAssignment
+            {
+                NumeroPlaza = dto.NumeroPlaza,
+                CorreoInstitucional = correoDescodificado,
+                IdPuesto = dto.IdPuesto,
+                ClaseOcupacional = dto.ClaseOcupacional.Trim(),
+                FechaInicio = dto.FechaInicio!.Value,
+                FechaFinal = dto.FechaFinal,
+            };
+
+            await asignacionRepo.AsignarAsync(asignacion).ConfigureAwait(false);
+            return Results.Created(
+                $"/usuarios/{Uri.EscapeDataString(correoDescodificado)}/plazas/{asignacion.NumeroPlaza}",
+                new { mensaje = $"Plaza '{asignacion.NumeroPlaza}' vinculada correctamente." });
+        }
+        catch (OracleException ex)
+        {
+            return OracleErrorMapper.ToResult(ex, isDev);
+        }
+    }
+
+    private static async Task<IResult> DesasignarPlazaAsync(string correo, ulong numeroPlaza, IPositionAssignmentRepository repo, bool isDev)
+    {
+        try
+        {
+            var desvinculada = await repo.DesasignarAsync(numeroPlaza, Uri.UnescapeDataString(correo)).ConfigureAwait(false);
+            return desvinculada
+                ? Results.Ok(new { mensaje = $"Plaza '{numeroPlaza}' desvinculada correctamente." })
+                : Results.NotFound(new { mensaje = $"No se encontró una vinculación activa de la plaza '{numeroPlaza}' para el usuario." });
         }
         catch (OracleException ex)
         {
