@@ -49,6 +49,8 @@ internal static class ServiceCollectionExtensions
             new PositionAssignmentRepository(sp.GetRequiredService<IQueryExecutor>()));
         services.AddScoped<IWorkPositionRepository>(sp =>
             new WorkPositionRepository(sp.GetRequiredService<IQueryExecutor>()));
+        services.AddScoped<IWorkPositionFunctionRepository>(sp =>
+            new WorkPositionFunctionRepository(sp.GetRequiredService<IQueryExecutor>()));
         services.AddScoped<IFunctionRepository>(sp =>
             new FunctionRepository(sp.GetRequiredService<IQueryExecutor>()));
         services.AddScoped<IUserFunctionRepository>(sp =>
