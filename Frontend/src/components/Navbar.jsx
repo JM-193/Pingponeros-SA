@@ -72,13 +72,14 @@ const NAV_ITEMS = [
       { label: 'Consultar', path: '/puestos-trabajo/consultar'},
     ]
   },
-  /*{
+  {
     label: 'Funciones',
     activeOn: '/funciones',
     submenu: [
-      { label: 'Consultar', path: '/organizacion/funciones/consultar' },
+      { label: 'Oficiales', path: '/funciones/consultar', roles: [1] },
+      { label: 'Usuarios', path: '/funciones/usuarios/consultar' },
     ],
-  },*/
+  },
 ]
 
 const filterNavItems = (items, sesion) =>
