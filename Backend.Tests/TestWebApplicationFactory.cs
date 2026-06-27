@@ -21,6 +21,7 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<TestEntryP
     internal IPositionRepository PlazaRepo { get; } = Substitute.For<IPositionRepository>();
     internal IPositionAssignmentRepository AsignacionRepo { get; } = Substitute.For<IPositionAssignmentRepository>();
     internal IWorkPositionRepository PuestoRepo { get; } = Substitute.For<IWorkPositionRepository>();
+    internal IWorkPositionFunctionRepository FuncionPuestoRepo { get; } = Substitute.For<IWorkPositionFunctionRepository>();
     internal IFunctionRepository FuncionRepo { get; } = Substitute.For<IFunctionRepository>();
     internal IUserFunctionRepository FuncionUsuarioRepo { get; } = Substitute.For<IUserFunctionRepository>();
     internal IDbExecutor DbExecutor { get; } = Substitute.For<IDbExecutor>();
@@ -53,6 +54,7 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<TestEntryP
             services.RemoveAll<IPositionRepository>();
             services.RemoveAll<IPositionAssignmentRepository>();
             services.RemoveAll<IWorkPositionRepository>();
+            services.RemoveAll<IWorkPositionFunctionRepository>();
             services.RemoveAll<IFunctionRepository>();
             services.RemoveAll<IUserFunctionRepository>();
             services.RemoveAll<IEmailService>();
@@ -66,6 +68,7 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<TestEntryP
             services.AddScoped<IPositionRepository>(_ => PlazaRepo);
             services.AddScoped<IPositionAssignmentRepository>(_ => AsignacionRepo);
             services.AddScoped<IWorkPositionRepository>(_ => PuestoRepo);
+            services.AddScoped<IWorkPositionFunctionRepository>(_ => FuncionPuestoRepo);
             services.AddScoped<IFunctionRepository>(_ => FuncionRepo);
             services.AddScoped<IUserFunctionRepository>(_ => FuncionUsuarioRepo);
             services.AddScoped<IEmailService>(_ => EmailService);
