@@ -80,7 +80,7 @@ internal sealed class PositionAssignmentRepository : IPositionAssignmentReposito
             WHERE  NOT EXISTS (
                        SELECT 1 FROM PLAZAS_USUARIOS pu
                        WHERE  pu.NUMERO_PLAZA = p.NUMERO_PLAZA
-                       AND    (pu.FECHA_FINAL IS NULL OR pu.FECHA_FINAL > SYSDATE) or pu.FECHA_FINAL > SYSDATE
+                       AND    (pu.FECHA_FINAL IS NULL OR pu.FECHA_FINAL > SYSDATE)
                    )
             ORDER BY p.NUMERO_PLAZA
             """;
