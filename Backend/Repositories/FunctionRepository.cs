@@ -23,11 +23,6 @@ internal sealed class FunctionRepository : IFunctionRepository
         Descripcion = reader.IsDBNull(reader.GetOrdinal(ColumnDescripcion)) ? string.Empty : reader.GetString(reader.GetOrdinal(ColumnDescripcion)),
     };
 
-    private static void AgregarParamId(OracleCommand cmd, int id)
-    {
-        cmd.Parameters.Add(new OracleParameter(":id", OracleDbType.Int32) { Value = id });
-    }
-
     private static void AgregarParamNombre(OracleCommand cmd, string nombre)
     {
         OracleCommandHelpers.AddStringParam(cmd, ":nombre", nombre);
@@ -119,16 +114,8 @@ internal sealed class FunctionRepository : IFunctionRepository
     public async Task<bool> EstaEnActividadesAsync(int id)
     {
         var result = await _q.ExecuteScalarAsync(connection =>
-        {
-            var cmd = new OracleCommand(
-                "SELECT COUNT(*) FROM ACTIVIDADES WHERE ID_FUNCION = :id",
-                connection)
-            {
-                BindByName = true,
-            };
-            AgregarParamId(cmd, id);
-            return cmd;
-        }).ConfigureAwait(false);
+            OracleCommandHelpers.CreateCountByIdCommand(connection, "ACTIVIDADES", "ID_FUNCION", id)
+        ).ConfigureAwait(false);
         return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
     }
 
@@ -136,28 +123,12 @@ internal sealed class FunctionRepository : IFunctionRepository
     {
         // Eliminar asociaciones con puestos de trabajo antes de borrar la función
         await _q.ExecuteAsync(connection =>
-        {
-            var cmd = new OracleCommand(
-                "DELETE FROM FUNCIONES_PUESTOS WHERE ID_FUNCION = :id",
-                connection)
-            {
-                BindByName = true,
-            };
-            AgregarParamId(cmd, id);
-            return cmd;
-        }).ConfigureAwait(false);
+            OracleCommandHelpers.CreateDeleteByIdCommand(connection, "FUNCIONES_PUESTOS", "ID_FUNCION", id)
+        ).ConfigureAwait(false);
 
         var rows = await _q.ExecuteAsync(connection =>
-        {
-            var cmd = new OracleCommand(
-                "DELETE FROM FUNCIONES WHERE ID_FUNCION = :id",
-                connection)
-            {
-                BindByName = true,
-            };
-            AgregarParamId(cmd, id);
-            return cmd;
-        }).ConfigureAwait(false);
+            OracleCommandHelpers.CreateDeleteByIdCommand(connection, "FUNCIONES", "ID_FUNCION", id)
+        ).ConfigureAwait(false);
 
         return rows > 0;
     }
