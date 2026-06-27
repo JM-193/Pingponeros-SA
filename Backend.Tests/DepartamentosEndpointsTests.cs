@@ -118,7 +118,7 @@ public sealed class DepartamentosEndpointsTests : IClassFixture<TestWebApplicati
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         Assert.NotNull(capturada);
-        Assert.Equal("finanzas", capturada!.Nombre);
+        Assert.Equal("Finanzas", capturada!.Nombre);
         Assert.Equal("Depto Finanzas", capturada.Descripcion);
     }
 

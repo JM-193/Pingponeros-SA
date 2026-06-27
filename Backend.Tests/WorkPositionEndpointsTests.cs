@@ -66,9 +66,9 @@ public sealed class WorkPositionEndpointsTests : IClassFixture<TestWebApplicatio
     }
 
     [Fact]
-    public async Task CrearPuesto_Returns400ConNombreMayorA25Caracteres()
+    public async Task CrearPuesto_Returns400ConNombreMayorA50Caracteres()
     {
-        var dto = new { Nombre = new string('A', 26), Descripcion = "Descripción válida" };
+        var dto = new { Nombre = new string('A', 51), Descripcion = "Descripción válida" };
 
         var response = await _client.PostAsJsonAsync("/puestos-trabajo", dto);
 
@@ -110,7 +110,7 @@ public sealed class WorkPositionEndpointsTests : IClassFixture<TestWebApplicatio
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         Assert.NotNull(capturado);
-        Assert.Equal("digitador", capturado!.Nombre);
+        Assert.Equal("Digitador", capturado!.Nombre);
         Assert.Equal("Puesto de digitador", capturado.Descripcion);
     }
 

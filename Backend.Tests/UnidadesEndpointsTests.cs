@@ -140,7 +140,7 @@ public sealed class UnidadesEndpointsTests : IClassFixture<TestWebApplicationFac
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         Assert.NotNull(capturada);
-        Assert.Equal("redes", capturada!.Nombre);
+        Assert.Equal("Redes", capturada!.Nombre);
         Assert.Equal("Unidad Redes", capturada.Descripcion);
     }
 

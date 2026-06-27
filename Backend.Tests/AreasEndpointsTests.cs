@@ -107,7 +107,7 @@ public sealed class AreasEndpointsTests : IClassFixture<TestWebApplicationFactor
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         Assert.NotNull(capturada);
-        Assert.Equal("sistemas", capturada!.Nombre);
+        Assert.Equal("Sistemas", capturada!.Nombre);
         Assert.Equal("Area de sistemas", capturada.Descripcion);
     }
 

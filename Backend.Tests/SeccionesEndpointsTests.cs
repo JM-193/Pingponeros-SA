@@ -120,7 +120,7 @@ public sealed class SeccionesEndpointsTests : IClassFixture<TestWebApplicationFa
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         Assert.NotNull(capturada);
-        Assert.Equal("soporte", capturada!.Nombre);
+        Assert.Equal("Soporte", capturada!.Nombre);
         Assert.Equal("Sección Soporte", capturada.Descripcion);
     }
 
