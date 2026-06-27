@@ -21,3 +21,19 @@ export async function crearPuesto(datos) {
 export async function eliminarPuesto(nombre) {
   return apiFetch(`/puestos-trabajo/${encodeURIComponent(nombre)}`, { method: 'DELETE', headers: JSON_HEADERS })
 }
+
+export async function obtenerFuncionesDePuesto(idPuesto) {
+  return apiFetch(`/puestos-trabajo/${idPuesto}/funciones`, { method: 'GET', headers: JSON_HEADERS })
+}
+
+export async function agregarFuncionAPuesto(idPuesto, idFuncion) {
+  return apiFetch(`/puestos-trabajo/${idPuesto}/funciones`, {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ idFuncion }),
+  })
+}
+
+export async function quitarFuncionDePuesto(idPuesto, idFuncion) {
+  return apiFetch(`/puestos-trabajo/${idPuesto}/funciones/${idFuncion}`, { method: 'DELETE', headers: JSON_HEADERS })
+}
