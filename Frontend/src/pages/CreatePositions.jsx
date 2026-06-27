@@ -185,7 +185,7 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
         idArea:         formData.idArea          ? Number.parseInt(formData.idArea, 10)         : null,
       }
       await crearPlaza(payload)
-      notifySuccess(`Plaza '${numero}' creada correctamente.`)
+      notifySuccess('Plaza creada correctamente.')
       setFormData(initialFormData)
       if (isModal && onSuccess) {
         callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)

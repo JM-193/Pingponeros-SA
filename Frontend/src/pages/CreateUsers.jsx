@@ -71,7 +71,7 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
     setErrors({})
     setIsSubmitting(true)
     try {
-      const data = await crearUsuario({
+      await crearUsuario({
         correoInstitucional: formData.email,
         primerNombre:        formData.firstName,
         segundoNombre:       formData.secondName || null,
@@ -79,7 +79,7 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
         segundoApellido:     formData.secondName_surname || null,
         rol:                 Number.parseInt(formData.role, 10),
       })
-      notifySuccess(data.mensaje ?? 'Usuario creado correctamente.')
+      notifySuccess('Usuario creado correctamente.')
       handleReset()
       if (isModal && onSuccess) {
         callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)

@@ -40,7 +40,7 @@ internal sealed class UserService : IUserService
             var cuerpo = EmailTemplateHelper.GenerarCuerpoCorreoBienvenida(usuario.PrimerNombre, apellidos, usuario.CorreoInstitucional, contrasenaTemp);
             _ = _emailService.EnviarAsync(usuario.CorreoInstitucional, asunto, cuerpo);
 
-            var respuestaMensaje = $"Usuario '{usuario.PrimerNombre} {usuario.PrimerApellido}' creado correctamente.";
+            var respuestaMensaje = "Usuario creado correctamente.";
 
             return Results.Created(
                 $"/usuarios/{Uri.EscapeDataString(usuario.CorreoInstitucional)}",
@@ -52,7 +52,7 @@ internal sealed class UserService : IUserService
         }
         catch (OracleException ex) when (ex.Number == 1)
         {
-            return Results.Conflict(new { mensaje = $"El correo '{usuario.CorreoInstitucional}' ya está registrado en el sistema." });
+            return Results.Conflict(new { mensaje = "El correo ya está registrado en el sistema." });
         }
         catch (OracleException ex)
         {

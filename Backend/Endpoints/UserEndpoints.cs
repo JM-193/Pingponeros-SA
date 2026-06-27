@@ -63,7 +63,7 @@ internal static class UserEndpoints
         {
             var usuario = await repo.ObtenerPorCorreoAsync(Uri.UnescapeDataString(correo)).ConfigureAwait(false);
             return usuario is null
-                ? Results.NotFound(new { error = $"No se encontró el usuario '{correo}'." })
+                ? Results.NotFound(new { error = "No se encontró el usuario." })
                 : Results.Ok(usuario);
         }
         catch (OracleException ex)
@@ -87,7 +87,7 @@ internal static class UserEndpoints
             var actualizado = await repo.ActualizarAsync(Uri.UnescapeDataString(correo), usuario).ConfigureAwait(false);
             return actualizado
                 ? Results.Ok(usuario)
-                : Results.NotFound(new { mensaje = $"No se encontró el usuario '{correo}'." });
+                : Results.NotFound(new { mensaje = "No se encontró el usuario." });
         }
         catch (OracleException ex)
         {
@@ -102,7 +102,7 @@ internal static class UserEndpoints
             var eliminado = await repo.EliminarAsync(Uri.UnescapeDataString(correo)).ConfigureAwait(false);
             return eliminado
                 ? Results.NoContent()
-                : Results.NotFound(new { mensaje = $"No se encontró el usuario '{correo}'." });
+                : Results.NotFound(new { mensaje = "No se encontró el usuario." });
         }
         catch (OracleException ex)
         {
@@ -142,11 +142,11 @@ internal static class UserEndpoints
         {
             var existePlaza = await plazaRepo.ExisteNumeroPlazaAsync(dto.NumeroPlaza).ConfigureAwait(false);
             if (!existePlaza)
-                return Results.NotFound(new { mensaje = $"No se encontró la plaza '{dto.NumeroPlaza}'." });
+                return Results.NotFound(new { mensaje = "No se encontró la plaza." });
 
             var ocupada = await asignacionRepo.PlazaTieneAsignacionActivaAsync(dto.NumeroPlaza).ConfigureAwait(false);
             if (ocupada)
-                return Results.Conflict(new { mensaje = $"La plaza '{dto.NumeroPlaza}' ya está vinculada a otro usuario." });
+                return Results.Conflict(new { mensaje = "La plaza ya está vinculada a otro usuario." });
 
             var asignacion = new PositionAssignment
             {
@@ -161,7 +161,7 @@ internal static class UserEndpoints
             await asignacionRepo.AsignarAsync(asignacion).ConfigureAwait(false);
             return Results.Created(
                 $"/usuarios/{Uri.EscapeDataString(correoDescodificado)}/plazas/{asignacion.NumeroPlaza}",
-                new { mensaje = $"Plaza '{asignacion.NumeroPlaza}' vinculada correctamente." });
+                new { mensaje = "Plaza vinculada correctamente." });
         }
         catch (OracleException ex)
         {
@@ -175,8 +175,8 @@ internal static class UserEndpoints
         {
             var desvinculada = await repo.DesasignarAsync(numeroPlaza, Uri.UnescapeDataString(correo)).ConfigureAwait(false);
             return desvinculada
-                ? Results.Ok(new { mensaje = $"Plaza '{numeroPlaza}' desvinculada correctamente." })
-                : Results.NotFound(new { mensaje = $"No se encontró una vinculación activa de la plaza '{numeroPlaza}' para el usuario." });
+                ? Results.Ok(new { mensaje = "Plaza desvinculada correctamente." })
+                : Results.NotFound(new { mensaje = "No se encontró una vinculación activa para el usuario." });
         }
         catch (OracleException ex)
         {

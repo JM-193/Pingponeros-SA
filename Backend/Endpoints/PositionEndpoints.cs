@@ -65,7 +65,7 @@ internal static class PositionEndpoints
         {
             var plaza = await repo.ObtenerPorNumeroAsync(numeroPlaza).ConfigureAwait(false);
             return plaza is null
-                ? Results.NotFound(new { mensaje = $"No se encontró la plaza '{numeroPlaza}'." })
+                ? Results.NotFound(new { mensaje = "No se encontró la plaza." })
                 : Results.Ok(plaza);
         }
         catch (OracleException ex)
@@ -83,7 +83,7 @@ internal static class PositionEndpoints
         {
             var existe = await repo.ExisteNumeroPlazaAsync(dto.NumeroPlaza).ConfigureAwait(false);
             if (existe)
-                return Results.Conflict(new { mensaje = $"Ya existe una plaza con el número '{dto.NumeroPlaza}'." });
+                return Results.Conflict(new { mensaje = "Ya existe una plaza con ese número." });
         }
         catch (OracleException ex)
         {
@@ -102,7 +102,7 @@ internal static class PositionEndpoints
         try
         {
             await repo.InsertarAsync(plaza).ConfigureAwait(false);
-            return Results.Created($"/plazas/{plaza.NumeroPlaza}", new { mensaje = $"Plaza '{plaza.NumeroPlaza}' creada correctamente." });
+            return Results.Created($"/plazas/{plaza.NumeroPlaza}", new { mensaje = "Plaza creada correctamente." });
         }
         catch (OracleException ex)
         {
@@ -116,7 +116,7 @@ internal static class PositionEndpoints
         {
             var existe = await repo.ExisteNumeroPlazaAsync(numeroPlaza).ConfigureAwait(false);
             if (!existe)
-                return Results.NotFound(new { mensaje = $"No se encontró la plaza '{numeroPlaza}'." });
+                return Results.NotFound(new { mensaje = "No se encontró la plaza." });
         }
         catch (OracleException ex)
         {
@@ -134,8 +134,8 @@ internal static class PositionEndpoints
 
         return await EjecutarActualizacionAsync(
             () => repo.ActualizarAsync(numeroPlaza, plaza),
-            $"Plaza '{numeroPlaza}' actualizada correctamente.",
-            $"No se encontró la plaza '{numeroPlaza}'.",
+            "Plaza actualizada correctamente.",
+            "No se encontró la plaza.",
             isDev).ConfigureAwait(false);
     }
 }

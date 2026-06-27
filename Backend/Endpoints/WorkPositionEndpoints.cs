@@ -41,11 +41,11 @@ internal static class WorkPositionEndpoints
         {
             var existe = await repo.ExisteNombreAsync(nombreDto).ConfigureAwait(false);
             if (existe)
-                return Results.Conflict(new { mensaje = $"Ya existe un puesto con el nombre '{nombreDto}'." });
+                return Results.Conflict(new { mensaje = "Ya existe un puesto con ese nombre." });
 
             var puesto = new WorkPosition { Nombre = nombreDto, Descripcion = dto.Descripcion.Trim() };
             var id = await repo.InsertarAsync(puesto).ConfigureAwait(false);
-            return Results.Created($"/puestos-trabajo/{id}", new { mensaje = $"Puesto '{puesto.Nombre}' creado correctamente." });
+            return Results.Created($"/puestos-trabajo/{id}", new { mensaje = "Puesto creado correctamente." });
         }
         catch (OracleException ex)
         {
@@ -61,16 +61,16 @@ internal static class WorkPositionEndpoints
         {
             var puesto = await repo.ObtenerPorNombreAsync(nombreDescodificado).ConfigureAwait(false);
             if (puesto is null)
-                return Results.NotFound(new { mensaje = $"No se encontró el puesto '{nombre}'." });
+                return Results.NotFound(new { mensaje = "No se encontró el puesto." });
 
             var asociado = await repo.EstaAsociadoAsync(puesto.Id).ConfigureAwait(false);
             if (asociado)
-                return Results.Conflict(new { mensaje = $"El puesto '{puesto.Nombre}' está asociado a una o más plazas y no puede eliminarse." });
+                return Results.Conflict(new { mensaje = "El puesto está asociado a una o más plazas y no puede eliminarse." });
 
             var eliminado = await repo.EliminarAsync(puesto.Id).ConfigureAwait(false);
             return eliminado
-                ? Results.Ok(new { mensaje = $"Puesto '{puesto.Nombre}' eliminado correctamente." })
-                : Results.NotFound(new { mensaje = $"No se encontró el puesto '{nombre}'." });
+                ? Results.Ok(new { mensaje = "Puesto eliminado correctamente." })
+                : Results.NotFound(new { mensaje = "No se encontró el puesto." });
         }
         catch (OracleException ex)
         {

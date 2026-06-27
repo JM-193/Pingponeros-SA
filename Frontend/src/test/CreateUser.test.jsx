@@ -135,12 +135,7 @@ describe('CreateUsers Page', () => {
   })
 
   it('crea usuario y limpia el formulario al éxito', async () => {
-    const mockResponse = {
-      id: 1,
-      mensaje: 'Usuario creado exitosamente',
-      contrasenaTemporal: 'TempPass123!',
-    }
-    userService.crearUsuario.mockResolvedValueOnce(mockResponse)
+    userService.crearUsuario.mockResolvedValueOnce({ id: 1 })
 
     const { container } = render(
       <BrowserRouter>
@@ -164,7 +159,7 @@ describe('CreateUsers Page', () => {
     await act(async () => { fireEvent.submit(form) })
 
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('Usuario creado exitosamente', expect.anything())
+      expect(toast.success).toHaveBeenCalledWith('Usuario creado correctamente.', expect.anything())
     })
 
     // El formulario se resetea después del éxito

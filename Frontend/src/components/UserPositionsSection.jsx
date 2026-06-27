@@ -113,7 +113,7 @@ export default function UserPositionsSection({ correo }) {
         fechaInicio: form.fechaInicio,
         fechaFinal: form.fechaFinal || null,
       })
-      notifySuccess(`Plaza '${form.numeroPlaza}' vinculada correctamente.`)
+      notifySuccess('Plaza vinculada correctamente.')
       setForm(EMPTY_FORM)
       await refrescar()
     } catch (err) {
@@ -126,14 +126,14 @@ export default function UserPositionsSection({ correo }) {
   const handleDesasignar = async (row) => {
     const confirmado = await confirmDelete({
       title: '¿Desvincular plaza?',
-      text: `La plaza ${row.numeroPlaza} quedará disponible para asignarse nuevamente. No se eliminará.`,
+      text: 'La plaza quedará disponible para asignarse nuevamente. No se eliminará.',
     })
     if (!confirmado) return
 
     setDeletingPlaza(row.numeroPlaza)
     try {
       await desasignarPlazaUsuario(correo, row.numeroPlaza)
-      notifySuccess(`Plaza '${row.numeroPlaza}' desvinculada correctamente.`)
+      notifySuccess('Plaza desvinculada correctamente.')
       await refrescar()
     } catch (err) {
       notifyApiError(err)
