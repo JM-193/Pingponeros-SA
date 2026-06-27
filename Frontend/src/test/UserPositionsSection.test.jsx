@@ -70,7 +70,7 @@ describe('UserPositionsSection', () => {
 
     fireEvent.change(screen.getByLabelText(/Plaza disponible/i), { target: { value: '2001' } })
     fireEvent.change(screen.getByLabelText(/Puesto/i), { target: { value: '5' } })
-    fireEvent.change(screen.getByLabelText(/Clase Ocupacional/i), { target: { value: 'Profesional 1' } })
+    fireEvent.change(screen.getByLabelText(/Clase Ocupacional/i), { target: { value: 'Profesional' } })
     fireEvent.change(screen.getByLabelText(/Fecha Inicio/i), { target: { value: '2026-01-01' } })
 
     fireEvent.click(screen.getByRole('button', { name: /Agregar/i }))
@@ -79,7 +79,7 @@ describe('UserPositionsSection', () => {
       expect(userService.asignarPlazaUsuario).toHaveBeenCalledWith(CORREO, {
         numeroPlaza: 2001,
         idPuesto: 5,
-        claseOcupacional: 'Profesional 1',
+        claseOcupacional: 'Profesional',
         fechaInicio: '2026-01-01',
         fechaFinal: null,
       })
@@ -102,6 +102,16 @@ describe('UserPositionsSection', () => {
       expect(screen.getByText('La clase ocupacional es obligatoria')).toBeInTheDocument()
     })
     expect(userService.asignarPlazaUsuario).not.toHaveBeenCalled()
+  })
+
+  it('filtra caracteres inválidos en el campo Clase Ocupacional al escribir', async () => {
+    render(<UserPositionsSection correo={CORREO} />)
+    await waitFor(() => expect(workPositionService.obtenerPuestos).toHaveBeenCalled())
+
+    const input = screen.getByLabelText(/Clase Ocupacional/i)
+    fireEvent.change(input, { target: { value: 'Profesional 1' } })
+
+    expect(input).toHaveValue('Profesional')
   })
 
   it('desvincula una plaza tras confirmar', async () => {

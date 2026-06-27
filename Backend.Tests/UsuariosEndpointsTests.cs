@@ -307,7 +307,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
         _factory.PlazaRepo.ExisteNumeroPlazaAsync(1001).Returns(true);
         _factory.AsignacionRepo.PlazaTieneAsignacionActivaAsync(1001).Returns(false);
         _factory.AsignacionRepo.AsignarAsync(Arg.Do<PositionAssignment>(a => capturada = a)).Returns(Task.CompletedTask);
-        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, ClaseOcupacional = "Profesional 1", FechaInicio = "2026-01-01", FechaFinal = (string?)null };
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, ClaseOcupacional = "Profesional", FechaInicio = "2026-01-01", FechaFinal = (string?)null };
 
         var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
 
@@ -316,7 +316,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
         Assert.Equal(1001UL, capturada!.NumeroPlaza);
         Assert.Equal("ana@test.com", capturada.CorreoInstitucional);
         Assert.Equal(5, capturada.IdPuesto);
-        Assert.Equal("Profesional 1", capturada.ClaseOcupacional);
+        Assert.Equal("Profesional", capturada.ClaseOcupacional);
         Assert.Null(capturada.FechaFinal);
     }
 
@@ -325,7 +325,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     {
         _factory.PlazaRepo.ExisteNumeroPlazaAsync(1001).Returns(true);
         _factory.AsignacionRepo.PlazaTieneAsignacionActivaAsync(1001).Returns(true);
-        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, ClaseOcupacional = "Profesional 1", FechaInicio = "2026-01-01", FechaFinal = (string?)null };
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, ClaseOcupacional = "Profesional", FechaInicio = "2026-01-01", FechaFinal = (string?)null };
 
         var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
 
@@ -336,7 +336,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     public async Task AsignarPlaza_Returns404CuandoPlazaNoExiste()
     {
         _factory.PlazaRepo.ExisteNumeroPlazaAsync(9999).Returns(false);
-        var dto = new { NumeroPlaza = 9999, IdPuesto = 5, ClaseOcupacional = "Profesional 1", FechaInicio = "2026-01-01", FechaFinal = (string?)null };
+        var dto = new { NumeroPlaza = 9999, IdPuesto = 5, ClaseOcupacional = "Profesional", FechaInicio = "2026-01-01", FechaFinal = (string?)null };
 
         var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
 
@@ -346,7 +346,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task AsignarPlaza_Returns400CuandoFaltaFechaInicio()
     {
-        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, ClaseOcupacional = "Profesional 1", FechaFinal = (string?)null };
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, ClaseOcupacional = "Profesional", FechaFinal = (string?)null };
 
         var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
 
@@ -356,7 +356,17 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task AsignarPlaza_Returns400CuandoFaltaPuesto()
     {
-        var dto = new { NumeroPlaza = 1001, IdPuesto = 0, ClaseOcupacional = "Profesional 1", FechaInicio = "2026-01-01" };
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 0, ClaseOcupacional = "Profesional", FechaInicio = "2026-01-01" };
+
+        var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AsignarPlaza_Returns400CuandoClaseOcupacionalTieneCaracteresInvalidos()
+    {
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, ClaseOcupacional = "Profesional 1", FechaInicio = "2026-01-01" };
 
         var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
 

@@ -14,6 +14,10 @@ import FormButton from './FormButton'
 import { confirmDelete } from '../utils/alerts'
 import { notifySuccess, notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
+import { SOLO_LETRAS_REGEX } from '../constants/regex'
+
+// Strips characters not allowed by SOLO_LETRAS_REGEX during typing/pasting.
+const CLASE_OCUPACIONAL_INVALIDOS = /[^A-Za-záéíóúÁÉÍÓÚñÑüÜ]/g
 
 const EMPTY_FORM = {
   numeroPlaza: '',
@@ -76,14 +80,19 @@ export default function UserPositionsSection({ correo }) {
   const handleFieldChange = (e) => {
     const { name, value } = e.target
     setErrors((prev) => (prev[name] ? { ...prev, [name]: undefined } : prev))
-    setForm((prev) => ({ ...prev, [name]: value }))
+    const sanitized = name === 'claseOcupacional' ? value.replace(CLASE_OCUPACIONAL_INVALIDOS, '') : value
+    setForm((prev) => ({ ...prev, [name]: sanitized }))
   }
 
   const validar = () => {
     const next = {}
     if (!form.numeroPlaza) next.numeroPlaza = 'Seleccione una plaza'
     if (!form.idPuesto) next.idPuesto = 'Seleccione un puesto'
-    if (!form.claseOcupacional.trim()) next.claseOcupacional = 'La clase ocupacional es obligatoria'
+    if (!form.claseOcupacional.trim()) {
+      next.claseOcupacional = 'La clase ocupacional es obligatoria'
+    } else if (!SOLO_LETRAS_REGEX.test(form.claseOcupacional)) {
+      next.claseOcupacional = 'La clase ocupacional solo puede contener letras'
+    }
     if (!form.fechaInicio) next.fechaInicio = 'La fecha de inicio es obligatoria'
     if (form.fechaFinal && form.fechaInicio && form.fechaFinal < form.fechaInicio) {
       next.fechaFinal = 'La fecha final no puede ser anterior a la de inicio'
