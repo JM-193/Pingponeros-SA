@@ -80,7 +80,7 @@ internal sealed class PositionAssignmentRepository : IPositionAssignmentReposito
             WHERE  NOT EXISTS (
                        SELECT 1 FROM PLAZAS_USUARIOS pu
                        WHERE  pu.NUMERO_PLAZA = p.NUMERO_PLAZA
-                       AND    pu.FECHA_FINAL IS NULL
+                       AND    (pu.FECHA_FINAL IS NULL OR pu.FECHA_FINAL > SYSDATE) or pu.FECHA_FINAL > SYSDATE
                    )
             ORDER BY p.NUMERO_PLAZA
             """;
@@ -103,7 +103,7 @@ internal sealed class PositionAssignmentRepository : IPositionAssignmentReposito
         var result = await _q.ExecuteScalarAsync(connection =>
         {
             var cmd = new OracleCommand(
-                "SELECT COUNT(*) FROM PLAZAS_USUARIOS WHERE NUMERO_PLAZA = :numeroPlaza AND FECHA_FINAL IS NULL",
+                "SELECT COUNT(*) FROM PLAZAS_USUARIOS WHERE NUMERO_PLAZA = :numeroPlaza AND (FECHA_FINAL IS NULL OR FECHA_FINAL > SYSDATE)",
                 connection)
             {
                 BindByName = true,
