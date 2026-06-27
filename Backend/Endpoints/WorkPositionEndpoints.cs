@@ -15,6 +15,10 @@ internal static class WorkPositionEndpoints
         puestos.MapGet("/", (IWorkPositionRepository repo) => ListarAsync(repo, isDev));
         puestos.MapPost("/", (CreateWorkPositionDto dto, IWorkPositionRepository repo) => CrearAsync(dto, repo, isDev));
         puestos.MapDelete("/{nombre}", (string nombre, IWorkPositionRepository repo) => EliminarAsync(nombre, repo, isDev));
+
+        puestos.MapGet("/{id:int}/funciones", (int id, IWorkPositionFunctionRepository repo) => ListarFuncionesAsync(id, repo, isDev));
+        puestos.MapPost("/{id:int}/funciones", (int id, AssignFunctionToPositionDto dto, IWorkPositionFunctionRepository repo) => AgregarFuncionAsync(id, dto, repo, isDev));
+        puestos.MapDelete("/{id:int}/funciones/{idFuncion:int}", (int id, int idFuncion, IWorkPositionFunctionRepository repo) => QuitarFuncionAsync(id, idFuncion, repo, isDev));
     }
 
     private static async Task<IResult> ListarAsync(IWorkPositionRepository repo, bool isDev)
@@ -71,6 +75,54 @@ internal static class WorkPositionEndpoints
             return eliminado
                 ? Results.Ok(new { mensaje = "Puesto eliminado correctamente." })
                 : Results.NotFound(new { mensaje = "No se encontró el puesto." });
+        }
+        catch (OracleException ex)
+        {
+            return OracleErrorMapper.ToResult(ex, isDev);
+        }
+    }
+
+    private static async Task<IResult> ListarFuncionesAsync(int id, IWorkPositionFunctionRepository repo, bool isDev)
+    {
+        try
+        {
+            var lista = await repo.ObtenerFuncionesDePuestoAsync(id).ConfigureAwait(false);
+            return Results.Ok(lista);
+        }
+        catch (OracleException ex)
+        {
+            return OracleErrorMapper.ToResult(ex, isDev);
+        }
+    }
+
+    private static async Task<IResult> AgregarFuncionAsync(int id, AssignFunctionToPositionDto dto, IWorkPositionFunctionRepository repo, bool isDev)
+    {
+        if (dto.Validar() is { } error)
+            return Results.BadRequest(new { mensaje = error });
+
+        try
+        {
+            var yaAsociada = await repo.EstaAsociadaAsync(id, dto.IdFuncion).ConfigureAwait(false);
+            if (yaAsociada)
+                return Results.Conflict(new { mensaje = "La función ya está asignada a este puesto." });
+
+            await repo.AgregarAsync(id, dto.IdFuncion).ConfigureAwait(false);
+            return Results.Created($"/puestos-trabajo/{id}/funciones/{dto.IdFuncion}", new { mensaje = "Función asignada correctamente." });
+        }
+        catch (OracleException ex)
+        {
+            return OracleErrorMapper.ToResult(ex, isDev);
+        }
+    }
+
+    private static async Task<IResult> QuitarFuncionAsync(int id, int idFuncion, IWorkPositionFunctionRepository repo, bool isDev)
+    {
+        try
+        {
+            var quitada = await repo.QuitarAsync(id, idFuncion).ConfigureAwait(false);
+            return quitada
+                ? Results.Ok(new { mensaje = "Función desasignada correctamente." })
+                : Results.NotFound(new { mensaje = "La función no estaba asignada a este puesto." });
         }
         catch (OracleException ex)
         {
