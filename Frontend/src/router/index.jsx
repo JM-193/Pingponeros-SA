@@ -23,6 +23,10 @@ import EditPositions from '../pages/EditPositions'
 import QueryPositions from '../pages/QueryPositions'
 import CreateWorkPositions from '../pages/CreateWorkPositions'
 import QueryWorkPositions from '../pages/QueryWorkPositions'
+import CreateFunctions from '../pages/CreateFunctions'
+import QueryFunctions from '../pages/QueryFunctions'
+import CreateUserFunctions from '../pages/CreateUserFunctions'
+import QueryUserFunctions from '../pages/QueryUserFunctions'
 import ProtectedRoute from '../components/ProtectedRoute'
 
 export default function AppRouter() {
@@ -38,6 +42,8 @@ export default function AppRouter() {
           <Route path="/cambiar-contrasena" element={<ChangePassword />} />
           <Route path="/home" element={<Home />} />
           {/* <Route path="/declaraciones/consultar" element={<QueryDeclarations />} /> */}
+          <Route path="/funciones/usuarios/crear" element={<CreateUserFunctions />} />
+          <Route path="/funciones/usuarios/consultar" element={<QueryUserFunctions />} />
 
           {/* Admin-only routes */}
           <Route element={<ProtectedRoute allowedRoles={[1]} />}>
@@ -61,6 +67,8 @@ export default function AppRouter() {
             <Route path="/organizacion/unidades/consultar" element={<QueryUnits />} />
             <Route path="/organizacion/puestos-trabajo/crear" element={<CreateWorkPositions />} />
             <Route path="/puestos-trabajo/consultar" element={<QueryWorkPositions />} />
+            <Route path="/organizacion/funciones/crear" element={<CreateFunctions />} />
+            <Route path="/funciones/consultar" element={<QueryFunctions />} />
           </Route>
         </Route>
       </Routes>
