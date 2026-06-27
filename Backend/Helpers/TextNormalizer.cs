@@ -10,10 +10,9 @@ namespace Backend.Helpers;
 /// </summary>
 internal static class TextNormalizer
 {
-    /// <summary>
-    /// Recorta los espacios en blanco al inicio y al final del nombre.
-    /// </summary>
-    public static string Nombre(string nombre) => nombre.Trim();
+    [SuppressMessage("Globalization", "CA1308:NormalizeStringsToUppercase",
+        Justification = "Los nombres de entidad se normalizan a minúsculas por requisito de negocio.")]
+    public static string Nombre(string nombre) => nombre.Trim().ToLowerInvariant();
 
     [SuppressMessage("Globalization", "CA1308:NormalizeStringsToUppercase",
         Justification = "Los correos se normalizan a minúsculas por requisito de negocio.")]
