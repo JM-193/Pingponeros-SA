@@ -289,7 +289,7 @@ describe('ChangePassword Page', () => {
 
   })
 
-  it('Cierra sesión luego de cambiar la contraseña temporal', async () => {
+  it('Mantiene sesión activa y redirige al Home tras cambiar la contraseña temporal', async () => {
     sessionService.obtenerSesion.mockReturnValue({ id: 1, nombre: 'User' })
     sessionService.esContrasenaTemporal.mockReturnValue(true)
 
@@ -311,15 +311,13 @@ describe('ChangePassword Page', () => {
     await act(async () => { fireEvent.submit(form) })
 
     await waitFor(() => {
-      // Verificar que el toast de éxito haya sido llamado
       expect(toast.success).toHaveBeenCalledWith(
-        expect.stringContaining('Contraseña actualizada. Inicia sesión de nuevo'),
+        expect.stringContaining('Contraseña actualizada correctamente'),
         expect.anything()
       )
-      // Verifica que la función cerrarSesion haya sido llamada después de un cambio exitoso de contraseña temporal
-      expect(sessionService.cerrarSesion).toHaveBeenCalled()
-      // Verifica que la redirección a la página de inicio de sesión haya ocurrido
-      expect(globalThis.location.pathname).toBe('/')
+      // El flag temporal se limpia pero la sesión permanece activa.
+      expect(sessionService.limpiarContrasenaTemporal).toHaveBeenCalled()
+      expect(sessionService.cerrarSesion).not.toHaveBeenCalled()
     })
   })
 })

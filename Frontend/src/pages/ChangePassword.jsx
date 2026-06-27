@@ -5,7 +5,7 @@ import Header from '../components/Header'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import PasswordChecklist from 'react-password-checklist'
-import { obtenerSesion, esContrasenaTemporal, cerrarSesion } from '../services/session'
+import { obtenerSesion, esContrasenaTemporal, limpiarContrasenaTemporal } from '../services/session'
 import { cambiarContrasena } from '../services/authService'
 import { notifySuccess, notifyApiError } from '../utils/notify'
 import { blockingInfo } from '../utils/alerts'
@@ -94,12 +94,7 @@ export default function ChangePassword() {
       await cambiarContrasena(userEmail, formData.currentPassword, formData.newPassword)
 
       if (forced) {
-        // The session still carries the temporary-password flag (and a stale
-        // token), so re-login with the new password to get a clean session.
-        notifySuccess('Contraseña actualizada. Inicia sesión de nuevo.')
-        cerrarSesion()
-        delayedNavigate('/', 1500)
-        return
+        limpiarContrasenaTemporal()
       }
 
       notifySuccess('Contraseña actualizada correctamente.')
