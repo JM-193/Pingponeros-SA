@@ -107,8 +107,9 @@ export default function EntityResultsTable({
   getRowId,
   sortConfig,
   onSort,
+  extraRowActions,
 }) {
-  const hasActions = Boolean(onEdit) || Boolean(onDelete)
+  const hasActions = Boolean(onEdit) || Boolean(onDelete) || Boolean(extraRowActions)
   const canSort = Boolean(onSort)
 
   const isMobile = useMediaQuery('(max-width: 768px)')
@@ -172,6 +173,7 @@ export default function EntityResultsTable({
 
               {hasActions && (
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '12px' }}>
+                  {extraRowActions?.(row)}
                   {onEdit && <EditButton row={row} onEdit={onEdit} showLabel />}
                   {onDelete && <DeleteButton row={row} onDelete={onDelete} deletingRowId={deletingRowId} rowId={rowId} showLabel />}
                 </div>
@@ -193,13 +195,13 @@ export default function EntityResultsTable({
         marginBottom: '24px',
       }}
     >
-      <div style={{ overflowX: 'auto' }}>
+      <div style={{ overflowX: 'hidden' }}>
         <table
           style={{
             width: '100%',
             borderCollapse: 'collapse',
             fontSize: '14px',
-            tableLayout: 'fixed',
+            tableLayout: 'auto',
           }}
         >
           <thead>
@@ -256,11 +258,10 @@ export default function EntityResultsTable({
               {hasActions && (
                 <th
                   style={{
-                    padding: '12px 32px',
+                    padding: '12px 16px',
                     textAlign: 'right',
                     fontWeight: 600,
                     borderBottom: `1px solid ${COLORS.borderColor}`,
-                    width: '10%',
                     whiteSpace: 'nowrap',
                   }}
                 />
@@ -300,13 +301,13 @@ export default function EntityResultsTable({
                   {hasActions && (
                     <td
                       style={{
-                        padding: '12px 32px',
-                        textAlign: 'center',
-                        width: '10%',
+                        padding: '12px 16px',
+                        textAlign: 'right',
                         whiteSpace: 'nowrap',
                       }}
                     >
                       <div style={{ display: 'inline-flex', gap: '8px' }}>
+                        {extraRowActions?.(row)}
                         {onEdit && <EditButton row={row} onEdit={onEdit} showLabel={false} />}
                         {onDelete && <DeleteButton row={row} onDelete={onDelete} deletingRowId={deletingRowId} rowId={rowId} showLabel={false} />}
                       </div>
@@ -343,6 +344,7 @@ EntityResultsTable.propTypes = {
     direction: PropTypes.oneOf(['asc', 'desc']),
   }),
   onSort: PropTypes.func,
+  extraRowActions: PropTypes.func,
 }
 
 EntityResultsTable.defaultProps = {
@@ -351,4 +353,5 @@ EntityResultsTable.defaultProps = {
   deletingRowId: null,
   sortConfig: null,
   onSort: null,
+  extraRowActions: null,
 }

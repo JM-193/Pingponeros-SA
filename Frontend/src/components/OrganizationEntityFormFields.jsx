@@ -12,6 +12,7 @@ export default function OrganizationEntityFormFields({
   descriptionPlaceholder,
   nameLabel,
   descriptionLabel = 'Descripción',
+  maxNameLength = 50,
   areaOptions,
   areaLabel = 'Área',
   areaRequired = false,
@@ -140,7 +141,7 @@ export default function OrganizationEntityFormFields({
             backgroundColor: COLORS.inputBg,
             color: COLORS.black,
           }}
-          maxLength={50}
+          maxLength={maxNameLength}
         />
         {errors.nombre && <span style={fieldErrorStyle}>{errors.nombre}</span>}
       </div>
@@ -203,6 +204,7 @@ OrganizationEntityFormFields.propTypes = {
   descriptionPlaceholder: PropTypes.string.isRequired,
   nameLabel: PropTypes.string,
   descriptionLabel: PropTypes.string,
+  maxNameLength: PropTypes.number,
   areaOptions: PropTypes.arrayOf(
     PropTypes.shape({
       value: PropTypes.string.isRequired,

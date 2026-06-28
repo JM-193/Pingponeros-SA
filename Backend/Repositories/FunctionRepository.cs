@@ -6,19 +6,19 @@ using Backend.Models;
 
 namespace Backend.Repositories;
 
-internal sealed class WorkPositionRepository : IWorkPositionRepository
+internal sealed class FunctionRepository : IFunctionRepository
 {
-    private const string ColumnIdPuesto = "ID_PUESTO";
+    private const string ColumnIdFuncion = "ID_FUNCION";
     private const string ColumnNombre = "NOMBRE";
     private const string ColumnDescripcion = "DESCRIPCION";
 
     private readonly IQueryExecutor _q;
 
-    public WorkPositionRepository(IQueryExecutor q) => _q = q;
+    public FunctionRepository(IQueryExecutor q) => _q = q;
 
-    private static WorkPosition MapearFila(System.Data.Common.DbDataReader reader) => new()
+    private static Function MapearFila(System.Data.Common.DbDataReader reader) => new()
     {
-        Id = reader.GetInt32(reader.GetOrdinal(ColumnIdPuesto)),
+        Id = reader.GetInt32(reader.GetOrdinal(ColumnIdFuncion)),
         Nombre = reader.IsDBNull(reader.GetOrdinal(ColumnNombre)) ? string.Empty : reader.GetString(reader.GetOrdinal(ColumnNombre)),
         Descripcion = reader.IsDBNull(reader.GetOrdinal(ColumnDescripcion)) ? string.Empty : reader.GetString(reader.GetOrdinal(ColumnDescripcion)),
     };
@@ -28,18 +28,18 @@ internal sealed class WorkPositionRepository : IWorkPositionRepository
         OracleCommandHelpers.AddStringParam(cmd, ":nombre", nombre);
     }
 
-    private static void AgregarParametrosInsertar(OracleCommand cmd, WorkPosition puesto)
+    private static void AgregarParametros(OracleCommand cmd, Function funcion)
     {
-        AgregarParamNombre(cmd, puesto.Nombre);
-        OracleCommandHelpers.AddStringParam(cmd, ":descripcion", puesto.Descripcion);
+        AgregarParamNombre(cmd, funcion.Nombre);
+        OracleCommandHelpers.AddStringParam(cmd, ":descripcion", funcion.Descripcion);
     }
 
-    public async Task<List<WorkPosition>> ObtenerTodasAsync()
+    public async Task<List<Function>> ObtenerTodasAsync()
     {
         return await _q.QueryAsync(connection =>
         {
             var cmd = new OracleCommand(
-                "SELECT ID_PUESTO, NOMBRE, DESCRIPCION FROM PUESTOS_TRABAJO ORDER BY NOMBRE",
+                "SELECT ID_FUNCION, NOMBRE, DESCRIPCION FROM FUNCIONES ORDER BY NOMBRE",
                 connection)
             {
                 BindByName = true,
@@ -47,12 +47,12 @@ internal sealed class WorkPositionRepository : IWorkPositionRepository
             return cmd;
         }, async reader =>
         {
-            var puestos = new List<WorkPosition>();
+            var funciones = new List<Function>();
             while (await reader.ReadAsync().ConfigureAwait(false))
             {
-                puestos.Add(MapearFila(reader));
+                funciones.Add(MapearFila(reader));
             }
-            return puestos;
+            return funciones;
         }).ConfigureAwait(false);
     }
 
@@ -61,7 +61,7 @@ internal sealed class WorkPositionRepository : IWorkPositionRepository
         var result = await _q.ExecuteScalarAsync(connection =>
         {
             var cmd = new OracleCommand(
-                "SELECT COUNT(*) FROM PUESTOS_TRABAJO WHERE LOWER(NOMBRE) = LOWER(:nombre)",
+                "SELECT COUNT(*) FROM FUNCIONES WHERE LOWER(NOMBRE) = LOWER(:nombre)",
                 connection)
             {
                 BindByName = true,
@@ -72,20 +72,20 @@ internal sealed class WorkPositionRepository : IWorkPositionRepository
         return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
     }
 
-    public async Task<int> InsertarAsync(WorkPosition puesto)
+    public async Task<int> InsertarAsync(Function funcion)
     {
-        ArgumentNullException.ThrowIfNull(puesto);
+        ArgumentNullException.ThrowIfNull(funcion);
 
         const string query = """
-            INSERT INTO PUESTOS_TRABAJO (NOMBRE, DESCRIPCION)
+            INSERT INTO FUNCIONES (NOMBRE, DESCRIPCION)
             VALUES (:nombre, :descripcion)
-            RETURNING ID_PUESTO INTO :id
+            RETURNING ID_FUNCION INTO :id
             """;
 
         var result = await _q.ExecuteScalarAsync(connection =>
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
-            AgregarParametrosInsertar(cmd, puesto);
+            AgregarParametros(cmd, funcion);
             var idParam = new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output);
             cmd.Parameters.Add(idParam);
             return cmd;
@@ -94,12 +94,12 @@ internal sealed class WorkPositionRepository : IWorkPositionRepository
         return (int)(OracleDecimal)result!;
     }
 
-    public async Task<WorkPosition?> ObtenerPorNombreAsync(string nombre)
+    public async Task<Function?> ObtenerPorNombreAsync(string nombre)
     {
         return await _q.QueryAsync(connection =>
         {
             var cmd = new OracleCommand(
-                "SELECT ID_PUESTO, NOMBRE, DESCRIPCION FROM PUESTOS_TRABAJO WHERE LOWER(NOMBRE) = LOWER(:nombre)",
+                "SELECT ID_FUNCION, NOMBRE, DESCRIPCION FROM FUNCIONES WHERE LOWER(NOMBRE) = LOWER(:nombre)",
                 connection)
             {
                 BindByName = true,
@@ -116,19 +116,25 @@ internal sealed class WorkPositionRepository : IWorkPositionRepository
         }).ConfigureAwait(false);
     }
 
-    public async Task<bool> EstaAsociadoAsync(int id)
+    public async Task<bool> EstaEnActividadesAsync(int id)
     {
         var result = await _q.ExecuteScalarAsync(connection =>
-            OracleCommandHelpers.CreateByIdCommand(connection, "SELECT COUNT(*) FROM PLAZAS_USUARIOS WHERE ID_PUESTO = :id", id)
+            OracleCommandHelpers.CreateByIdCommand(connection, "SELECT COUNT(*) FROM ACTIVIDADES WHERE ID_FUNCION = :id", id)
         ).ConfigureAwait(false);
         return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
     }
 
     public async Task<bool> EliminarAsync(int id)
     {
-        var rows = await _q.ExecuteAsync(connection =>
-            OracleCommandHelpers.CreateByIdCommand(connection, "DELETE FROM PUESTOS_TRABAJO WHERE ID_PUESTO = :id", id)
+        // Eliminar asociaciones con puestos de trabajo antes de borrar la función
+        await _q.ExecuteAsync(connection =>
+            OracleCommandHelpers.CreateByIdCommand(connection, "DELETE FROM FUNCIONES_PUESTOS WHERE ID_FUNCION = :id", id)
         ).ConfigureAwait(false);
+
+        var rows = await _q.ExecuteAsync(connection =>
+            OracleCommandHelpers.CreateByIdCommand(connection, "DELETE FROM FUNCIONES WHERE ID_FUNCION = :id", id)
+        ).ConfigureAwait(false);
+
         return rows > 0;
     }
 }

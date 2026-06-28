@@ -5,6 +5,9 @@ import {
   obtenerPuestoPorNombre,
   crearPuesto,
   eliminarPuesto,
+  obtenerFuncionesDePuesto,
+  agregarFuncionAPuesto,
+  quitarFuncionDePuesto,
 } from '../services/workPositionService'
 
 describe('workPositionService', () => {
@@ -201,6 +204,113 @@ describe('workPositionService', () => {
 
       await expect(eliminarPuesto('chofer'))
         .rejects.toThrow('Error inesperado (500)')
+    })
+  })
+
+  describe('obtenerFuncionesDePuesto', () => {
+    it('obtiene las funciones asignadas a un puesto', async () => {
+      const mockFunciones = [
+        { id: 1, nombre: 'Elaborar informes', descripcion: 'Redactar informes mensuales' },
+        { id: 2, nombre: 'Atención al cliente', descripcion: 'Brindar atención al público' },
+      ]
+
+      mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockFunciones })
+
+      const result = await obtenerFuncionesDePuesto(5)
+
+      expect(result).toEqual(mockFunciones)
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/puestos-trabajo/5/funciones'),
+        expect.objectContaining({ method: 'GET' }),
+      )
+    })
+
+    it('retorna lista vacía cuando el puesto no tiene funciones asignadas', async () => {
+      mockFetch.mockResolvedValueOnce({ ok: true, json: async () => [] })
+
+      const result = await obtenerFuncionesDePuesto(99)
+
+      expect(result).toEqual([])
+    })
+
+    it('lanza error cuando el servidor falla', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({ mensaje: 'Error del servidor' }),
+      })
+
+      await expect(obtenerFuncionesDePuesto(1)).rejects.toThrow('Error del servidor')
+    })
+  })
+
+  describe('agregarFuncionAPuesto', () => {
+    it('agrega una función a un puesto con el body correcto', async () => {
+      mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ mensaje: 'Función asignada correctamente.' }) })
+
+      await agregarFuncionAPuesto(1, 3)
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/puestos-trabajo/1/funciones'),
+        expect.objectContaining({
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idFuncion: 3 }),
+        }),
+      )
+    })
+
+    it('lanza error cuando la función ya está asignada al puesto', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 409,
+        json: async () => ({ mensaje: 'La función ya está asignada a este puesto.' }),
+      })
+
+      await expect(agregarFuncionAPuesto(1, 3)).rejects.toThrow('La función ya está asignada a este puesto.')
+    })
+
+    it('lanza error con código genérico cuando json falla', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        json: async () => { throw new Error('JSON error') },
+      })
+
+      await expect(agregarFuncionAPuesto(1, 0)).rejects.toThrow('Error inesperado (400)')
+    })
+  })
+
+  describe('quitarFuncionDePuesto', () => {
+    it('quita una función de un puesto con la URL correcta', async () => {
+      mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ mensaje: 'Función desasignada correctamente.' }) })
+
+      await quitarFuncionDePuesto(1, 3)
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/puestos-trabajo/1/funciones/3'),
+        expect.objectContaining({ method: 'DELETE' }),
+      )
+    })
+
+    it('lanza error cuando la función no está asignada al puesto', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: async () => ({ mensaje: 'La función no estaba asignada a este puesto.' }),
+      })
+
+      await expect(quitarFuncionDePuesto(1, 99)).rejects.toThrow('La función no estaba asignada a este puesto.')
+    })
+
+    it('usa código de error genérico cuando ningún campo mensaje existe', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({}),
+      })
+
+      await expect(quitarFuncionDePuesto(1, 2)).rejects.toThrow('Error inesperado (500)')
     })
   })
 })

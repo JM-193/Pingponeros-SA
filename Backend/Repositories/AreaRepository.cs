@@ -12,7 +12,7 @@ internal sealed class AreaRepository : IAreaRepository
     private const string ColumnNombre = "NOMBRE";
     private const string ColumnDescripcion = "DESCRIPCION";
     private const string ColumnEstado = "ESTADO";
-    
+
     private readonly IQueryExecutor _q;
 
     public AreaRepository(IQueryExecutor q) => _q = q;
@@ -29,7 +29,7 @@ internal sealed class AreaRepository : IAreaRepository
     {
         OracleCommandHelpers.AddStringParam(cmd, ":nombre", nombre);
     }
-    
+
     private static void AgregarParametros(OracleCommand cmd, Area area)
     {
         AgregarParamNombre(cmd, area.Nombre);

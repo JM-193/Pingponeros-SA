@@ -35,7 +35,7 @@ internal sealed class DepartmentRepository : IDepartmentRepository
     private static void AgregarParametros(OracleCommand cmd, Department departamento)
     {
         OracleCommandHelpers.AddNullableIntParam(cmd, ":idArea", departamento.IdArea);
-        OracleCommandHelpers.AddStringParam(cmd, ":nombre", departamento.Nombre);
+        AgregarParamNombre(cmd, departamento.Nombre);
         OracleCommandHelpers.AddStringParam(cmd, ":descripcion", departamento.Descripcion);
         OracleCommandHelpers.AddInt32Param(cmd, ":estado", departamento.Estado);
     }

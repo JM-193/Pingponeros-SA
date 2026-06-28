@@ -80,6 +80,7 @@ export default function EntityListPage({
   getRowId,
   searchPlaceholder = 'Ingrese el nombre o descripción',
   resultsPerPage = 10,
+  extraRowActions,
 }) {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
@@ -214,6 +215,7 @@ export default function EntityListPage({
           getRowId={resolveRowId}
           sortConfig={sortConfig}
           onSort={handleSort}
+          extraRowActions={extraRowActions}
         />
         {hasResults ? (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
@@ -373,6 +375,7 @@ EntityListPage.propTypes = {
   getRowId: PropTypes.func,
   searchPlaceholder: PropTypes.string,
   resultsPerPage: PropTypes.number,
+  extraRowActions: PropTypes.func,
 }
 
 EntityListPage.defaultProps = {
@@ -384,4 +387,5 @@ EntityListPage.defaultProps = {
   deleteConfirmMessage: null,
   matchesSearch: null,
   getRowId: null,
+  extraRowActions: null,
 }
