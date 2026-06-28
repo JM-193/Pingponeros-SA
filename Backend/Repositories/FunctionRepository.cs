@@ -114,7 +114,7 @@ internal sealed class FunctionRepository : IFunctionRepository
     public async Task<bool> EstaEnActividadesAsync(int id)
     {
         var result = await _q.ExecuteScalarAsync(connection =>
-            OracleCommandHelpers.CreateCountByIdCommand(connection, "ACTIVIDADES", "ID_FUNCION", id)
+            OracleCommandHelpers.CreateByIdCommand(connection, "SELECT COUNT(*) FROM ACTIVIDADES WHERE ID_FUNCION = :id", id)
         ).ConfigureAwait(false);
         return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
     }
@@ -123,11 +123,11 @@ internal sealed class FunctionRepository : IFunctionRepository
     {
         // Eliminar asociaciones con puestos de trabajo antes de borrar la función
         await _q.ExecuteAsync(connection =>
-            OracleCommandHelpers.CreateDeleteByIdCommand(connection, "FUNCIONES_PUESTOS", "ID_FUNCION", id)
+            OracleCommandHelpers.CreateByIdCommand(connection, "DELETE FROM FUNCIONES_PUESTOS WHERE ID_FUNCION = :id", id)
         ).ConfigureAwait(false);
 
         var rows = await _q.ExecuteAsync(connection =>
-            OracleCommandHelpers.CreateDeleteByIdCommand(connection, "FUNCIONES", "ID_FUNCION", id)
+            OracleCommandHelpers.CreateByIdCommand(connection, "DELETE FROM FUNCIONES WHERE ID_FUNCION = :id", id)
         ).ConfigureAwait(false);
 
         return rows > 0;

@@ -97,7 +97,7 @@ internal sealed class UserFunctionRepository : IUserFunctionRepository
     public async Task<bool> EstaEnActividadesAsync(int id)
     {
         var result = await _q.ExecuteScalarAsync(connection =>
-            OracleCommandHelpers.CreateCountByIdCommand(connection, "ACTIVIDADES", "ID_FUNCION_PROPIA", id)
+            OracleCommandHelpers.CreateByIdCommand(connection, "SELECT COUNT(*) FROM ACTIVIDADES WHERE ID_FUNCION_PROPIA = :id", id)
         ).ConfigureAwait(false);
         return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
     }
@@ -105,7 +105,7 @@ internal sealed class UserFunctionRepository : IUserFunctionRepository
     public async Task<bool> EliminarAsync(int id)
     {
         var rows = await _q.ExecuteAsync(connection =>
-            OracleCommandHelpers.CreateDeleteByIdCommand(connection, "FUNCIONES_USUARIOS", "ID_FUNCION_PROPIA", id)
+            OracleCommandHelpers.CreateByIdCommand(connection, "DELETE FROM FUNCIONES_USUARIOS WHERE ID_FUNCION_PROPIA = :id", id)
         ).ConfigureAwait(false);
         return rows > 0;
     }
