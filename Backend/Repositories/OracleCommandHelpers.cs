@@ -70,25 +70,11 @@ internal static class OracleCommandHelpers
         cmd.Parameters.Add(param);
     }
 
-    // table y column son siempre constantes internas; nunca provienen de entrada del usuario.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "table and column are internal constants, never user input.")]
-    internal static OracleCommand CreateCountByIdCommand(OracleConnection conn, string table, string column, int id)
+    // sql debe ser siempre un literal de cadena en el llamador; el valor de usuario va en :id parametrizado.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "sql is always a compile-time string literal at all internal call sites; user data is bound via the :id parameter.")]
+    internal static OracleCommand CreateByIdCommand(OracleConnection conn, string sql, int id)
     {
-        var cmd = new OracleCommand($"SELECT COUNT(*) FROM {table} WHERE {column} = :id", conn)
-        {
-            BindByName = true,
-        };
-        cmd.Parameters.Add(new OracleParameter(":id", OracleDbType.Int32) { Value = id });
-        return cmd;
-    }
-
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "table and column are internal constants, never user input.")]
-    internal static OracleCommand CreateDeleteByIdCommand(OracleConnection conn, string table, string column, int id)
-    {
-        var cmd = new OracleCommand($"DELETE FROM {table} WHERE {column} = :id", conn)
-        {
-            BindByName = true,
-        };
+        var cmd = new OracleCommand(sql, conn) { BindByName = true };
         cmd.Parameters.Add(new OracleParameter(":id", OracleDbType.Int32) { Value = id });
         return cmd;
     }
