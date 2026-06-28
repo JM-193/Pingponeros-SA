@@ -32,9 +32,14 @@ internal sealed class UserRepository : IUserRepository
         Estado = r.GetInt32(r.GetOrdinal(ColumnEstado)),
     };
 
+    private static void AgregarParamCorreo(OracleCommand cmd, string correo)
+    {
+        OracleCommandHelpers.AddStringParam(cmd, nameof(correo), correo);
+    }
+
     private static void AgregarParametros(OracleCommand cmd, User u)
     {
-        OracleCommandHelpers.AddStringParam(cmd, "correo", u.CorreoInstitucional);
+        AgregarParamCorreo(cmd, u.CorreoInstitucional);
         OracleCommandHelpers.AddStringParam(cmd, "primerNombre", u.PrimerNombre);
         OracleCommandHelpers.AddStringParam(cmd, "segundoNombre", u.SegundoNombre);
         OracleCommandHelpers.AddStringParam(cmd, "primerApellido", u.PrimerApellido);
@@ -89,7 +94,7 @@ internal sealed class UserRepository : IUserRepository
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddStringParam(cmd, nameof(correo), correo);
+            AgregarParamCorreo(cmd, correo);
             return cmd;
         }, async reader =>
         {
@@ -152,7 +157,7 @@ internal sealed class UserRepository : IUserRepository
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddStringParam(cmd, nameof(correo), correo);
+            AgregarParamCorreo(cmd, correo);
             OracleCommandHelpers.AddStringParam(cmd, "hash", contrasenaHash);
             return cmd;
         }).ConfigureAwait(false);
@@ -176,7 +181,7 @@ internal sealed class UserRepository : IUserRepository
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddStringParam(cmd, nameof(correo), correo);
+            AgregarParamCorreo(cmd, correo);
             OracleCommandHelpers.AddStringParam(cmd, "hash", contrasenaHash);
             return cmd;
         }).ConfigureAwait(false);
@@ -201,7 +206,7 @@ internal sealed class UserRepository : IUserRepository
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddStringParam(cmd, nameof(correo), correo);
+            AgregarParamCorreo(cmd, correo);
             return cmd;
         }, async reader =>
         {
@@ -268,7 +273,7 @@ internal sealed class UserRepository : IUserRepository
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddStringParam(cmd, nameof(correo), correo);
+            AgregarParamCorreo(cmd, correo);
             return cmd;
         }).ConfigureAwait(false);
         return filas > 0;

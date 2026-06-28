@@ -18,11 +18,11 @@ internal static class AreaEndpoints
             RouteGroup = "/areas",
             Messages = new CrudMessages
             {
-                Conflicto = nombre => $"Ya existe un área con el nombre '{nombre}'.",
-                Creado = nombre => $"Área '{nombre}' creada correctamente.",
-                Actualizado = nombre => $"Área '{nombre}' actualizada correctamente.",
-                NoEncontradoPorNombre = nombre => $"No se encontró el área '{nombre}'.",
-                NoEncontradoActivoPorId = id => $"No se encontró el área activa con ID '{id}'.",
+                Conflicto = _ => "Ya existe un área con ese nombre.",
+                Creado = _ => "Área creada correctamente.",
+                Actualizado = _ => "Área actualizada correctamente.",
+                NoEncontradoPorNombre = _ => "No se encontró el área.",
+                NoEncontradoActivoPorId = _ => "No se encontró el área activa.",
             },
             Validar = dto => dto.Validar(),
             NombreDto = dto => dto.Nombre,

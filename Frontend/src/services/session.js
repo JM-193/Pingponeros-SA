@@ -93,6 +93,14 @@ export function esContrasenaTemporal() {
 }
 
 /**
+ * Remove the temporary-password flag once the user has set a permanent password,
+ * keeping the active session token intact.
+ */
+export function limpiarContrasenaTemporal() {
+  sessionStorage.removeItem(TEMP_PW_KEY)
+}
+
+/**
  * End the active session.
  */
 export function cerrarSesion() {

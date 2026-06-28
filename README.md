@@ -97,7 +97,10 @@ This project provides a reliable digital system to centralize and automate those
 - Organizational structure management (admin):
   - Full CRUD for areas, departments, sections, and units.
 - Position and function management (admin):
-  - Full CRUD for positions, position types, and functions.
+  - Plazas (positions): create, read, and update. Plazas cannot be deleted.
+  - Puestos de trabajo (job roles) and functions: create and read; they cannot be
+    edited, and they can only be deleted if they have never been assigned/used, to
+    preserve historical records.
   - Function metadata includes periodicity (daily to yearly).
 - Reports:
   - Admin reports in Excel and PDF (staff profile, schedules by org unit, out-of-schedule workload).

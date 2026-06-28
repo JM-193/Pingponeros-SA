@@ -31,6 +31,19 @@ public sealed class PlazasEndpointsTests : IClassFixture<TestWebApplicationFacto
     }
 
     [Fact]
+    public async Task GetPlazasDisponibles_Returns200ConLista()
+    {
+        _factory.AsignacionRepo.ObtenerPlazasDisponiblesAsync().Returns(new List<Position>
+        {
+            new() { NumeroPlaza = 2001, IdUnidad = 1 }
+        });
+
+        var response = await _client.GetAsync("/plazas/disponibles");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
     public async Task GetPlazaPorNumero_Returns200CuandoExiste()
     {
         _factory.PlazaRepo.ObtenerPorNumeroAsync(1001).Returns(new Position { NumeroPlaza = 1001, IdUnidad = 1 });
@@ -83,7 +96,7 @@ public sealed class PlazasEndpointsTests : IClassFixture<TestWebApplicationFacto
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         Assert.NotNull(capturada);
-        Assert.Equal(1002L, capturada!.NumeroPlaza);
+        Assert.Equal(1002UL, capturada!.NumeroPlaza);
         Assert.Equal(1, capturada.IdUnidad);
         Assert.Equal(2, capturada.IdDepartamento);
         Assert.Null(capturada.IdSeccion);
@@ -113,7 +126,7 @@ public sealed class PlazasEndpointsTests : IClassFixture<TestWebApplicationFacto
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(capturada);
-        Assert.Equal(1001L, capturada!.NumeroPlaza);
+        Assert.Equal(1001UL, capturada!.NumeroPlaza);
         Assert.Equal(1, capturada.IdUnidad);
         Assert.Null(capturada.IdDepartamento);
         Assert.Equal(3, capturada.IdSeccion);

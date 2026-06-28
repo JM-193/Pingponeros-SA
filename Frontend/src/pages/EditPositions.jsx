@@ -219,7 +219,7 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
         idArea:         formData.idArea          ? Number.parseInt(formData.idArea,          10) : null,
       }
       await actualizarPlaza(numeroPlaza, payload)
-      notifySuccess(`Plaza '${numeroPlaza}' actualizada correctamente.`)
+      notifySuccess('Plaza actualizada correctamente.')
       if (isModal && onSuccess) {
         callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
       } else {

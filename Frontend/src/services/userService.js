@@ -59,3 +59,43 @@ export async function actualizarUsuario(correo, datos) {
     body: JSON.stringify(datos),
   })
 }
+
+/**
+ * Obtiene las plazas vinculadas (activas) de un usuario.
+ * @param {string} correo - Correo del usuario.
+ * @returns {Promise<Array>} Lista de vinculaciones plaza-usuario.
+ */
+export async function obtenerPlazasUsuario(correo) {
+  return apiFetch(`/usuarios/${encodeURIComponent(correo)}/plazas`, {
+    method: 'GET',
+    headers: JSON_HEADERS,
+  }, { emptyArrayOn404: true })
+}
+
+/**
+ * Vincula una plaza disponible a un usuario.
+ * @param {string} correo - Correo del usuario.
+ * @param {{ numeroPlaza: number, idPuesto: number, claseOcupacional: string,
+ *           fechaInicio: string, fechaFinal?: string|null }} datos
+ * @returns {Promise<object>} Respuesta del servidor.
+ */
+export async function asignarPlazaUsuario(correo, datos) {
+  return apiFetch(`/usuarios/${encodeURIComponent(correo)}/plazas`, {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    body: JSON.stringify(datos),
+  })
+}
+
+/**
+ * Desvincula (libera) una plaza de un usuario. La plaza no se elimina.
+ * @param {string} correo - Correo del usuario.
+ * @param {number} numeroPlaza - Número de la plaza a desvincular.
+ * @returns {Promise<object>} Respuesta del servidor.
+ */
+export async function desasignarPlazaUsuario(correo, numeroPlaza) {
+  return apiFetch(`/usuarios/${encodeURIComponent(correo)}/plazas/${numeroPlaza}`, {
+    method: 'DELETE',
+    headers: JSON_HEADERS,
+  })
+}

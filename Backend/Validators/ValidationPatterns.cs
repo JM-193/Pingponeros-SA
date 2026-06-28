@@ -13,7 +13,7 @@ internal static class ValidationPatterns
     /// del código original— y un núcleo opcional para tolerar campos opcionales en blanco
     /// (p. ej. el segundo nombre); los campos obligatorios delegan el "vacío" en <c>[Required]</c>.
     /// </summary>
-    public const string SoloLetras = @"^\s*([A-Za-záéíóúÁÉÍÓÚñÑüÜ]+)?\s*$";
+    public const string SoloLetras = @"^(?:\s+|\s*[A-Za-záéíóúÁÉÍÓÚñÑüÜ]+\s*)$";
 
     /// <summary>
     /// Correo institucional UCR: <c>nombre.apellido@ucr.ac.cr</c> (solo letras antes de @),

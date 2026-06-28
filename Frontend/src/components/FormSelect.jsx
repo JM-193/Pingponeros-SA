@@ -10,8 +10,11 @@ function FormSelect({
   options,
   required,
   defaultLabel,
+  disabled,
   error,
 }) {
+  const borderColor = disabled ? COLORS.borderDisabled : COLORS.borderColor
+
   return (
     <div style={{ marginBottom: '20px' }}>
       <label
@@ -33,16 +36,19 @@ function FormSelect({
         value={value}
         onChange={onChange}
         required={required}
+        disabled={disabled}
         aria-invalid={error ? 'true' : undefined}
         style={{
           width: '100%',
           padding: '10px',
-          border: error ? `2px solid ${COLORS.danger}` : `1px solid ${COLORS.borderColor}`,
+          border: error ? `2px solid ${COLORS.danger}` : `1px solid ${borderColor}`,
           borderRadius: '4px',
           fontSize: '14px',
           boxSizing: 'border-box',
-          backgroundColor: COLORS.inputBg,
-          cursor: 'pointer',
+          backgroundColor: disabled ? COLORS.disabledBg : COLORS.inputBg,
+          color: disabled ? COLORS.disabledColor : COLORS.black,
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          opacity: disabled ? 0.7 : 1,
         }}
       >
         <option value="">{defaultLabel}</option>
@@ -75,6 +81,7 @@ FormSelect.propTypes = {
   ),
   required: PropTypes.bool,
   defaultLabel: PropTypes.string,
+  disabled: PropTypes.bool,
   error: PropTypes.string,
 }
 
@@ -82,6 +89,7 @@ FormSelect.defaultProps = {
   options: [],
   required: false,
   defaultLabel: 'Selecciona una opción',
+  disabled: false,
   error: '',
 }
 

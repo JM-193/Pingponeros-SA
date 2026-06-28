@@ -119,32 +119,16 @@ internal sealed class WorkPositionRepository : IWorkPositionRepository
     public async Task<bool> EstaAsociadoAsync(int id)
     {
         var result = await _q.ExecuteScalarAsync(connection =>
-        {
-            var cmd = new OracleCommand(
-                "SELECT COUNT(*) FROM PLAZAS_USUARIOS WHERE ID_PUESTO = :id",
-                connection)
-            {
-                BindByName = true,
-            };
-            cmd.Parameters.Add(new OracleParameter(":id", OracleDbType.Int32) { Value = id });
-            return cmd;
-        }).ConfigureAwait(false);
+            OracleCommandHelpers.CreateByIdCommand(connection, "SELECT COUNT(*) FROM PLAZAS_USUARIOS WHERE ID_PUESTO = :id", id)
+        ).ConfigureAwait(false);
         return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
     }
 
     public async Task<bool> EliminarAsync(int id)
     {
         var rows = await _q.ExecuteAsync(connection =>
-        {
-            var cmd = new OracleCommand(
-                "DELETE FROM PUESTOS_TRABAJO WHERE ID_PUESTO = :id",
-                connection)
-            {
-                BindByName = true,
-            };
-            cmd.Parameters.Add(new OracleParameter(":id", OracleDbType.Int32) { Value = id });
-            return cmd;
-        }).ConfigureAwait(false);
+            OracleCommandHelpers.CreateByIdCommand(connection, "DELETE FROM PUESTOS_TRABAJO WHERE ID_PUESTO = :id", id)
+        ).ConfigureAwait(false);
         return rows > 0;
     }
 }

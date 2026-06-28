@@ -18,11 +18,11 @@ internal static class SectionEndpoints
             RouteGroup = "/secciones",
             Messages = new CrudMessages
             {
-                Conflicto = nombre => $"Ya existe una sección con el nombre '{nombre}'.",
-                Creado = nombre => $"Sección '{nombre}' creada correctamente.",
-                Actualizado = nombre => $"Sección '{nombre}' actualizada correctamente.",
-                NoEncontradoPorNombre = nombre => $"No se encontró la sección '{nombre}'.",
-                NoEncontradoActivoPorId = id => $"No se encontró la sección activa con ID '{id}'.",
+                Conflicto = _ => "Ya existe una sección con ese nombre.",
+                Creado = _ => "Sección creada correctamente.",
+                Actualizado = _ => "Sección actualizada correctamente.",
+                NoEncontradoPorNombre = _ => "No se encontró la sección.",
+                NoEncontradoActivoPorId = _ => "No se encontró la sección activa.",
             },
             Validar = dto => dto.Validar(),
             NombreDto = dto => dto.Nombre,

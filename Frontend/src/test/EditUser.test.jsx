@@ -4,8 +4,31 @@ import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import EditUsers from '../pages/EditUsers'
 import * as userService from '../services/userService'
+import * as positionService from '../services/positionService'
+import * as workPositionService from '../services/workPositionService'
+import { guardarSesion, cerrarSesion } from '../services/session'
 
 vi.mock('../services/userService')
+vi.mock('../services/positionService')
+vi.mock('../services/workPositionService')
+
+// Defaults para la sección de plazas embebida en Editar Usuario (evita llamadas de red reales).
+const setupPlazaMocks = () => {
+  userService.obtenerPlazasUsuario.mockResolvedValue([])
+  positionService.obtenerPlazasDisponibles.mockResolvedValue([])
+  workPositionService.obtenerPuestos.mockResolvedValue([])
+}
+
+// Construye un JWT de prueba (solo el payload importa; la firma no se verifica en el cliente).
+const buildToken = (correo) => {
+  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))
+  const payload = btoa(
+    JSON.stringify({ correoInstitucional: correo, exp: Math.floor(Date.now() / 1000) + 3600 }),
+  )
+    .replaceAll('+', '-')
+    .replaceAll('/', '_')
+  return `${header}.${payload}.sig`
+}
 
 const mockUser = {
   correoInstitucional: 'juan.perez@ucr.ac.cr',
@@ -30,6 +53,8 @@ const renderWithRoute = (correo) =>
 describe('EditUsers Page', () => {
   beforeEach(() => {
     vi.resetAllMocks()
+    cerrarSesion()
+    setupPlazaMocks()
   })
 
   it('renderiza página en estado de carga sin parámetros de ruta', () => {
@@ -95,6 +120,32 @@ describe('EditUsers Page', () => {
     await waitFor(() => {
       expect(toast.success).toHaveBeenCalledWith('Usuario actualizado correctamente.', expect.anything())
     })
+  })
+
+  it('deshabilita el campo Rol al editar el propio perfil', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    guardarSesion(buildToken(mockUser.correoInstitucional))
+
+    renderWithRoute(mockUser.correoInstitucional)
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
+    })
+
+    expect(screen.getByLabelText(/Rol/i)).toBeDisabled()
+  })
+
+  it('mantiene habilitado el campo Rol al editar a otro usuario', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    guardarSesion(buildToken('otra.persona@ucr.ac.cr'))
+
+    renderWithRoute(mockUser.correoInstitucional)
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
+    })
+
+    expect(screen.getByLabelText(/Rol/i)).not.toBeDisabled()
   })
 
   it('muestra error cuando la actualización falla', async () => {
@@ -166,6 +217,8 @@ describe('EditUsers Page', () => {
 describe('EditUsers Modal Mode', () => {
   beforeEach(() => {
     vi.resetAllMocks()
+    cerrarSesion()
+    setupPlazaMocks()
   })
 
   it('renderiza dentro de un modal cuando isModal es true', async () => {

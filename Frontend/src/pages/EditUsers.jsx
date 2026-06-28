@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import { obtenerUsuarioPorCorreo, actualizarUsuario } from '../services/userService'
+import { obtenerSesion } from '../services/session'
 import Modal from '../components/Modal'
 import PageLayout from '../components/PageLayout'
 import FormContainer from '../components/FormContainer'
@@ -11,6 +12,7 @@ import FormInput from '../components/FormInput'
 import FormSelect from '../components/FormSelect'
 import FormButton from '../components/FormButton'
 import StateToggle from '../components/StateToggle'
+import UserPositionsSection from '../components/UserPositionsSection'
 import { notifySuccess, notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 
@@ -130,6 +132,11 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
     }
   }
 
+  // El usuario autenticado no puede modificar su propio rol: se bloquea como el correo.
+  const correoSesion = obtenerSesion()?.correoInstitucional ?? ''
+  const isOwnProfile =
+    !!correoOriginal && correoSesion.toLowerCase() === correoOriginal.toLowerCase()
+
   const formContent = (
     <FormContainer
       onSubmit={handleSubmit}
@@ -201,7 +208,7 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
         ]}
         defaultLabel="Seleccione un rol"
         required
-        disabled={isSubmitting}
+        disabled={isSubmitting || isOwnProfile}
         error={errors.role}
       />
 
@@ -211,7 +218,9 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
         disabled={isSubmitting}
       />
 
-      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+      {correoOriginal && <UserPositionsSection correo={correoOriginal} />}
+
+      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '24px' }}>
         <FormButton
           label="Cancelar"
           type="button"

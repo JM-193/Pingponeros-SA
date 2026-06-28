@@ -18,11 +18,11 @@ internal static class DepartmentEndpoints
             RouteGroup = "/departamentos",
             Messages = new CrudMessages
             {
-                Conflicto = nombre => $"Ya existe un departamento con el nombre '{nombre}'.",
-                Creado = nombre => $"Departamento '{nombre}' creado correctamente.",
-                Actualizado = nombre => $"Departamento '{nombre}' actualizado correctamente.",
-                NoEncontradoPorNombre = nombre => $"No se encontró el departamento '{nombre}'.",
-                NoEncontradoActivoPorId = id => $"No se encontró el departamento activo con ID '{id}'.",
+                Conflicto = _ => "Ya existe un departamento con ese nombre.",
+                Creado = _ => "Departamento creado correctamente.",
+                Actualizado = _ => "Departamento actualizado correctamente.",
+                NoEncontradoPorNombre = _ => "No se encontró el departamento.",
+                NoEncontradoActivoPorId = _ => "No se encontró el departamento activo.",
             },
             Validar = dto => dto.Validar(),
             NombreDto = dto => dto.Nombre,

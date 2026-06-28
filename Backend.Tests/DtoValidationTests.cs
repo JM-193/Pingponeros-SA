@@ -204,9 +204,8 @@ public sealed class DtoValidationTests
     // CreatePositionDto                                                 //
     // ---------------------------------------------------------------- //
     [Theory]
-    [InlineData(0)]
-    [InlineData(-5)]
-    public void CreatePositionDto_NumeroNoPositivo_RetornaMensaje(long numero)
+    [InlineData(0UL)]
+    public void CreatePositionDto_NumeroNoPositivo_RetornaMensaje(ulong numero)
     {
         var dto = new CreatePositionDto(numero, null, null, null, null);
         Assert.Equal("El número de plaza debe ser un entero positivo.", dto.Validar());

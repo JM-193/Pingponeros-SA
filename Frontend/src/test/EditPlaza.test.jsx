@@ -125,7 +125,7 @@ describe('EditPositions Page', () => {
 
     await waitFor(() => {
       expect(toast.success).toHaveBeenCalledWith(
-        expect.stringContaining("Plaza '7' actualizada correctamente"),
+        expect.stringContaining("Plaza actualizada correctamente"),
         expect.anything(),
       )
     })

@@ -19,7 +19,11 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<TestEntryP
     internal ISectionRepository SeccionRepo { get; } = Substitute.For<ISectionRepository>();
     internal IUnitRepository UnidadRepo { get; } = Substitute.For<IUnitRepository>();
     internal IPositionRepository PlazaRepo { get; } = Substitute.For<IPositionRepository>();
+    internal IPositionAssignmentRepository AsignacionRepo { get; } = Substitute.For<IPositionAssignmentRepository>();
     internal IWorkPositionRepository PuestoRepo { get; } = Substitute.For<IWorkPositionRepository>();
+    internal IWorkPositionFunctionRepository FuncionPuestoRepo { get; } = Substitute.For<IWorkPositionFunctionRepository>();
+    internal IFunctionRepository FuncionRepo { get; } = Substitute.For<IFunctionRepository>();
+    internal IUserFunctionRepository FuncionUsuarioRepo { get; } = Substitute.For<IUserFunctionRepository>();
     internal IDbExecutor DbExecutor { get; } = Substitute.For<IDbExecutor>();
     internal IQueryExecutor QueryExecutor { get; } = Substitute.For<IQueryExecutor>();
     internal IEmailService EmailService { get; } = Substitute.For<IEmailService>();
@@ -48,7 +52,11 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<TestEntryP
             services.RemoveAll<ISectionRepository>();
             services.RemoveAll<IUnitRepository>();
             services.RemoveAll<IPositionRepository>();
+            services.RemoveAll<IPositionAssignmentRepository>();
             services.RemoveAll<IWorkPositionRepository>();
+            services.RemoveAll<IWorkPositionFunctionRepository>();
+            services.RemoveAll<IFunctionRepository>();
+            services.RemoveAll<IUserFunctionRepository>();
             services.RemoveAll<IEmailService>();
             services.AddScoped<IDbExecutor>(_ => DbExecutor);
             services.AddScoped<IQueryExecutor>(_ => QueryExecutor);
@@ -58,7 +66,11 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<TestEntryP
             services.AddScoped<ISectionRepository>(_ => SeccionRepo);
             services.AddScoped<IUnitRepository>(_ => UnidadRepo);
             services.AddScoped<IPositionRepository>(_ => PlazaRepo);
+            services.AddScoped<IPositionAssignmentRepository>(_ => AsignacionRepo);
             services.AddScoped<IWorkPositionRepository>(_ => PuestoRepo);
+            services.AddScoped<IWorkPositionFunctionRepository>(_ => FuncionPuestoRepo);
+            services.AddScoped<IFunctionRepository>(_ => FuncionRepo);
+            services.AddScoped<IUserFunctionRepository>(_ => FuncionUsuarioRepo);
             services.AddScoped<IEmailService>(_ => EmailService);
         });
     }

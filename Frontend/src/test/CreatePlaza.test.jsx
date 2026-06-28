@@ -168,7 +168,7 @@ describe('CreatePositions Page', () => {
 
     await waitFor(() => {
       expect(toast.success).toHaveBeenCalledWith(
-        expect.stringContaining("Plaza '5' creada correctamente"),
+        expect.stringContaining("Plaza creada correctamente"),
         expect.anything(),
       )
     })

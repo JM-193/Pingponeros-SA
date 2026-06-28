@@ -31,12 +31,12 @@ public sealed class PositionRepositoryTests
         var plazas = await repo.ObtenerTodasAsync();
 
         Assert.Equal(2, plazas.Count);
-        Assert.Equal(1001L, plazas[0].NumeroPlaza);
+        Assert.Equal(1001UL, plazas[0].NumeroPlaza);
         Assert.Equal(1, plazas[0].IdUnidad);
         Assert.Equal(2, plazas[0].IdDepartamento);
         Assert.Equal(3, plazas[0].IdSeccion);
         Assert.Equal(4, plazas[0].IdArea);
-        Assert.Equal(1002L, plazas[1].NumeroPlaza);
+        Assert.Equal(1002UL, plazas[1].NumeroPlaza);
         Assert.Null(plazas[1].IdUnidad);
         Assert.Null(plazas[1].IdDepartamento);
         Assert.Null(plazas[1].IdSeccion);
@@ -120,7 +120,7 @@ public sealed class PositionRepositoryTests
         });
 
         Assert.NotNull(command);
-        Assert.Equal(1001L, command!.Parameters[":numeroPlaza"].Value);
+        Assert.Equal(1001m, command!.Parameters[":numeroPlaza"].Value);
         Assert.Equal(1, command.Parameters[":idUnidad"].Value);
         Assert.Equal(DBNull.Value, command.Parameters[":idDepartamento"].Value);
         Assert.Equal(3, command.Parameters[":idSeccion"].Value);
@@ -155,7 +155,7 @@ public sealed class PositionRepositoryTests
         var plaza = await repo.ObtenerPorNumeroAsync(1001);
 
         Assert.NotNull(plaza);
-        Assert.Equal(1001L, plaza!.NumeroPlaza);
+        Assert.Equal(1001UL, plaza!.NumeroPlaza);
         Assert.Equal(1, plaza.IdUnidad);
         Assert.Null(plaza.IdDepartamento);
         Assert.Equal(3, plaza.IdSeccion);
@@ -182,7 +182,7 @@ public sealed class PositionRepositoryTests
         var plaza = await repo.ObtenerPorNumeroAsync(1002);
 
         Assert.NotNull(plaza);
-        Assert.Equal(1002L, plaza!.NumeroPlaza);
+        Assert.Equal(1002UL, plaza!.NumeroPlaza);
         Assert.Null(plaza.IdUnidad);
         Assert.Equal(2, plaza.IdDepartamento);
         Assert.Null(plaza.IdSeccion);

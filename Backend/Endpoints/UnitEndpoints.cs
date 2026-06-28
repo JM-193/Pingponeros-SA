@@ -18,11 +18,11 @@ internal static class UnitEndpoints
             RouteGroup = "/unidades",
             Messages = new CrudMessages
             {
-                Conflicto = nombre => $"Ya existe una unidad con el nombre '{nombre}'.",
-                Creado = nombre => $"Unidad '{nombre}' creada correctamente.",
-                Actualizado = nombre => $"Unidad '{nombre}' actualizada correctamente.",
-                NoEncontradoPorNombre = nombre => $"No se encontró la unidad '{nombre}'.",
-                NoEncontradoActivoPorId = id => $"No se encontró la unidad activa con ID '{id}'.",
+                Conflicto = _ => "Ya existe una unidad con ese nombre.",
+                Creado = _ => "Unidad creada correctamente.",
+                Actualizado = _ => "Unidad actualizada correctamente.",
+                NoEncontradoPorNombre = _ => "No se encontró la unidad.",
+                NoEncontradoActivoPorId = _ => "No se encontró la unidad activa.",
             },
             Validar = dto => dto.Validar(),
             NombreDto = dto => dto.Nombre,
