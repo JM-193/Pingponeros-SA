@@ -6,16 +6,36 @@ namespace Backend.Repositories;
 
 internal sealed class WorkPositionFunctionRepository : IWorkPositionFunctionRepository
 {
+    private const string ColumnIdFuncion = "ID_FUNCION";
+    private const string ColumnNombre = "NOMBRE";
+    private const string ColumnDescripcion = "DESCRIPCION";
+
     private readonly IQueryExecutor _q;
 
     public WorkPositionFunctionRepository(IQueryExecutor q) => _q = q;
 
     private static Function MapearFila(System.Data.Common.DbDataReader reader) => new()
     {
-        Id = reader.GetInt32(reader.GetOrdinal("ID_FUNCION")),
-        Nombre = reader.IsDBNull(reader.GetOrdinal("NOMBRE")) ? string.Empty : reader.GetString(reader.GetOrdinal("NOMBRE")),
-        Descripcion = reader.IsDBNull(reader.GetOrdinal("DESCRIPCION")) ? string.Empty : reader.GetString(reader.GetOrdinal("DESCRIPCION")),
+        Id = reader.GetInt32(reader.GetOrdinal(ColumnIdFuncion)),
+        Nombre = reader.IsDBNull(reader.GetOrdinal(ColumnNombre)) ? string.Empty : reader.GetString(reader.GetOrdinal(ColumnNombre)),
+        Descripcion = reader.IsDBNull(reader.GetOrdinal(ColumnDescripcion)) ? string.Empty : reader.GetString(reader.GetOrdinal(ColumnDescripcion)),
     };
+
+    private static void AgregarParamIdPuesto(OracleCommand cmd, int idPuesto)
+    {
+        OracleCommandHelpers.AddInt32Param(cmd, ":idPuesto", idPuesto);
+    }
+
+    private static void AgregarParamIdFuncion(OracleCommand cmd, int idFuncion)
+    {
+        OracleCommandHelpers.AddInt32Param(cmd, ":idFuncion", idFuncion);
+    }
+
+    private static void AgregarParametros(OracleCommand cmd, int idPuesto, int idFuncion)
+    {
+        AgregarParamIdPuesto(cmd, idPuesto);
+        AgregarParamIdFuncion(cmd, idFuncion);
+    }
 
     public async Task<List<Function>> ObtenerFuncionesDePuestoAsync(int idPuesto)
     {
@@ -33,7 +53,7 @@ internal sealed class WorkPositionFunctionRepository : IWorkPositionFunctionRepo
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(new OracleParameter(":idPuesto", OracleDbType.Int32) { Value = idPuesto });
+            AgregarParamIdPuesto(cmd, idPuesto);
             return cmd;
         }, async reader =>
         {
@@ -54,8 +74,7 @@ internal sealed class WorkPositionFunctionRepository : IWorkPositionFunctionRepo
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(new OracleParameter(":idPuesto", OracleDbType.Int32) { Value = idPuesto });
-            cmd.Parameters.Add(new OracleParameter(":idFuncion", OracleDbType.Int32) { Value = idFuncion });
+            AgregarParametros(cmd, idPuesto, idFuncion);
             return cmd;
         }).ConfigureAwait(false);
         return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
@@ -71,8 +90,7 @@ internal sealed class WorkPositionFunctionRepository : IWorkPositionFunctionRepo
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(new OracleParameter(":idPuesto", OracleDbType.Int32) { Value = idPuesto });
-            cmd.Parameters.Add(new OracleParameter(":idFuncion", OracleDbType.Int32) { Value = idFuncion });
+            AgregarParametros(cmd, idPuesto, idFuncion);
             return cmd;
         }).ConfigureAwait(false);
     }
@@ -87,8 +105,7 @@ internal sealed class WorkPositionFunctionRepository : IWorkPositionFunctionRepo
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(new OracleParameter(":idPuesto", OracleDbType.Int32) { Value = idPuesto });
-            cmd.Parameters.Add(new OracleParameter(":idFuncion", OracleDbType.Int32) { Value = idFuncion });
+            AgregarParametros(cmd, idPuesto, idFuncion);
             return cmd;
         }).ConfigureAwait(false);
         return rows > 0;

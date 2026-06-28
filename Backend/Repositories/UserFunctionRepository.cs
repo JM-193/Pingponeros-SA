@@ -25,6 +25,18 @@ internal sealed class UserFunctionRepository : IUserFunctionRepository
         Descripcion = reader.IsDBNull(reader.GetOrdinal(ColumnDescripcion)) ? string.Empty : reader.GetString(reader.GetOrdinal(ColumnDescripcion)),
     };
 
+    private static void AgregarParamCorreo(OracleCommand cmd, string correo)
+    {
+        OracleCommandHelpers.AddStringParam(cmd, ":correo", correo);
+    }
+
+    private static void AgregarParametros(OracleCommand cmd, UserFunction funcion)
+    {
+        AgregarParamCorreo(cmd, funcion.CorreoInstitucional);
+        OracleCommandHelpers.AddStringParam(cmd, ":nombre", funcion.Nombre);
+        OracleCommandHelpers.AddStringParam(cmd, ":descripcion", funcion.Descripcion);
+    }
+
     public async Task<List<UserFunction>> ObtenerTodasAsync()
     {
         return await _q.QueryAsync(connection =>
@@ -57,7 +69,7 @@ internal sealed class UserFunctionRepository : IUserFunctionRepository
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddStringParam(cmd, ":correo", correo);
+            AgregarParamCorreo(cmd, correo);
             return cmd;
         }, async reader =>
         {
@@ -83,9 +95,7 @@ internal sealed class UserFunctionRepository : IUserFunctionRepository
         var result = await _q.ExecuteScalarAsync(connection =>
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
-            OracleCommandHelpers.AddStringParam(cmd, ":correo", funcion.CorreoInstitucional);
-            OracleCommandHelpers.AddStringParam(cmd, ":nombre", funcion.Nombre);
-            OracleCommandHelpers.AddStringParam(cmd, ":descripcion", funcion.Descripcion);
+            AgregarParametros(cmd, funcion);
             var idParam = new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output);
             cmd.Parameters.Add(idParam);
             return cmd;

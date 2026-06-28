@@ -28,6 +28,12 @@ internal sealed class FunctionRepository : IFunctionRepository
         OracleCommandHelpers.AddStringParam(cmd, ":nombre", nombre);
     }
 
+    private static void AgregarParametros(OracleCommand cmd, Function funcion)
+    {
+        AgregarParamNombre(cmd, funcion.Nombre);
+        OracleCommandHelpers.AddStringParam(cmd, ":descripcion", funcion.Descripcion);
+    }
+
     public async Task<List<Function>> ObtenerTodasAsync()
     {
         return await _q.QueryAsync(connection =>
@@ -79,8 +85,7 @@ internal sealed class FunctionRepository : IFunctionRepository
         var result = await _q.ExecuteScalarAsync(connection =>
         {
             var cmd = new OracleCommand(query, connection) { BindByName = true };
-            AgregarParamNombre(cmd, funcion.Nombre);
-            OracleCommandHelpers.AddStringParam(cmd, ":descripcion", funcion.Descripcion);
+            AgregarParametros(cmd, funcion);
             var idParam = new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output);
             cmd.Parameters.Add(idParam);
             return cmd;

@@ -45,6 +45,26 @@ internal sealed class PositionAssignmentRepository : IPositionAssignmentReposito
         IdArea = r.IsDBNull(r.GetOrdinal(ColumnIdArea)) ? null : r.GetInt32(r.GetOrdinal(ColumnIdArea)),
     };
 
+    private static void AgregarParamNumeroPlaza(OracleCommand cmd, ulong numeroPlaza)
+    {
+        OracleCommandHelpers.AddUInt64Param(cmd, ":numeroPlaza", numeroPlaza);
+    }
+
+    private static void AgregarParamCorreo(OracleCommand cmd, string correo)
+    {
+        OracleCommandHelpers.AddStringParam(cmd, ":correo", correo);
+    }
+
+    private static void AgregarParametros(OracleCommand cmd, PositionAssignment asignacion)
+    {
+        AgregarParamNumeroPlaza(cmd, asignacion.NumeroPlaza);
+        AgregarParamCorreo(cmd, asignacion.CorreoInstitucional);
+        OracleCommandHelpers.AddInt32Param(cmd, ":idPuesto", asignacion.IdPuesto);
+        OracleCommandHelpers.AddStringParam(cmd, ":claseOcupacional", asignacion.ClaseOcupacional);
+        OracleCommandHelpers.AddDateParam(cmd, ":fechaInicio", asignacion.FechaInicio);
+        OracleCommandHelpers.AddNullableDateParam(cmd, ":fechaFinal", asignacion.FechaFinal);
+    }
+
     public async Task<List<PositionAssignment>> ObtenerActivasPorUsuarioAsync(string correo)
     {
         const string sql = """
@@ -61,7 +81,7 @@ internal sealed class PositionAssignmentRepository : IPositionAssignmentReposito
         return await _q.QueryAsync(connection =>
         {
             var cmd = new OracleCommand(sql, connection) { BindByName = true };
-            OracleCommandHelpers.AddStringParam(cmd, nameof(correo), correo);
+            AgregarParamCorreo(cmd, correo);
             return cmd;
         }, async reader =>
         {
@@ -108,7 +128,7 @@ internal sealed class PositionAssignmentRepository : IPositionAssignmentReposito
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddUInt64Param(cmd, ":numeroPlaza", numeroPlaza);
+            AgregarParamNumeroPlaza(cmd, numeroPlaza);
             return cmd;
         }).ConfigureAwait(false);
         return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
@@ -128,12 +148,7 @@ internal sealed class PositionAssignmentRepository : IPositionAssignmentReposito
         await _q.ExecuteAsync(connection =>
         {
             var cmd = new OracleCommand(sql, connection) { BindByName = true };
-            OracleCommandHelpers.AddUInt64Param(cmd, ":numeroPlaza", asignacion.NumeroPlaza);
-            OracleCommandHelpers.AddStringParam(cmd, ":correo", asignacion.CorreoInstitucional);
-            OracleCommandHelpers.AddInt32Param(cmd, ":idPuesto", asignacion.IdPuesto);
-            OracleCommandHelpers.AddStringParam(cmd, ":claseOcupacional", asignacion.ClaseOcupacional);
-            OracleCommandHelpers.AddDateParam(cmd, ":fechaInicio", asignacion.FechaInicio);
-            OracleCommandHelpers.AddNullableDateParam(cmd, ":fechaFinal", asignacion.FechaFinal);
+            AgregarParametros(cmd, asignacion);
             return cmd;
         }).ConfigureAwait(false);
     }
@@ -151,8 +166,8 @@ internal sealed class PositionAssignmentRepository : IPositionAssignmentReposito
         var filas = await _q.ExecuteAsync(connection =>
         {
             var cmd = new OracleCommand(sql, connection) { BindByName = true };
-            OracleCommandHelpers.AddUInt64Param(cmd, ":numeroPlaza", numeroPlaza);
-            OracleCommandHelpers.AddStringParam(cmd, ":correo", correo);
+            AgregarParamNumeroPlaza(cmd, numeroPlaza);
+            AgregarParamCorreo(cmd, correo);
             return cmd;
         }).ConfigureAwait(false);
 
