@@ -34,12 +34,9 @@ const NAV_ITEMS = [
   },
   {
     label: 'Plazas',
-    activeOn: '/plazas',
+    path: '/plazas/consultar',
+    activeOn: '/plazas/consultar',
     roles: [1],
-    submenu: [
-      { label: 'Consultar', path: '/plazas/consultar'},
-      { label: 'Asignar', /* path: '/plazas/asignar' */ },
-    ]
   },
   {
     label: 'Organización',
@@ -66,17 +63,15 @@ const NAV_ITEMS = [
   },
   {
     label: 'Puestos de trabajo',
-    activeOn: '/puestos-trabajo',
+    path: '/puestos-trabajo/consultar',
+    activeOn: '/puestos-trabajo/consultar',
     roles: [1],
-    submenu: [
-      { label: 'Consultar', path: '/puestos-trabajo/consultar'},
-    ]
   },
   {
     label: 'Funciones',
     activeOn: '/funciones',
     submenu: [
-      { label: 'Oficiales', path: '/funciones/consultar', roles: [1] },
+      { label: 'Oficiales', path: '/funciones/oficiales/consultar', roles: [1] },
       { label: 'Usuarios', path: '/funciones/usuarios/consultar' },
     ],
   },

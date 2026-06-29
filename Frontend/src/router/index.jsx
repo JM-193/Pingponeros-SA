@@ -43,7 +43,7 @@ export default function AppRouter() {
             <Route path="/organizacion/secciones/consultar" element={<QuerySections />} />
             <Route path="/organizacion/unidades/consultar" element={<QueryUnits />} />
             <Route path="/puestos-trabajo/consultar" element={<QueryWorkPositions />} />
-            <Route path="/funciones/consultar" element={<QueryFunctions />} />
+            <Route path="/funciones/oficiales/consultar" element={<QueryFunctions />} />
           </Route>
         </Route>
       </Routes>
