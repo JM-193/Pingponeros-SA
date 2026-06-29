@@ -25,6 +25,10 @@ internal sealed record AssignPositionDto(
     [property: RegularExpression(ValidationPatterns.SoloLetras, ErrorMessage = "La clase ocupacional solo puede contener letras.")]
     string ClaseOcupacional,
 
+    [property: Required(ErrorMessage = "El lugar de trabajo es obligatorio.")]
+    [property: MaxLength(150, ErrorMessage = "El lugar de trabajo no puede superar los 150 caracteres.")]
+    string LugarTrabajo,
+
     [property: Required(ErrorMessage = "La fecha de inicio es obligatoria.")]
     DateTime? FechaInicio,
 
@@ -40,5 +44,6 @@ internal sealed record AssignPositionDto(
             nameof(NumeroPlaza),
             nameof(IdPuesto),
             nameof(ClaseOcupacional),
+            nameof(LugarTrabajo),
             nameof(FechaInicio));
 }

@@ -154,6 +154,7 @@ internal static class UserEndpoints
                 CorreoInstitucional = correoDescodificado,
                 IdPuesto = dto.IdPuesto,
                 ClaseOcupacional = dto.ClaseOcupacional.Trim(),
+                LugarTrabajo = dto.LugarTrabajo.Trim(),
                 FechaInicio = dto.FechaInicio!.Value,
                 FechaFinal = dto.FechaFinal,
             };
