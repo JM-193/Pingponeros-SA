@@ -23,6 +23,7 @@ const EMPTY_FORM = {
   numeroPlaza: '',
   idPuesto: '',
   claseOcupacional: '',
+  lugarTrabajo: '',
   fechaInicio: '',
   fechaFinal: '',
 }
@@ -93,6 +94,7 @@ export default function UserPositionsSection({ correo }) {
     } else if (!SOLO_LETRAS_REGEX.test(form.claseOcupacional)) {
       next.claseOcupacional = 'La clase ocupacional solo puede contener letras'
     }
+    if (!form.lugarTrabajo.trim()) next.lugarTrabajo = 'El lugar de trabajo es obligatorio'
     if (!form.fechaInicio) next.fechaInicio = 'La fecha de inicio es obligatoria'
     if (form.fechaFinal && form.fechaInicio && form.fechaFinal < form.fechaInicio) {
       next.fechaFinal = 'La fecha final no puede ser anterior a la de inicio'
@@ -110,6 +112,7 @@ export default function UserPositionsSection({ correo }) {
         numeroPlaza: Number.parseInt(form.numeroPlaza, 10),
         idPuesto: Number.parseInt(form.idPuesto, 10),
         claseOcupacional: form.claseOcupacional.trim(),
+        lugarTrabajo: form.lugarTrabajo.trim(),
         fechaInicio: form.fechaInicio,
         fechaFinal: form.fechaFinal || null,
       })
@@ -156,6 +159,7 @@ export default function UserPositionsSection({ correo }) {
     { key: 'numeroPlaza', label: 'N.º Plaza', render: (r) => r.numeroPlaza },
     { key: 'puestoNombre', label: 'Puesto', render: (r) => r.puestoNombre ?? r.idPuesto },
     { key: 'claseOcupacional', label: 'Clase Ocupacional', render: (r) => r.claseOcupacional },
+    { key: 'lugarTrabajo', label: 'Lugar de Trabajo', render: (r) => r.lugarTrabajo },
     { key: 'fechaInicio', label: 'Fecha Inicio', render: (r) => formatFecha(r.fechaInicio) },
   ]
 
@@ -254,6 +258,18 @@ export default function UserPositionsSection({ correo }) {
               disabled={isAdding}
               maxLength={190}
               error={errors.claseOcupacional}
+            />
+
+            <FormInput
+              label="Lugar de Trabajo"
+              id="lugarTrabajo"
+              name="lugarTrabajo"
+              value={form.lugarTrabajo}
+              onChange={handleFieldChange}
+              required
+              disabled={isAdding}
+              maxLength={150}
+              error={errors.lugarTrabajo}
             />
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>

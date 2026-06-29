@@ -12,6 +12,9 @@ import QueryPositions from '../pages/QueryPositions'
 import QueryWorkPositions from '../pages/QueryWorkPositions'
 import QueryFunctions from '../pages/QueryFunctions'
 import QueryUserFunctions from '../pages/QueryUserFunctions'
+import Declarations from '../pages/Declarations'
+import DeclarationForm from '../pages/DeclarationForm'
+import DeclarationView from '../pages/DeclarationView'
 import ProtectedRoute from '../components/ProtectedRoute'
 
 export default function AppRouter() {
@@ -26,7 +29,9 @@ export default function AppRouter() {
         <Route element={<ProtectedRoute />}>
           <Route path="/cambiar-contrasena" element={<ChangePassword />} />
           <Route path="/home" element={<Home />} />
-          {/* <Route path="/declaraciones/consultar" element={<QueryDeclarations />} /> */}
+          <Route path="/declaraciones" element={<Declarations />} />
+          <Route path="/declaraciones/formulario" element={<DeclarationForm />} />
+          <Route path="/declaraciones/ver/:id" element={<DeclarationView />} />
           <Route path="/funciones/usuarios/consultar" element={<QueryUserFunctions />} />
 
           {/* Admin-only routes */}

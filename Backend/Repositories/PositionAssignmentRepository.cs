@@ -12,6 +12,7 @@ internal sealed class PositionAssignmentRepository : IPositionAssignmentReposito
     private const string ColumnIdPuesto = "ID_PUESTO";
     private const string ColumnPuestoNombre = "PUESTO_NOMBRE";
     private const string ColumnClaseOcupacional = "CLASE_OCUPACIONAL";
+    private const string ColumnLugarTrabajo = "LUGAR_TRABAJO";
     private const string ColumnFechaInicio = "FECHA_INICIO";
     private const string ColumnFechaFinal = "FECHA_FINAL";
 
@@ -32,6 +33,7 @@ internal sealed class PositionAssignmentRepository : IPositionAssignmentReposito
         IdPuesto = r.GetInt32(r.GetOrdinal(ColumnIdPuesto)),
         PuestoNombre = r.IsDBNull(r.GetOrdinal(ColumnPuestoNombre)) ? null : r.GetString(r.GetOrdinal(ColumnPuestoNombre)),
         ClaseOcupacional = r.GetString(r.GetOrdinal(ColumnClaseOcupacional)),
+        LugarTrabajo = r.GetString(r.GetOrdinal(ColumnLugarTrabajo)),
         FechaInicio = r.GetDateTime(r.GetOrdinal(ColumnFechaInicio)),
         FechaFinal = r.IsDBNull(r.GetOrdinal(ColumnFechaFinal)) ? null : r.GetDateTime(r.GetOrdinal(ColumnFechaFinal)),
     };
@@ -61,6 +63,7 @@ internal sealed class PositionAssignmentRepository : IPositionAssignmentReposito
         AgregarParamCorreo(cmd, asignacion.CorreoInstitucional);
         OracleCommandHelpers.AddInt32Param(cmd, ":idPuesto", asignacion.IdPuesto);
         OracleCommandHelpers.AddStringParam(cmd, ":claseOcupacional", asignacion.ClaseOcupacional);
+        OracleCommandHelpers.AddStringParam(cmd, ":lugarTrabajo", asignacion.LugarTrabajo);
         OracleCommandHelpers.AddDateParam(cmd, ":fechaInicio", asignacion.FechaInicio);
         OracleCommandHelpers.AddNullableDateParam(cmd, ":fechaFinal", asignacion.FechaFinal);
     }
@@ -69,12 +72,12 @@ internal sealed class PositionAssignmentRepository : IPositionAssignmentReposito
     {
         const string sql = """
             SELECT pu.NUMERO_PLAZA, pu.CORREO_INSTITUCIONAL, pu.ID_PUESTO,
-                   pt.NOMBRE AS PUESTO_NOMBRE, pu.CLASE_OCUPACIONAL,
+                   pt.NOMBRE AS PUESTO_NOMBRE, pu.CLASE_OCUPACIONAL, pu.LUGAR_TRABAJO,
                    pu.FECHA_INICIO, pu.FECHA_FINAL
             FROM   PLAZAS_USUARIOS pu
             JOIN   PUESTOS_TRABAJO pt ON pt.ID_PUESTO = pu.ID_PUESTO
             WHERE  pu.CORREO_INSTITUCIONAL = :correo
-            AND    pu.FECHA_FINAL IS NULL
+            AND    (pu.FECHA_FINAL IS NULL OR pu.FECHA_FINAL > SYSDATE)
             ORDER BY pu.NUMERO_PLAZA
             """;
 
@@ -140,9 +143,9 @@ internal sealed class PositionAssignmentRepository : IPositionAssignmentReposito
 
         const string sql = """
             INSERT INTO PLAZAS_USUARIOS
-                (NUMERO_PLAZA, CORREO_INSTITUCIONAL, ID_PUESTO, CLASE_OCUPACIONAL, FECHA_INICIO, FECHA_FINAL)
+                (NUMERO_PLAZA, CORREO_INSTITUCIONAL, ID_PUESTO, CLASE_OCUPACIONAL, LUGAR_TRABAJO, FECHA_INICIO, FECHA_FINAL)
             VALUES
-                (:numeroPlaza, :correo, :idPuesto, :claseOcupacional, :fechaInicio, :fechaFinal)
+                (:numeroPlaza, :correo, :idPuesto, :claseOcupacional, :lugarTrabajo, :fechaInicio, :fechaFinal)
             """;
 
         await _q.ExecuteAsync(connection =>
@@ -160,7 +163,7 @@ internal sealed class PositionAssignmentRepository : IPositionAssignmentReposito
             SET    FECHA_FINAL = SYSDATE
             WHERE  NUMERO_PLAZA = :numeroPlaza
             AND    CORREO_INSTITUCIONAL = :correo
-            AND    FECHA_FINAL IS NULL
+            AND    (FECHA_FINAL IS NULL OR FECHA_FINAL > SYSDATE)
             """;
 
         var filas = await _q.ExecuteAsync(connection =>

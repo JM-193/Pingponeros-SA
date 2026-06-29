@@ -164,6 +164,14 @@ internal static class UserEndpoints
                 $"/usuarios/{Uri.EscapeDataString(correoDescodificado)}/plazas/{asignacion.NumeroPlaza}",
                 new { mensaje = "Plaza vinculada correctamente." });
         }
+        catch (OracleException ex) when (ex.Number == 1)
+        {
+            // ORA-00001 (PK_PU): ya existe una fila con esa plaza, usuario, puesto y fecha de inicio.
+            return Results.Conflict(new
+            {
+                mensaje = "No se puede vincular: ya existe un registro de esta plaza con este usuario, puesto y fecha de inicio.",
+            });
+        }
         catch (OracleException ex)
         {
             return OracleErrorMapper.ToResult(ex, isDev);

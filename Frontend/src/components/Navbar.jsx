@@ -15,7 +15,7 @@ const NAV_ITEMS = [
   },
   {
     label: 'Declaraciones',
-    /* path: '/declaraciones/consultar',*/
+    path: '/declaraciones',
     activeOn: '/declaraciones'
   },
   /*{
