@@ -1,6 +1,6 @@
 ﻿// EditAreas.test.jsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import EditAreas from '../pages/EditAreas'
 import * as areaService from '../services/areaService'
@@ -13,155 +13,6 @@ const mockArea = {
   estado: 1,
 }
 
-const renderWithRoute = (nombre) =>
-  render(
-    <MemoryRouter initialEntries={[`/organizacion/areas/editar/${nombre}`]}>
-      <Routes>
-        <Route path="/organizacion/areas/editar/:nombre" element={<EditAreas />} />
-        <Route path="/organizacion/areas/consultar" element={<div>Lista de áreas</div>} />
-      </Routes>
-    </MemoryRouter>,
-  )
-
-describe('EditAreas Page', () => {
-  beforeEach(() => {
-    vi.resetAllMocks()
-  })
-
-  it('renderiza página en estado de carga sin parámetros de ruta', () => {
-    render(
-      <BrowserRouter>
-        <EditAreas />
-      </BrowserRouter>,
-    )
-
-    expect(screen.getByText('Cargando área...')).toBeInTheDocument()
-  })
-
-  it('renderiza Header y Navbar', () => {
-    render(
-      <BrowserRouter>
-        <EditAreas />
-      </BrowserRouter>,
-    )
-
-    expect(screen.getByText('Página Principal')).toBeInTheDocument()
-  })
-
-  it('renderiza Footer', () => {
-    render(
-      <BrowserRouter>
-        <EditAreas />
-      </BrowserRouter>,
-    )
-
-    const footer = document.querySelector('footer')
-    expect(footer).toBeInTheDocument()
-  })
-
-  it('tiene layout con full height', () => {
-    const { container } = render(
-      <BrowserRouter>
-        <EditAreas />
-      </BrowserRouter>,
-    )
-
-    const mainDiv = container.firstChild
-    expect(mainDiv).toHaveStyle('min-height: 100vh')
-    expect(mainDiv).toHaveStyle('display: flex')
-  })
-
-  it('contiene elemento main', () => {
-    const { container } = render(
-      <BrowserRouter>
-        <EditAreas />
-      </BrowserRouter>,
-    )
-
-    const main = container.querySelector('main')
-    expect(main).toBeInTheDocument()
-    expect(main).toHaveStyle('flex: 1')
-  })
-
-  it('carga y renderiza el formulario con los datos del área', async () => {
-    areaService.obtenerAreaPorNombre.mockResolvedValueOnce(mockArea)
-
-    renderWithRoute('Administración')
-
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Editar Área/i })).toBeInTheDocument()
-    })
-
-    expect(screen.getByDisplayValue('Administración')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('Área de administración general')).toBeInTheDocument()
-  })
-
-  it('muestra error de validación cuando nombre está vacío al enviar', async () => {
-    areaService.obtenerAreaPorNombre.mockResolvedValueOnce(mockArea)
-
-    renderWithRoute('Administración')
-
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText('Nombre del área')).toBeInTheDocument()
-    })
-
-    const nombreInput = screen.getByPlaceholderText('Nombre del área')
-    fireEvent.change(nombreInput, { target: { value: '' } })
-
-    fireEvent.submit(nombreInput.closest('form'))
-
-    await waitFor(() => {
-      expect(screen.getByText('El nombre del área es requerido')).toBeInTheDocument()
-    })
-  })
-
-  it('actualiza área correctamente y redirige', async () => {
-    areaService.obtenerAreaPorNombre.mockResolvedValueOnce(mockArea)
-    areaService.actualizarArea.mockResolvedValueOnce({})
-
-    renderWithRoute('Administración')
-
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText('Nombre del área')).toBeInTheDocument()
-    })
-
-    const submitButton = screen.getByRole('button', { name: /Actualizar/i })
-    fireEvent.click(submitButton)
-
-    await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('Área actualizada correctamente', expect.anything())
-    })
-  })
-
-  it('muestra error cuando la actualización falla', async () => {
-    areaService.obtenerAreaPorNombre.mockResolvedValueOnce(mockArea)
-    areaService.actualizarArea.mockRejectedValueOnce(new Error('Error al actualizar'))
-
-    renderWithRoute('Administración')
-
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText('Nombre del área')).toBeInTheDocument()
-    })
-
-    const submitButton = screen.getByRole('button', { name: /Actualizar/i })
-    fireEvent.click(submitButton)
-
-    await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith('Error al actualizar', expect.anything())
-    })
-  })
-
-  it('muestra error cuando falla la carga del área', async () => {
-    areaService.obtenerAreaPorNombre.mockRejectedValueOnce(new Error('Área no encontrada'))
-
-    renderWithRoute('Inexistente')
-
-    await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith('Área no encontrada', expect.anything())
-    })
-  })
-})
-
 describe('EditAreas Modal Mode', () => {
   beforeEach(() => {
     vi.resetAllMocks()
@@ -172,7 +23,7 @@ describe('EditAreas Modal Mode', () => {
 
     render(
       <BrowserRouter>
-        <EditAreas isModal isOpen={true} entityName="Administración" onClose={() => {}} onSuccess={() => {}} />
+        <EditAreas isOpen={true} entityName="Administración" onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -190,7 +41,7 @@ describe('EditAreas Modal Mode', () => {
 
     render(
       <BrowserRouter>
-        <EditAreas isModal isOpen={true} entityName="Administración" onClose={() => {}} onSuccess={() => {}} />
+        <EditAreas isOpen={true} entityName="Administración" onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -205,7 +56,7 @@ describe('EditAreas Modal Mode', () => {
   it('muestra cargando dentro del modal', () => {
     render(
       <BrowserRouter>
-        <EditAreas isModal isOpen={true} entityName="Test" onClose={() => {}} onSuccess={() => {}} />
+        <EditAreas isOpen={true} entityName="Test" onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -220,7 +71,7 @@ describe('EditAreas Modal Mode', () => {
 
     render(
       <BrowserRouter>
-        <EditAreas isModal isOpen={true} entityName="Administración" onClose={onClose} onSuccess={() => {}} />
+        <EditAreas isOpen={true} entityName="Administración" onClose={onClose} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -238,7 +89,7 @@ describe('EditAreas Modal Mode', () => {
 
     render(
       <BrowserRouter>
-        <EditAreas isModal isOpen={true} entityName="Administración" onClose={() => {}} onSuccess={() => {}} />
+        <EditAreas isOpen={true} entityName="Administración" onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -260,7 +111,7 @@ describe('EditAreas Modal Mode', () => {
 
     render(
       <BrowserRouter>
-        <EditAreas isModal isOpen={true} entityName="Administración" onClose={() => {}} onSuccess={() => {}} />
+        <EditAreas isOpen={true} entityName="Administración" onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 

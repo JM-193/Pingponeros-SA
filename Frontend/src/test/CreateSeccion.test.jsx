@@ -7,38 +7,6 @@ import * as areaService from '../services/areaService'
 vi.mock('../services/sectionService')
 vi.mock('../services/areaService')
 
-describe('CreateSections Page', () => {
-  beforeEach(() => {
-    vi.resetAllMocks()
-    areaService.obtenerAreas.mockResolvedValue([
-      { id: 1, nombre: 'Administración', descripcion: 'Área' },
-    ])
-  })
-
-  it('renderiza formulario de crear sección', async () => {
-    render(
-      <BrowserRouter>
-        <CreateSections />
-      </BrowserRouter>,
-    )
-
-    expect(await screen.findByRole('heading', { name: /Crear Sección/i })).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('Nombre de la sección')).toBeInTheDocument()
-  })
-
-  it('renderiza Header y Navbar', async () => {
-    render(
-      <BrowserRouter>
-        <CreateSections />
-      </BrowserRouter>,
-    )
-
-    await waitFor(() => {
-      expect(screen.getByText('Página Principal')).toBeInTheDocument()
-    })
-  })
-})
-
 describe('CreateSections Modal Mode', () => {
   beforeEach(() => {
     vi.resetAllMocks()
@@ -50,7 +18,7 @@ describe('CreateSections Modal Mode', () => {
   it('renderiza dentro de un modal cuando isModal es true', async () => {
     render(
       <BrowserRouter>
-        <CreateSections isModal isOpen={true} onClose={() => {}} onSuccess={() => {}} />
+        <CreateSections isOpen={true} onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -65,7 +33,7 @@ describe('CreateSections Modal Mode', () => {
   it('no renderiza Header ni Navbar en modo modal', async () => {
     render(
       <BrowserRouter>
-        <CreateSections isModal isOpen={true} onClose={() => {}} onSuccess={() => {}} />
+        <CreateSections isOpen={true} onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -79,7 +47,7 @@ describe('CreateSections Modal Mode', () => {
   it('no renderiza nada cuando isOpen es false', async () => {
     render(
       <BrowserRouter>
-        <CreateSections isModal isOpen={false} onClose={() => {}} onSuccess={() => {}} />
+        <CreateSections isOpen={false} onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -92,7 +60,7 @@ describe('CreateSections Modal Mode', () => {
     const onClose = vi.fn()
     render(
       <BrowserRouter>
-        <CreateSections isModal isOpen={true} onClose={onClose} onSuccess={() => {}} />
+        <CreateSections isOpen={true} onClose={onClose} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 

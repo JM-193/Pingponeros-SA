@@ -17,22 +17,6 @@ const mockSeccion = {
 
 const mockAreas = [{ id: 1, nombre: 'Administración' }]
 
-describe('EditSections Page', () => {
-  beforeEach(() => {
-    vi.resetAllMocks()
-  })
-
-  it('renderiza página en estado de carga sin parámetros de ruta', () => {
-    render(
-      <BrowserRouter>
-        <EditSections />
-      </BrowserRouter>,
-    )
-
-    expect(screen.getByText('Cargando sección...')).toBeInTheDocument()
-  })
-})
-
 describe('EditSections Modal Mode', () => {
   beforeEach(() => {
     vi.resetAllMocks()
@@ -44,7 +28,7 @@ describe('EditSections Modal Mode', () => {
 
     render(
       <BrowserRouter>
-        <EditSections isModal isOpen={true} entityName="Soporte" onClose={() => {}} onSuccess={() => {}} />
+        <EditSections isOpen={true} entityName="Soporte" onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -59,7 +43,7 @@ describe('EditSections Modal Mode', () => {
   it('muestra cargando dentro del modal', () => {
     render(
       <BrowserRouter>
-        <EditSections isModal isOpen={true} entityName="Soporte" onClose={() => {}} onSuccess={() => {}} />
+        <EditSections isOpen={true} entityName="Soporte" onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -73,7 +57,7 @@ describe('EditSections Modal Mode', () => {
 
     render(
       <BrowserRouter>
-        <EditSections isModal isOpen={true} entityName="Soporte" onClose={() => {}} onSuccess={() => {}} />
+        <EditSections isOpen={true} entityName="Soporte" onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -91,7 +75,7 @@ describe('EditSections Modal Mode', () => {
 
     render(
       <BrowserRouter>
-        <EditSections isModal isOpen={true} entityName="Soporte" onClose={onClose} onSuccess={() => {}} />
+        <EditSections isOpen={true} entityName="Soporte" onClose={onClose} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -109,7 +93,7 @@ describe('EditSections Modal Mode', () => {
 
     render(
       <BrowserRouter>
-        <EditSections isModal isOpen={true} entityName="Soporte" onClose={() => {}} onSuccess={() => {}} />
+        <EditSections isOpen={true} entityName="Soporte" onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 

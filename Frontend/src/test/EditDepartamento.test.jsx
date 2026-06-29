@@ -17,22 +17,6 @@ const mockDepartamento = {
 
 const mockAreas = [{ id: 1, nombre: 'Administración' }]
 
-describe('EditDepartments Page', () => {
-  beforeEach(() => {
-    vi.resetAllMocks()
-  })
-
-  it('renderiza página en estado de carga sin parámetros de ruta', () => {
-    render(
-      <BrowserRouter>
-        <EditDepartments />
-      </BrowserRouter>,
-    )
-
-    expect(screen.getByText('Cargando departamento...')).toBeInTheDocument()
-  })
-})
-
 describe('EditDepartments Modal Mode', () => {
   beforeEach(() => {
     vi.resetAllMocks()
@@ -44,7 +28,7 @@ describe('EditDepartments Modal Mode', () => {
 
     render(
       <BrowserRouter>
-        <EditDepartments isModal isOpen={true} entityName="Compras" onClose={() => {}} onSuccess={() => {}} />
+        <EditDepartments isOpen={true} entityName="Compras" onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -59,7 +43,7 @@ describe('EditDepartments Modal Mode', () => {
   it('muestra cargando dentro del modal', () => {
     render(
       <BrowserRouter>
-        <EditDepartments isModal isOpen={true} entityName="Compras" onClose={() => {}} onSuccess={() => {}} />
+        <EditDepartments isOpen={true} entityName="Compras" onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -73,7 +57,7 @@ describe('EditDepartments Modal Mode', () => {
 
     render(
       <BrowserRouter>
-        <EditDepartments isModal isOpen={true} entityName="Compras" onClose={() => {}} onSuccess={() => {}} />
+        <EditDepartments isOpen={true} entityName="Compras" onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -91,7 +75,7 @@ describe('EditDepartments Modal Mode', () => {
 
     render(
       <BrowserRouter>
-        <EditDepartments isModal isOpen={true} entityName="Compras" onClose={onClose} onSuccess={() => {}} />
+        <EditDepartments isOpen={true} entityName="Compras" onClose={onClose} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -109,7 +93,7 @@ describe('EditDepartments Modal Mode', () => {
 
     render(
       <BrowserRouter>
-        <EditDepartments isModal isOpen={true} entityName="Compras" onClose={() => {}} onSuccess={() => {}} />
+        <EditDepartments isOpen={true} entityName="Compras" onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 

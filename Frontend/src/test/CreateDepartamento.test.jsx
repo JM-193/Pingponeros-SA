@@ -7,38 +7,6 @@ import * as areaService from '../services/areaService'
 vi.mock('../services/departmentService')
 vi.mock('../services/areaService')
 
-describe('CreateDepartments Page', () => {
-  beforeEach(() => {
-    vi.resetAllMocks()
-    areaService.obtenerAreas.mockResolvedValue([
-      { id: 1, nombre: 'Administración', descripcion: 'Área' },
-    ])
-  })
-
-  it('renderiza formulario de crear departamento', async () => {
-    render(
-      <BrowserRouter>
-        <CreateDepartments />
-      </BrowserRouter>,
-    )
-
-    expect(await screen.findByRole('heading', { name: /Crear Departamento/i })).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('Nombre del departamento')).toBeInTheDocument()
-  })
-
-  it('renderiza Header y Navbar', async () => {
-    render(
-      <BrowserRouter>
-        <CreateDepartments />
-      </BrowserRouter>,
-    )
-
-    await waitFor(() => {
-      expect(screen.getByText('Página Principal')).toBeInTheDocument()
-    })
-  })
-})
-
 describe('CreateDepartments Modal Mode', () => {
   beforeEach(() => {
     vi.resetAllMocks()
@@ -50,7 +18,7 @@ describe('CreateDepartments Modal Mode', () => {
   it('renderiza dentro de un modal cuando isModal es true', async () => {
     render(
       <BrowserRouter>
-        <CreateDepartments isModal isOpen={true} onClose={() => {}} onSuccess={() => {}} />
+        <CreateDepartments isOpen={true} onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -65,7 +33,7 @@ describe('CreateDepartments Modal Mode', () => {
   it('no renderiza Header ni Navbar en modo modal', async () => {
     render(
       <BrowserRouter>
-        <CreateDepartments isModal isOpen={true} onClose={() => {}} onSuccess={() => {}} />
+        <CreateDepartments isOpen={true} onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -79,7 +47,7 @@ describe('CreateDepartments Modal Mode', () => {
   it('no renderiza nada cuando isOpen es false', async () => {
     render(
       <BrowserRouter>
-        <CreateDepartments isModal isOpen={false} onClose={() => {}} onSuccess={() => {}} />
+        <CreateDepartments isOpen={false} onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -92,7 +60,7 @@ describe('CreateDepartments Modal Mode', () => {
     const onClose = vi.fn()
     render(
       <BrowserRouter>
-        <CreateDepartments isModal isOpen={true} onClose={onClose} onSuccess={() => {}} />
+        <CreateDepartments isOpen={true} onClose={onClose} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
