@@ -273,4 +273,230 @@ public sealed class DtoValidationTests
         // Validar() solo cubre la forma; la complejidad la valida PasswordPolicy aparte.
         Assert.Null(new ChangePasswordDto("correo@ucr.ac.cr", "actual", "nuevaDistinta").Validar());
     }
+
+    // ---------------------------------------------------------------- //
+    // CreateDeclaracionDto                                              //
+    // ---------------------------------------------------------------- //
+    [Fact]
+    public void CreateDeclaracionDto_NumeroPlazaCero_RetornaMensaje()
+    {
+        var dto = new CreateDeclaracionDto(0UL);
+        Assert.Equal("El número de plaza debe ser un entero positivo.", dto.Validar());
+    }
+
+    [Fact]
+    public void CreateDeclaracionDto_NumeroPlazaPositivo_RetornaNull()
+    {
+        Assert.Null(new CreateDeclaracionDto(100UL).Validar());
+    }
+
+    // ---------------------------------------------------------------- //
+    // GuardarDeclaracionDto                                             //
+    // ---------------------------------------------------------------- //
+    private static GuardarDeclaracionDto DtoVacio() =>
+        new(null, null, null, null, null);
+
+    private static GuardarDeclaracionDto DtoConHorario(string entrada = "08:00", string salida = "17:00", string jornada = "Tiempo Completo") =>
+        new(new HorarioInputDto(entrada, salida, jornada), null, null, null, null);
+
+    private static ActividadInputDto ActividadOficialValida() =>
+        new(IdFuncion: 1, IdFuncionPropia: null, TipoFuncion: "Propia de mi puesto", Periodicidad: "Semanal", VecesRealizadas: 1, Duracion: 30);
+
+    private static ActividadInputDto ActividadDefinidaValida() =>
+        new(IdFuncion: null, IdFuncionPropia: 5, TipoFuncion: "Definida por mí", Periodicidad: "Diario", VecesRealizadas: 2, Duracion: 15);
+
+    [Fact]
+    public void GuardarDeclaracionDto_TodoNull_RetornaNull()
+    {
+        Assert.Null(DtoVacio().Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_HorarioValido_RetornaNull()
+    {
+        Assert.Null(DtoConHorario().Validar());
+    }
+
+    [Theory]
+    [InlineData("8:00")]
+    [InlineData("30:00")]
+    [InlineData("")]
+    [InlineData("  ")]
+    public void GuardarDeclaracionDto_HoraEntradaFormatoInvalido_RetornaMensaje(string entrada)
+    {
+        var dto = DtoConHorario(entrada: entrada);
+        Assert.Equal("La hora de entrada debe tener el formato HH:MM.", dto.Validar());
+    }
+
+    [Theory]
+    [InlineData("8:00")]
+    [InlineData("30:00")]
+    [InlineData("")]
+    public void GuardarDeclaracionDto_HoraSalidaFormatoInvalido_RetornaMensaje(string salida)
+    {
+        var dto = DtoConHorario(salida: salida);
+        Assert.Equal("La hora de salida debe tener el formato HH:MM.", dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_JornadaVacia_RetornaMensaje()
+    {
+        var dto = DtoConHorario(jornada: "");
+        Assert.Equal("La jornada laboral es obligatoria.", dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_JornadaMayorA25Caracteres_RetornaMensaje()
+    {
+        var dto = DtoConHorario(jornada: new string('A', 26));
+        Assert.Equal("La jornada laboral es obligatoria.", dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_TiempoDescansoNegativo_RetornaMensaje()
+    {
+        var dto = new GuardarDeclaracionDto(null, -1m, null, null, null);
+        Assert.Equal("El tiempo de descanso no puede ser negativo.", dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_TiempoDescansoCero_RetornaNull()
+    {
+        var dto = new GuardarDeclaracionDto(null, 0m, null, null, null);
+        Assert.Null(dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_HoraExtraSinTiempo_RetornaMensaje()
+    {
+        var dto = new GuardarDeclaracionDto(null, null, new HoraExtraInputDto(null, "Justificacion", false), null, null);
+        Assert.Equal("El tiempo adicional debe ser un valor positivo.", dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_HoraExtraTiempoNegativo_RetornaMensaje()
+    {
+        var dto = new GuardarDeclaracionDto(null, null, new HoraExtraInputDto(-10m, "Justificacion", false), null, null);
+        Assert.Equal("El tiempo adicional debe ser un valor positivo.", dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_HoraExtraSinJustificacion_RetornaMensaje()
+    {
+        var dto = new GuardarDeclaracionDto(null, null, new HoraExtraInputDto(60m, "", false), null, null);
+        Assert.Equal("Debe justificar el tiempo adicional fuera de su jornada.", dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_HoraExtraValida_RetornaNull()
+    {
+        var dto = new GuardarDeclaracionDto(null, null, new HoraExtraInputDto(60m, "Reuniones", true), null, null);
+        Assert.Null(dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_PermisoSinDias_RetornaMensaje()
+    {
+        var dto = new GuardarDeclaracionDto(null, null, null, new PermisoAusenciaInputDto(null, "Permiso médico", false), null);
+        Assert.Equal("Los días de permiso o licencia deben ser un valor positivo.", dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_PermisoDiasNegativos_RetornaMensaje()
+    {
+        var dto = new GuardarDeclaracionDto(null, null, null, new PermisoAusenciaInputDto(-1m, "Permiso médico", false), null);
+        Assert.Equal("Los días de permiso o licencia deben ser un valor positivo.", dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_PermisoSinJustificacion_RetornaMensaje()
+    {
+        var dto = new GuardarDeclaracionDto(null, null, null, new PermisoAusenciaInputDto(2m, " ", false), null);
+        Assert.Equal("Debe indicar cuál es el permiso o licencia.", dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_PermisoValido_RetornaNull()
+    {
+        var dto = new GuardarDeclaracionDto(null, null, null, new PermisoAusenciaInputDto(2m, "Permiso médico", true), null);
+        Assert.Null(dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_ActividadOficialValida_RetornaNull()
+    {
+        var dto = new GuardarDeclaracionDto(null, null, null, null, [ActividadOficialValida()]);
+        Assert.Null(dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_ActividadDefinidaValida_RetornaNull()
+    {
+        var dto = new GuardarDeclaracionDto(null, null, null, null, [ActividadDefinidaValida()]);
+        Assert.Null(dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_ActividadSinTipo_RetornaMensaje()
+    {
+        var act = new ActividadInputDto(1, null, "", "Semanal", 1, 30);
+        var dto = new GuardarDeclaracionDto(null, null, null, null, [act]);
+        Assert.Equal("Cada actividad debe indicar su tipo de función.", dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_ActividadTipoDesconocido_RetornaMensaje()
+    {
+        var act = new ActividadInputDto(1, null, "Tipo inválido", "Semanal", 1, 30);
+        var dto = new GuardarDeclaracionDto(null, null, null, null, [act]);
+        Assert.Contains("Tipo de función no válido", dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_ActividadOficialSinIdFuncion_RetornaMensaje()
+    {
+        var act = new ActividadInputDto(null, null, "Propia de mi puesto", "Semanal", 1, 30);
+        var dto = new GuardarDeclaracionDto(null, null, null, null, [act]);
+        Assert.Equal("La actividad oficial debe referenciar una función válida del catálogo.", dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_ActividadOficialConIdFuncionPropia_RetornaMensaje()
+    {
+        var act = new ActividadInputDto(1, 2, "Propia de mi puesto", "Semanal", 1, 30);
+        var dto = new GuardarDeclaracionDto(null, null, null, null, [act]);
+        Assert.Equal("La actividad oficial debe referenciar una función válida del catálogo.", dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_ActividadDefinidaSinIdFuncionPropia_RetornaMensaje()
+    {
+        var act = new ActividadInputDto(null, null, "Definida por mí", "Semanal", 1, 30);
+        var dto = new GuardarDeclaracionDto(null, null, null, null, [act]);
+        Assert.Equal("La actividad «Definida por mí» debe referenciar una función propia válida.", dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_ActividadSinPeriodicidad_RetornaMensaje()
+    {
+        var act = new ActividadInputDto(1, null, "Propia de mi puesto", "", 1, 30);
+        var dto = new GuardarDeclaracionDto(null, null, null, null, [act]);
+        Assert.Equal("Cada actividad debe indicar su periodicidad.", dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_ActividadVecesRealizadasCero_RetornaMensaje()
+    {
+        var act = new ActividadInputDto(1, null, "Propia de mi puesto", "Semanal", 0, 30);
+        var dto = new GuardarDeclaracionDto(null, null, null, null, [act]);
+        Assert.Equal("La cantidad de veces realizada debe ser al menos 1.", dto.Validar());
+    }
+
+    [Fact]
+    public void GuardarDeclaracionDto_ActividadDuracionCero_RetornaMensaje()
+    {
+        var act = new ActividadInputDto(1, null, "Propia de mi puesto", "Semanal", 1, 0);
+        var dto = new GuardarDeclaracionDto(null, null, null, null, [act]);
+        Assert.Equal("La duración de la actividad debe ser al menos 1 minuto.", dto.Validar());
+    }
 }
