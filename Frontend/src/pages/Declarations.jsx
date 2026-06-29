@@ -41,6 +41,8 @@ export default function Declarations() {
     }
   }, [correo])
 
+  const continueLabel = tieneActiva ? 'Continuar Declaración' : 'Iniciar Declaración'
+
   return (
     <PageLayout>
       <h1
@@ -79,7 +81,7 @@ export default function Declarations() {
 
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '28px' }}>
         <FormButton
-          label={loading ? 'Cargando...' : tieneActiva ? 'Continuar declaración' : 'Rellenar formulario'}
+          label={loading ? 'Cargando...' : continueLabel}
           type="button"
           variant="primary"
           onClick={() => navigate('/declaraciones/formulario')}

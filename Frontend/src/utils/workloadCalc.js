@@ -1,6 +1,6 @@
 import { JORNADA_HORAS, PERIODICIDAD_FACTOR_SEMANAL } from '../constants/declaracion'
 
-// Minutos semanales que consume una actividad: duración (min) × veces × factor de periodicidad.
+// Minutos semanales que consume una actividad: duración (min) x veces x factor de periodicidad.
 export function actividadMinutosSemanales(actividad) {
   const factor = PERIODICIDAD_FACTOR_SEMANAL[actividad?.periodicidad] ?? 0
   const veces = Number(actividad?.vecesRealizadas) || 0
@@ -14,7 +14,7 @@ export function totalMinutosSemanales(actividades) {
 
 /**
  * Compara la carga total de las actividades con las horas de la jornada y devuelve el nivel de aviso.
- * nivel: 'ok' | 'excede1' (> 1×) | 'excede15' (> 1.5×). Es solo informativo (no bloquea).
+ * nivel: 'ok' | 'excede1' (> 1x) | 'excede15' (> 1.5x). Es solo informativo (no bloquea).
  */
 export function evaluarCarga(actividades, jornadaLaboral) {
   const totalMin = totalMinutosSemanales(actividades)

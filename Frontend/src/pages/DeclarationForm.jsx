@@ -343,11 +343,11 @@ export default function DeclarationForm() {
     const next = {}
     if (form.actividades.length === 0) next.actividades = 'Agregue al menos una función.'
     if (form.permisoAplica) {
-      if (!(Number(form.permisoDias) > 0)) next.permisoDias = 'Indique los días.'
+      if (Number(form.permisoDias) <= 0) next.permisoDias = 'Indique los días.'
       if (!form.permisoJustificacion.trim()) next.permisoJustificacion = 'Indique cuál es el permiso o licencia.'
     }
     if (form.horaExtraAplica) {
-      if (!(Number(form.horaExtraTiempo) > 0)) next.horaExtraTiempo = 'Indique los minutos.'
+      if (Number(form.horaExtraTiempo) <= 0) next.horaExtraTiempo = 'Indique los minutos.'
       if (!form.horaExtraJustificacion.trim()) next.horaExtraJustificacion = 'Justifique el tiempo adicional.'
     }
     setErrors(next)
@@ -424,7 +424,7 @@ export default function DeclarationForm() {
 
   const plazaOptions = autocompletado.map((p) => ({
     value: String(p.numeroPlaza),
-    label: `Plaza N.º ${p.numeroPlaza}${p.cargo ? ` — ${p.cargo}` : ''}`,
+    label: `Plaza N.º ${p.numeroPlaza}${p.cargo ? ' — ' + p.cargo : ''}`,
   }))
 
   const carga = useMemo(() => evaluarCarga(form.actividades, form.jornadaLaboral), [form.actividades, form.jornadaLaboral])
@@ -617,12 +617,14 @@ function CargaBanner({ carga }) {
     excede15: { bg: COLORS.errorSoftBg, color: COLORS.errorStrong, border: COLORS.errorSoftBorder },
   }[carga.nivel]
 
+  const excede_1x = carga.nivel === 'excede1'
+        ? 'La carga supera su jornada semanal (1x).'
+        : 'La carga está dentro de su jornada semanal.'
+
   const mensaje =
     carga.nivel === 'excede15'
-      ? 'La carga supera 1.5× su jornada semanal. Revise las funciones declaradas.'
-      : carga.nivel === 'excede1'
-        ? 'La carga supera su jornada semanal (1×).'
-        : 'La carga está dentro de su jornada semanal.'
+      ? 'La carga supera 1.5x su jornada semanal. Revise las funciones declaradas.'
+      : excede_1x
 
   return (
     <div
@@ -708,10 +710,10 @@ function StepAdicional({ form, errors, titular, setField, onInput }) {
       <p style={stepSubtitleStyle}>Información Adicional</p>
 
       <FormInput
-        label="Tiempo de descanso al día (almuerzo y café)"
+        label="Tiempo de descanso (almuerzo, café, etc) total al día. (minutos)"
         id="descanso"
         name="descanso"
-        type="time"
+        type="number"
         value={form.descanso}
         onChange={onInput}
       />

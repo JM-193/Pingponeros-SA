@@ -1,6 +1,6 @@
 // Constantes del formulario de declaración jurada (cargas de trabajo).
 
-// Jornadas laborales y sus horas semanales (base para el chequeo de carga 1× / 1.5×).
+// Jornadas laborales y sus horas semanales (base para el chequeo de carga 1x / 1.5x).
 export const JORNADA_OPTIONS = [
   { value: 'Tiempo Completo', label: 'Tiempo Completo', horas: 48 },
   { value: 'Tres Cuartos de Tiempo', label: 'Tres Cuartos de Tiempo', horas: 36 },
