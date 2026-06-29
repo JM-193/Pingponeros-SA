@@ -200,7 +200,7 @@ export default function Login() {
           disabled={loading}
           style={{
             padding: '14px',
-            backgroundColor: loading ? '#5a7db5' : COLORS.authBtn,
+            backgroundColor: loading ? COLORS.authBtnDisabled : COLORS.authBtn,
             color: COLORS.white,
             border: 'none',
             borderRadius: '4px',

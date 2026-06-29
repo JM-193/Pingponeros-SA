@@ -1,14 +1,15 @@
 ﻿// Footer.test.jsx
 import { render, screen } from '@testing-library/react'
 import Footer from '../components/Footer'
+import { COLORS } from '../constants/colors'
 
 describe('Footer', () => {
   it('renderiza footer con fondo oscuro', () => {
     const { container } = render(<Footer />)
 
     const footer = container.querySelector('footer')
-    expect(footer).toHaveStyle('background-color: #2D2F34')
-    expect(footer).toHaveStyle('color: #fff')
+    expect(footer).toHaveStyle(`background-color: ${COLORS.footerBg}`)
+    expect(footer).toHaveStyle(`color: ${COLORS.white}`)
   })
 
   it('renderiza logo de UCR', () => {

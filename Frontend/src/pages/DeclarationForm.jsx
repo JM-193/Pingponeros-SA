@@ -613,7 +613,7 @@ function CargaBanner({ carga }) {
 
   const palette = {
     ok: { bg: COLORS.successSoftBg, color: COLORS.successStrong, border: COLORS.successSoftBorder },
-    excede1: { bg: '#fff8e1', color: '#8a6d00', border: '#ffe082' },
+    excede1: { bg: COLORS.warnSoftBg, color: COLORS.warnStrong, border: COLORS.warnSoftBorder },
     excede15: { bg: COLORS.errorSoftBg, color: COLORS.errorStrong, border: COLORS.errorSoftBorder },
   }[carga.nivel]
 

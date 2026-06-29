@@ -519,7 +519,7 @@ function ProfileDropdown({
               gap: '12px',
               width: '100%',
               padding: '14px 16px',
-              borderBottom: '1px solid #eee',
+              borderBottom: `1px solid ${COLORS.borderSubtle}`,
               backgroundColor: COLORS.white,
             }}
           >
@@ -602,7 +602,7 @@ function ProfileDropdown({
               padding: '12px 16px',
               textAlign: 'left',
               border: 'none',
-              borderTop: '1px solid #fff',
+              borderTop: `1px solid ${COLORS.white}`,
               background: 'none',
               fontSize: '13px',
               color: COLORS.danger,

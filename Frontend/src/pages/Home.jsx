@@ -45,7 +45,7 @@ export default function Home() {
           letterSpacing: '0.04em',
           textAlign: 'center',
           margin: '0 0 10px',
-          color: '#1a1a1a',
+          color: COLORS.labelColor,
         }}
       >
         Vicerrectoría de Administración
@@ -59,7 +59,7 @@ export default function Home() {
           letterSpacing: '0.04em',
           textAlign: 'center',
           margin: '0 0 28px',
-          color: '#1a1a1a',
+          color: COLORS.labelColor,
         }}
       >
         Aplicación de Cargas de Trabajo
@@ -72,7 +72,7 @@ export default function Home() {
           textAlign: 'justify',
           maxWidth: '820px',
           margin: '0 auto 36px',
-          color: '#333',
+          color: COLORS.textDark,
         }}
       >
         La herramienta para la aplicación de cargas de trabajo, tiene por objetivo recopilar
@@ -91,7 +91,7 @@ export default function Home() {
           fontSize: 'clamp(15px, 1.5vw, 20px)',
           textAlign: 'center',
           margin: '0 0 16px',
-          color: '#1a1a1a',
+          color: COLORS.labelColor,
         }}
       >
         Declaraciones Jurada del Puesto de Trabajo
@@ -112,7 +112,7 @@ export default function Home() {
         style={{
           maxWidth: '720px',
           margin: '0 auto',
-          backgroundColor: '#d9d9d9',
+          backgroundColor: COLORS.surfacePanel,
           borderRadius: '8px',
           padding: '24px',
         }}
@@ -123,7 +123,7 @@ export default function Home() {
             fontSize: '15px',
             textAlign: 'center',
             margin: '0 0 18px',
-            color: '#1a1a1a',
+            color: COLORS.labelColor,
           }}
         >
           Historial de Declaraciones Juradas
