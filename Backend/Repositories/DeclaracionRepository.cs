@@ -10,12 +10,96 @@ namespace Backend.Repositories;
 
 internal sealed class DeclaracionRepository : IDeclaracionRepository
 {
+    // Cabecera (DECLARACIONES_JURADAS)
+    private const string ColumnIdDeclaracion = "ID_DECLARACION";
+    private const string ColumnNumeroPlaza = "NUMERO_PLAZA";
+    private const string ColumnCorreo = "CORREO_INSTITUCIONAL";
+    private const string ColumnFechaDeclaracion = "FECHA_DECLARACION";
+    private const string ColumnCompleta = "COMPLETA";
+
+    // Actividades (ACTIVIDADES)
+    private const string ColumnIdActividad = "ID_ACTIVIDAD";
+    private const string ColumnIdFuncion = "ID_FUNCION";
+    private const string ColumnIdFuncionPropia = "ID_FUNCION_PROPIA";
+    private const string ColumnTipoFuncion = "TIPO_FUNCION";
+    private const string ColumnPeriodicidad = "PERIODICIDAD";
+    private const string ColumnVecesRealizadas = "VECES_REALIZADAS";
+    private const string ColumnDuracion = "DURACION";
+    private const string ColumnNombre = "NOMBRE";
+    private const string ColumnDescripcion = "DESCRIPCION";
+
+    // Tablas hijas (horario, descanso, horas extra, permiso)
+    private const string ColumnIdHorarioLaboral = "ID_HORARIO_LABORAL";
+    private const string ColumnHoraEntrada = "HORA_ENTRADA";
+    private const string ColumnHoraSalida = "HORA_SALIDA";
+    private const string ColumnJornadaLaboral = "JORNADA_LABORAL";
+    private const string ColumnIdDescanso = "ID_DESCANSO";
+    private const string ColumnTiempo = "TIEMPO";
+    private const string ColumnIdHorasExtras = "ID_HORAS_EXTRAS";
+    private const string ColumnTiempoAdicional = "TIEMPO_ADICIONAL";
+    private const string ColumnJustificacion = "JUSTIFICACION";
+    private const string ColumnConocimientoJefatura = "CONOCIMIENTO_JEFATURA";
+    private const string ColumnIdPermisoAusencia = "ID_PERMISO_AUSENCIA";
+    private const string ColumnDias = "DIAS";
+
+    // Columnas derivadas (datos de plaza / autocompletado)
+    private const string ColumnCargo = "CARGO";
+    private const string ColumnClaseOcupacional = "CLASE_OCUPACIONAL";
+    private const string ColumnLugarTrabajo = "LUGAR_TRABAJO";
+    private const string ColumnTitular = "TITULAR";
+    private const string ColumnIdPuesto = "ID_PUESTO";
+
     private static readonly string[] TablasHijas =
         ["ACTIVIDADES", "HORARIOS_LABORALES", "DESCANSOS", "HORAS_EXTRAS", "PERMISOS_AUSENCIA"];
 
     private readonly IQueryExecutor _q;
 
     public DeclaracionRepository(IQueryExecutor q) => _q = q;
+
+    private static void AgregarParamCorreo(OracleCommand cmd, string correo)
+    {
+        OracleCommandHelpers.AddStringParam(cmd, ":correo", correo);
+    }
+
+    private static void AgregarParamNumeroPlaza(OracleCommand cmd, ulong numeroPlaza)
+    {
+        OracleCommandHelpers.AddUInt64Param(cmd, ":numeroPlaza", numeroPlaza);
+    }
+
+    private static void AgregarParamId(OracleCommand cmd, int id)
+    {
+        OracleCommandHelpers.AddInt32Param(cmd, ":id", id);
+    }
+
+    private static void AgregarParametrosHorario(OracleCommand cmd, int id, HorarioLaboral horario)
+    {
+        AgregarParamId(cmd, id);
+        OracleCommandHelpers.AddStringParam(cmd, ":entrada", horario.HoraEntrada);
+        OracleCommandHelpers.AddStringParam(cmd, ":salida", horario.HoraSalida);
+        OracleCommandHelpers.AddStringParam(cmd, ":jornada", horario.JornadaLaboral);
+    }
+
+    private static void AgregarParametrosDescanso(OracleCommand cmd, int id, Descanso descanso)
+    {
+        AgregarParamId(cmd, id);
+        OracleCommandHelpers.AddDecimalParam(cmd, ":tiempo", descanso.Tiempo);
+    }
+
+    private static void AgregarParametrosHoraExtra(OracleCommand cmd, int id, HoraExtra horaExtra)
+    {
+        AgregarParamId(cmd, id);
+        OracleCommandHelpers.AddDecimalParam(cmd, ":tiempo", horaExtra.TiempoAdicional);
+        OracleCommandHelpers.AddStringParam(cmd, ":justificacion", horaExtra.Justificacion);
+        OracleCommandHelpers.AddInt32Param(cmd, ":conocimiento", horaExtra.ConocimientoJefatura);
+    }
+
+    private static void AgregarParametrosPermiso(OracleCommand cmd, int id, PermisoAusencia permiso)
+    {
+        AgregarParamId(cmd, id);
+        OracleCommandHelpers.AddDecimalParam(cmd, ":dias", permiso.Dias);
+        OracleCommandHelpers.AddStringParam(cmd, ":justificacion", permiso.Justificacion);
+        OracleCommandHelpers.AddInt32Param(cmd, ":conocimiento", permiso.ConocimientoJefatura);
+    }
 
     private static string? LeerStringOpcional(DbDataReader r, string columna)
     {
@@ -28,24 +112,24 @@ internal sealed class DeclaracionRepository : IDeclaracionRepository
     // ---------------------------------------------------------------- //
     private static Declaracion MapearCabecera(DbDataReader r) => new()
     {
-        Id = r.GetInt32(r.GetOrdinal("ID_DECLARACION")),
-        NumeroPlaza = Convert.ToUInt64(r.GetValue(r.GetOrdinal("NUMERO_PLAZA")), CultureInfo.InvariantCulture),
-        CorreoInstitucional = r.GetString(r.GetOrdinal("CORREO_INSTITUCIONAL")),
-        FechaDeclaracion = r.GetDateTime(r.GetOrdinal("FECHA_DECLARACION")),
-        Completa = r.GetInt32(r.GetOrdinal("COMPLETA")),
+        Id = r.GetInt32(r.GetOrdinal(ColumnIdDeclaracion)),
+        NumeroPlaza = Convert.ToUInt64(r.GetValue(r.GetOrdinal(ColumnNumeroPlaza)), CultureInfo.InvariantCulture),
+        CorreoInstitucional = r.GetString(r.GetOrdinal(ColumnCorreo)),
+        FechaDeclaracion = r.GetDateTime(r.GetOrdinal(ColumnFechaDeclaracion)),
+        Completa = r.GetInt32(r.GetOrdinal(ColumnCompleta)),
     };
 
     private static Actividad MapearActividad(DbDataReader r) => new()
     {
-        Id = r.GetInt32(r.GetOrdinal("ID_ACTIVIDAD")),
-        IdFuncion = r.IsDBNull(r.GetOrdinal("ID_FUNCION")) ? null : r.GetInt32(r.GetOrdinal("ID_FUNCION")),
-        IdFuncionPropia = r.IsDBNull(r.GetOrdinal("ID_FUNCION_PROPIA")) ? null : r.GetInt32(r.GetOrdinal("ID_FUNCION_PROPIA")),
-        TipoFuncion = r.GetString(r.GetOrdinal("TIPO_FUNCION")),
-        Periodicidad = r.GetString(r.GetOrdinal("PERIODICIDAD")),
-        VecesRealizadas = r.GetInt32(r.GetOrdinal("VECES_REALIZADAS")),
-        Duracion = r.GetInt32(r.GetOrdinal("DURACION")),
-        Nombre = r.IsDBNull(r.GetOrdinal("NOMBRE")) ? null : r.GetString(r.GetOrdinal("NOMBRE")),
-        Descripcion = r.IsDBNull(r.GetOrdinal("DESCRIPCION")) ? null : r.GetString(r.GetOrdinal("DESCRIPCION")),
+        Id = r.GetInt32(r.GetOrdinal(ColumnIdActividad)),
+        IdFuncion = r.IsDBNull(r.GetOrdinal(ColumnIdFuncion)) ? null : r.GetInt32(r.GetOrdinal(ColumnIdFuncion)),
+        IdFuncionPropia = r.IsDBNull(r.GetOrdinal(ColumnIdFuncionPropia)) ? null : r.GetInt32(r.GetOrdinal(ColumnIdFuncionPropia)),
+        TipoFuncion = r.GetString(r.GetOrdinal(ColumnTipoFuncion)),
+        Periodicidad = r.GetString(r.GetOrdinal(ColumnPeriodicidad)),
+        VecesRealizadas = r.GetInt32(r.GetOrdinal(ColumnVecesRealizadas)),
+        Duracion = r.GetInt32(r.GetOrdinal(ColumnDuracion)),
+        Nombre = r.IsDBNull(r.GetOrdinal(ColumnNombre)) ? null : r.GetString(r.GetOrdinal(ColumnNombre)),
+        Descripcion = r.IsDBNull(r.GetOrdinal(ColumnDescripcion)) ? null : r.GetString(r.GetOrdinal(ColumnDescripcion)),
     };
 
     // ---------------------------------------------------------------- //
@@ -61,7 +145,7 @@ internal sealed class DeclaracionRepository : IDeclaracionRepository
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddStringParam(cmd, ":correo", correo);
+            AgregarParamCorreo(cmd, correo);
             return cmd;
         }).ConfigureAwait(false);
 
@@ -78,7 +162,7 @@ internal sealed class DeclaracionRepository : IDeclaracionRepository
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddStringParam(cmd, ":correo", correo);
+            AgregarParamCorreo(cmd, correo);
             return cmd;
         }).ConfigureAwait(false);
 
@@ -98,6 +182,12 @@ internal sealed class DeclaracionRepository : IDeclaracionRepository
     // ---------------------------------------------------------------- //
     // Crear / completar / cancelar                                     //
     // ---------------------------------------------------------------- //
+    private static void AgregarParametrosCrear(OracleCommand cmd, ulong numeroPlaza, string correo)
+    {
+        AgregarParamNumeroPlaza(cmd, numeroPlaza);
+        AgregarParamCorreo(cmd, correo);
+    }
+
     public async Task<int> CrearAsync(ulong numeroPlaza, string correo)
     {
         const string sql = """
@@ -109,8 +199,7 @@ internal sealed class DeclaracionRepository : IDeclaracionRepository
         var result = await _q.ExecuteScalarAsync(connection =>
         {
             var cmd = new OracleCommand(sql, connection) { BindByName = true };
-            OracleCommandHelpers.AddUInt64Param(cmd, ":numeroPlaza", numeroPlaza);
-            OracleCommandHelpers.AddStringParam(cmd, ":correo", correo);
+            AgregarParametrosCrear(cmd, numeroPlaza, correo);
             cmd.Parameters.Add(new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output));
             return cmd;
         }).ConfigureAwait(false);
@@ -151,57 +240,35 @@ internal sealed class DeclaracionRepository : IDeclaracionRepository
             foreach (var tabla in TablasHijas)
             {
                 await EjecutarAsync(connection, tx, $"DELETE FROM {tabla} WHERE ID_DECLARACION = :id",
-                    cmd => OracleCommandHelpers.AddInt32Param(cmd, ":id", id)).ConfigureAwait(false);
+                    cmd => AgregarParamId(cmd, id)).ConfigureAwait(false);
             }
 
             if (detalle.Horario is { } horario)
             {
                 await EjecutarAsync(connection, tx,
                     "INSERT INTO HORARIOS_LABORALES (ID_DECLARACION, HORA_ENTRADA, HORA_SALIDA, JORNADA_LABORAL) VALUES (:id, :entrada, :salida, :jornada)",
-                    cmd =>
-                    {
-                        OracleCommandHelpers.AddInt32Param(cmd, ":id", id);
-                        OracleCommandHelpers.AddStringParam(cmd, ":entrada", horario.HoraEntrada);
-                        OracleCommandHelpers.AddStringParam(cmd, ":salida", horario.HoraSalida);
-                        OracleCommandHelpers.AddStringParam(cmd, ":jornada", horario.JornadaLaboral);
-                    }).ConfigureAwait(false);
+                    cmd => AgregarParametrosHorario(cmd, id, horario)).ConfigureAwait(false);
             }
 
             if (detalle.Descanso is { } descanso)
             {
                 await EjecutarAsync(connection, tx,
                     "INSERT INTO DESCANSOS (ID_DECLARACION, TIEMPO) VALUES (:id, :tiempo)",
-                    cmd =>
-                    {
-                        OracleCommandHelpers.AddInt32Param(cmd, ":id", id);
-                        OracleCommandHelpers.AddDecimalParam(cmd, ":tiempo", descanso.Tiempo);
-                    }).ConfigureAwait(false);
+                    cmd => AgregarParametrosDescanso(cmd, id, descanso)).ConfigureAwait(false);
             }
 
             if (detalle.HoraExtra is { } horaExtra)
             {
                 await EjecutarAsync(connection, tx,
                     "INSERT INTO HORAS_EXTRAS (ID_DECLARACION, TIEMPO_ADICIONAL, JUSTIFICACION, CONOCIMIENTO_JEFATURA) VALUES (:id, :tiempo, :justificacion, :conocimiento)",
-                    cmd =>
-                    {
-                        OracleCommandHelpers.AddInt32Param(cmd, ":id", id);
-                        OracleCommandHelpers.AddDecimalParam(cmd, ":tiempo", horaExtra.TiempoAdicional);
-                        OracleCommandHelpers.AddStringParam(cmd, ":justificacion", horaExtra.Justificacion);
-                        OracleCommandHelpers.AddInt32Param(cmd, ":conocimiento", horaExtra.ConocimientoJefatura);
-                    }).ConfigureAwait(false);
+                    cmd => AgregarParametrosHoraExtra(cmd, id, horaExtra)).ConfigureAwait(false);
             }
 
             if (detalle.PermisoAusencia is { } permiso)
             {
                 await EjecutarAsync(connection, tx,
                     "INSERT INTO PERMISOS_AUSENCIA (ID_DECLARACION, DIAS, JUSTIFICACION, CONOCIMIENTO_JEFATURA) VALUES (:id, :dias, :justificacion, :conocimiento)",
-                    cmd =>
-                    {
-                        OracleCommandHelpers.AddInt32Param(cmd, ":id", id);
-                        OracleCommandHelpers.AddDecimalParam(cmd, ":dias", permiso.Dias);
-                        OracleCommandHelpers.AddStringParam(cmd, ":justificacion", permiso.Justificacion);
-                        OracleCommandHelpers.AddInt32Param(cmd, ":conocimiento", permiso.ConocimientoJefatura);
-                    }).ConfigureAwait(false);
+                    cmd => AgregarParametrosPermiso(cmd, id, permiso)).ConfigureAwait(false);
             }
 
             // Inserta todas las actividades en una sola llamada (paquete PKG_DECLARACIONES, FORALL).
@@ -290,8 +357,8 @@ internal sealed class DeclaracionRepository : IDeclaracionRepository
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddUInt64Param(cmd, ":numeroPlaza", cabecera.NumeroPlaza);
-            OracleCommandHelpers.AddStringParam(cmd, ":correo", cabecera.CorreoInstitucional);
+            AgregarParamNumeroPlaza(cmd, cabecera.NumeroPlaza);
+            AgregarParamCorreo(cmd, cabecera.CorreoInstitucional);
             return cmd;
         }, async reader =>
         {
@@ -305,11 +372,11 @@ internal sealed class DeclaracionRepository : IDeclaracionRepository
             id,
             r => new HorarioLaboral
             {
-                Id = r.GetInt32(r.GetOrdinal("ID_HORARIO_LABORAL")),
-                IdDeclaracion = r.GetInt32(r.GetOrdinal("ID_DECLARACION")),
-                HoraEntrada = r.GetString(r.GetOrdinal("HORA_ENTRADA")),
-                HoraSalida = r.GetString(r.GetOrdinal("HORA_SALIDA")),
-                JornadaLaboral = r.GetString(r.GetOrdinal("JORNADA_LABORAL")),
+                Id = r.GetInt32(r.GetOrdinal(ColumnIdHorarioLaboral)),
+                IdDeclaracion = r.GetInt32(r.GetOrdinal(ColumnIdDeclaracion)),
+                HoraEntrada = r.GetString(r.GetOrdinal(ColumnHoraEntrada)),
+                HoraSalida = r.GetString(r.GetOrdinal(ColumnHoraSalida)),
+                JornadaLaboral = r.GetString(r.GetOrdinal(ColumnJornadaLaboral)),
             }).ConfigureAwait(false);
 
         detalle.Descanso = await LeerUnoAsync(
@@ -317,9 +384,9 @@ internal sealed class DeclaracionRepository : IDeclaracionRepository
             id,
             r => new Descanso
             {
-                Id = r.GetInt32(r.GetOrdinal("ID_DESCANSO")),
-                IdDeclaracion = r.GetInt32(r.GetOrdinal("ID_DECLARACION")),
-                Tiempo = r.GetDecimal(r.GetOrdinal("TIEMPO")),
+                Id = r.GetInt32(r.GetOrdinal(ColumnIdDescanso)),
+                IdDeclaracion = r.GetInt32(r.GetOrdinal(ColumnIdDeclaracion)),
+                Tiempo = r.GetDecimal(r.GetOrdinal(ColumnTiempo)),
             }).ConfigureAwait(false);
 
         detalle.HoraExtra = await LeerUnoAsync(
@@ -327,11 +394,11 @@ internal sealed class DeclaracionRepository : IDeclaracionRepository
             id,
             r => new HoraExtra
             {
-                Id = r.GetInt32(r.GetOrdinal("ID_HORAS_EXTRAS")),
-                IdDeclaracion = r.GetInt32(r.GetOrdinal("ID_DECLARACION")),
-                TiempoAdicional = r.GetDecimal(r.GetOrdinal("TIEMPO_ADICIONAL")),
-                Justificacion = r.GetString(r.GetOrdinal("JUSTIFICACION")),
-                ConocimientoJefatura = r.GetInt32(r.GetOrdinal("CONOCIMIENTO_JEFATURA")),
+                Id = r.GetInt32(r.GetOrdinal(ColumnIdHorasExtras)),
+                IdDeclaracion = r.GetInt32(r.GetOrdinal(ColumnIdDeclaracion)),
+                TiempoAdicional = r.GetDecimal(r.GetOrdinal(ColumnTiempoAdicional)),
+                Justificacion = r.GetString(r.GetOrdinal(ColumnJustificacion)),
+                ConocimientoJefatura = r.GetInt32(r.GetOrdinal(ColumnConocimientoJefatura)),
             }).ConfigureAwait(false);
 
         detalle.PermisoAusencia = await LeerUnoAsync(
@@ -339,11 +406,11 @@ internal sealed class DeclaracionRepository : IDeclaracionRepository
             id,
             r => new PermisoAusencia
             {
-                Id = r.GetInt32(r.GetOrdinal("ID_PERMISO_AUSENCIA")),
-                IdDeclaracion = r.GetInt32(r.GetOrdinal("ID_DECLARACION")),
-                Dias = r.GetDecimal(r.GetOrdinal("DIAS")),
-                Justificacion = r.GetString(r.GetOrdinal("JUSTIFICACION")),
-                ConocimientoJefatura = r.GetInt32(r.GetOrdinal("CONOCIMIENTO_JEFATURA")),
+                Id = r.GetInt32(r.GetOrdinal(ColumnIdPermisoAusencia)),
+                IdDeclaracion = r.GetInt32(r.GetOrdinal(ColumnIdDeclaracion)),
+                Dias = r.GetDecimal(r.GetOrdinal(ColumnDias)),
+                Justificacion = r.GetString(r.GetOrdinal(ColumnJustificacion)),
+                ConocimientoJefatura = r.GetInt32(r.GetOrdinal(ColumnConocimientoJefatura)),
             }).ConfigureAwait(false);
 
         detalle.Actividades = await _q.QueryAsync(connection =>
@@ -404,7 +471,7 @@ internal sealed class DeclaracionRepository : IDeclaracionRepository
             {
                 BindByName = true,
             };
-            OracleCommandHelpers.AddStringParam(cmd, ":correo", correo);
+            AgregarParamCorreo(cmd, correo);
             return cmd;
         }, async reader =>
         {
@@ -441,27 +508,27 @@ internal sealed class DeclaracionRepository : IDeclaracionRepository
 
     private static DeclaracionResumen MapearResumen(DbDataReader r) => new()
     {
-        Id = r.GetInt32(r.GetOrdinal("ID_DECLARACION")),
-        NumeroPlaza = Convert.ToUInt64(r.GetValue(r.GetOrdinal("NUMERO_PLAZA")), CultureInfo.InvariantCulture),
-        Cargo = LeerStringOpcional(r, "CARGO"),
-        FechaDeclaracion = r.GetDateTime(r.GetOrdinal("FECHA_DECLARACION")),
-        Completa = r.GetInt32(r.GetOrdinal("COMPLETA")),
+        Id = r.GetInt32(r.GetOrdinal(ColumnIdDeclaracion)),
+        NumeroPlaza = Convert.ToUInt64(r.GetValue(r.GetOrdinal(ColumnNumeroPlaza)), CultureInfo.InvariantCulture),
+        Cargo = LeerStringOpcional(r, ColumnCargo),
+        FechaDeclaracion = r.GetDateTime(r.GetOrdinal(ColumnFechaDeclaracion)),
+        Completa = r.GetInt32(r.GetOrdinal(ColumnCompleta)),
     };
 
     private static DatosAutocompletado MapearAutocompletado(DbDataReader r) => new()
     {
-        NumeroPlaza = Convert.ToUInt64(r.GetValue(r.GetOrdinal("NUMERO_PLAZA")), CultureInfo.InvariantCulture),
-        IdPuesto = r.GetInt32(r.GetOrdinal("ID_PUESTO")),
-        Cargo = LeerStringOpcional(r, "CARGO"),
-        ClaseOcupacional = LeerStringOpcional(r, "CLASE_OCUPACIONAL") ?? string.Empty,
-        LugarTrabajo = LeerStringOpcional(r, "LUGAR_TRABAJO") ?? string.Empty,
-        Titular = LeerStringOpcional(r, "TITULAR") ?? string.Empty,
+        NumeroPlaza = Convert.ToUInt64(r.GetValue(r.GetOrdinal(ColumnNumeroPlaza)), CultureInfo.InvariantCulture),
+        IdPuesto = r.GetInt32(r.GetOrdinal(ColumnIdPuesto)),
+        Cargo = LeerStringOpcional(r, ColumnCargo),
+        ClaseOcupacional = LeerStringOpcional(r, ColumnClaseOcupacional) ?? string.Empty,
+        LugarTrabajo = LeerStringOpcional(r, ColumnLugarTrabajo) ?? string.Empty,
+        Titular = LeerStringOpcional(r, ColumnTitular) ?? string.Empty,
     };
 
     private static void AplicarDatosPlaza(DbDataReader r, DeclaracionDetalle detalle)
     {
-        detalle.Cargo = LeerStringOpcional(r, "CARGO");
-        detalle.ClaseOcupacional = LeerStringOpcional(r, "CLASE_OCUPACIONAL");
-        detalle.LugarTrabajo = LeerStringOpcional(r, "LUGAR_TRABAJO");
+        detalle.Cargo = LeerStringOpcional(r, ColumnCargo);
+        detalle.ClaseOcupacional = LeerStringOpcional(r, ColumnClaseOcupacional);
+        detalle.LugarTrabajo = LeerStringOpcional(r, ColumnLugarTrabajo);
     }
 }
