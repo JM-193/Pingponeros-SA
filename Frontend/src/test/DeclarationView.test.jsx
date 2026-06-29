@@ -1,6 +1,6 @@
 // DeclarationView.test.jsx
 import { render, screen, waitFor } from '@testing-library/react'
-import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import DeclarationView from '../pages/DeclarationView'
 import * as session from '../services/session'
 import * as declarationService from '../services/declarationService'
