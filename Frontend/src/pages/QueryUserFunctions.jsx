@@ -5,7 +5,6 @@ import {
   eliminarFuncionUsuario,
 } from '../services/userFunctionService'
 import { obtenerSesion } from '../services/session'
-import { ENTITY_FORMS_AS_MODAL } from '../constants/uiMode'
 import CreateUserFunctions from './CreateUserFunctions'
 
 export default function QueryUserFunctions() {
@@ -51,16 +50,6 @@ export default function QueryUserFunctions() {
     )
   }
 
-  const formProps = ENTITY_FORMS_AS_MODAL
-    ? {
-        renderCreateModal: ({ isModal, isOpen, onClose, onSuccess }) => (
-          <CreateUserFunctions isModal={isModal} isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
-        ),
-      }
-    : {
-        createPath: '/funciones/usuarios/crear',
-      }
-
   return (
     <EntityListPage
       title="Funciones de Usuarios"
@@ -74,7 +63,9 @@ export default function QueryUserFunctions() {
       deleteConfirmMessage={(funcion) =>
         `¿Está seguro de que desea eliminar la función "${funcion.nombre}"? Esta acción no se puede deshacer.`
       }
-      {...formProps}
+      renderCreateModal={({ isOpen, onClose, onSuccess }) => (
+        <CreateUserFunctions isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
+      )}
     />
   )
 }

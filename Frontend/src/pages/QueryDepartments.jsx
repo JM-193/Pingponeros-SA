@@ -3,7 +3,6 @@ import EntityListPage from '../components/EntityListPage'
 import { obtenerDepartamentos } from '../services/departmentService'
 import { obtenerAreas } from '../services/areaService'
 import { buildNameMap, formatStatusLabel, resolveOptionValueKey } from '../utils/organizationOptions'
-import { ENTITY_FORMS_AS_MODAL } from '../constants/uiMode'
 import CreateDepartments from './CreateDepartments'
 import EditDepartments from './EditDepartments'
 
@@ -63,19 +62,6 @@ export default function QueryDepartments() {
     )
   }
 
-  const formProps = ENTITY_FORMS_AS_MODAL
-    ? {
-        renderCreateModal: ({ isModal, isOpen, onClose, onSuccess }) => (
-          <CreateDepartments isModal={isModal} isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
-        ),
-        renderEditModal: ({ isModal, isOpen, onClose, onSuccess, item }) =>
-          item && <EditDepartments isModal={isModal} isOpen={isOpen} entityName={item.nombre} onClose={onClose} onSuccess={onSuccess} />,
-      }
-    : {
-        createPath: '/organizacion/departamentos/crear',
-        editPath: (departamento) => `/organizacion/departamentos/editar/${encodeURIComponent(departamento.nombre)}`,
-      }
-
   return (
     <EntityListPage
       title="Departamentos"
@@ -85,7 +71,11 @@ export default function QueryDepartments() {
       matchesSearch={matchesSearch}
       getRowId={(departamento) => departamento.id ?? departamento.idDepartamento}
       searchPlaceholder="Ingrese el nombre, descripción o área del departamento"
-      {...formProps}
+      renderCreateModal={({ isOpen, onClose, onSuccess }) => (
+        <CreateDepartments isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
+      )}
+      renderEditModal={({ isOpen, onClose, onSuccess, item }) =>
+        item && <EditDepartments isOpen={isOpen} entityName={item.nombre} onClose={onClose} onSuccess={onSuccess} />}
     />
   )
 }

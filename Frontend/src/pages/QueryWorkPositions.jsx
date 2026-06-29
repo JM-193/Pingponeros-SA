@@ -4,7 +4,6 @@ import EntityListPage from '../components/EntityListPage'
 import Modal from '../components/Modal'
 import WorkPositionFunctionsSection from '../components/WorkPositionFunctionsSection'
 import { obtenerPuestos, eliminarPuesto } from '../services/workPositionService'
-import { ENTITY_FORMS_AS_MODAL } from '../constants/uiMode'
 import { COLORS } from '../constants/colors'
 import CreateWorkPositions from './CreateWorkPositions'
 
@@ -34,16 +33,6 @@ export default function QueryWorkPositions() {
       puesto.descripcion.toLowerCase().includes(lowerTerm)
     )
   }
-
-  const formProps = ENTITY_FORMS_AS_MODAL
-    ? {
-        renderCreateModal: ({ isModal, isOpen, onClose, onSuccess }) => (
-          <CreateWorkPositions isModal={isModal} isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
-        ),
-      }
-    : {
-        createPath: '/organizacion/puestos-trabajo/crear',
-      }
 
   const extraRowActions = (puesto) => (
     <button
@@ -88,7 +77,9 @@ export default function QueryWorkPositions() {
           `¿Está seguro de que desea eliminar el puesto de trabajo "${puesto.nombre}"? Esta acción no se puede deshacer.`
         }
         extraRowActions={extraRowActions}
-        {...formProps}
+        renderCreateModal={({ isOpen, onClose, onSuccess }) => (
+          <CreateWorkPositions isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
+        )}
       />
 
       <Modal

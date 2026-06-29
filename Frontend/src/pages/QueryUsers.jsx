@@ -1,6 +1,5 @@
 import EntityListPage from '../components/EntityListPage'
 import { obtenerUsuarios } from '../services/userService'
-import { ENTITY_FORMS_AS_MODAL } from '../constants/uiMode'
 import CreateUsers from './CreateUsers'
 import EditUsers from './EditUsers'
 
@@ -52,19 +51,6 @@ export default function QueryUsers() {
     )
   }
 
-  const formProps = ENTITY_FORMS_AS_MODAL
-    ? {
-        renderCreateModal: ({ isModal, isOpen, onClose, onSuccess }) => (
-          <CreateUsers isModal={isModal} isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
-        ),
-        renderEditModal: ({ isModal, isOpen, onClose, onSuccess, item }) =>
-          item && <EditUsers isModal={isModal} isOpen={isOpen} entityId={item.correoInstitucional} onClose={onClose} onSuccess={onSuccess} />,
-      }
-    : {
-        createPath: '/usuarios/crear',
-        editPath: (usuario) => `/usuarios/editar/${encodeURIComponent(usuario.correoInstitucional)}`,
-      }
-
   return (
     <EntityListPage
       title="Usuarios"
@@ -75,7 +61,11 @@ export default function QueryUsers() {
       getRowId={(usuario) => usuario.correoInstitucional}
       isRowInactive={(usuario) => usuario.estado === 0}
       searchPlaceholder="Ingrese el nombre, apellidos o correo del usuario"
-      {...formProps}
+      renderCreateModal={({ isOpen, onClose, onSuccess }) => (
+        <CreateUsers isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
+      )}
+      renderEditModal={({ isOpen, onClose, onSuccess, item }) =>
+        item && <EditUsers isOpen={isOpen} entityId={item.correoInstitucional} onClose={onClose} onSuccess={onSuccess} />}
     />
   )
 }
