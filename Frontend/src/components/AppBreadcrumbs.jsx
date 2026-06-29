@@ -8,33 +8,6 @@ import { useMediaQuery } from '../hooks/useMediaQuery'
 const HOME = { label: 'Inicio', to: '/home' }
 const ORGANIZATION = { label: 'Organización' }
 
-const USERS = { label: 'Usuarios' }
-
-const AREAS = {
-  label: 'Áreas',
-  to: '/organizacion/areas/consultar',
-}
-
-const DEPARTMENTS = {
-  label: 'Departamentos',
-  to: '/organizacion/departamentos/consultar',
-}
-
-const SECTIONS = {
-  label: 'Secciones',
-  to: '/organizacion/secciones/consultar',
-}
-
-const UNITS = {
-  label: 'Unidades',
-  to: '/organizacion/unidades/consultar',
-}
-
-const POSITIONS = {
-  label: 'Plazas',
-  to: '/organizacion/plazas/consultar',
-}
-
 const BREADCRUMB_MAP = [
   {
     pattern: '/home',
@@ -53,24 +26,8 @@ const BREADCRUMB_MAP = [
     pattern: '/usuarios/consultar',
     crumbs: [
       HOME,
-      USERS,
+      { label: 'Usuarios' },
       { label: 'Consultar' },
-    ],
-  },
-  {
-    pattern: '/usuarios/crear',
-    crumbs: [
-      HOME,
-      USERS,
-      { label: 'Crear' },
-    ],
-  },
-  {
-    pattern: '/usuarios/editar/:correo',
-    crumbs: [
-      HOME,
-      { ...USERS, to: '/usuarios/consultar' },
-      { label: 'Editar' },
     ],
   },
 
@@ -83,24 +40,6 @@ const BREADCRUMB_MAP = [
       { label: 'Consultar' },
     ],
   },
-  {
-    pattern: '/organizacion/areas/crear',
-    crumbs: [
-      HOME,
-      ORGANIZATION,
-      AREAS,
-      { label: 'Crear' },
-    ],
-  },
-  {
-    pattern: '/organizacion/areas/editar/:nombre',
-    crumbs: [
-      HOME,
-      ORGANIZATION,
-      AREAS,
-      { label: 'Editar' },
-    ],
-  },
 
   {
     pattern: '/organizacion/departamentos/consultar',
@@ -109,24 +48,6 @@ const BREADCRUMB_MAP = [
       ORGANIZATION,
       { label: 'Departamentos' },
       { label: 'Consultar' },
-    ],
-  },
-  {
-    pattern: '/organizacion/departamentos/crear',
-    crumbs: [
-      HOME,
-      ORGANIZATION,
-      DEPARTMENTS,
-      { label: 'Crear' },
-    ],
-  },
-  {
-    pattern: '/organizacion/departamentos/editar/:nombre',
-    crumbs: [
-      HOME,
-      ORGANIZATION,
-      DEPARTMENTS,
-      { label: 'Editar' },
     ],
   },
 
@@ -139,24 +60,6 @@ const BREADCRUMB_MAP = [
       { label: 'Consultar' },
     ],
   },
-  {
-    pattern: '/organizacion/secciones/crear',
-    crumbs: [
-      HOME,
-      ORGANIZATION,
-      SECTIONS,
-      { label: 'Crear' },
-    ],
-  },
-  {
-    pattern: '/organizacion/secciones/editar/:nombre',
-    crumbs: [
-      HOME,
-      ORGANIZATION,
-      SECTIONS,
-      { label: 'Editar' },
-    ],
-  },
 
   {
     pattern: '/organizacion/unidades/consultar',
@@ -167,24 +70,6 @@ const BREADCRUMB_MAP = [
       { label: 'Consultar' },
     ],
   },
-  {
-    pattern: '/organizacion/unidades/crear',
-    crumbs: [
-      HOME,
-      ORGANIZATION,
-      UNITS,
-      { label: 'Crear' },
-    ],
-  },
-  {
-    pattern: '/organizacion/unidades/editar/:nombre',
-    crumbs: [
-      HOME,
-      ORGANIZATION,
-      UNITS,
-      { label: 'Editar' },
-    ],
-  },
 
   {
     pattern: '/organizacion/plazas/consultar',
@@ -193,24 +78,6 @@ const BREADCRUMB_MAP = [
       ORGANIZATION,
       { label: 'Plazas' },
       { label: 'Consultar' },
-    ],
-  },
-  {
-    pattern: '/organizacion/plazas/crear',
-    crumbs: [
-      HOME,
-      ORGANIZATION,
-      POSITIONS,
-      { label: 'Crear' },
-    ],
-  },
-  {
-    pattern: '/organizacion/plazas/editar/:numeroPlaza',
-    crumbs: [
-      HOME,
-      ORGANIZATION,
-      POSITIONS,
-      { label: 'Editar' },
     ],
   },
 ]
