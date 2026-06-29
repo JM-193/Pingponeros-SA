@@ -55,6 +55,9 @@ internal static class ServiceCollectionExtensions
             new FunctionRepository(sp.GetRequiredService<IQueryExecutor>()));
         services.AddScoped<IUserFunctionRepository>(sp =>
             new UserFunctionRepository(sp.GetRequiredService<IQueryExecutor>()));
+        services.AddScoped<IDeclaracionRepository>(sp =>
+            new DeclaracionRepository(sp.GetRequiredService<IQueryExecutor>()));
+        services.AddScoped<IDeclaracionService, DeclaracionService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IUserService, UserService>();
