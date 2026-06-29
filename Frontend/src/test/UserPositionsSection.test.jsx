@@ -71,6 +71,7 @@ describe('UserPositionsSection', () => {
     fireEvent.change(screen.getByLabelText(/Plaza disponible/i), { target: { value: '2001' } })
     fireEvent.change(screen.getByLabelText(/Puesto/i), { target: { value: '5' } })
     fireEvent.change(screen.getByLabelText(/Clase Ocupacional/i), { target: { value: 'Profesional' } })
+    fireEvent.change(screen.getByLabelText(/Lugar de Trabajo/i), { target: { value: 'Oficina Central' } })
     fireEvent.change(screen.getByLabelText(/Fecha Inicio/i), { target: { value: '2026-01-01' } })
 
     fireEvent.click(screen.getByRole('button', { name: /Agregar/i }))
@@ -80,6 +81,7 @@ describe('UserPositionsSection', () => {
         numeroPlaza: 2001,
         idPuesto: 5,
         claseOcupacional: 'Profesional',
+        lugarTrabajo: 'Oficina Central',
         fechaInicio: '2026-01-01',
         fechaFinal: null,
       })
