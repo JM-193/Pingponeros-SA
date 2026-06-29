@@ -307,7 +307,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
         _factory.PlazaRepo.ExisteNumeroPlazaAsync(1001).Returns(true);
         _factory.AsignacionRepo.PlazaTieneAsignacionActivaAsync(1001).Returns(false);
         _factory.AsignacionRepo.AsignarAsync(Arg.Do<PositionAssignment>(a => capturada = a)).Returns(Task.CompletedTask);
-        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, ClaseOcupacional = "Profesional", FechaInicio = "2026-01-01", FechaFinal = (string?)null };
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, ClaseOcupacional = "Profesional", LugarTrabajo = "Oficina Central", FechaInicio = "2026-01-01", FechaFinal = (string?)null };
 
         var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
 
@@ -317,6 +317,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
         Assert.Equal("ana@test.com", capturada.CorreoInstitucional);
         Assert.Equal(5, capturada.IdPuesto);
         Assert.Equal("Profesional", capturada.ClaseOcupacional);
+        Assert.Equal("Oficina Central", capturada.LugarTrabajo);
         Assert.Null(capturada.FechaFinal);
     }
 
@@ -325,7 +326,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     {
         _factory.PlazaRepo.ExisteNumeroPlazaAsync(1001).Returns(true);
         _factory.AsignacionRepo.PlazaTieneAsignacionActivaAsync(1001).Returns(true);
-        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, ClaseOcupacional = "Profesional", FechaInicio = "2026-01-01", FechaFinal = (string?)null };
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, ClaseOcupacional = "Profesional", LugarTrabajo = "Oficina Central", FechaInicio = "2026-01-01", FechaFinal = (string?)null };
 
         var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
 
@@ -336,7 +337,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     public async Task AsignarPlaza_Returns404CuandoPlazaNoExiste()
     {
         _factory.PlazaRepo.ExisteNumeroPlazaAsync(9999).Returns(false);
-        var dto = new { NumeroPlaza = 9999, IdPuesto = 5, ClaseOcupacional = "Profesional", FechaInicio = "2026-01-01", FechaFinal = (string?)null };
+        var dto = new { NumeroPlaza = 9999, IdPuesto = 5, ClaseOcupacional = "Profesional", LugarTrabajo = "Oficina Central", FechaInicio = "2026-01-01", FechaFinal = (string?)null };
 
         var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
 

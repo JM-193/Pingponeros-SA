@@ -14,8 +14,8 @@ public sealed class PositionAssignmentRepositoryTests
     public async Task ObtenerActivasPorUsuarioAsync_MapeaFilasConNombreDePuesto()
     {
         var table = CrearTablaAsignaciones();
-        table.Rows.Add(1001L, "ana@test.com", 5, "Analista", "Profesional 1", new DateTime(2026, 1, 1), DBNull.Value);
-        table.Rows.Add(1002L, "ana@test.com", 6, "Asistente", "Tecnico", new DateTime(2026, 2, 1), DBNull.Value);
+        table.Rows.Add(1001L, "ana@test.com", 5, "Analista", "Profesional 1", "Oficina Central", new DateTime(2026, 1, 1), DBNull.Value);
+        table.Rows.Add(1002L, "ana@test.com", 6, "Asistente", "Tecnico", "Sucursal Norte", new DateTime(2026, 2, 1), DBNull.Value);
 
         var q = Substitute.For<IQueryExecutor>();
         q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<PositionAssignment>>>>())
@@ -36,6 +36,7 @@ public sealed class PositionAssignmentRepositoryTests
         Assert.Equal(5, asignaciones[0].IdPuesto);
         Assert.Equal("Analista", asignaciones[0].PuestoNombre);
         Assert.Equal("Profesional 1", asignaciones[0].ClaseOcupacional);
+        Assert.Equal("Oficina Central", asignaciones[0].LugarTrabajo);
         Assert.Equal(new DateTime(2026, 1, 1), asignaciones[0].FechaInicio);
         Assert.Null(asignaciones[0].FechaFinal);
     }
@@ -200,6 +201,7 @@ public sealed class PositionAssignmentRepositoryTests
         table.Columns.Add("ID_PUESTO", typeof(int));
         table.Columns.Add("PUESTO_NOMBRE", typeof(string));
         table.Columns.Add("CLASE_OCUPACIONAL", typeof(string));
+        table.Columns.Add("LUGAR_TRABAJO", typeof(string));
         table.Columns.Add("FECHA_INICIO", typeof(DateTime));
         table.Columns.Add("FECHA_FINAL", typeof(DateTime));
         return table;
