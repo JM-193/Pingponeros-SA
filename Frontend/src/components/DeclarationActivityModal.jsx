@@ -81,8 +81,8 @@ export default function DeclarationActivityModal({
       if (!form.nuevaDescripcion.trim()) next.nuevaDescripcion = 'La descripción es obligatoria'
     }
     if (!form.periodicidad) next.periodicidad = 'Seleccione la periodicidad'
-    if (!(Number(form.vecesRealizadas) >= 1)) next.vecesRealizadas = 'Debe ser al menos 1'
-    if (!(Number(form.duracion) >= 1)) next.duracion = 'Debe ser al menos 1 minuto'
+    if (Number(form.vecesRealizadas) < 1) next.vecesRealizadas = 'Debe ser al menos 1'
+    if (Number(form.duracion) < 1) next.duracion = 'Debe ser al menos 1 minuto'
     setErrors(next)
     return Object.keys(next).length === 0
   }
@@ -119,7 +119,7 @@ export default function DeclarationActivityModal({
       }
 
       onAgregar({
-        tempId: `tmp-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        tempId: `tmp-${crypto.randomUUID()}`,
         tipoFuncion: form.tipoFuncion,
         idFuncion,
         idFuncionPropia,

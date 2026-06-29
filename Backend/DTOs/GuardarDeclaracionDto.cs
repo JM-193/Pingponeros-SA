@@ -21,8 +21,11 @@ internal sealed record GuardarDeclaracionDto(
         ["Propia de mi puesto", "De otro puesto", "De apoyo ocasional"];
     internal const string TipoFuncionPropia = "Definida por mí";
 
-    private static readonly Regex HoraRegex =
-        new("^[0-2][0-9]:[0-5][0-9]$", RegexOptions.CultureInvariant);
+private static readonly Regex HoraRegex =
+    new(
+        "^[0-2][0-9]:[0-5][0-9]$",
+        RegexOptions.CultureInvariant,
+        TimeSpan.FromMilliseconds(100));
 
     public string? Validar()
     {
