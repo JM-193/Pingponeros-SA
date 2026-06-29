@@ -2,13 +2,12 @@ import PropTypes from 'prop-types'
 import DepartmentSectionEditForm from '../components/DepartmentSectionEditForm'
 import { obtenerSeccionPorNombre, actualizarSeccion } from '../services/sectionService'
 
-export default function EditSections({ isModal, isOpen, onSuccess, onClose, entityName }) {
+export default function EditSections({ isOpen, onSuccess, onClose, entityName }) {
   return (
     <DepartmentSectionEditForm
       entityType="seccion"
       fetchByName={obtenerSeccionPorNombre}
       updateEntity={actualizarSeccion}
-      isModal={isModal}
       isOpen={isOpen}
       onSuccess={onSuccess}
       onClose={onClose}
@@ -18,17 +17,12 @@ export default function EditSections({ isModal, isOpen, onSuccess, onClose, enti
 }
 
 EditSections.propTypes = {
-  isModal: PropTypes.bool,
   isOpen: PropTypes.bool,
-  onSuccess: PropTypes.func,
-  onClose: PropTypes.func,
-  entityName: PropTypes.string,
+  onSuccess: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+  entityName: PropTypes.string.isRequired,
 }
 
 EditSections.defaultProps = {
-  isModal: false,
   isOpen: false,
-  onSuccess: null,
-  onClose: null,
-  entityName: null,
 }

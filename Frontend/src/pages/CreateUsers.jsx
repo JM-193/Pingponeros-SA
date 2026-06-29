@@ -1,10 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import { crearUsuario } from '../services/userService'
 import Modal from '../components/Modal'
-import PageLayout from '../components/PageLayout'
 import FormContainer from '../components/FormContainer'
 import FormRow from '../components/FormRow'
 import FormInput from '../components/FormInput'
@@ -13,9 +10,7 @@ import FormButton from '../components/FormButton'
 import { notifySuccess, notifyApiError } from '../utils/notify'
 import { EMAIL_REGEX } from '../constants/regex'
 
-export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
-  const navigate = useNavigate()
-  const delayedNavigate = useDelayedNavigate()
+export default function CreateUsers({ isOpen, onSuccess, onClose }) {
   const callbackTimeoutRef = useRef(null)
   useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
   const [formData, setFormData] = useState({
@@ -81,11 +76,7 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
       })
       notifySuccess('Usuario creado correctamente.')
       handleReset()
-      if (isModal && onSuccess) {
-        callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
-      } else {
-        delayedNavigate(-1, 1500)
-      }
+      callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
     } catch (err) {
       notifyApiError(err)
     } finally {
@@ -105,19 +96,14 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
   }
 
   const handleCancel = () => {
-    if (isModal && onClose) {
-      onClose()
-    } else {
-      navigate(-1)
-    }
+    onClose()
   }
 
   const formContent = (
     <FormContainer
       onSubmit={handleSubmit}
-      title={isModal ? undefined : 'Crear Usuario'}
-      subtitle={isModal ? undefined : 'Formulario de Registro'}
       requiredNote
+      embedded
     >
       <FormRow columns={2}>
         <FormInput
@@ -209,27 +195,19 @@ export default function CreateUsers({ isModal, isOpen, onSuccess, onClose }) {
     </FormContainer>
   )
 
-  return isModal ? (
+  return (
     <Modal isOpen={isOpen} title="Crear Usuario" onClose={handleCancel}>
       {formContent}
     </Modal>
-  ) : (
-    <PageLayout>
-      {formContent}
-    </PageLayout>
   )
 }
 
 CreateUsers.propTypes = {
-  isModal: PropTypes.bool,
   isOpen: PropTypes.bool,
-  onSuccess: PropTypes.func,
-  onClose: PropTypes.func,
+  onSuccess: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
 }
 
 CreateUsers.defaultProps = {
-  isModal: false,
   isOpen: false,
-  onSuccess: null,
-  onClose: null,
 }

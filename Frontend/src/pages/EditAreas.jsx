@@ -1,23 +1,17 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import { actualizarArea, obtenerAreaPorNombre } from '../services/areaService'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
-import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
 import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
 import StateToggle from '../components/StateToggle'
 import { createOrganizationEntityInputChangeHandler, getOrganizationEntityFormErrors, getOrganizationEntityPayload } from '../utils/organizationEntityForm'
 import { notifySuccess, notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 
-export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityName }) {
-  const navigate = useNavigate()
-  const delayedNavigate = useDelayedNavigate()
+export default function EditAreas({ isOpen, onSuccess, onClose, entityName }) {
   const callbackTimeoutRef = useRef(null)
   useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
-  const params = useParams()
-  const nombre = entityName ?? params.nombre
+  const nombre = entityName
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
@@ -41,11 +35,7 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
         setNombreOriginal(area.nombre)
       } catch (err) {
         notifyApiError(err)
-        if (isModal && onClose) {
-          callbackTimeoutRef.current = setTimeout(() => onClose(), 2000)
-        } else {
-          delayedNavigate('/organizacion/areas/consultar', 2000)
-        }
+        callbackTimeoutRef.current = setTimeout(() => onClose(), 2000)
       } finally {
         setIsLoading(false)
       }
@@ -54,7 +44,7 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
     if (nombre) {
       cargarArea()
     }
-  }, [nombre, navigate, isModal, onClose, delayedNavigate])
+  }, [nombre, onClose])
 
   const clearFeedback = () => {
     setErrors({})
@@ -81,11 +71,7 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
       await actualizarArea(nombreOriginal, getOrganizationEntityPayload(formData, { includeEstado: true }))
 
       notifySuccess('Área actualizada correctamente')
-      if (isModal && onSuccess) {
-        callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
-      } else {
-        delayedNavigate('/organizacion/areas/consultar', 1500)
-      }
+      callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
     } catch (err) {
       notifyApiError(err)
     } finally {
@@ -99,11 +85,7 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
   }
 
   const handleCancel = () => {
-    if (isModal && onClose) {
-      onClose()
-    } else {
-      navigate('/organizacion/areas/consultar')
-    }
+    onClose()
   }
 
   const formFields = (
@@ -130,7 +112,7 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
     ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando área...</p>
     : formFields
 
-  return isModal ? (
+  return (
     <OrganizationEntityFormModal
       isOpen={isOpen}
       title="Editar Área"
@@ -141,32 +123,16 @@ export default function EditAreas({ isModal, isOpen, onSuccess, onClose, entityN
     >
       {formBody}
     </OrganizationEntityFormModal>
-  ) : (
-    <OrganizationEntityFormPage
-      title="Editar Área"
-      subtitle="Formulario de Actualización"
-      onSubmit={handleSubmit}
-      onCancel={handleCancel}
-      isBusy={isSubmitting}
-      primaryLabel="Actualizar"
-    >
-      {formBody}
-    </OrganizationEntityFormPage>
   )
 }
 
 EditAreas.propTypes = {
-  isModal: PropTypes.bool,
   isOpen: PropTypes.bool,
-  onSuccess: PropTypes.func,
-  onClose: PropTypes.func,
-  entityName: PropTypes.string,
+  onSuccess: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+  entityName: PropTypes.string.isRequired,
 }
 
 EditAreas.defaultProps = {
-  isModal: false,
   isOpen: false,
-  onSuccess: null,
-  onClose: null,
-  entityName: null,
 }

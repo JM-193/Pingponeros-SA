@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
-import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
 import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
 import { crearUnidad } from '../services/unitService'
@@ -28,9 +25,7 @@ const initialFormData = {
   estado: 1,
 }
 
-export default function CreateUnits({ isModal, isOpen, onSuccess, onClose }) {
-  const navigate = useNavigate()
-  const delayedNavigate = useDelayedNavigate()
+export default function CreateUnits({ isOpen, onSuccess, onClose }) {
   const callbackTimeoutRef = useRef(null)
   useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
   const [parentType, setParentType] = useState('')
@@ -74,13 +69,9 @@ export default function CreateUnits({ isModal, isOpen, onSuccess, onClose }) {
     ({ resetFormData }) => {
       resetFormData()
       setParentType('')
-      if (isModal && onSuccess) {
-        callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
-      } else {
-        delayedNavigate('/organizacion/unidades/consultar', 1500)
-      }
+      callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
     },
-    [delayedNavigate, setParentType, isModal, onSuccess],
+    [setParentType, onSuccess],
   )
 
   const {
@@ -127,11 +118,7 @@ export default function CreateUnits({ isModal, isOpen, onSuccess, onClose }) {
     })
 
   const handleCancel = () => {
-    if (isModal && onClose) {
-      onClose()
-    } else {
-      navigate('/organizacion/unidades/consultar')
-    }
+    onClose()
   }
 
   const formFields = (
@@ -159,7 +146,7 @@ export default function CreateUnits({ isModal, isOpen, onSuccess, onClose }) {
     ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando datos de organización...</p>
     : formFields
 
-  return isModal ? (
+  return (
     <OrganizationEntityFormModal
       isOpen={isOpen}
       title="Crear Unidad"
@@ -170,30 +157,15 @@ export default function CreateUnits({ isModal, isOpen, onSuccess, onClose }) {
     >
       {formBody}
     </OrganizationEntityFormModal>
-  ) : (
-    <OrganizationEntityFormPage
-      title="Crear Unidad"
-      subtitle="Formulario de Registro"
-      onSubmit={handleSubmit}
-      onCancel={handleCancel}
-      isBusy={isSubmitting}
-      primaryLabel="Crear"
-    >
-      {formBody}
-    </OrganizationEntityFormPage>
   )
 }
 
 CreateUnits.propTypes = {
-  isModal: PropTypes.bool,
   isOpen: PropTypes.bool,
-  onSuccess: PropTypes.func,
-  onClose: PropTypes.func,
+  onSuccess: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
 }
 
 CreateUnits.defaultProps = {
-  isModal: false,
   isOpen: false,
-  onSuccess: null,
-  onClose: null,
 }

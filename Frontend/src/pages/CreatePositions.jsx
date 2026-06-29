@@ -1,6 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import { crearPlaza } from '../services/positionService'
 import { obtenerUnidades } from '../services/unitService'
@@ -12,7 +10,6 @@ import FormContainer from '../components/FormContainer'
 import FormInput from '../components/FormInput'
 import FormSelect from '../components/FormSelect'
 import FormButton from '../components/FormButton'
-import PageLayout from '../components/PageLayout'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
 import { isUnidadInArea, resolvePlazaFieldChange } from '../utils/organizationHierarchy'
 import { notifySuccess, notifyError, notifyApiError } from '../utils/notify'
@@ -28,9 +25,7 @@ const initialFormData = {
 
 const NUMERO_REGEX = /\D/g
 
-export default function CreatePositions({ isModal, isOpen, onSuccess, onClose }) {
-  const navigate = useNavigate()
-  const delayedNavigate = useDelayedNavigate()
+export default function CreatePositions({ isOpen, onSuccess, onClose }) {
   const callbackTimeoutRef = useRef(null)
   useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
   const [formData, setFormData] = useState(initialFormData)
@@ -187,11 +182,7 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
       await crearPlaza(payload)
       notifySuccess('Plaza creada correctamente.')
       setFormData(initialFormData)
-      if (isModal && onSuccess) {
-        callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
-      } else {
-        delayedNavigate(-1, 1500)
-      }
+      callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
     } catch (err) {
       notifyApiError(err)
     } finally {
@@ -200,19 +191,14 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
   }
 
   const handleCancel = () => {
-    if (isModal && onClose) {
-      onClose()
-    } else {
-      navigate(-1)
-    }
+    onClose()
   }
 
   const formContent = (
     <FormContainer
       onSubmit={handleSubmit}
-      title={isModal ? undefined : 'Crear Plaza'}
-      subtitle={isModal ? undefined : 'Formulario de Registro'}
       requiredNote
+      embedded
     >
       <FormInput
         label="Número de Plaza"
@@ -306,27 +292,19 @@ export default function CreatePositions({ isModal, isOpen, onSuccess, onClose })
     ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando datos de organización...</p>
     : formContent
 
-  return isModal ? (
+  return (
     <Modal isOpen={isOpen} title="Crear Plaza" onClose={handleCancel}>
       {formBody}
     </Modal>
-  ) : (
-    <PageLayout>
-      {formBody}
-    </PageLayout>
   )
 }
 
 CreatePositions.propTypes = {
-  isModal: PropTypes.bool,
   isOpen: PropTypes.bool,
-  onSuccess: PropTypes.func,
-  onClose: PropTypes.func,
+  onSuccess: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
 }
 
 CreatePositions.defaultProps = {
-  isModal: false,
   isOpen: false,
-  onSuccess: null,
-  onClose: null,
 }

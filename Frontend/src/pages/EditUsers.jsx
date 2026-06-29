@@ -1,11 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import { obtenerUsuarioPorCorreo, actualizarUsuario } from '../services/userService'
 import { obtenerSesion } from '../services/session'
 import Modal from '../components/Modal'
-import PageLayout from '../components/PageLayout'
 import FormContainer from '../components/FormContainer'
 import FormRow from '../components/FormRow'
 import FormInput from '../components/FormInput'
@@ -16,13 +13,10 @@ import UserPositionsSection from '../components/UserPositionsSection'
 import { notifySuccess, notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 
-export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityId }) {
-  const navigate = useNavigate()
-  const delayedNavigate = useDelayedNavigate()
+export default function EditUsers({ isOpen, onSuccess, onClose, entityId }) {
   const callbackTimeoutRef = useRef(null)
   useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
-  const params = useParams()
-  const correo = entityId ?? params.correo
+  const correo = entityId
   const [formData, setFormData] = useState({
     firstName: '',
     secondName: '',
@@ -57,11 +51,7 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
         setCorreoOriginal(user.correoInstitucional)
       } catch (err) {
         notifyApiError(err)
-        if (isModal && onClose) {
-          callbackTimeoutRef.current = setTimeout(() => onClose(), 2000)
-        } else {
-          delayedNavigate('/usuarios/consultar', 2000)
-        }
+        callbackTimeoutRef.current = setTimeout(() => onClose(), 2000)
       } finally {
         setIsLoading(false)
       }
@@ -70,7 +60,7 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
     if (correo) {
       cargarUsuario()
     }
-  }, [correo, navigate, isModal, onClose, delayedNavigate])
+  }, [correo, onClose])
 
   const clearFeedback = () => {
     setErrors({})
@@ -112,11 +102,7 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
         estado:              formData.estado,
       })
       notifySuccess('Usuario actualizado correctamente.')
-      if (isModal && onSuccess) {
-        callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
-      } else {
-        delayedNavigate(-1, 1500)
-      }
+      callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
     } catch (err) {
       notifyApiError(err)
     } finally {
@@ -125,11 +111,7 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
   }
 
   const handleCancel = () => {
-    if (isModal && onClose) {
-      onClose()
-    } else {
-      navigate(-1)
-    }
+    onClose()
   }
 
   // El usuario autenticado no puede modificar su propio rol: se bloquea como el correo.
@@ -140,9 +122,8 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
   const formContent = (
     <FormContainer
       onSubmit={handleSubmit}
-      title={isModal ? undefined : 'Editar Usuario'}
-      subtitle={isModal ? undefined : 'Formulario de Actualización'}
       requiredNote
+      embedded
     >
       <FormRow columns={2}>
         <FormInput
@@ -242,29 +223,20 @@ export default function EditUsers({ isModal, isOpen, onSuccess, onClose, entityI
     ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando usuario...</p>
     : formContent
 
-  return isModal ? (
+  return (
     <Modal isOpen={isOpen} title="Editar Usuario" onClose={handleCancel}>
       {formBody}
     </Modal>
-  ) : (
-    <PageLayout>
-      {formBody}
-    </PageLayout>
   )
 }
 
 EditUsers.propTypes = {
-  isModal: PropTypes.bool,
   isOpen: PropTypes.bool,
-  onSuccess: PropTypes.func,
-  onClose: PropTypes.func,
-  entityId: PropTypes.string,
+  onSuccess: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+  entityId: PropTypes.string.isRequired,
 }
 
 EditUsers.defaultProps = {
-  isModal: false,
   isOpen: false,
-  onSuccess: null,
-  onClose: null,
-  entityId: null,
 }

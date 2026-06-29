@@ -1,7 +1,5 @@
 import PropTypes from 'prop-types'
 import { useCallback, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import OrganizationEntityFormPage from './OrganizationEntityFormPage'
 import OrganizationEntityFormModal from './OrganizationEntityFormModal'
 import OrganizationEntityFormFields from './OrganizationEntityFormFields'
 import { obtenerAreas } from '../services/areaService'
@@ -13,17 +11,13 @@ import {
 } from '../utils/departmentSectionFormConfig'
 import { COLORS } from '../constants/colors'
 
-const subtitle = 'Formulario de Registro'
-
 export default function DepartmentSectionCreateForm({
   entityType,
   createEntity,
-  isModal,
   isOpen,
   onSuccess,
   onClose,
 }) {
-  const navigate = useNavigate()
   const config = getDepartmentSectionConfig(entityType)
   const [areaOptions, setAreaOptions] = useState([])
 
@@ -43,13 +37,9 @@ export default function DepartmentSectionCreateForm({
   const handleSuccess = useCallback(
     ({ resetFormData }) => {
       resetFormData()
-      if (isModal && onSuccess) {
-        setTimeout(() => onSuccess(), 1200)
-      } else {
-        setTimeout(() => navigate(config.listPath), 1500)
-      }
+      setTimeout(() => onSuccess(), 1200)
     },
-    [navigate, config.listPath, isModal, onSuccess],
+    [onSuccess],
   )
 
   const {
@@ -75,11 +65,7 @@ export default function DepartmentSectionCreateForm({
   })
 
   const handleCancel = () => {
-    if (isModal && onClose) {
-      onClose()
-    } else {
-      navigate(config.listPath)
-    }
+    onClose()
   }
 
   const formFields = (
@@ -100,7 +86,7 @@ export default function DepartmentSectionCreateForm({
     ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando áreas...</p>
     : formFields
 
-  return isModal ? (
+  return (
     <OrganizationEntityFormModal
       isOpen={isOpen}
       title={config.titleCreate}
@@ -111,32 +97,17 @@ export default function DepartmentSectionCreateForm({
     >
       {formBody}
     </OrganizationEntityFormModal>
-  ) : (
-    <OrganizationEntityFormPage
-      title={config.titleCreate}
-      subtitle={subtitle}
-      onSubmit={handleSubmit}
-      onCancel={handleCancel}
-      isBusy={isSubmitting}
-      primaryLabel="Crear"
-    >
-      {formBody}
-    </OrganizationEntityFormPage>
   )
 }
 
 DepartmentSectionCreateForm.propTypes = {
   entityType: PropTypes.oneOf(['departamento', 'seccion']).isRequired,
   createEntity: PropTypes.func.isRequired,
-  isModal: PropTypes.bool,
   isOpen: PropTypes.bool,
-  onSuccess: PropTypes.func,
-  onClose: PropTypes.func,
+  onSuccess: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
 }
 
 DepartmentSectionCreateForm.defaultProps = {
-  isModal: false,
   isOpen: false,
-  onSuccess: null,
-  onClose: null,
 }

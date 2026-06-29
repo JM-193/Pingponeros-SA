@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
-import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
 import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
 import StateToggle from '../components/StateToggle'
 import { actualizarUnidad, obtenerUnidadPorNombre } from '../services/unitService'
@@ -29,13 +26,10 @@ const initialFormData = {
   estado: 1,
 }
 
-export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityName }) {
-  const navigate = useNavigate()
-  const delayedNavigate = useDelayedNavigate()
+export default function EditUnits({ isOpen, onSuccess, onClose, entityName }) {
   const callbackTimeoutRef = useRef(null)
   useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
-  const params = useParams()
-  const nombre = entityName ?? params.nombre
+  const nombre = entityName
   const [parentType, setParentType] = useState('')
   const [areaOptions, setAreaOptions] = useState([])
   const [departmentOptions, setDepartmentOptions] = useState([])
@@ -95,20 +89,12 @@ export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityN
   }, [])
 
   const handleLoadError = useCallback(() => {
-    if (isModal && onClose) {
-      callbackTimeoutRef.current = setTimeout(() => onClose(), 2000)
-    } else {
-      delayedNavigate('/organizacion/unidades/consultar', 2000)
-    }
-  }, [delayedNavigate, isModal, onClose])
+    callbackTimeoutRef.current = setTimeout(() => onClose(), 2000)
+  }, [onClose])
 
   const handleSuccess = useCallback(() => {
-    if (isModal && onSuccess) {
-      callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
-    } else {
-      delayedNavigate('/organizacion/unidades/consultar', 1500)
-    }
-  }, [delayedNavigate, isModal, onSuccess])
+    callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
+  }, [onSuccess])
 
   const submitUpdate = useCallback(
     (payload) => actualizarUnidad(nombreOriginal, payload),
@@ -167,11 +153,7 @@ export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityN
   }
 
   const handleCancel = () => {
-    if (isModal && onClose) {
-      onClose()
-    } else {
-      navigate('/organizacion/unidades/consultar')
-    }
+    onClose()
   }
 
   const formFields = (
@@ -206,7 +188,7 @@ export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityN
     ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando unidad...</p>
     : formFields
 
-  return isModal ? (
+  return (
     <OrganizationEntityFormModal
       isOpen={isOpen}
       title="Editar Unidad"
@@ -217,32 +199,16 @@ export default function EditUnits({ isModal, isOpen, onSuccess, onClose, entityN
     >
       {formBody}
     </OrganizationEntityFormModal>
-  ) : (
-    <OrganizationEntityFormPage
-      title="Editar Unidad"
-      subtitle="Formulario de Actualización"
-      onSubmit={handleSubmit}
-      onCancel={handleCancel}
-      isBusy={isSubmitting}
-      primaryLabel="Actualizar"
-    >
-      {formBody}
-    </OrganizationEntityFormPage>
   )
 }
 
 EditUnits.propTypes = {
-  isModal: PropTypes.bool,
   isOpen: PropTypes.bool,
-  onSuccess: PropTypes.func,
-  onClose: PropTypes.func,
-  entityName: PropTypes.string,
+  onSuccess: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+  entityName: PropTypes.string.isRequired,
 }
 
 EditUnits.defaultProps = {
-  isModal: false,
   isOpen: false,
-  onSuccess: null,
-  onClose: null,
-  entityName: null,
 }

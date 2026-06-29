@@ -1,6 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import { actualizarPlaza, obtenerPlazaPorNumero } from '../services/positionService'
 import { obtenerUnidades } from '../services/unitService'
@@ -11,7 +9,6 @@ import Modal from '../components/Modal'
 import FormContainer from '../components/FormContainer'
 import FormSelect from '../components/FormSelect'
 import FormButton from '../components/FormButton'
-import PageLayout from '../components/PageLayout'
 import { buildLabeledOptions, resolveOptionValueKey } from '../utils/organizationOptions'
 import { isUnidadInArea, resolvePlazaFieldChange } from '../utils/organizationHierarchy'
 import { notifySuccess, notifyError, notifyApiError } from '../utils/notify'
@@ -29,13 +26,10 @@ const initialFormData = {
   idUnidad: '',
 }
 
-export default function EditPositions({ isModal, isOpen, onSuccess, onClose, entityId }) {
-  const navigate = useNavigate()
-  const delayedNavigate = useDelayedNavigate()
+export default function EditPositions({ isOpen, onSuccess, onClose, entityId }) {
   const callbackTimeoutRef = useRef(null)
   useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
-  const params = useParams()
-  const numeroPlaza = entityId ?? params.numeroPlaza
+  const numeroPlaza = entityId
 
   const [formData, setFormData] = useState(initialFormData)
   const [parentType, setParentType] = useState('')
@@ -89,17 +83,13 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
         })
       } catch (err) {
         notifyApiError(err)
-        if (isModal && onClose) {
-          callbackTimeoutRef.current = setTimeout(() => onClose(), 2000)
-        } else {
-          delayedNavigate('/organizacion/plazas/consultar', 2000)
-        }
+        callbackTimeoutRef.current = setTimeout(() => onClose(), 2000)
       } finally {
         setIsLoading(false)
       }
     }
     cargarDatos()
-  }, [numeroPlaza, navigate, isModal, onClose, delayedNavigate])
+  }, [numeroPlaza, onClose])
 
   const filteredDepartamentosOptions = useMemo(() => {
     if (!formData.idArea) return allDepartamentosOptions
@@ -220,11 +210,7 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
       }
       await actualizarPlaza(numeroPlaza, payload)
       notifySuccess('Plaza actualizada correctamente.')
-      if (isModal && onSuccess) {
-        callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
-      } else {
-        delayedNavigate(-1, 1500)
-      }
+      callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
     } catch (err) {
       notifyApiError(err)
     } finally {
@@ -233,18 +219,13 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
   }
 
   const handleCancel = () => {
-    if (isModal && onClose) {
-      onClose()
-    } else {
-      navigate(-1)
-    }
+    onClose()
   }
 
   const formContent = (
     <FormContainer
       onSubmit={handleSubmit}
-      title={isModal ? undefined : 'Editar Plaza'}
-      subtitle={isModal ? undefined : 'Modificar asignaciones de la plaza'}
+      embedded
     >
       <p
         style={{
@@ -343,29 +324,20 @@ export default function EditPositions({ isModal, isOpen, onSuccess, onClose, ent
     ? <p style={{ textAlign: 'center', color: COLORS.textSubtle }}>Cargando datos de la plaza...</p>
     : formContent
 
-  return isModal ? (
+  return (
     <Modal isOpen={isOpen} title="Editar Plaza" onClose={handleCancel}>
       {formBody}
     </Modal>
-  ) : (
-    <PageLayout>
-      {formBody}
-    </PageLayout>
   )
 }
 
 EditPositions.propTypes = {
-  isModal: PropTypes.bool,
   isOpen: PropTypes.bool,
-  onSuccess: PropTypes.func,
-  onClose: PropTypes.func,
-  entityId: PropTypes.string,
+  onSuccess: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+  entityId: PropTypes.string.isRequired,
 }
 
 EditPositions.defaultProps = {
-  isModal: false,
   isOpen: false,
-  onSuccess: null,
-  onClose: null,
-  entityId: null,
 }
