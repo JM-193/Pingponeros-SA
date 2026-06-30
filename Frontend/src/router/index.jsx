@@ -16,6 +16,7 @@ import Declarations from '../pages/Declarations'
 import DeclarationForm from '../pages/DeclarationForm'
 import DeclarationView from '../pages/DeclarationView'
 import Reports from '../pages/Reports'
+import UserProfile from '../pages/UserProfile'
 import ProtectedRoute from '../components/ProtectedRoute'
 
 export default function AppRouter() {
@@ -29,6 +30,7 @@ export default function AppRouter() {
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/cambiar-contrasena" element={<ChangePassword />} />
+          <Route path="/perfil" element={<UserProfile />} />
           <Route path="/home" element={<Home />} />
           <Route path="/declaraciones" element={<Declarations />} />
           <Route path="/declaraciones/formulario" element={<DeclarationForm />} />
