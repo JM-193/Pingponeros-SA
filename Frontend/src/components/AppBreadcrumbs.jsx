@@ -15,6 +15,14 @@ const BREADCRUMB_MAP = [
   },
 
   {
+    pattern: '/dashboard',
+    crumbs: [
+      HOME,
+      { label: 'Dashboard' },
+    ],
+  },
+
+  {
     pattern: '/cambiar-contrasena',
     crumbs: [
       HOME,
