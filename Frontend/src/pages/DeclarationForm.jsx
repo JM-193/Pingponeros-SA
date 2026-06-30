@@ -487,7 +487,7 @@ export default function DeclarationForm() {
           <FormButton
             label="Cancelar declaración"
             type="button"
-            variant="secondary"
+            variant="danger"
             onClick={handleCancelar}
             disabled={saving}
             width="auto"
@@ -698,7 +698,7 @@ function StepDiagnostico({ actividades, carga, jornadaSeleccionada, error, onAbr
       <ActividadCategoria titulo="De apoyo ocasional" actividades={porTipo(TIPO_FUNCION.APOYO)} onEliminar={onEliminar} />
       <ActividadCategoria titulo="Definida por mí" actividades={porTipo(TIPO_FUNCION.DEFINIDA)} onEliminar={onEliminar} />
 
-      <FormButton label="Agregar Función" type="button" variant="primary" onClick={onAbrirModal} width="100%" />
+      <FormButton label="Agregar Función" type="button" variant="outline" onClick={onAbrirModal} width="auto" />
     </>
   )
 }
