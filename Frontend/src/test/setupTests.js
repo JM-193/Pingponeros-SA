@@ -24,6 +24,48 @@ vi.mock('sweetalert2', () => {
   return { default: { mixin: () => ({ fire }), fire } }
 })
 
+// react-select renderiza un combobox enriquecido (input de búsqueda + menú en portal)
+// que no encaja con jsdom ni con las interacciones nativas de las pruebas. Se mockea con
+// un <select> nativo que respeta el contrato de props del componente (value como objeto
+// { value, label } y onChange recibiendo la opción seleccionada), de modo que las pruebas
+// puedan seguir usando fireEvent.change/getByRole('combobox') como con el <select> previo.
+vi.mock('react-select', () => ({
+  default: ({
+    options = [],
+    value,
+    onChange,
+    inputId,
+    name,
+    isDisabled,
+    placeholder,
+    required,
+    'aria-invalid': ariaInvalid,
+    'aria-label': ariaLabel,
+  }) =>
+    React.createElement(
+      'select',
+      {
+        id: inputId,
+        name,
+        disabled: isDisabled,
+        required,
+        'aria-invalid': ariaInvalid,
+        'aria-label': ariaLabel,
+        value: value ? value.value : '',
+        onChange: (event) => {
+          const selected = options.find((option) => String(option.value) === event.target.value)
+          onChange(selected || null, { action: selected ? 'select-option' : 'clear' })
+        },
+      },
+      [
+        React.createElement('option', { key: '__placeholder__', value: '' }, placeholder),
+        ...options.map((option) =>
+          React.createElement('option', { key: option.value, value: option.value }, option.label),
+        ),
+      ],
+    ),
+}))
+
 if (typeof globalThis.matchMedia !== 'function') {
   Object.defineProperty(globalThis, 'matchMedia', {
     writable: true,

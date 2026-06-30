@@ -1,5 +1,7 @@
 import PropTypes from 'prop-types'
+import Select from 'react-select'
 import { COLORS } from '../constants/colors'
+import { buildSelectStyles, selectTheme, menuPortalTarget } from '../utils/selectStyles'
 
 function FormSelect({
   label,
@@ -13,7 +15,15 @@ function FormSelect({
   disabled,
   error,
 }) {
-  const borderColor = disabled ? COLORS.borderDisabled : COLORS.borderColor
+  // react-select trabaja con objetos { value, label }; convertimos el valor
+  // controlado (un id en forma de string) al objeto correspondiente.
+  const selectedOption = options.find((option) => option.value === value) || null
+
+  // Adaptamos el callback de react-select al contrato de evento sintético que
+  // esperan los formularios consumidores (e.target.name / e.target.value).
+  const handleChange = (selected) => {
+    onChange({ target: { name, value: selected ? selected.value : '' } })
+  }
 
   return (
     <div style={{ marginBottom: '20px' }}>
@@ -30,36 +40,30 @@ function FormSelect({
         {label}
         {required && <span style={{ color: COLORS.danger, marginLeft: '2px' }} aria-hidden="true">*</span>}
       </label>
-      <select
-        id={id}
+      <Select
+        inputId={id}
         name={name}
-        value={value}
-        onChange={onChange}
-        required={required}
-        disabled={disabled}
+        value={selectedOption}
+        onChange={handleChange}
+        options={options}
+        isDisabled={disabled}
+        isClearable
+        isSearchable
+        placeholder={defaultLabel}
+        noOptionsMessage={() => 'Sin resultados'}
+        classNamePrefix="form-select"
         aria-invalid={error ? 'true' : undefined}
-        style={{
-          width: '100%',
-          padding: '10px',
-          border: error ? `2px solid ${COLORS.danger}` : `1px solid ${borderColor}`,
-          borderRadius: '4px',
-          fontSize: '14px',
-          boxSizing: 'border-box',
-          backgroundColor: disabled ? COLORS.disabledBg : COLORS.inputBg,
-          color: disabled ? COLORS.disabledColor : COLORS.black,
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          opacity: disabled ? 0.7 : 1,
-        }}
-      >
-        <option value="">{defaultLabel}</option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+        aria-errormessage={error ? `${id}-error` : undefined}
+        required={required}
+        menuPortalTarget={menuPortalTarget}
+        styles={buildSelectStyles({ error: Boolean(error) })}
+        theme={selectTheme}
+      />
       {error && (
-        <span style={{ fontSize: '12px', color: COLORS.danger, marginTop: '6px', display: 'block' }}>
+        <span
+          id={`${id}-error`}
+          style={{ fontSize: '12px', color: COLORS.danger, marginTop: '6px', display: 'block' }}
+        >
           {error}
         </span>
       )}

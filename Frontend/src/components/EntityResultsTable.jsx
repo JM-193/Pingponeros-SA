@@ -1,8 +1,10 @@
 import { useId } from 'react'
 import PropTypes from 'prop-types'
 import { FaPencilAlt, FaSort, FaSortDown, FaSortUp, FaTrash } from 'react-icons/fa'
+import Select from 'react-select'
 import { COLORS } from '../constants/colors'
 import { useMediaQuery } from '../hooks/useMediaQuery'
+import { buildSelectStyles, selectTheme, menuPortalTarget } from '../utils/selectStyles'
 
 const getCellAlign = (align) => align ?? 'left'
 const getHeaderJustifyContent = (align) => {
@@ -21,6 +23,7 @@ function MobileSortControl({ columns, sortConfig, onSort }) {
   const selectId = useId()
   const activeKey = sortConfig?.key ?? ''
   const isSorted = Boolean(activeKey)
+  const sortOptions = columns.map((column) => ({ value: column.key, label: column.label }))
   const directionLabel = sortConfig?.direction === 'desc' ? 'descendente' : 'ascendente'
 
   return (
@@ -45,30 +48,20 @@ function MobileSortControl({ columns, sortConfig, onSort }) {
         >
           Ordenar por
         </label>
-        <select
-          id={selectId}
-          value={activeKey}
-          onChange={(e) => onSort(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: `1px solid ${COLORS.borderColor}`,
-            borderRadius: '4px',
-            fontSize: '14px',
-            boxSizing: 'border-box',
-            backgroundColor: COLORS.inputBg,
-            color: COLORS.textDark,
-          }}
-        >
-          <option value="" disabled>
-            Seleccione una columna
-          </option>
-          {columns.map((column) => (
-            <option key={column.key} value={column.key}>
-              {column.label}
-            </option>
-          ))}
-        </select>
+        <Select
+          inputId={selectId}
+          value={sortOptions.find((option) => option.value === activeKey) || null}
+          onChange={(option) => option && onSort(option.value)}
+          options={sortOptions}
+          isSearchable
+          isClearable={false}
+          placeholder="Seleccione una columna"
+          noOptionsMessage={() => 'Sin resultados'}
+          classNamePrefix="form-select"
+          menuPortalTarget={menuPortalTarget}
+          styles={buildSelectStyles()}
+          theme={selectTheme}
+        />
       </div>
       <button
         type="button"
