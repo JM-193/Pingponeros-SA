@@ -80,6 +80,14 @@ const BREADCRUMB_MAP = [
       { label: 'Consultar' },
     ],
   },
+
+  {
+    pattern: '/reportes',
+    crumbs: [
+      HOME,
+      { label: 'Reportes' },
+    ],
+  },
 ]
 
 export default function AppBreadcrumbs() {

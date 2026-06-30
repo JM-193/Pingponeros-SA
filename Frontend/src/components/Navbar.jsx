@@ -18,14 +18,6 @@ const NAV_ITEMS = [
     path: '/declaraciones',
     activeOn: '/declaraciones'
   },
-  /*{
-    label: 'Consultas',
-    activeOn: '/consultas',
-    submenu: [
-      { label: 'Diagnostico de carga', path: '/organizacion/consultas/diagnostico' },
-      { label: 'Consultas adicionales', path: '/organizacion/consultas/adicionales' },
-    ],
-  },*/
   {
     label: 'Usuarios',
     path: '/usuarios/consultar',
@@ -74,6 +66,12 @@ const NAV_ITEMS = [
       { label: 'Oficiales', path: '/funciones/oficiales/consultar', roles: [1] },
       { label: 'Usuarios', path: '/funciones/usuarios/consultar' },
     ],
+  },
+  {
+    label: 'Reportes',
+    path: '/reportes',
+    activeOn: '/reportes',
+    roles: [1],
   },
 ]
 

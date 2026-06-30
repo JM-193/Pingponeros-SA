@@ -4,8 +4,10 @@ import PropTypes from 'prop-types'
 import PageLayout from '../components/PageLayout'
 import FormButton from '../components/FormButton'
 import EntityResultsTable from '../components/EntityResultsTable'
+import ReportPreview from '../components/ReportPreview'
 import { obtenerSesion } from '../services/session'
 import { obtenerDeclaracion } from '../services/declarationService'
+import { obtenerReporteHorasDeclaracion } from '../services/reportService'
 import { notifyApiError } from '../utils/notify'
 import { formatearMinutos } from '../utils/tiempo'
 import { COLORS } from '../constants/colors'
@@ -72,6 +74,9 @@ export default function DeclarationView() {
   const sesion = obtenerSesion()
   const [loading, setLoading] = useState(true)
   const [detalle, setDetalle] = useState(null)
+  const [reporteBlob, setReporteBlob] = useState(null)
+  const [reporteOpen, setReporteOpen] = useState(false)
+  const [generandoReporte, setGenerandoReporte] = useState(false)
 
   useEffect(() => {
     let activo = true
@@ -91,6 +96,19 @@ export default function DeclarationView() {
       activo = false
     }
   }, [id])
+
+  const handleGenerarReporte = async () => {
+    setGenerandoReporte(true)
+    try {
+      const blob = await obtenerReporteHorasDeclaracion(id)
+      setReporteBlob(blob)
+      setReporteOpen(true)
+    } catch (err) {
+      notifyApiError(err)
+    } finally {
+      setGenerandoReporte(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -173,10 +191,26 @@ export default function DeclarationView() {
           <Campo label="Titular del puesto" value={titular} />
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '20px' }}>
           <FormButton label="Regresar" type="button" variant="secondary" onClick={() => navigate('/home')} width="auto" />
+          <FormButton
+            label={generandoReporte ? 'Generando...' : 'Reporte de Horas'}
+            type="button"
+            variant="primary"
+            onClick={handleGenerarReporte}
+            disabled={generandoReporte}
+            width="auto"
+          />
         </div>
       </div>
+
+      <ReportPreview
+        isOpen={reporteOpen}
+        onClose={() => setReporteOpen(false)}
+        previewBlob={reporteBlob}
+        downloadName={`reporte-horas-declaracion-${id}.pdf`}
+        getDownloadBlob={() => reporteBlob}
+      />
     </PageLayout>
   )
 }

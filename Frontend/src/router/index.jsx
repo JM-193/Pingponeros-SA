@@ -15,6 +15,7 @@ import QueryUserFunctions from '../pages/QueryUserFunctions'
 import Declarations from '../pages/Declarations'
 import DeclarationForm from '../pages/DeclarationForm'
 import DeclarationView from '../pages/DeclarationView'
+import Reports from '../pages/Reports'
 import ProtectedRoute from '../components/ProtectedRoute'
 
 export default function AppRouter() {
@@ -44,6 +45,7 @@ export default function AppRouter() {
             <Route path="/organizacion/unidades/consultar" element={<QueryUnits />} />
             <Route path="/puestos-trabajo/consultar" element={<QueryWorkPositions />} />
             <Route path="/funciones/oficiales/consultar" element={<QueryFunctions />} />
+            <Route path="/reportes" element={<Reports />} />
           </Route>
         </Route>
       </Routes>
