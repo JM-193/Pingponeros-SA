@@ -106,24 +106,24 @@ describe('UserPositionsSection', () => {
     expect(userService.asignarPlazaUsuario).not.toHaveBeenCalled()
   })
 
-  it('filtra dígitos y símbolos en el campo Clase Ocupacional al escribir', async () => {
+  it('filtra símbolos en el campo Clase Ocupacional y conserva dígitos al escribir', async () => {
     render(<UserPositionsSection correo={CORREO} />)
     await waitFor(() => expect(workPositionService.obtenerPuestos).toHaveBeenCalled())
 
     const input = screen.getByLabelText(/Clase Ocupacional/i)
     fireEvent.change(input, { target: { value: 'Profesional3#' } })
 
-    expect(input).toHaveValue('Profesional')
+    expect(input).toHaveValue('Profesional3')
   })
 
-  it('permite letras, espacios y puntuación en Lugar de Trabajo y filtra el resto', async () => {
+  it('permite letras, dígitos, espacios y puntuación en Lugar de Trabajo y filtra el resto', async () => {
     render(<UserPositionsSection correo={CORREO} />)
     await waitFor(() => expect(workPositionService.obtenerPuestos).toHaveBeenCalled())
 
     const input = screen.getByLabelText(/Lugar de Trabajo/i)
     fireEvent.change(input, { target: { value: 'Aula 3, Edificio B#' } })
 
-    expect(input).toHaveValue('Aula , Edificio B')
+    expect(input).toHaveValue('Aula 3, Edificio B')
   })
 
   it('desvincula una plaza tras confirmar', async () => {
