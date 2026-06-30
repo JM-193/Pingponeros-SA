@@ -59,3 +59,34 @@ export async function apiFetch(path, options, { emptyArrayOn404 = false } = {}) 
   if (response.status === 204) return null
   return leerCuerpo(response)
 }
+
+/**
+ * Variante de {@link apiFetch} para descargar archivos binarios (PDF / Excel). Aplica la misma
+ * normalización de errores —si el backend responde con un error, lee `mensaje` del cuerpo JSON y
+ * lanza un {@link ApiError}— pero en caso de éxito devuelve el cuerpo como `Blob`.
+ *
+ * @param {string} path Ruta relativa al API (p. ej. '/reportes/funcionarios?formato=pdf').
+ * @param {RequestInit} [options] Opciones de fetch. Si se omite, se llama a fetch con un solo argumento.
+ * @returns {Promise<Blob>} El contenido del archivo como Blob.
+ */
+export async function apiFetchBlob(path, options) {
+  let response
+  try {
+    response = options === undefined
+      ? await fetch(`${API_URL}${path}`)
+      : await fetch(`${API_URL}${path}`, options)
+  } catch {
+    throw new ApiError('No se pudo conectar con el servidor. Verifique su conexión.', 0)
+  }
+
+  if (!response.ok) {
+    const data = await leerCuerpo(response)
+    throw new ApiError(
+      data.mensaje ?? data.detail ?? data.title ?? `Error inesperado (${response.status})`,
+      response.status,
+      data.codigo,
+    )
+  }
+
+  return response.blob()
+}
