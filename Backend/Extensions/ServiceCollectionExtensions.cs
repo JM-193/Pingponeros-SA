@@ -59,8 +59,11 @@ internal static class ServiceCollectionExtensions
             new DeclaracionRepository(sp.GetRequiredService<IQueryExecutor>()));
         services.AddScoped<IReporteRepository>(sp =>
             new ReporteRepository(sp.GetRequiredService<IQueryExecutor>()));
+        services.AddScoped<IDashboardRepository>(sp =>
+            new DashboardRepository(sp.GetRequiredService<IQueryExecutor>()));
         services.AddScoped<IDeclaracionService, DeclaracionService>();
         services.AddScoped<IReporteService, ReporteService>();
+        services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IUserService, UserService>();
