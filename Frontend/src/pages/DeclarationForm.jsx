@@ -33,7 +33,7 @@ import { TEXTO_SEGURO_REGEX } from '../constants/regex'
 const asArray = (v) => (Array.isArray(v) ? v : [])
 
 // Justificaciones: texto libre que bloquea caracteres de inyección SQL (defensa en profundidad).
-const CAMPOS_TEXTO_SEGURO = ['permisoJustificacion', 'horaExtraJustificacion']
+const CAMPOS_TEXTO_SEGURO = new Set(['permisoJustificacion', 'horaExtraJustificacion'])
 const CARACTERES_INSEGUROS = /[^A-Za-z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,:()¿?¡!/%-]/g
 const MENSAJE_TEXTO_INSEGURO = 'La justificación contiene caracteres no permitidos.'
 
@@ -256,7 +256,7 @@ export default function DeclarationForm() {
 
   const handleInput = (e) => {
     const { name, value } = e.target
-    const sanitized = CAMPOS_TEXTO_SEGURO.includes(name) ? value.replace(CARACTERES_INSEGUROS, '') : value
+    const sanitized = CAMPOS_TEXTO_SEGURO.has(name) ? value.replace(CARACTERES_INSEGUROS, '') : value
     setField(name, sanitized)
   }
 
@@ -452,7 +452,7 @@ export default function DeclarationForm() {
     label: `Plaza N.º ${p.numeroPlaza}${p.cargo ? ' — ' + p.cargo : ''}`,
   }))
 
-  const carga = useMemo(() => evaluarCarga(form.actividades, form.jornadaLaboral), [form.actividades, form.jornadaLaboral])
+  const carga = evaluarCarga(form.actividades, form.jornadaLaboral)
 
   if (loading) {
     return (
