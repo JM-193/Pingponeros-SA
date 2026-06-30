@@ -29,42 +29,78 @@ internal sealed record GuardarDeclaracionDto(
 
     public string? Validar()
     {
-        if (Horario is { } h)
-        {
-            if (string.IsNullOrWhiteSpace(h.HoraEntrada) || !HoraRegex.IsMatch(h.HoraEntrada))
-                return "La hora de entrada debe tener el formato HH:MM.";
-            if (string.IsNullOrWhiteSpace(h.HoraSalida) || !HoraRegex.IsMatch(h.HoraSalida))
-                return "La hora de salida debe tener el formato HH:MM.";
-            if (string.IsNullOrWhiteSpace(h.JornadaLaboral) || h.JornadaLaboral.Length > 25)
-                return "La jornada laboral es obligatoria.";
-        }
+        if (ValidarHorario() is { } error)
+            return error;
 
         if (TiempoDescanso is < 0)
             return "El tiempo de descanso no puede ser negativo.";
 
-        if (HoraExtra is { } he)
-        {
-            if (he.TiempoAdicional is null or < 0)
-                return "El tiempo adicional debe ser un valor positivo.";
-            if (string.IsNullOrWhiteSpace(he.Justificacion))
-                return "Debe justificar el tiempo adicional fuera de su jornada.";
-        }
+        if (ValidarHoraExtra() is { } horaExtraError)
+            return horaExtraError;
 
-        if (PermisoAusencia is { } pa)
-        {
-            if (pa.Dias is null or < 0)
-                return "Los días de permiso o licencia deben ser un valor positivo.";
-            if (string.IsNullOrWhiteSpace(pa.Justificacion))
-                return "Debe indicar cuál es el permiso o licencia.";
-        }
+        if (ValidarPermisoAusencia() is { } permisoError)
+            return permisoError;
 
-        if (Actividades is { } actividades)
+        if (ValidarActividades() is { } actividadError)
+            return actividadError;
+
+        return null;
+    }
+
+    private string? ValidarHorario()
+    {
+        if (Horario is not { } h)
+            return null;
+
+        if (string.IsNullOrWhiteSpace(h.HoraEntrada) || !HoraRegex.IsMatch(h.HoraEntrada))
+            return "La hora de entrada debe tener el formato HH:MM.";
+
+        if (string.IsNullOrWhiteSpace(h.HoraSalida) || !HoraRegex.IsMatch(h.HoraSalida))
+            return "La hora de salida debe tener el formato HH:MM.";
+
+        if (string.IsNullOrWhiteSpace(h.JornadaLaboral) || h.JornadaLaboral.Length > 25)
+            return "La jornada laboral es obligatoria.";
+
+        return null;
+    }
+
+    private string? ValidarHoraExtra()
+    {
+        if (HoraExtra is not { } he)
+            return null;
+
+        if (he.TiempoAdicional is null or < 0)
+            return "El tiempo adicional debe ser un valor positivo.";
+
+        if (string.IsNullOrWhiteSpace(he.Justificacion))
+            return "Debe justificar el tiempo adicional fuera de su jornada.";
+
+        return null;
+    }
+
+    private string? ValidarPermisoAusencia()
+    {
+        if (PermisoAusencia is not { } pa)
+            return null;
+
+        if (pa.Dias is null or < 0)
+            return "Los días de permiso o licencia deben ser un valor positivo.";
+
+        if (string.IsNullOrWhiteSpace(pa.Justificacion))
+            return "Debe indicar cuál es el permiso o licencia.";
+
+        return null;
+    }
+
+    private string? ValidarActividades()
+    {
+        if (Actividades is not { } actividades)
+            return null;
+
+        foreach (var actividad in actividades)
         {
-            foreach (var a in actividades)
-            {
-                if (ValidarActividad(a) is { } error)
-                    return error;
-            }
+            if (ValidarActividad(actividad) is { } error)
+                return error;
         }
 
         return null;
