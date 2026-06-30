@@ -10,6 +10,7 @@ import QuerySections from '../pages/QuerySections'
 import QueryUnits from '../pages/QueryUnits'
 import QueryPositions from '../pages/QueryPositions'
 import QueryWorkPositions from '../pages/QueryWorkPositions'
+import QueryOccupationalClasses from '../pages/QueryOccupationalClasses'
 import QueryFunctions from '../pages/QueryFunctions'
 import QueryUserFunctions from '../pages/QueryUserFunctions'
 import Declarations from '../pages/Declarations'
@@ -48,6 +49,7 @@ export default function AppRouter() {
             <Route path="/organizacion/secciones/consultar" element={<QuerySections />} />
             <Route path="/organizacion/unidades/consultar" element={<QueryUnits />} />
             <Route path="/puestos-trabajo/consultar" element={<QueryWorkPositions />} />
+            <Route path="/clases-ocupacionales/consultar" element={<QueryOccupationalClasses />} />
             <Route path="/funciones/oficiales/consultar" element={<QueryFunctions />} />
             <Route path="/reportes" element={<Reports />} />
           </Route>

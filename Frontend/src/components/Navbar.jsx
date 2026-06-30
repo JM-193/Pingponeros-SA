@@ -66,6 +66,12 @@ const NAV_ITEMS = [
     roles: [1],
   },
   {
+    label: 'Clases Ocupacionales',
+    path: '/clases-ocupacionales/consultar',
+    activeOn: '/clases-ocupacionales/consultar',
+    roles: [1],
+  },
+  {
     label: 'Funciones',
     activeOn: '/funciones',
     submenu: [
@@ -459,7 +465,9 @@ function ProfileDropdown({
         display: 'flex',
         alignItems: 'center',
         order: isMobile ? 1 : 0,
-        minHeight: isMobile ? '50px' : 'auto',
+        minHeight: isMobile ? '50px' : '48px',
+        alignSelf: isMobile ? undefined : 'flex-start',
+        flexShrink: isMobile ? undefined : 0,
       }}
     >
       <button
@@ -764,9 +772,9 @@ export default function Navbar() {
         backgroundColor: COLORS.navBg,
         padding: isMobile ? '0 16px' : '0 24px',
         display: 'flex',
-        alignItems: isMobile ? 'center' : 'stretch',
+        alignItems: isMobile ? 'center' : 'flex-start',
         justifyContent: 'space-between',
-        flexWrap: 'wrap',
+        flexWrap: isMobile ? 'wrap' : 'nowrap',
         gap: 0,
         minHeight: isMobile ? '50px' : 'auto',
       }}
@@ -807,6 +815,7 @@ export default function Navbar() {
           order: isMobile ? 2 : 0,
           width: isMobile ? 'calc(100% + 32px)' : 'auto',
           margin: isMobile ? '0 -16px' : 0,
+          flex: isMobile ? undefined : '1 1 0',
         }}
       >
         <NavbarMenu

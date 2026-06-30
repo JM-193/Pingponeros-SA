@@ -134,6 +134,15 @@ const BREADCRUMB_MAP = [
   },
 
   {
+    pattern: '/clases-ocupacionales/consultar',
+    crumbs: [
+      HOME,
+      { label: 'Clases Ocupacionales' },
+      { label: 'Consultar' },
+    ],
+  },
+
+  {
     pattern: '/funciones/oficiales/consultar',
     crumbs: [
       HOME,
