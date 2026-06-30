@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { FiKey, FiLogOut, FiMenu, FiX } from 'react-icons/fi'
+import { FiKey, FiLogOut, FiMenu, FiUser, FiX } from 'react-icons/fi'
 import PropTypes from 'prop-types'
 import { cerrarSesion, obtenerSesion } from '../services/session'
 import { COLORS } from '../constants/colors'
@@ -567,6 +567,25 @@ function ProfileDropdown({
               </span>
             </div>
           </div>
+          <button
+            onClick={() => navigate('/perfil')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              width: '100%',
+              padding: '12px 16px',
+              textAlign: 'left',
+              border: 'none',
+              background: 'none',
+              fontSize: '13px',
+              color: COLORS.headerBg,
+              cursor: 'pointer',
+            }}
+          >
+            <FiUser size={16} />
+            <span>Perfil</span>
+          </button>
           <button
             onClick={() => navigate('/cambiar-contrasena')}
             style={{
