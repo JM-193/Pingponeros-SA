@@ -23,5 +23,9 @@ internal static class ReporteEndpoints
         // GET /reportes/declaraciones/{id}/horas — Reporte personal (PDF) de las horas de una declaración
         reportes.MapGet("/declaraciones/{id:int}/horas", (int id, IReporteService svc)
             => svc.GenerarHorasDeclaracionAsync(id, isDev));
+
+        // GET /reportes/declaraciones/{id}/documento — Documento oficial (PDF) de la declaración para firma física
+        reportes.MapGet("/declaraciones/{id:int}/documento", (int id, IReporteService svc)
+            => svc.GenerarDeclaracionDocumentoAsync(id, isDev));
     }
 }

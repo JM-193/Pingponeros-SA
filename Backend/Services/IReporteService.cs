@@ -13,4 +13,7 @@ internal interface IReporteService
 
     /// <summary>Reporte personal (PDF) de las horas registradas en una declaración específica.</summary>
     Task<IResult> GenerarHorasDeclaracionAsync(int idDeclaracion, bool isDev);
+
+    /// <summary>Documento oficial (PDF) de una declaración jurada, listo para imprimir y firmar.</summary>
+    Task<IResult> GenerarDeclaracionDocumentoAsync(int idDeclaracion, bool isDev);
 }

@@ -146,6 +146,70 @@ public sealed class ReporteEndpointsTests : IClassFixture<TestWebApplicationFact
         Assert.True((await response.Content.ReadAsByteArrayAsync()).Length > 0);
     }
 
+    // ---------------------------------------------------------------- //
+    // GET /reportes/declaraciones/{id}/documento  (documento oficial)   //
+    // ---------------------------------------------------------------- //
+
+    [Fact]
+    public async Task DocumentoDeclaracion_NoExiste_Returns404()
+    {
+        _factory.DeclaracionRepo.ObtenerDetalleAsync(Arg.Any<int>()).Returns((DeclaracionDetalle?)null);
+
+        var response = await _client.GetAsync("/reportes/declaraciones/99/documento");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DocumentoDeclaracion_SinActividades_Returns200ConPdf()
+    {
+        // A diferencia del reporte de horas, el documento se emite aunque no haya actividades.
+        var detalle = new DeclaracionDetalle
+        {
+            Declaracion = new Declaracion { Id = 5, NumeroPlaza = 100, CorreoInstitucional = "juan@ucr.ac.cr", FechaDeclaracion = DateTime.Today, Completa = 1 },
+            Cargo = "Analista",
+            ClaseOcupacional = "Profesional",
+            LugarTrabajo = "Edificio A",
+            Horario = new HorarioLaboral { HoraEntrada = "08:00", HoraSalida = "17:00", JornadaLaboral = "Tiempo Completo" },
+            Actividades = [],
+        };
+        _factory.DeclaracionRepo.ObtenerDetalleAsync(5).Returns(detalle);
+        _factory.UsuarioRepo.ObtenerPorCorreoAsync(Arg.Any<string>())
+            .Returns(new User { CorreoInstitucional = "juan@ucr.ac.cr", PrimerNombre = "Juan", PrimerApellido = "Pérez", SegundoApellido = "García" });
+
+        var response = await _client.GetAsync("/reportes/declaraciones/5/documento");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(MimePdf, response.Content.Headers.ContentType?.MediaType);
+        Assert.True((await response.Content.ReadAsByteArrayAsync()).Length > 0);
+    }
+
+    [Fact]
+    public async Task DocumentoDeclaracion_Completa_Returns200ConPdf()
+    {
+        var detalle = new DeclaracionDetalle
+        {
+            Declaracion = new Declaracion { Id = 1, NumeroPlaza = 100, CorreoInstitucional = "juan@ucr.ac.cr", FechaDeclaracion = DateTime.Today, Completa = 1 },
+            Cargo = "Analista",
+            ClaseOcupacional = "Profesional",
+            LugarTrabajo = "Edificio A",
+            Horario = new HorarioLaboral { HoraEntrada = "08:00", HoraSalida = "17:00", JornadaLaboral = "Tiempo Completo" },
+            Descanso = new Descanso { Tiempo = 60 },
+            PermisoAusencia = new PermisoAusencia { Dias = 2, Justificacion = "Permiso médico", ConocimientoJefatura = 1 },
+            HoraExtra = new HoraExtra { TiempoAdicional = 180, Justificacion = "Reuniones", ConocimientoJefatura = 0 },
+            Actividades = [new Actividad { TipoFuncion = "Definida por mí", Periodicidad = "Diario", VecesRealizadas = 1, Duracion = 200, Nombre = "Abrir edificio", Descripcion = "Abrir el edificio" }],
+        };
+        _factory.DeclaracionRepo.ObtenerDetalleAsync(1).Returns(detalle);
+        _factory.UsuarioRepo.ObtenerPorCorreoAsync(Arg.Any<string>())
+            .Returns(new User { CorreoInstitucional = "juan@ucr.ac.cr", PrimerNombre = "Juan", PrimerApellido = "Pérez", SegundoApellido = "García" });
+
+        var response = await _client.GetAsync("/reportes/declaraciones/1/documento");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(MimePdf, response.Content.Headers.ContentType?.MediaType);
+        Assert.True((await response.Content.ReadAsByteArrayAsync()).Length > 0);
+    }
+
     private static List<ReporteFuncionarioFila> UnFuncionario() =>
     [
         new()

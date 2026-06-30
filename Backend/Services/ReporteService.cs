@@ -161,6 +161,32 @@ internal sealed class ReporteService : IReporteService
     }
 
     // ---------------------------------------------------------------- //
+    // Documento oficial (PDF) de una declaración                        //
+    // ---------------------------------------------------------------- //
+    public async Task<IResult> GenerarDeclaracionDocumentoAsync(int idDeclaracion, bool isDev)
+    {
+        try
+        {
+            // A diferencia del reporte de horas, el documento se emite aunque no haya actividades:
+            // basta con que la declaración exista para imprimirla y firmarla.
+            var detalle = await _declaraciones.ObtenerDetalleAsync(idDeclaracion).ConfigureAwait(false);
+            if (detalle is null)
+                return SinDatos();
+
+            var usuario = await _usuarios.ObtenerPorCorreoAsync(detalle.Declaracion.CorreoInstitucional)
+                                         .ConfigureAwait(false);
+            var titular = ConstruirTitular(usuario);
+
+            var pdf = ReportePdfBuilder.BuildDeclaracionJurada(detalle, titular);
+            return Results.File(pdf, MimePdf, $"declaracion-jurada-{idDeclaracion}.pdf");
+        }
+        catch (OracleException ex)
+        {
+            return OracleErrorMapper.ToResult(ex, isDev);
+        }
+    }
+
+    // ---------------------------------------------------------------- //
     // Helpers                                                           //
     // ---------------------------------------------------------------- //
     private static IResult ConstruirArchivo(ReporteTabular datos, string? formato) => ParseFormato(formato) switch
