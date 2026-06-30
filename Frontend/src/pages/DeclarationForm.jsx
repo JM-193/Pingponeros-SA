@@ -23,7 +23,7 @@ import {
   crearFuncionUsuario,
 } from '../services/userFunctionService'
 import { notifySuccess, notifyError, notifyApiError } from '../utils/notify'
-import { confirmAction } from '../utils/alerts'
+import { confirmAction, blockingInfo } from '../utils/alerts'
 import { hhmmAMinutos, minutosAHHMM, formatearMinutos } from '../utils/tiempo'
 import { evaluarCarga } from '../utils/workloadCalc'
 import { COLORS } from '../constants/colors'
@@ -336,6 +336,13 @@ export default function DeclarationForm() {
 
   const handleSiguiente = async () => {
     if (step === 1 && !validarPaso1()) return
+    if (step === 2 && carga.nivel === 'excede15') {
+      await blockingInfo(
+        'Carga de trabajo excesiva',
+        'La carga total supera 1.5x su jornada semanal. Reduzca las funciones declaradas antes de continuar.',
+      )
+      return
+    }
     setSaving(true)
     try {
       await persist()
