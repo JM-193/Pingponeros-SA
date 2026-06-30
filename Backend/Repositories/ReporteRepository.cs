@@ -46,12 +46,13 @@ internal sealed class ReporteRepository : IReporteRepository
                 """
                 SELECT u.CORREO_INSTITUCIONAL, u.PRIMER_NOMBRE, u.SEGUNDO_NOMBRE,
                        u.PRIMER_APELLIDO, u.SEGUNDO_APELLIDO, u.ROL, u.ESTADO,
-                       pu.NUMERO_PLAZA, pt.NOMBRE AS CARGO, pu.CLASE_OCUPACIONAL, pu.LUGAR_TRABAJO
+                       pu.NUMERO_PLAZA, pt.NOMBRE AS CARGO, co.NOMBRE AS CLASE_OCUPACIONAL, pu.LUGAR_TRABAJO
                 FROM   USUARIOS u
                 LEFT JOIN PLAZAS_USUARIOS pu
                        ON pu.CORREO_INSTITUCIONAL = u.CORREO_INSTITUCIONAL
                       AND (pu.FECHA_FINAL IS NULL OR pu.FECHA_FINAL > SYSDATE)
                 LEFT JOIN PUESTOS_TRABAJO pt ON pt.ID_PUESTO = pu.ID_PUESTO
+                LEFT JOIN CLASES_OCUPACIONALES co ON co.ID_CLASE_OCUPACIONAL = pu.ID_CLASE_OCUPACIONAL
                 ORDER BY u.PRIMER_APELLIDO, u.SEGUNDO_APELLIDO, u.PRIMER_NOMBRE, pu.NUMERO_PLAZA
                 """,
                 connection)

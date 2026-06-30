@@ -345,9 +345,10 @@ internal sealed class DeclaracionRepository : IDeclaracionRepository
         {
             var cmd = new OracleCommand(
                 """
-                SELECT pt.NOMBRE AS CARGO, pu.CLASE_OCUPACIONAL, pu.LUGAR_TRABAJO
+                SELECT pt.NOMBRE AS CARGO, co.NOMBRE AS CLASE_OCUPACIONAL, pu.LUGAR_TRABAJO
                 FROM   PLAZAS_USUARIOS pu
                 JOIN   PUESTOS_TRABAJO pt ON pt.ID_PUESTO = pu.ID_PUESTO
+                JOIN   CLASES_OCUPACIONALES co ON co.ID_CLASE_OCUPACIONAL = pu.ID_CLASE_OCUPACIONAL
                 WHERE  pu.NUMERO_PLAZA = :numeroPlaza
                 AND    pu.CORREO_INSTITUCIONAL = :correo
                 ORDER BY pu.FECHA_INICIO DESC
