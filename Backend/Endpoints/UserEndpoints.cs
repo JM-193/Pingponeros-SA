@@ -36,8 +36,8 @@ internal static class UserEndpoints
         usuarios.MapGet("/{correo}/plazas", (string correo, IPositionAssignmentRepository repo) => ListarPlazasAsync(correo, repo, isDev));
 
         // POST /usuarios/{correo}/plazas — Vincula una plaza disponible al usuario
-        usuarios.MapPost("/{correo}/plazas", (string correo, AssignPositionDto dto, IPositionAssignmentRepository asignacionRepo, IPositionRepository plazaRepo)
-            => AsignarPlazaAsync(correo, dto, asignacionRepo, plazaRepo, isDev));
+        usuarios.MapPost("/{correo}/plazas", (string correo, AssignPositionDto dto, IPositionAssignmentRepository asignacionRepo, IPositionRepository plazaRepo, IOccupationalClassRepository clasesRepo)
+            => AsignarPlazaAsync(correo, dto, asignacionRepo, plazaRepo, clasesRepo, isDev));
 
         // DELETE /usuarios/{correo}/plazas/{numeroPlaza} — Desvincula (libera) la plaza del usuario
         usuarios.MapDelete("/{correo}/plazas/{numeroPlaza}", (string correo, ulong numeroPlaza, IPositionAssignmentRepository repo)
@@ -131,6 +131,7 @@ internal static class UserEndpoints
         AssignPositionDto dto,
         IPositionAssignmentRepository asignacionRepo,
         IPositionRepository plazaRepo,
+        IOccupationalClassRepository clasesRepo,
         bool isDev)
     {
         if (dto.Validar() is { } error)
@@ -148,12 +149,16 @@ internal static class UserEndpoints
             if (ocupada)
                 return Results.Conflict(new { mensaje = "La plaza ya está vinculada a otro usuario." });
 
+            var existeClase = await clasesRepo.ObtenerPorIdAsync(dto.IdClaseOcupacional).ConfigureAwait(false);
+            if (existeClase is null)
+                return Results.NotFound(new { mensaje = "No se encontró la clase ocupacional." });
+
             var asignacion = new PositionAssignment
             {
                 NumeroPlaza = dto.NumeroPlaza,
                 CorreoInstitucional = correoDescodificado,
                 IdPuesto = dto.IdPuesto,
-                ClaseOcupacional = dto.ClaseOcupacional.Trim(),
+                IdClaseOcupacional = dto.IdClaseOcupacional,
                 LugarTrabajo = dto.LugarTrabajo.Trim(),
                 FechaInicio = dto.FechaInicio!.Value,
                 FechaFinal = dto.FechaFinal,
