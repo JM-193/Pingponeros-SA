@@ -30,3 +30,8 @@ export async function obtenerReporteAdmin(tipo, formato) {
 export async function obtenerReporteHorasDeclaracion(id) {
   return apiFetchBlob(`/reportes/declaraciones/${encodeURIComponent(id)}/horas`, { method: 'GET' })
 }
+
+// Documento oficial (PDF) de la declaración jurada, listo para imprimir y firmar. Devuelve un Blob.
+export async function obtenerDeclaracionDocumento(id) {
+  return apiFetchBlob(`/reportes/declaraciones/${encodeURIComponent(id)}/documento`, { method: 'GET' })
+}

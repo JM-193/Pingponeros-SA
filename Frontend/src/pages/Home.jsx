@@ -131,58 +131,71 @@ export default function Home() {
         Aplicación de Cargas de Trabajo
       </h2>
 
-      <p
-        style={{
-          fontSize: '14px',
-          lineHeight: '1.6',
-          textAlign: 'justify',
-          maxWidth: '820px',
-          margin: '0 auto 36px',
-          color: COLORS.textDark,
-        }}
-      >
-        La herramienta para la aplicación de cargas de trabajo, tiene por objetivo recopilar
-        información que permita conocer el volumen, distribución y organización del trabajo.
-        Sus respuestas verdaderas y precisas servirán de referencia para valorar las necesidades
-        planteadas por su Unidad de Trabajo. Las respuestas brindadas serán contrastadas con
-        la matriz de procesos de la Unidad respectiva, así como los formularios generales de
-        puesto. Se agradece el tiempo y disposición para analizar y responder las preguntas
-        que se le indican.
-      </p>
-
-      {/* Sección de declaraciones */}
-      <h3
-        style={{
-          fontWeight: 700,
-          fontSize: 'clamp(15px, 1.5vw, 20px)',
-          textAlign: 'center',
-          margin: '0 0 16px',
-          color: COLORS.labelColor,
-        }}
-      >
-        Declaraciones Jurada del Puesto de Trabajo
-      </h3>
-
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
-        <FormButton
-          label="Ir a Declaraciones"
-          type="button"
-          variant="primary"
-          onClick={() => navigate('/declaraciones')}
-          width="auto"
-        />
-      </div>
-
-      {/* Historial box */}
+      {/* Descripción */}
       <div
         style={{
-          maxWidth: '720px',
-          margin: '0 auto',
-          backgroundColor: COLORS.surfacePanel,
+          maxWidth: '820px',
+          margin: '0 auto 24px',
+          backgroundColor: COLORS.white,
           borderRadius: '8px',
           padding: '24px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.12)',
+          border: `1px solid ${COLORS.borderColor}`,
         }}
       >
+        <p
+          style={{
+            fontSize: '14px',
+            lineHeight: '1.6',
+            textAlign: 'justify',
+            margin: 0,
+            color: COLORS.textDark,
+          }}
+        >
+          La herramienta para la aplicación de cargas de trabajo, tiene por objetivo recopilar
+          información que permita conocer el volumen, distribución y organización del trabajo.
+          Sus respuestas verdaderas y precisas servirán de referencia para valorar las necesidades
+          planteadas por su Unidad de Trabajo. Las respuestas brindadas serán contrastadas con
+          la matriz de procesos de la Unidad respectiva, así como los formularios generales de
+          puesto. Se agradece el tiempo y disposición para analizar y responder las preguntas
+          que se le indican.
+        </p>
+      </div>
+
+      {/* Sección de declaraciones */}
+      <div
+        style={{
+          maxWidth: '820px',
+          margin: '0 auto',
+          backgroundColor: COLORS.white,
+          borderRadius: '8px',
+          padding: '24px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.12)',
+          border: `1px solid ${COLORS.borderColor}`,
+        }}
+      >
+        <h3
+          style={{
+            fontWeight: 700,
+            fontSize: 'clamp(15px, 1.5vw, 20px)',
+            textAlign: 'center',
+            margin: '0 0 16px',
+            color: COLORS.labelColor,
+          }}
+        >
+          Declaraciones Jurada del Puesto de Trabajo
+        </h3>
+
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
+          <FormButton
+            label="Ir a Declaraciones"
+            type="button"
+            variant="primary"
+            onClick={() => navigate('/declaraciones')}
+            width="auto"
+          />
+        </div>
+
         <h4
           style={{
             fontWeight: 700,

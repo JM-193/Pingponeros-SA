@@ -130,9 +130,11 @@ export default function UserProfile() {
         style={{
           maxWidth: '720px',
           margin: '0 auto 32px',
-          backgroundColor: COLORS.surfacePanel,
+          backgroundColor: COLORS.white,
           borderRadius: '8px',
           padding: '24px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.12)',
+          border: `1px solid ${COLORS.borderColor}`,
         }}
       >
         <h2
@@ -183,9 +185,11 @@ export default function UserProfile() {
         style={{
           maxWidth: '960px',
           margin: '0 auto',
-          backgroundColor: COLORS.surfacePanel,
+          backgroundColor: COLORS.white,
           borderRadius: '8px',
           padding: '24px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.12)',
+          border: `1px solid ${COLORS.borderColor}`,
         }}
       >
         <h2

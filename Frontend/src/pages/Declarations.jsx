@@ -10,9 +10,11 @@ import { COLORS } from '../constants/colors'
 const avisoStyle = {
   maxWidth: '820px',
   margin: '0 auto',
-  backgroundColor: COLORS.surfaceMuted,
+  backgroundColor: COLORS.white,
   borderRadius: '8px',
   padding: '24px',
+  boxShadow: '0 2px 10px rgba(0,0,0,0.12)',
+  border: `1px solid ${COLORS.borderColor}`,
 }
 
 export default function Declarations() {
