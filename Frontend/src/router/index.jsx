@@ -16,6 +16,7 @@ import Declarations from '../pages/Declarations'
 import DeclarationForm from '../pages/DeclarationForm'
 import DeclarationView from '../pages/DeclarationView'
 import Reports from '../pages/Reports'
+import Dashboard from '../pages/Dashboard'
 import UserProfile from '../pages/UserProfile'
 import ProtectedRoute from '../components/ProtectedRoute'
 
@@ -39,6 +40,7 @@ export default function AppRouter() {
 
           {/* Admin-only routes */}
           <Route element={<ProtectedRoute allowedRoles={[1]} />}>
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/usuarios/consultar" element={<QueryUsers />} />
             <Route path="/plazas/consultar" element={<QueryPositions />} />
             <Route path="/organizacion/areas/consultar" element={<QueryAreas />} />
