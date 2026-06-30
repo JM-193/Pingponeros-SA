@@ -14,8 +14,8 @@ public sealed class PositionAssignmentRepositoryTests
     public async Task ObtenerActivasPorUsuarioAsync_MapeaFilasConNombreDePuesto()
     {
         var table = CrearTablaAsignaciones();
-        table.Rows.Add(1001L, "ana@test.com", 5, "Analista", "Profesional 1", "Oficina Central", new DateTime(2026, 1, 1), DBNull.Value);
-        table.Rows.Add(1002L, "ana@test.com", 6, "Asistente", "Tecnico", "Sucursal Norte", new DateTime(2026, 2, 1), DBNull.Value);
+        table.Rows.Add(1001L, "ana@test.com", 5, "Analista", 10L, "Profesional 1", "Oficina Central", new DateTime(2026, 1, 1), DBNull.Value);
+        table.Rows.Add(1002L, "ana@test.com", 6, "Asistente", 11L, "Tecnico", "Sucursal Norte", new DateTime(2026, 2, 1), DBNull.Value);
 
         var q = Substitute.For<IQueryExecutor>();
         q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<PositionAssignment>>>>())
@@ -35,7 +35,8 @@ public sealed class PositionAssignmentRepositoryTests
         Assert.Equal("ana@test.com", asignaciones[0].CorreoInstitucional);
         Assert.Equal(5, asignaciones[0].IdPuesto);
         Assert.Equal("Analista", asignaciones[0].PuestoNombre);
-        Assert.Equal("Profesional 1", asignaciones[0].ClaseOcupacional);
+        Assert.Equal(10L, asignaciones[0].IdClaseOcupacional);
+        Assert.Equal("Profesional 1", asignaciones[0].ClaseOcupacionalNombre);
         Assert.Equal("Oficina Central", asignaciones[0].LugarTrabajo);
         Assert.Equal(new DateTime(2026, 1, 1), asignaciones[0].FechaInicio);
         Assert.Null(asignaciones[0].FechaFinal);
@@ -115,7 +116,8 @@ public sealed class PositionAssignmentRepositoryTests
             NumeroPlaza = 1001,
             CorreoInstitucional = "ana@test.com",
             IdPuesto = 5,
-            ClaseOcupacional = "Profesional 1",
+            IdClaseOcupacional = 10,
+            LugarTrabajo = "Oficina Central",
             FechaInicio = new DateTime(2026, 1, 1),
             FechaFinal = null,
         });
@@ -124,7 +126,8 @@ public sealed class PositionAssignmentRepositoryTests
         Assert.Equal(1001m, command!.Parameters[":numeroPlaza"].Value);
         Assert.Equal("ana@test.com", command.Parameters[":correo"].Value);
         Assert.Equal(5, command.Parameters[":idPuesto"].Value);
-        Assert.Equal("Profesional 1", command.Parameters[":claseOcupacional"].Value);
+        Assert.Equal(10L, command.Parameters[":idClaseOcupacional"].Value);
+        Assert.Equal("Oficina Central", command.Parameters[":lugarTrabajo"].Value);
         Assert.Equal(new DateTime(2026, 1, 1), command.Parameters[":fechaInicio"].Value);
         Assert.Equal(DBNull.Value, command.Parameters[":fechaFinal"].Value);
     }
@@ -147,7 +150,8 @@ public sealed class PositionAssignmentRepositoryTests
             NumeroPlaza = 1001,
             CorreoInstitucional = "ana@test.com",
             IdPuesto = 5,
-            ClaseOcupacional = "Profesional 1",
+            IdClaseOcupacional = 10,
+            LugarTrabajo = "Oficina Central",
             FechaInicio = new DateTime(2026, 1, 1),
             FechaFinal = new DateTime(2026, 6, 1),
         });
@@ -200,6 +204,7 @@ public sealed class PositionAssignmentRepositoryTests
         table.Columns.Add("CORREO_INSTITUCIONAL", typeof(string));
         table.Columns.Add("ID_PUESTO", typeof(int));
         table.Columns.Add("PUESTO_NOMBRE", typeof(string));
+        table.Columns.Add("ID_CLASE_OCUPACIONAL", typeof(long));
         table.Columns.Add("CLASE_OCUPACIONAL", typeof(string));
         table.Columns.Add("LUGAR_TRABAJO", typeof(string));
         table.Columns.Add("FECHA_INICIO", typeof(DateTime));
