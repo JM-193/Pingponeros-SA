@@ -1,12 +1,14 @@
 // DeclarationView.test.jsx
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import DeclarationView from '../pages/DeclarationView'
 import * as session from '../services/session'
 import * as declarationService from '../services/declarationService'
+import * as reportService from '../services/reportService'
 
 vi.mock('../services/session')
 vi.mock('../services/declarationService')
+vi.mock('../services/reportService')
 
 const mockSesion = {
   primerNombre: 'Juan',
@@ -224,5 +226,35 @@ describe('DeclarationView Page', () => {
     await waitFor(() => {
       expect(screen.getByText(/Diagnóstico de la Carga de Trabajo/i)).toBeInTheDocument()
     })
+  })
+
+  it('renderiza el botón Reporte de Horas cuando hay datos', async () => {
+    declarationService.obtenerDeclaracion.mockResolvedValue(mockDetalle)
+
+    renderConId()
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Reporte de Horas/i })).toBeInTheDocument()
+    })
+  })
+
+  it('genera el reporte de horas y abre la previsualización al pulsar el botón', async () => {
+    const blob = new Blob(['pdf'], { type: 'application/pdf' })
+    declarationService.obtenerDeclaracion.mockResolvedValue(mockDetalle)
+    reportService.obtenerReporteHorasDeclaracion.mockResolvedValue(blob)
+    globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock')
+    globalThis.URL.revokeObjectURL = vi.fn()
+
+    renderConId('1')
+
+    const boton = await screen.findByRole('button', { name: /Reporte de Horas/i })
+    fireEvent.click(boton)
+
+    await waitFor(() =>
+      expect(reportService.obtenerReporteHorasDeclaracion).toHaveBeenCalledWith('1'),
+    )
+    await waitFor(() =>
+      expect(screen.getByTitle('Vista previa del reporte')).toBeInTheDocument(),
+    )
   })
 })

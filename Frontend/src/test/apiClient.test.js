@@ -1,6 +1,6 @@
 // apiClient.test.js
 import { describe, it, expect, beforeEach } from 'vitest'
-import { apiFetch, ApiError } from '../services/apiClient'
+import { apiFetch, apiFetchBlob, ApiError } from '../services/apiClient'
 
 describe('apiClient', () => {
   const mockFetch = vi.fn()
@@ -93,5 +93,37 @@ describe('apiClient', () => {
     expect(error).toBeInstanceOf(Error)
     expect(error.status).toBe(500)
     expect(error.codigo).toBe('X')
+  })
+
+  describe('apiFetchBlob', () => {
+    it('devuelve el cuerpo como Blob en respuestas correctas', async () => {
+      const blob = new Blob(['contenido'], { type: 'application/pdf' })
+      mockFetch.mockResolvedValueOnce({ ok: true, status: 200, blob: async () => blob })
+
+      const result = await apiFetchBlob('/reportes/funcionarios?formato=pdf', { method: 'GET' })
+
+      expect(result).toBe(blob)
+    })
+
+    it('lanza ApiError con status 0 cuando fetch falla', async () => {
+      mockFetch.mockRejectedValueOnce(new TypeError('Failed to fetch'))
+
+      await expect(apiFetchBlob('/reportes/horas', { method: 'GET' })).rejects.toMatchObject({
+        name: 'ApiError',
+        status: 0,
+      })
+    })
+
+    it('parsea el mensaje del backend cuando responde con error', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: async () => ({ mensaje: 'No se encontraron datos para el reporte seleccionado.' }),
+      })
+
+      await expect(
+        apiFetchBlob('/reportes/declaraciones?formato=pdf', { method: 'GET' }),
+      ).rejects.toThrow('No se encontraron datos para el reporte seleccionado.')
+    })
   })
 })
