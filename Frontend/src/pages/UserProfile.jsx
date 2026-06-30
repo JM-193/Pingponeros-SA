@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import PageLayout from '../components/PageLayout'
+import EntityResultsTable from '../components/EntityResultsTable'
 import { obtenerSesion } from '../services/session'
 import { obtenerPlazasUsuario } from '../services/userService'
 import { notifyApiError } from '../utils/notify'
@@ -101,56 +102,11 @@ export default function UserProfile() {
     }
 
     return (
-      <div style={{ overflowX: 'auto' }}>
-        <table
-          style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            fontSize: '13px',
-            color: COLORS.textDark,
-          }}
-        >
-          <thead>
-            <tr style={{ backgroundColor: COLORS.navBg }}>
-              {COLUMNS.map((col) => (
-                <th
-                  key={col.key}
-                  style={{
-                    padding: '10px 14px',
-                    textAlign: 'left',
-                    fontWeight: 700,
-                    fontSize: '13px',
-                    color: COLORS.white,
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {col.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {plazas.map((plaza, i) => (
-              <tr
-                key={plaza.numeroPlaza}
-                style={{ backgroundColor: i % 2 === 0 ? COLORS.white : COLORS.surfaceAlt }}
-              >
-                {COLUMNS.map((col) => (
-                  <td
-                    key={col.key}
-                    style={{
-                      padding: '10px 14px',
-                      borderBottom: `1px solid ${COLORS.borderColor}`,
-                    }}
-                  >
-                    {col.render(plaza)}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <EntityResultsTable
+        columns={COLUMNS}
+        rows={plazas}
+        getRowId={(plaza) => plaza.numeroPlaza}
+      />
     )
   }
 
