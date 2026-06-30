@@ -7,6 +7,8 @@ import { useMediaQuery } from '../hooks/useMediaQuery'
 
 const HOME = { label: 'Inicio', to: '/home' }
 const ORGANIZATION = { label: 'Organización' }
+const DECLARATIONS = { label: 'Declaraciones', to: '/declaraciones' }
+const FUNCTIONS = { label: 'Funciones' }
 
 const BREADCRUMB_MAP = [
   {
@@ -27,6 +29,40 @@ const BREADCRUMB_MAP = [
     crumbs: [
       HOME,
       { label: 'Cambiar Contraseña' },
+    ],
+  },
+
+  {
+    pattern: '/perfil',
+    crumbs: [
+      HOME,
+      { label: 'Perfil' },
+    ],
+  },
+
+  {
+    pattern: '/declaraciones',
+    crumbs: [
+      HOME,
+      { label: 'Declaraciones' },
+    ],
+  },
+
+  {
+    pattern: '/declaraciones/formulario',
+    crumbs: [
+      HOME,
+      DECLARATIONS,
+      { label: 'Formulario' },
+    ],
+  },
+
+  {
+    pattern: '/declaraciones/ver/:id',
+    crumbs: [
+      HOME,
+      DECLARATIONS,
+      { label: 'Detalle' },
     ],
   },
 
@@ -80,11 +116,39 @@ const BREADCRUMB_MAP = [
   },
 
   {
-    pattern: '/organizacion/plazas/consultar',
+    pattern: '/plazas/consultar',
     crumbs: [
       HOME,
-      ORGANIZATION,
       { label: 'Plazas' },
+      { label: 'Consultar' },
+    ],
+  },
+
+  {
+    pattern: '/puestos-trabajo/consultar',
+    crumbs: [
+      HOME,
+      { label: 'Puestos de trabajo' },
+      { label: 'Consultar' },
+    ],
+  },
+
+  {
+    pattern: '/funciones/oficiales/consultar',
+    crumbs: [
+      HOME,
+      FUNCTIONS,
+      { label: 'Oficiales' },
+      { label: 'Consultar' },
+    ],
+  },
+
+  {
+    pattern: '/funciones/usuarios/consultar',
+    crumbs: [
+      HOME,
+      FUNCTIONS,
+      { label: 'Usuarios' },
       { label: 'Consultar' },
     ],
   },
