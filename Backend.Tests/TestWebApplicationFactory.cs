@@ -26,6 +26,7 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<TestEntryP
     internal IUserFunctionRepository FuncionUsuarioRepo { get; } = Substitute.For<IUserFunctionRepository>();
     internal IDeclaracionRepository DeclaracionRepo { get; } = Substitute.For<IDeclaracionRepository>();
     internal IReporteRepository ReporteRepo { get; } = Substitute.For<IReporteRepository>();
+    internal IOccupationalClassRepository ClasesRepo { get; } = Substitute.For<IOccupationalClassRepository>();
     internal IDbExecutor DbExecutor { get; } = Substitute.For<IDbExecutor>();
     internal IQueryExecutor QueryExecutor { get; } = Substitute.For<IQueryExecutor>();
     internal IEmailService EmailService { get; } = Substitute.For<IEmailService>();
@@ -61,6 +62,7 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<TestEntryP
             services.RemoveAll<IUserFunctionRepository>();
             services.RemoveAll<IDeclaracionRepository>();
             services.RemoveAll<IReporteRepository>();
+            services.RemoveAll<IOccupationalClassRepository>();
             services.RemoveAll<IEmailService>();
             services.AddScoped<IDbExecutor>(_ => DbExecutor);
             services.AddScoped<IQueryExecutor>(_ => QueryExecutor);
@@ -77,6 +79,7 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<TestEntryP
             services.AddScoped<IUserFunctionRepository>(_ => FuncionUsuarioRepo);
             services.AddScoped<IDeclaracionRepository>(_ => DeclaracionRepo);
             services.AddScoped<IReporteRepository>(_ => ReporteRepo);
+            services.AddScoped<IOccupationalClassRepository>(_ => ClasesRepo);
             services.AddScoped<IEmailService>(_ => EmailService);
         });
     }
