@@ -217,7 +217,7 @@ export default function UserPositionsSection({ correo }) {
               padding: '20px',
             }}
           >
-            <h4 style={{ fontWeight: 700, fontSize: '14px', color: COLORS.labelColor, margin: '0 0 16px' }}>
+            <h4 style={{ fontWeight: 700, fontSize: '16px', color: COLORS.labelColor, margin: '0 0 16px' }}>
               Agregar plaza
             </h4>
 
