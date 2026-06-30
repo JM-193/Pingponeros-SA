@@ -22,11 +22,12 @@ internal sealed record AssignPositionDto(
 
     [property: Required(ErrorMessage = "La clase ocupacional es obligatoria.")]
     [property: MaxLength(190, ErrorMessage = "La clase ocupacional no puede superar los 190 caracteres.")]
-    [property: RegularExpression(ValidationPatterns.SoloLetras, ErrorMessage = "La clase ocupacional solo puede contener letras.")]
+    [property: RegularExpression(ValidationPatterns.SoloLetrasYPuntuacion, ErrorMessage = "La clase ocupacional solo puede contener letras, números, espacios, puntos, comas y dos puntos.")]
     string ClaseOcupacional,
 
     [property: Required(ErrorMessage = "El lugar de trabajo es obligatorio.")]
     [property: MaxLength(150, ErrorMessage = "El lugar de trabajo no puede superar los 150 caracteres.")]
+    [property: RegularExpression(ValidationPatterns.SoloLetrasYPuntuacion, ErrorMessage = "El lugar de trabajo solo puede contener letras, números, espacios, puntos, comas y dos puntos.")]
     string LugarTrabajo,
 
     [property: Required(ErrorMessage = "La fecha de inicio es obligatoria.")]

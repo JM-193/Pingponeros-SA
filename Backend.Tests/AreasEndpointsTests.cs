@@ -73,6 +73,16 @@ public sealed class AreasEndpointsTests : IClassFixture<TestWebApplicationFactor
     }
 
     [Fact]
+    public async Task CrearArea_Returns400CuandoNombreTieneCaracteresInvalidos()
+    {
+        var dto = new { Nombre = "Sistemas 1", Descripcion = "Descripción válida" };
+
+        var response = await _client.PostAsJsonAsync("/areas", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
     public async Task CrearArea_Returns409CuandoNombreYaExiste()
     {
         _factory.AreaRepo.ExisteNombreAsync(Arg.Any<string>()).Returns(true);

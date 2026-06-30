@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
+using Backend.Validators;
 
 namespace Backend.DTOs;
 
@@ -24,6 +25,14 @@ internal sealed record GuardarDeclaracionDto(
     private static readonly Regex HoraRegex =
             new(
                 "^[0-2][0-9]:[0-5][0-9]$",
+                RegexOptions.CultureInvariant,
+                TimeSpan.FromMilliseconds(100));
+
+    // Lista blanca de texto libre para las justificaciones: bloquea los caracteres usados en
+    // inyecciones SQL (defensa en profundidad; los repositorios ya usan consultas parametrizadas).
+    private static readonly Regex TextoSeguroRegex =
+            new(
+                ValidationPatterns.TextoSeguro,
                 RegexOptions.CultureInvariant,
                 TimeSpan.FromMilliseconds(100));
 
@@ -75,6 +84,9 @@ internal sealed record GuardarDeclaracionDto(
         if (string.IsNullOrWhiteSpace(he.Justificacion))
             return "Debe justificar el tiempo adicional fuera de su jornada.";
 
+        if (!TextoSeguroRegex.IsMatch(he.Justificacion))
+            return "La justificación del tiempo adicional contiene caracteres no permitidos.";
+
         return null;
     }
 
@@ -88,6 +100,9 @@ internal sealed record GuardarDeclaracionDto(
 
         if (string.IsNullOrWhiteSpace(pa.Justificacion))
             return "Debe indicar cuál es el permiso o licencia.";
+
+        if (!TextoSeguroRegex.IsMatch(pa.Justificacion))
+            return "La justificación del permiso o licencia contiene caracteres no permitidos.";
 
         return null;
     }

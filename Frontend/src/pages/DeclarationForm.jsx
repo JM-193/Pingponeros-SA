@@ -28,8 +28,14 @@ import { hhmmAMinutos, minutosAHHMM, formatearMinutos } from '../utils/tiempo'
 import { evaluarCarga } from '../utils/workloadCalc'
 import { COLORS } from '../constants/colors'
 import { JORNADA_OPTIONS, TIPO_FUNCION } from '../constants/declaracion'
+import { TEXTO_SEGURO_REGEX } from '../constants/regex'
 
 const asArray = (v) => (Array.isArray(v) ? v : [])
+
+// Justificaciones: texto libre que bloquea caracteres de inyección SQL (defensa en profundidad).
+const CAMPOS_TEXTO_SEGURO = ['permisoJustificacion', 'horaExtraJustificacion']
+const CARACTERES_INSEGUROS = /[^A-Za-z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,:()¿?¡!/%-]/g
+const MENSAJE_TEXTO_INSEGURO = 'La justificación contiene caracteres no permitidos.'
 
 const EMPTY_FORM = {
   numeroPlaza: '',
@@ -248,7 +254,11 @@ export default function DeclarationForm() {
     setForm((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleInput = (e) => setField(e.target.name, e.target.value)
+  const handleInput = (e) => {
+    const { name, value } = e.target
+    const sanitized = CAMPOS_TEXTO_SEGURO.includes(name) ? value.replace(CARACTERES_INSEGUROS, '') : value
+    setField(name, sanitized)
+  }
 
   const handlePlazaChange = async (e) => {
     const numero = e.target.value
@@ -344,11 +354,19 @@ export default function DeclarationForm() {
     if (form.actividades.length === 0) next.actividades = 'Agregue al menos una función.'
     if (form.permisoAplica) {
       if (Number(form.permisoDias) <= 0) next.permisoDias = 'Indique los días.'
-      if (!form.permisoJustificacion.trim()) next.permisoJustificacion = 'Indique cuál es el permiso o licencia.'
+      if (!form.permisoJustificacion.trim()) {
+        next.permisoJustificacion = 'Indique cuál es el permiso o licencia.'
+      } else if (!TEXTO_SEGURO_REGEX.test(form.permisoJustificacion)) {
+        next.permisoJustificacion = MENSAJE_TEXTO_INSEGURO
+      }
     }
     if (form.horaExtraAplica) {
       if (Number(form.horaExtraTiempo) <= 0) next.horaExtraTiempo = 'Indique los minutos.'
-      if (!form.horaExtraJustificacion.trim()) next.horaExtraJustificacion = 'Justifique el tiempo adicional.'
+      if (!form.horaExtraJustificacion.trim()) {
+        next.horaExtraJustificacion = 'Justifique el tiempo adicional.'
+      } else if (!TEXTO_SEGURO_REGEX.test(form.horaExtraJustificacion)) {
+        next.horaExtraJustificacion = MENSAJE_TEXTO_INSEGURO
+      }
     }
     setErrors(next)
     return Object.keys(next).length === 0

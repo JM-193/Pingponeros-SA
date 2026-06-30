@@ -78,6 +78,32 @@ describe('OrganizationEntityForm utilities', () => {
       expect(updates[0].descripcion).toBe('New desc')
     })
 
+    it('elimina dígitos y símbolos del nombre al escribir', () => {
+      const updates = []
+      const setFormData = vi.fn((fn) => {
+        updates.push(fn({ nombre: '', descripcion: '' }))
+      })
+
+      const handler = createOrganizationEntityInputChangeHandler(setFormData, () => {})
+
+      handler({ target: { name: 'nombre', value: 'Área3#' } })
+
+      expect(updates[0].nombre).toBe('Área')
+    })
+
+    it('conserva la puntuación básica y elimina dígitos en la descripción', () => {
+      const updates = []
+      const setFormData = vi.fn((fn) => {
+        updates.push(fn({ nombre: 'Test', descripcion: '' }))
+      })
+
+      const handler = createOrganizationEntityInputChangeHandler(setFormData, () => {})
+
+      handler({ target: { name: 'descripcion', value: 'Hola, mundo.9' } })
+
+      expect(updates[0].descripcion).toBe('Hola, mundo.')
+    })
+
     it('preserva otros campos al actualizar uno', () => {
       const initialData = { nombre: 'Original', descripcion: 'Original desc' }
       const setFormData = vi.fn((fn) => {
@@ -123,6 +149,24 @@ describe('OrganizationEntityForm utilities', () => {
       const errors = getOrganizationEntityFormErrors({
         nombre: 'Administración',
         descripcion: 'Área de administración',
+      })
+      expect(errors).toEqual({})
+    })
+
+    it('retorna error de nombre cuando tiene dígitos o símbolos', () => {
+      const errors = getOrganizationEntityFormErrors({ nombre: 'Área 1', descripcion: 'Válida' })
+      expect(errors.nombre).toBe('El nombre solo puede contener letras, espacios, puntos, comas y dos puntos')
+    })
+
+    it('retorna error de descripción cuando tiene caracteres no permitidos', () => {
+      const errors = getOrganizationEntityFormErrors({ nombre: 'Área', descripcion: 'Costo #5' })
+      expect(errors.descripcion).toBe('La descripción solo puede contener letras, espacios, puntos, comas y dos puntos')
+    })
+
+    it('acepta nombre y descripción con puntuación básica permitida', () => {
+      const errors = getOrganizationEntityFormErrors({
+        nombre: 'Área: Norte',
+        descripcion: 'Sede central, edificio principal.',
       })
       expect(errors).toEqual({})
     })

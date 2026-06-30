@@ -73,6 +73,16 @@ public sealed class DepartamentosEndpointsTests : IClassFixture<TestWebApplicati
     }
 
     [Fact]
+    public async Task CrearDepartamento_Returns400CuandoNombreTieneCaracteresInvalidos()
+    {
+        var dto = new { Nombre = "RH 2", IdArea = 1, Descripcion = "Descripción válida" };
+
+        var response = await _client.PostAsJsonAsync("/departamentos", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
     public async Task CrearDepartamento_Returns400ConAreaNull()
     {
         // El DTO permite null, esto es válido

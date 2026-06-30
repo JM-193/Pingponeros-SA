@@ -1,10 +1,22 @@
+import { SOLO_LETRAS_PUNTUACION_REGEX } from '../constants/regex'
+
+// Campos de texto libre que solo admiten letras, espacios y puntuación básica (. , :).
+const CAMPOS_SOLO_TEXTO = ['nombre', 'descripcion']
+
+// Elimina, al escribir/pegar, los caracteres no permitidos por SOLO_LETRAS_PUNTUACION_REGEX.
+const CARACTERES_INVALIDOS = /[^A-Za-z0-9áéíóúÁÉÍÓÚñÑüÜ.,:\s]/g
+
+const MENSAJE_NOMBRE = 'El nombre solo puede contener letras, números, espacios, puntos, comas y dos puntos'
+const MENSAJE_DESCRIPCION = 'La descripción solo puede contener letras, números, espacios, puntos, comas y dos puntos'
+
 export function createOrganizationEntityInputChangeHandler(setFormData, clearFeedback) {
   return (event) => {
     const { name, value } = event.target
     clearFeedback()
+    const sanitized = CAMPOS_SOLO_TEXTO.includes(name) ? value.replace(CARACTERES_INVALIDOS, '') : value
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: sanitized,
     }))
   }
 }
@@ -33,10 +45,14 @@ export function getOrganizationEntityFormErrors(formData, options = {}) {
 
   if (!formData.nombre.trim()) {
     errors.nombre = `El nombre ${nameArticle} ${entityLabel} es requerido`
+  } else if (!SOLO_LETRAS_PUNTUACION_REGEX.test(formData.nombre)) {
+    errors.nombre = MENSAJE_NOMBRE
   }
 
   if (!formData.descripcion.trim()) {
     errors.descripcion = 'La descripción es requerida'
+  } else if (!SOLO_LETRAS_PUNTUACION_REGEX.test(formData.descripcion)) {
+    errors.descripcion = MENSAJE_DESCRIPCION
   }
 
   if (requireArea && !formData.idArea) {

@@ -375,6 +375,16 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     }
 
     [Fact]
+    public async Task AsignarPlaza_Returns400CuandoLugarTrabajoTieneCaracteresInvalidos()
+    {
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, ClaseOcupacional = "Profesional", LugarTrabajo = "Edificio 3", FechaInicio = "2026-01-01" };
+
+        var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
     public async Task DesasignarPlaza_Returns200CuandoSeDesvincula()
     {
         _factory.AsignacionRepo.DesasignarAsync(1001, "ana@test.com").Returns(true);

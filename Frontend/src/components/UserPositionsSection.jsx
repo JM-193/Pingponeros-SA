@@ -14,10 +14,13 @@ import FormButton from './FormButton'
 import { confirmDelete } from '../utils/alerts'
 import { notifySuccess, notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
-import { SOLO_LETRAS_REGEX } from '../constants/regex'
+import { SOLO_LETRAS_PUNTUACION_REGEX } from '../constants/regex'
 
-// Strips characters not allowed by SOLO_LETRAS_REGEX during typing/pasting.
-const CLASE_OCUPACIONAL_INVALIDOS = /[^A-Za-záéíóúÁÉÍÓÚñÑüÜ]/g
+// Campos de texto libre que solo admiten letras, espacios y puntuación básica (. , :).
+const CAMPOS_SOLO_TEXTO = ['claseOcupacional', 'lugarTrabajo']
+
+// Elimina, al escribir/pegar, los caracteres no permitidos por SOLO_LETRAS_PUNTUACION_REGEX.
+const CARACTERES_INVALIDOS = /[^A-Za-z0-9áéíóúÁÉÍÓÚñÑüÜ.,:\s]/g
 
 const EMPTY_FORM = {
   numeroPlaza: '',
@@ -81,7 +84,7 @@ export default function UserPositionsSection({ correo }) {
   const handleFieldChange = (e) => {
     const { name, value } = e.target
     setErrors((prev) => (prev[name] ? { ...prev, [name]: undefined } : prev))
-    const sanitized = name === 'claseOcupacional' ? value.replace(CLASE_OCUPACIONAL_INVALIDOS, '') : value
+    const sanitized = CAMPOS_SOLO_TEXTO.includes(name) ? value.replace(CARACTERES_INVALIDOS, '') : value
     setForm((prev) => ({ ...prev, [name]: sanitized }))
   }
 
@@ -91,10 +94,14 @@ export default function UserPositionsSection({ correo }) {
     if (!form.idPuesto) next.idPuesto = 'Seleccione un puesto'
     if (!form.claseOcupacional.trim()) {
       next.claseOcupacional = 'La clase ocupacional es obligatoria'
-    } else if (!SOLO_LETRAS_REGEX.test(form.claseOcupacional)) {
-      next.claseOcupacional = 'La clase ocupacional solo puede contener letras'
+    } else if (!SOLO_LETRAS_PUNTUACION_REGEX.test(form.claseOcupacional)) {
+      next.claseOcupacional = 'La clase ocupacional solo puede contener letras, números, espacios, puntos, comas y dos puntos'
     }
-    if (!form.lugarTrabajo.trim()) next.lugarTrabajo = 'El lugar de trabajo es obligatorio'
+    if (!form.lugarTrabajo.trim()) {
+      next.lugarTrabajo = 'El lugar de trabajo es obligatorio'
+    } else if (!SOLO_LETRAS_PUNTUACION_REGEX.test(form.lugarTrabajo)) {
+      next.lugarTrabajo = 'El lugar de trabajo solo puede contener letras, números, espacios, puntos, comas y dos puntos'
+    }
     if (!form.fechaInicio) next.fechaInicio = 'La fecha de inicio es obligatoria'
     if (form.fechaFinal && form.fechaInicio && form.fechaFinal < form.fechaInicio) {
       next.fechaFinal = 'La fecha final no puede ser anterior a la de inicio'

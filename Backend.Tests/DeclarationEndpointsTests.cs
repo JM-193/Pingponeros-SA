@@ -202,6 +202,19 @@ public sealed class DeclarationEndpointsTests : IClassFixture<TestWebApplication
     }
 
     [Fact]
+    public async Task GuardarDeclaracion_JustificacionConCaracteresPeligrosos_Returns400()
+    {
+        var dto = new
+        {
+            HoraExtra = new { TiempoAdicional = 30, Justificacion = "'; DROP TABLE USUARIOS;--", ConocimientoJefatura = false },
+        };
+
+        var response = await _client.PutAsJsonAsync("/declaraciones/1", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
     public async Task GuardarDeclaracion_DeclaracionNoExiste_Returns404()
     {
         _factory.DeclaracionRepo.ObtenerCabeceraAsync(Arg.Any<int>()).Returns((Declaracion?)null);

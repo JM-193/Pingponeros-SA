@@ -6,8 +6,15 @@ import FormInput from './FormInput'
 import FormButton from './FormButton'
 import { COLORS } from '../constants/colors'
 import { TIPO_FUNCION, TIPO_FUNCION_OPTIONS, PERIODICIDAD_OPTIONS } from '../constants/declaracion'
+import { SOLO_LETRAS_PUNTUACION_REGEX } from '../constants/regex'
 
 const NUEVA = '__nueva__'
+
+// Campos de texto libre de la "nueva función": solo letras, espacios y puntuación básica (. , :).
+const CAMPOS_SOLO_TEXTO = ['nuevaNombre', 'nuevaDescripcion']
+const CARACTERES_INVALIDOS = /[^A-Za-z0-9áéíóúÁÉÍÓÚñÑüÜ.,:\s]/g
+const MENSAJE_NOMBRE = 'El nombre solo puede contener letras, números, espacios, puntos, comas y dos puntos'
+const MENSAJE_DESCRIPCION = 'La descripción solo puede contener letras, números, espacios, puntos, comas y dos puntos'
 
 const EMPTY = {
   tipoFuncion: '',
@@ -63,12 +70,13 @@ export default function DeclarationActivityModal({
   const handleChange = (e) => {
     const { name, value } = e.target
     setErrors((prev) => (prev[name] ? { ...prev, [name]: undefined } : prev))
+    const sanitized = CAMPOS_SOLO_TEXTO.includes(name) ? value.replace(CARACTERES_INVALIDOS, '') : value
     setForm((prev) => {
       // Al cambiar de tipo se reinicia la función seleccionada y los campos de "nueva".
       if (name === 'tipoFuncion') {
-        return { ...prev, tipoFuncion: value, funcion: '', nuevaNombre: '', nuevaDescripcion: '' }
+        return { ...prev, tipoFuncion: sanitized, funcion: '', nuevaNombre: '', nuevaDescripcion: '' }
       }
-      return { ...prev, [name]: value }
+      return { ...prev, [name]: sanitized }
     })
   }
 
@@ -77,8 +85,16 @@ export default function DeclarationActivityModal({
     if (!form.tipoFuncion) next.tipoFuncion = 'Seleccione el tipo de función'
     if (!form.funcion) next.funcion = 'Seleccione una función'
     if (esNueva) {
-      if (!form.nuevaNombre.trim()) next.nuevaNombre = 'El nombre es obligatorio'
-      if (!form.nuevaDescripcion.trim()) next.nuevaDescripcion = 'La descripción es obligatoria'
+      if (!form.nuevaNombre.trim()) {
+        next.nuevaNombre = 'El nombre es obligatorio'
+      } else if (!SOLO_LETRAS_PUNTUACION_REGEX.test(form.nuevaNombre)) {
+        next.nuevaNombre = MENSAJE_NOMBRE
+      }
+      if (!form.nuevaDescripcion.trim()) {
+        next.nuevaDescripcion = 'La descripción es obligatoria'
+      } else if (!SOLO_LETRAS_PUNTUACION_REGEX.test(form.nuevaDescripcion)) {
+        next.nuevaDescripcion = MENSAJE_DESCRIPCION
+      }
     }
     if (!form.periodicidad) next.periodicidad = 'Seleccione la periodicidad'
     if (Number(form.vecesRealizadas) < 1) next.vecesRealizadas = 'Debe ser al menos 1'

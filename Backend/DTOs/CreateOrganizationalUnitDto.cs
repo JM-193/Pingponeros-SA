@@ -11,6 +11,7 @@ internal abstract record CreateOrganizationalUnitDto
 
     [Required(ErrorMessage = "La descripción es obligatoria.")]
     [MaxLength(2048, ErrorMessage = "La descripción no puede superar los 2048 caracteres.")]
+    [RegularExpression(ValidationPatterns.SoloLetrasYPuntuacion, ErrorMessage = "La descripción solo puede contener letras, números, espacios, puntos, comas y dos puntos.")]
     public string Descripcion { get; init; } = null!;
 
     public int? IdArea { get; init; }
