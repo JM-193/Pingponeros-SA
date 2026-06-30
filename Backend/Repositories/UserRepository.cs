@@ -188,7 +188,7 @@ internal sealed class UserRepository : IUserRepository
     }
 
     // ------------------------------------------------------------------ //
-    // GET HASH MÁS RECIENTE                                               //
+    // OBTENER HASH MÁS RECIENTE                                           //
     // ------------------------------------------------------------------ //
     public async Task<Password?> ObtenerContrasenaMasRecienteAsync(string correo)
     {

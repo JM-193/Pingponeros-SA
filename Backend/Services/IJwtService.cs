@@ -2,13 +2,14 @@
 namespace Backend.Services;
 
 /// <summary>
-/// Service for generating authentication JWTs.
-/// The signing key must come from configuration (appsettings.json or environment variables),
-/// never hardcoded in the code.
+/// Servicio para generar JWT de autenticación.
+/// La clave de firma debe provenir de la configuración (appsettings.json o variables de entorno),
+/// nunca incrustada directamente en el código.
+/// </summary>
 internal interface IJwtService
 {
     /// <summary>
-    /// Generates a signed JWT with the basic claims of the authenticated user.
+    /// Genera un JWT firmado con los claims básicos del usuario autenticado.
     /// </summary>
     string GenerarToken(
         string correoInstitucional,
