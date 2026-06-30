@@ -128,4 +128,44 @@ describe('EntityResultsTable', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Ordenar por Nombre descendente' }))
     expect(onSort).toHaveBeenCalledWith('nombre')
   })
+
+  it('permite ordenar columnas en móvil', () => {
+    mockMatchMedia(true)
+    const onSort = vi.fn()
+
+    render(
+      <EntityResultsTable
+        {...defaultProps}
+        sortConfig={{ key: 'nombre', direction: 'asc' }}
+        onSort={onSort}
+      />
+    )
+
+    fireEvent.change(screen.getByLabelText('Ordenar por'), { target: { value: 'codigo' } })
+    expect(onSort).toHaveBeenCalledWith('codigo')
+  })
+
+  it('alterna la dirección de orden en móvil', () => {
+    mockMatchMedia(true)
+    const onSort = vi.fn()
+
+    render(
+      <EntityResultsTable
+        {...defaultProps}
+        sortConfig={{ key: 'nombre', direction: 'asc' }}
+        onSort={onSort}
+      />
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cambiar orden a descendente' }))
+    expect(onSort).toHaveBeenCalledWith('nombre')
+  })
+
+  it('no muestra el control de orden en móvil cuando no hay onSort', () => {
+    mockMatchMedia(true)
+
+    render(<EntityResultsTable {...defaultProps} />)
+
+    expect(screen.queryByLabelText('Ordenar por')).not.toBeInTheDocument()
+  })
 })
