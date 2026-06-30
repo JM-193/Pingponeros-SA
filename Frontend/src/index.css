@@ -1,3 +1,7 @@
+html {
+  scrollbar-gutter: stable;
+}
+
 * {
   box-sizing: border-box;
   font-family: 'Myriad Pro', Arial, sans-serif;
