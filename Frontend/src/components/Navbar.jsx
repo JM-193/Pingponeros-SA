@@ -9,6 +9,12 @@ import { notifyInfo } from '../utils/notify'
 
 const NAV_ITEMS = [
   {
+    label: 'Dashboard',
+    path: '/dashboard',
+    activeOn: '/dashboard',
+    roles: [1],
+  },
+  {
     label: 'Página Principal',
     path: '/home',
     activeOn: '/home'
