@@ -218,10 +218,10 @@ internal sealed class ReporteService : IReporteService
     private static string TextoEstado(int estado) => estado == 1 ? "Activo" : "Inactivo";
     private static string TextoCompleta(int completa) => completa == 1 ? "Completa" : "Borrador";
 
-    private static Formato ParseFormato(string? formato) => (formato?.Trim().ToLowerInvariant()) switch
+    private static Formato ParseFormato(string? formato) => (formato?.Trim().ToUpperInvariant()) switch
     {
-        null or "" or "pdf" => Formato.Pdf,
-        "excel" or "xlsx" => Formato.Excel,
+        null or "" or "PDF" => Formato.Pdf,
+        "EXCEL" or "XLSX" => Formato.Excel,
         _ => Formato.Invalido,
     };
 
