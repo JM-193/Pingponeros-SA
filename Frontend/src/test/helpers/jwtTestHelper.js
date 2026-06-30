@@ -1,12 +1,12 @@
 // src/test/helpers/jwtTestHelper.js
 
 /**
- * Construct a minimal JWT with the given payload.
- * session.js does not verify the signature, it only decodes the payload, so 
- * the signature can be any string.
+ * Construye un JWT mínimo con el payload indicado.
+ * session.js no verifica la firma, solo decodifica el payload, por lo que
+ * la firma puede ser cualquier cadena.
  *
- * @param {object} payload  Fields that will be in the JWT payload
- * @returns {string}  JWT with header.payload.fakesignature format
+ * @param {object} payload  Campos que estarán en el payload del JWT
+ * @returns {string}  JWT con formato header.payload.fakesignature
  */
 export function buildJWT(payload) {
   const toBase64Url = (str) => {
@@ -21,7 +21,7 @@ export function buildJWT(payload) {
 }
 
 /**
- * Returns the current time in epoch seconds (format that uses the `exp` field in JWT).
+ * Devuelve la hora actual en segundos epoch (formato que usa el campo `exp` en el JWT).
  * @returns {number}
  */
 export const nowInSeconds = () => Math.floor(Date.now() / 1000)

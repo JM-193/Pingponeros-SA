@@ -1,7 +1,7 @@
-// File for compiling regular expressions used across the frontend application
+// Archivo donde se compilan las expresiones regulares usadas en toda la aplicación frontend
 
-// Regular expression for validating UCR email addresses
+// Expresión regular para validar correos electrónicos de la UCR
 export const EMAIL_REGEX = /^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$/
 
-// Mirrors ValidationPatterns.SoloLetras (Backend): letters only, optional surrounding whitespace.
+// Replica ValidationPatterns.SoloLetras (Backend): solo letras, con espacios alrededor opcionales.
 export const SOLO_LETRAS_REGEX = /^(?:\s+|\s*[A-Za-záéíóúÁÉÍÓÚñÑüÜ]+\s*)$/

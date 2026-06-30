@@ -114,7 +114,7 @@ export default function EntityResultsTable({
 
   const isMobile = useMediaQuery('(max-width: 768px)')
 
-  // Mobile view for the table
+  // Vista móvil de la tabla
   if (isMobile) {
     return (
       <div style={{ marginBottom: '24px' }}>

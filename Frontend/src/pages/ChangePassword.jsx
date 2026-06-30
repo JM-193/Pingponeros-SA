@@ -21,8 +21,8 @@ export default function ChangePassword() {
     const sesion = obtenerSesion()
     return sesion?.correoInstitucional ?? ''
   })
-  // Forced mode: the user logged in with a temporary password and must change it
-  // before doing anything else.
+  // Modo forzado: el usuario inició sesión con una contraseña temporal y debe cambiarla
+  // antes de hacer cualquier otra cosa.
   const [forced] = useState(() => esContrasenaTemporal())
   const [formData, setFormData] = useState({
     currentPassword: '',
@@ -108,12 +108,12 @@ export default function ChangePassword() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: COLORS.bodyBg }}>
-      {/* Header */}
+      {/* Encabezado */}
       <Header />
 
       <Navbar />
 
-      {/* Main content */}
+      {/* Contenido principal */}
       <main
         style={{
           flex: 1,
@@ -226,7 +226,7 @@ export default function ChangePassword() {
         </div>
       </main>
 
-      {/* Footer */}
+      {/* Pie de página */}
       <Footer />
     </div>
   )

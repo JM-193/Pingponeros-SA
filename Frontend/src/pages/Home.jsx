@@ -150,7 +150,7 @@ export default function Home() {
         que se le indican.
       </p>
 
-      {/* Declaraciones section */}
+      {/* Sección de declaraciones */}
       <h3
         style={{
           fontWeight: 700,

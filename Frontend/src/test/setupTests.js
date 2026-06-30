@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest'
-// vite-node (vitest 3.x) does not support Vite 8's OXC JSX transform, so JSX
-// is compiled with the classic runtime (React.createElement). Make React global
-// so all test files work without needing an explicit import.
+// vite-node (vitest 3.x) no soporta la transformación JSX OXC de Vite 8, por lo que el JSX
+// se compila con el runtime clásico (React.createElement). Se expone React como global
+// para que todos los archivos de prueba funcionen sin necesitar un import explícito.
 import React from 'react'
 globalThis.React = React
 

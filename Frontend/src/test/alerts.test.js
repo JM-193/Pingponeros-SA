@@ -2,8 +2,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import * as AlertsUtil from '../utils/alerts'
 
-// alerts.js calls Swal.mixin(...) at module load and uses the returned
-// instance's .fire() in every function. Hoisted so vi.mock can reference it.
+// alerts.js llama a Swal.mixin(...) al cargar el módulo y usa el .fire() de la
+// instancia devuelta en cada función. Se eleva (hoisted) para que vi.mock pueda referenciarlo.
 const { mockFire } = vi.hoisted(() => ({ mockFire: vi.fn() }))
 
 vi.mock('sweetalert2', () => ({

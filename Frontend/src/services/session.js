@@ -2,8 +2,8 @@ const SESSION_KEY = 'pingponeros_session'
 const TEMP_PW_KEY = 'pingponeros_temp_password'
 
 /**
- * Decode a JWT payload without verifying the signature
- * (signature verification is handled by the backend).
+ * Decodifica el payload de un JWT sin verificar la firma
+ * (la verificación de la firma la realiza el backend).
  * @param {string} token
  * @returns {object|null}
  */
@@ -25,14 +25,14 @@ function decodificarPayload(token) {
 }
 
 /**
- * Save the JWT token to SessionStorage.
- * The expiration is obtained from the `exp` claim of the token itself (seconds epoch).
+ * Guarda el token JWT en SessionStorage.
+ * La expiración se obtiene del claim `exp` del propio token (segundos epoch).
  *
- * Whether the password is temporary lives outside the token (the backend keeps it
- * out of the claims), so we persist it here as a sidecar flag. This lets the
- * forced-change gate survive page refreshes / direct navigation.
- * @param {string} token JWT received from the backend
- * @param {boolean} [esTemporal] Whether the logged-in password is temporary.
+ * El que la contraseña sea temporal vive fuera del token (el backend lo mantiene
+ * fuera de los claims), por lo que se persiste aquí como bandera complementaria. Esto permite
+ * que el bloqueo de cambio forzado sobreviva a recargas de página / navegación directa.
+ * @param {string} token JWT recibido del backend
+ * @param {boolean} [esTemporal] Indica si la contraseña con la que se inició sesión es temporal.
  */
 export function guardarSesion(token, esTemporal = false) {
   if (typeof token !== 'string' || !token) return
@@ -54,7 +54,7 @@ function obtenerSesionValida() {
     return null
   }
 
-  // exp comes in seconds (epoch), Date.now() in milliseconds
+  // exp viene en segundos (epoch), Date.now() en milisegundos
   if (typeof payload.exp === 'number' && Date.now() >= payload.exp * 1000) {
     sessionStorage.removeItem(SESSION_KEY)
     return null
@@ -64,8 +64,8 @@ function obtenerSesionValida() {
 }
 
 /**
- * Returns the user's decoded payload if the token exists and has not expired.
- * or null if it has expired / does not exist / is invalid.
+ * Devuelve el payload decodificado del usuario si el token existe y no ha expirado,
+ * o null si expiró / no existe / es inválido.
  * @returns {object|null}
  */
 export function obtenerSesion() {
@@ -73,8 +73,8 @@ export function obtenerSesion() {
 }
 
 /**
- * Returns the raw JWT token (to send in the Authorization header),
- * or null if it does not exist or has expired.
+ * Devuelve el token JWT en bruto (para enviarlo en el encabezado Authorization),
+ * o null si no existe o ha expirado.
  * @returns {string|null}
  */
 export function obtenerToken() {
@@ -82,9 +82,9 @@ export function obtenerToken() {
 }
 
 /**
- * Returns true when the active session was started with a temporary password
- * and must be changed before continuing. Guarded by a valid token so a stale
- * flag (no session / expired token) reads false.
+ * Devuelve true cuando la sesión activa se inició con una contraseña temporal
+ * y debe cambiarse antes de continuar. Protegido por un token válido para que una bandera
+ * obsoleta (sin sesión / token expirado) devuelva false.
  * @returns {boolean}
  */
 export function esContrasenaTemporal() {
@@ -93,15 +93,15 @@ export function esContrasenaTemporal() {
 }
 
 /**
- * Remove the temporary-password flag once the user has set a permanent password,
- * keeping the active session token intact.
+ * Elimina la bandera de contraseña temporal una vez que el usuario ha establecido una contraseña permanente,
+ * manteniendo intacto el token de la sesión activa.
  */
 export function limpiarContrasenaTemporal() {
   sessionStorage.removeItem(TEMP_PW_KEY)
 }
 
 /**
- * End the active session.
+ * Finaliza la sesión activa.
  */
 export function cerrarSesion() {
   sessionStorage.removeItem(SESSION_KEY)
