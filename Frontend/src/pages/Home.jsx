@@ -35,6 +35,72 @@ export default function Home() {
     }
   }, [correo])
 
+  const renderHistorial = () => {
+    if (loading) {
+      return (
+        <p style={{ textAlign: 'center', color: COLORS.textMuted }}>
+          Cargando declaraciones...
+        </p>
+      )
+    }
+
+    if (historial.length === 0) {
+      return (
+        <p style={{ textAlign: 'center', color: COLORS.textMuted, fontStyle: 'italic' }}>
+          No hay declaraciones juradas guardadas.
+        </p>
+      )
+    }
+
+    return historial.map((d) => (
+      <div
+        key={d.id}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          backgroundColor: COLORS.white,
+          borderRadius: '6px',
+          padding: '12px 16px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+        }}
+      >
+        <div>
+          <p
+            style={{
+              margin: 0,
+              fontWeight: 700,
+              fontSize: '14px',
+              color: COLORS.textDark,
+            }}
+          >
+            Plaza N.º {d.numeroPlaza}
+            {d.cargo ? ` — ${d.cargo}` : ''}
+          </p>
+
+          <p
+            style={{
+              margin: '2px 0 0',
+              fontSize: '13px',
+              color: COLORS.textMuted,
+            }}
+          >
+            {String(d.fechaDeclaracion).slice(0, 10)}
+          </p>
+        </div>
+
+        <FormButton
+          label="Ver"
+          type="button"
+          variant="primary"
+          onClick={() => navigate(`/declaraciones/ver/${d.id}`)}
+          width="auto"
+        />
+      </div>
+    ))
+  }
+
   return (
     <PageLayout>
       <h1
@@ -130,45 +196,7 @@ export default function Home() {
         </h4>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {loading ? (
-            <p style={{ textAlign: 'center', color: COLORS.textMuted }}>Cargando declaraciones...</p>
-          ) : historial.length === 0 ? (
-            <p style={{ textAlign: 'center', color: COLORS.textMuted, fontStyle: 'italic' }}>
-              No hay declaraciones juradas guardadas.
-            </p>
-          ) : (
-            historial.map((d) => (
-              <div
-                key={d.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '12px',
-                  backgroundColor: COLORS.white,
-                  borderRadius: '6px',
-                  padding: '12px 16px',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
-                }}
-              >
-                <div>
-                  <p style={{ margin: 0, fontWeight: 700, fontSize: '14px', color: COLORS.textDark }}>
-                    Plaza N.º {d.numeroPlaza}{d.cargo ? ` — ${d.cargo}` : ''}
-                  </p>
-                  <p style={{ margin: '2px 0 0', fontSize: '13px', color: COLORS.textMuted }}>
-                    {String(d.fechaDeclaracion).slice(0, 10)}
-                  </p>
-                </div>
-                <FormButton
-                  label="Ver"
-                  type="button"
-                  variant="primary"
-                  onClick={() => navigate(`/declaraciones/ver/${d.id}`)}
-                  width="auto"
-                />
-              </div>
-            ))
-          )}
+          {renderHistorial()}
         </div>
       </div>
     </PageLayout>
