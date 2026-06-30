@@ -267,7 +267,7 @@ export default function EntityResultsTable({
 
               {hasActions && (
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '12px' }}>
-                  {extraRowActions?.(row)}
+                  {extraRowActions?.(row, { showLabel: true })}
                   {onEdit && <EditButton row={row} onEdit={onEdit} showLabel />}
                   {onDelete && <DeleteButton row={row} onDelete={onDelete} deletingRowId={deletingRowId} rowId={rowId} showLabel />}
                 </div>
@@ -401,7 +401,7 @@ export default function EntityResultsTable({
                       }}
                     >
                       <div style={{ display: 'inline-flex', gap: '8px' }}>
-                        {extraRowActions?.(row)}
+                        {extraRowActions?.(row, { showLabel: false })}
                         {onEdit && <EditButton row={row} onEdit={onEdit} showLabel={false} />}
                         {onDelete && <DeleteButton row={row} onDelete={onDelete} deletingRowId={deletingRowId} rowId={rowId} showLabel={false} />}
                       </div>

@@ -34,7 +34,7 @@ export default function QueryWorkPositions() {
     )
   }
 
-  const extraRowActions = (puesto) => (
+  const extraRowActions = (puesto, { showLabel = false } = {}) => (
     <button
       type="button"
       onClick={() => setFunctionsModalPuesto(puesto)}
@@ -44,7 +44,7 @@ export default function QueryWorkPositions() {
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '8px 12px',
+        padding: showLabel ? '8px 16px' : '8px 12px',
         backgroundColor: COLORS.secondaryBtn,
         color: COLORS.white,
         border: 'none',
@@ -59,6 +59,7 @@ export default function QueryWorkPositions() {
       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = COLORS.secondaryBtn)}
     >
       <FaListUl size={14} aria-hidden="true" focusable="false" />
+      {showLabel && 'Funciones'}
     </button>
   )
 
