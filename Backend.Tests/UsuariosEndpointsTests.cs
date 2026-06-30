@@ -377,7 +377,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task AsignarPlaza_Returns400CuandoLugarTrabajoTieneCaracteresInvalidos()
     {
-        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, ClaseOcupacional = "Profesional", LugarTrabajo = "Edificio 3", FechaInicio = "2026-01-01" };
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, ClaseOcupacional = "Profesional", LugarTrabajo = "Edificio#", FechaInicio = "2026-01-01" };
 
         var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
 

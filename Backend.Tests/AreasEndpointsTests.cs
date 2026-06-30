@@ -75,7 +75,7 @@ public sealed class AreasEndpointsTests : IClassFixture<TestWebApplicationFactor
     [Fact]
     public async Task CrearArea_Returns400CuandoNombreTieneCaracteresInvalidos()
     {
-        var dto = new { Nombre = "Sistemas 1", Descripcion = "Descripción válida" };
+        var dto = new { Nombre = "Sistemas#", Descripcion = "Descripción válida" };
 
         var response = await _client.PostAsJsonAsync("/areas", dto);
 
