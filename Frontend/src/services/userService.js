@@ -75,8 +75,8 @@ export async function obtenerPlazasUsuario(correo) {
 /**
  * Vincula una plaza disponible a un usuario.
  * @param {string} correo - Correo del usuario.
- * @param {{ numeroPlaza: number, idPuesto: number, claseOcupacional: string,
- *           fechaInicio: string, fechaFinal?: string|null }} datos
+ * @param {{ numeroPlaza: number, idPuesto: number, idClaseOcupacional: number,
+ *           lugarTrabajo: string, fechaInicio: string, fechaFinal?: string|null }} datos
  * @returns {Promise<object>} Respuesta del servidor.
  */
 export async function asignarPlazaUsuario(correo, datos) {

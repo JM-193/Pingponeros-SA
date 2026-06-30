@@ -13,7 +13,7 @@ const formatFecha = (value) => (value ? String(value).slice(0, 10) : '—')
 const COLUMNS = [
   { key: 'numeroPlaza', label: 'N.º Plaza', render: (r) => r.numeroPlaza },
   { key: 'puestoNombre', label: 'Puesto de Trabajo', render: (r) => r.puestoNombre ?? r.idPuesto },
-  { key: 'claseOcupacional', label: 'Clase Ocupacional', render: (r) => r.claseOcupacional },
+  { key: 'claseOcupacionalNombre', label: 'Clase Ocupacional', render: (r) => r.claseOcupacionalNombre },
   { key: 'lugarTrabajo', label: 'Lugar de Trabajo', render: (r) => r.lugarTrabajo },
   { key: 'fechaInicio', label: 'Fecha Inicial', render: (r) => formatFecha(r.fechaInicio) },
   { key: 'fechaFinal', label: 'Fecha Final', render: (r) => formatFecha(r.fechaFinal) },

@@ -5,10 +5,12 @@ import UserPositionsSection from '../components/UserPositionsSection'
 import * as userService from '../services/userService'
 import * as positionService from '../services/positionService'
 import * as workPositionService from '../services/workPositionService'
+import * as occupationalClassService from '../services/occupationalClassService'
 
 vi.mock('../services/userService')
 vi.mock('../services/positionService')
 vi.mock('../services/workPositionService')
+vi.mock('../services/occupationalClassService')
 
 const CORREO = 'ana.lopez@ucr.ac.cr'
 
@@ -17,7 +19,8 @@ const asignacion = {
   correoInstitucional: CORREO,
   idPuesto: 5,
   puestoNombre: 'Analista',
-  claseOcupacional: 'Profesional 1',
+  idClaseOcupacional: 3,
+  claseOcupacionalNombre: 'Profesional A',
   fechaInicio: '2026-01-01T00:00:00',
   fechaFinal: null,
 }
@@ -26,6 +29,10 @@ const disponibles = [{ numeroPlaza: 2001 }, { numeroPlaza: 2002 }]
 const puestos = [
   { id: 5, nombre: 'Analista' },
   { id: 6, nombre: 'Asistente' },
+]
+const clases = [
+  { idClaseOcupacional: 3, codigo: 5200, nombre: 'Profesional A' },
+  { idClaseOcupacional: 4, codigo: 5220, nombre: 'Profesional B' },
 ]
 
 describe('UserPositionsSection', () => {
@@ -36,6 +43,7 @@ describe('UserPositionsSection', () => {
     userService.desasignarPlazaUsuario.mockResolvedValue({})
     positionService.obtenerPlazasDisponibles.mockResolvedValue(disponibles)
     workPositionService.obtenerPuestos.mockResolvedValue(puestos)
+    occupationalClassService.obtenerClasesOcupacionales.mockResolvedValue(clases)
   })
 
   it('muestra mensaje cuando el usuario no tiene plazas', async () => {
@@ -48,8 +56,9 @@ describe('UserPositionsSection', () => {
 
   it('renderiza la tabla con las plazas asignadas', async () => {
     userService.obtenerPlazasUsuario.mockResolvedValue([asignacion])
-    // Sin puestos en el dropdown para que "Analista" sea único (solo la fila de la tabla).
+    // Sin puestos ni clases en los dropdowns para que los nombres sean únicos (solo la fila de la tabla).
     workPositionService.obtenerPuestos.mockResolvedValue([])
+    occupationalClassService.obtenerClasesOcupacionales.mockResolvedValue([])
 
     render(<UserPositionsSection correo={CORREO} />)
 
@@ -57,7 +66,7 @@ describe('UserPositionsSection', () => {
       expect(screen.getByText('1001')).toBeInTheDocument()
     })
     expect(screen.getByText('Analista')).toBeInTheDocument()
-    expect(screen.getByText('Profesional 1')).toBeInTheDocument()
+    expect(screen.getByText('Profesional A')).toBeInTheDocument()
     expect(screen.getByText('2026-01-01')).toBeInTheDocument()
   })
 
@@ -70,7 +79,7 @@ describe('UserPositionsSection', () => {
 
     fireEvent.change(screen.getByLabelText(/Plaza disponible/i), { target: { value: '2001' } })
     fireEvent.change(screen.getByLabelText(/Puesto/i), { target: { value: '5' } })
-    fireEvent.change(screen.getByLabelText(/Clase Ocupacional/i), { target: { value: 'Profesional' } })
+    fireEvent.change(screen.getByLabelText(/Clase Ocupacional/i), { target: { value: '3' } })
     fireEvent.change(screen.getByLabelText(/Lugar de Trabajo/i), { target: { value: 'Oficina Central' } })
     fireEvent.change(screen.getByLabelText(/Fecha Inicio/i), { target: { value: '2026-01-01' } })
 
@@ -80,7 +89,7 @@ describe('UserPositionsSection', () => {
       expect(userService.asignarPlazaUsuario).toHaveBeenCalledWith(CORREO, {
         numeroPlaza: 2001,
         idPuesto: 5,
-        claseOcupacional: 'Profesional',
+        idClaseOcupacional: 3,
         lugarTrabajo: 'Oficina Central',
         fechaInicio: '2026-01-01',
         fechaFinal: null,
@@ -106,14 +115,13 @@ describe('UserPositionsSection', () => {
     expect(userService.asignarPlazaUsuario).not.toHaveBeenCalled()
   })
 
-  it('filtra símbolos en el campo Clase Ocupacional y conserva dígitos al escribir', async () => {
+  it('muestra las opciones de clases ocupacionales en el dropdown', async () => {
     render(<UserPositionsSection correo={CORREO} />)
-    await waitFor(() => expect(workPositionService.obtenerPuestos).toHaveBeenCalled())
+    await waitFor(() => expect(occupationalClassService.obtenerClasesOcupacionales).toHaveBeenCalled())
 
-    const input = screen.getByLabelText(/Clase Ocupacional/i)
-    fireEvent.change(input, { target: { value: 'Profesional3#' } })
-
-    expect(input).toHaveValue('Profesional3')
+    const select = screen.getByLabelText(/Clase Ocupacional/i)
+    expect(select.tagName).toBe('SELECT')
+    expect(select.options).toHaveLength(clases.length + 1) // +1 por la opción por defecto
   })
 
   it('permite letras, dígitos, espacios y puntuación en Lugar de Trabajo y filtra el resto', async () => {
