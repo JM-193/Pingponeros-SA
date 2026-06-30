@@ -26,9 +26,9 @@ internal static class WorkloadCalculator
     private static readonly Dictionary<string, int> JornadaHoras = new(StringComparer.Ordinal)
     {
         ["Tiempo Completo"] = 48,
-        ["Tres Cuartos de Tiempo"] = 36,
+        ["3/4 de Tiempo"] = 36,
         ["Medio Tiempo"] = 24,
-        ["Cuarto de Tiempo"] = 12,
+        ["1/4 de Tiempo"] = 12,
     };
 
     /// <summary>Minutos semanales que consume una actividad: duración (min) × veces × factor de periodicidad.</summary>

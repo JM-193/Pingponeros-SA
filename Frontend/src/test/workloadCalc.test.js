@@ -75,16 +75,16 @@ describe('evaluarCarga', () => {
   })
 
   it('devuelve nivel "excede1" cuando la carga supera las horas base', () => {
-    // Cuarto de Tiempo = 12h → 720 min base, carga 780 min (>1x pero <1.5x)
+    // 1/4 de Tiempo = 12h → 720 min base, carga 780 min (>1x pero <1.5x)
     const actividades = [{ periodicidad: 'Semanal', vecesRealizadas: 13, duracion: 60 }]
-    const { nivel } = evaluarCarga(actividades, 'Cuarto de Tiempo')
+    const { nivel } = evaluarCarga(actividades, '1/4 de Tiempo')
     expect(nivel).toBe('excede1')
   })
 
   it('devuelve nivel "excede15" cuando la carga supera 1.5x las horas base', () => {
-    // Cuarto de Tiempo = 12h → 720 min, carga 1200 min (>1.5x)
+    // 1/4 de Tiempo = 12h → 720 min, carga 1200 min (>1.5x)
     const actividades = [{ periodicidad: 'Semanal', vecesRealizadas: 20, duracion: 60 }]
-    const { nivel } = evaluarCarga(actividades, 'Cuarto de Tiempo')
+    const { nivel } = evaluarCarga(actividades, '1/4 de Tiempo')
     expect(nivel).toBe('excede15')
   })
 

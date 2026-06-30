@@ -3,9 +3,9 @@
 // Jornadas laborales y sus horas semanales (base para el chequeo de carga 1x / 1.5x).
 export const JORNADA_OPTIONS = [
   { value: 'Tiempo Completo', label: 'Tiempo Completo', horas: 48 },
-  { value: 'Tres Cuartos de Tiempo', label: 'Tres Cuartos de Tiempo', horas: 36 },
+  { value: '3/4 de Tiempo', label: '3/4 de Tiempo', horas: 36 },
   { value: 'Medio Tiempo', label: 'Medio Tiempo', horas: 24 },
-  { value: 'Cuarto de Tiempo', label: 'Cuarto de Tiempo', horas: 12 },
+  { value: '1/4 de Tiempo', label: '1/4 de Tiempo', horas: 12 },
 ]
 
 export const JORNADA_HORAS = Object.fromEntries(JORNADA_OPTIONS.map((o) => [o.value, o.horas]))
