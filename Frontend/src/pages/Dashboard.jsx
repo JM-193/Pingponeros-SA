@@ -28,7 +28,6 @@ import {
   Tooltip,
   PieChart,
   Pie,
-  Cell,
   Legend,
   LineChart,
   Line,
@@ -480,12 +479,12 @@ function Contenido({ resumen, navigate }) {
   const alertasActivas = alertasConfig.filter((a) => (alertas[a.key] ?? 0) > 0)
 
   const rolData = [
-    { name: 'Administradores', value: usuariosPorRol.administradores ?? 0 },
-    { name: 'Funcionarios', value: usuariosPorRol.usuarios ?? 0 },
+    { name: 'Administradores', value: usuariosPorRol.administradores ?? 0, fill: ACCENT.primary },
+    { name: 'Funcionarios', value: usuariosPorRol.usuarios ?? 0, fill: ACCENT.info },
   ]
   const declData = [
-    { name: 'Completadas', value: estadoDeclaraciones.completadas ?? 0 },
-    { name: 'En progreso', value: estadoDeclaraciones.pendientes ?? 0 },
+    { name: 'Completadas', value: estadoDeclaraciones.completadas ?? 0, fill: ACCENT.success },
+    { name: 'En progreso', value: estadoDeclaraciones.pendientes ?? 0, fill: ACCENT.warn },
   ]
   const periodoData = (asignacionesPorPeriodo ?? []).map((p) => ({
     mes: formatPeriodo(p.etiqueta),
@@ -584,10 +583,7 @@ function Contenido({ resumen, navigate }) {
           ) : (
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
-                <Pie data={rolData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85} paddingAngle={2}>
-                  <Cell fill={ACCENT.primary} />
-                  <Cell fill={ACCENT.info} />
-                </Pie>
+                <Pie data={rolData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85} paddingAngle={2} />
                 <Tooltip />
                 <Legend wrapperStyle={{ fontSize: '13px' }} />
               </PieChart>
@@ -601,10 +597,7 @@ function Contenido({ resumen, navigate }) {
           ) : (
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
-                <Pie data={declData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85} paddingAngle={2}>
-                  <Cell fill={ACCENT.success} />
-                  <Cell fill={ACCENT.warn} />
-                </Pie>
+                <Pie data={declData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85} paddingAngle={2} />
                 <Tooltip />
                 <Legend wrapperStyle={{ fontSize: '13px' }} />
               </PieChart>

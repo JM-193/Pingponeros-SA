@@ -23,7 +23,6 @@ vi.mock('recharts', () => {
     Tooltip: Passthrough,
     PieChart: Passthrough,
     Pie: Passthrough,
-    Cell: Passthrough,
     Legend: Passthrough,
     LineChart: Passthrough,
     Line: Passthrough,
