@@ -48,9 +48,9 @@ internal sealed class AuthService : IAuthService
             if (usuario.Estado != 1)
                 return Results.Json(new { mensaje = "La cuenta del usuario se encuentra inactiva. Contacte al equipo de soporte." }, statusCode: 403);
 
-            // If the password is temporary, the frontend needs to know this to
-            // force the change, so that data goes outside the token, next to
-            // the token, not inside the claims.
+            // Si la contraseña es temporal, el frontend necesita saberlo para
+            // forzar el cambio; por eso ese dato viaja fuera del token, junto a
+            // él, no dentro de los claims.
             var token = _jwtService.GenerarToken(
                 usuario.CorreoInstitucional,
                 usuario.PrimerNombre,

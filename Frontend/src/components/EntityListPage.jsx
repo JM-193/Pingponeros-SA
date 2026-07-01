@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
-import { useNavigate } from 'react-router-dom'
 import { FaSearch } from 'react-icons/fa'
 import PageLayout from './PageLayout'
 import PageTitle from './PageTitle'
@@ -68,8 +67,6 @@ const sortRowsByColumn = (rows, columns, sortConfig) => {
 export default function EntityListPage({
   title,
   entityLabel,
-  createPath,
-  editPath,
   renderCreateModal,
   renderEditModal,
   fetchItems,
@@ -82,7 +79,6 @@ export default function EntityListPage({
   resultsPerPage = 10,
   extraRowActions,
 }) {
-  const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [allItems, setAllItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -133,20 +129,12 @@ export default function EntityListPage({
   }
 
   const handleEdit = (item) => {
-    if (renderEditModal) {
-      setEditingItem(item)
-      setEditModalOpen(true)
-    } else if (editPath) {
-      navigate(editPath(item))
-    }
+    setEditingItem(item)
+    setEditModalOpen(true)
   }
 
   const handleCreateClick = () => {
-    if (renderCreateModal) {
-      setCreateModalOpen(true)
-    } else if (createPath) {
-      navigate(createPath)
-    }
+    setCreateModalOpen(true)
   }
 
   const handleModalSuccess = useCallback(async () => {
@@ -209,7 +197,7 @@ export default function EntityListPage({
         <EntityResultsTable
           columns={columns}
           rows={currentResults}
-          onEdit={(editPath || renderEditModal) ? handleEdit : undefined}
+          onEdit={renderEditModal ? handleEdit : undefined}
           onDelete={deleteItem ? handleDelete : undefined}
           deletingRowId={deletingId}
           getRowId={resolveRowId}
@@ -335,13 +323,11 @@ export default function EntityListPage({
       <div id="results-section">{renderResultsContent()}</div>
 
       {renderCreateModal?.({
-        isModal: true,
         isOpen: createModalOpen,
         onClose: () => setCreateModalOpen(false),
         onSuccess: handleModalSuccess,
       })}
       {renderEditModal?.({
-        isModal: true,
         isOpen: editModalOpen,
         onClose: () => { setEditModalOpen(false); setEditingItem(null) },
         onSuccess: handleModalSuccess,
@@ -354,8 +340,6 @@ export default function EntityListPage({
 EntityListPage.propTypes = {
   title: PropTypes.string.isRequired,
   entityLabel: PropTypes.string.isRequired,
-  createPath: PropTypes.string,
-  editPath: PropTypes.func,
   renderCreateModal: PropTypes.func,
   renderEditModal: PropTypes.func,
   fetchItems: PropTypes.func.isRequired,
@@ -379,8 +363,6 @@ EntityListPage.propTypes = {
 }
 
 EntityListPage.defaultProps = {
-  createPath: null,
-  editPath: null,
   renderCreateModal: null,
   renderEditModal: null,
   deleteItem: null,

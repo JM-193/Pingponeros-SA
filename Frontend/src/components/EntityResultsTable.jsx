@@ -1,7 +1,10 @@
+import { useId } from 'react'
 import PropTypes from 'prop-types'
 import { FaPencilAlt, FaSort, FaSortDown, FaSortUp, FaTrash } from 'react-icons/fa'
+import Select from 'react-select'
 import { COLORS } from '../constants/colors'
 import { useMediaQuery } from '../hooks/useMediaQuery'
+import { buildSelectStyles, selectTheme, menuPortalTarget } from '../utils/selectStyles'
 
 const getCellAlign = (align) => align ?? 'left'
 const getHeaderJustifyContent = (align) => {
@@ -14,6 +17,94 @@ const getSortIcon = (isSorted, direction) => {
   if (!isSorted) return <FaSort size={12} aria-hidden="true" focusable="false" />
   if (direction === 'asc') return <FaSortUp size={12} aria-hidden="true" focusable="false" />
   return <FaSortDown size={12} aria-hidden="true" focusable="false" />
+}
+
+function MobileSortControl({ columns, sortConfig, onSort }) {
+  const selectId = useId()
+  const activeKey = sortConfig?.key ?? ''
+  const isSorted = Boolean(activeKey)
+  const sortOptions = columns.map((column) => ({ value: column.key, label: column.label }))
+  const directionLabel = sortConfig?.direction === 'desc' ? 'descendente' : 'ascendente'
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-end',
+        gap: '8px',
+        marginBottom: '12px',
+      }}
+    >
+      <div style={{ flex: 1 }}>
+        <label
+          htmlFor={selectId}
+          style={{
+            display: 'block',
+            marginBottom: '6px',
+            fontWeight: 600,
+            fontSize: '12px',
+            color: COLORS.textSubtle,
+          }}
+        >
+          Ordenar por
+        </label>
+        <Select
+          inputId={selectId}
+          value={sortOptions.find((option) => option.value === activeKey) || null}
+          onChange={(option) => option && onSort(option.value)}
+          options={sortOptions}
+          isSearchable
+          isClearable={false}
+          placeholder="Seleccione una columna"
+          noOptionsMessage={() => 'Sin resultados'}
+          classNamePrefix="form-select"
+          menuPortalTarget={menuPortalTarget}
+          styles={buildSelectStyles()}
+          theme={selectTheme}
+        />
+      </div>
+      <button
+        type="button"
+        onClick={() => onSort(sortConfig.key)}
+        disabled={!isSorted}
+        aria-label={`Cambiar orden a ${sortConfig?.direction === 'asc' ? 'descendente' : 'ascendente'}`}
+        title={`Orden ${directionLabel}`}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minWidth: '44px',
+          height: '40px',
+          padding: '0 12px',
+          backgroundColor: isSorted ? COLORS.primaryBtn : COLORS.disabledBg,
+          color: isSorted ? COLORS.white : COLORS.disabledColor,
+          border: 'none',
+          borderRadius: '4px',
+          cursor: isSorted ? 'pointer' : 'not-allowed',
+        }}
+      >
+        {getSortIcon(isSorted, sortConfig?.direction)}
+      </button>
+    </div>
+  )
+}
+
+MobileSortControl.propTypes = {
+  columns: PropTypes.arrayOf(
+    PropTypes.shape({
+      key: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  sortConfig: PropTypes.shape({
+    key: PropTypes.string,
+    direction: PropTypes.oneOf(['asc', 'desc']),
+  }),
+  onSort: PropTypes.func.isRequired,
+}
+
+MobileSortControl.defaultProps = {
+  sortConfig: null,
 }
 
 function EditButton({ row, onEdit, showLabel }) {
@@ -114,10 +205,13 @@ export default function EntityResultsTable({
 
   const isMobile = useMediaQuery('(max-width: 768px)')
 
-  // Mobile view for the table
+  // Vista móvil de la tabla
   if (isMobile) {
     return (
       <div style={{ marginBottom: '24px' }}>
+        {canSort && rows.length > 0 && (
+          <MobileSortControl columns={columns} sortConfig={sortConfig} onSort={onSort} />
+        )}
         {rows.map((row) => {
           const rowId = getRowId(row)
           return (
@@ -173,7 +267,7 @@ export default function EntityResultsTable({
 
               {hasActions && (
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '12px' }}>
-                  {extraRowActions?.(row)}
+                  {extraRowActions?.(row, { showLabel: true })}
                   {onEdit && <EditButton row={row} onEdit={onEdit} showLabel />}
                   {onDelete && <DeleteButton row={row} onDelete={onDelete} deletingRowId={deletingRowId} rowId={rowId} showLabel />}
                 </div>
@@ -307,7 +401,7 @@ export default function EntityResultsTable({
                       }}
                     >
                       <div style={{ display: 'inline-flex', gap: '8px' }}>
-                        {extraRowActions?.(row)}
+                        {extraRowActions?.(row, { showLabel: false })}
                         {onEdit && <EditButton row={row} onEdit={onEdit} showLabel={false} />}
                         {onDelete && <DeleteButton row={row} onDelete={onDelete} deletingRowId={deletingRowId} rowId={rowId} showLabel={false} />}
                       </div>

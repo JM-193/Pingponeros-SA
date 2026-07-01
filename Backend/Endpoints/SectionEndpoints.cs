@@ -11,6 +11,12 @@ internal static class SectionEndpoints
 {
     // ---------------------------------------------------------------- //
     // Rutas de Secciones                                                //
+    // La fábrica MapOrgCrudEndpoints registra estas rutas:             //
+    //   GET    /secciones          — Lista todas las secciones          //
+    //   POST   /secciones          — Crea una sección (vinculada a un Área) //
+    //   GET    /secciones/{nombre} — Busca una sección por nombre       //
+    //   PUT    /secciones/{nombre} — Edita una sección existente        //
+    //   DELETE /secciones/{id}     — Desactiva una sección              //
     // ---------------------------------------------------------------- //
     public static void MapSectionEndpoints(this IEndpointRouteBuilder app, bool isDev) =>
         app.MapOrgCrudEndpoints(new OrgCrudEndpoints<ISectionRepository, Section, CreateSectionDto>

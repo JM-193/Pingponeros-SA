@@ -2,12 +2,11 @@ import PropTypes from 'prop-types'
 import DepartmentSectionCreateForm from '../components/DepartmentSectionCreateForm'
 import { crearDepartamento } from '../services/departmentService'
 
-export default function CreateDepartments({ isModal, isOpen, onSuccess, onClose }) {
+export default function CreateDepartments({ isOpen, onSuccess, onClose }) {
   return (
     <DepartmentSectionCreateForm
       entityType="departamento"
       createEntity={crearDepartamento}
-      isModal={isModal}
       isOpen={isOpen}
       onSuccess={onSuccess}
       onClose={onClose}
@@ -16,15 +15,11 @@ export default function CreateDepartments({ isModal, isOpen, onSuccess, onClose 
 }
 
 CreateDepartments.propTypes = {
-  isModal: PropTypes.bool,
   isOpen: PropTypes.bool,
-  onSuccess: PropTypes.func,
-  onClose: PropTypes.func,
+  onSuccess: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
 }
 
 CreateDepartments.defaultProps = {
-  isModal: false,
   isOpen: false,
-  onSuccess: null,
-  onClose: null,
 }

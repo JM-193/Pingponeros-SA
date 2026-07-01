@@ -4,7 +4,6 @@ import EntityListPage from '../components/EntityListPage'
 import Modal from '../components/Modal'
 import WorkPositionFunctionsSection from '../components/WorkPositionFunctionsSection'
 import { obtenerPuestos, eliminarPuesto } from '../services/workPositionService'
-import { ENTITY_FORMS_AS_MODAL } from '../constants/uiMode'
 import { COLORS } from '../constants/colors'
 import CreateWorkPositions from './CreateWorkPositions'
 
@@ -35,17 +34,7 @@ export default function QueryWorkPositions() {
     )
   }
 
-  const formProps = ENTITY_FORMS_AS_MODAL
-    ? {
-        renderCreateModal: ({ isModal, isOpen, onClose, onSuccess }) => (
-          <CreateWorkPositions isModal={isModal} isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
-        ),
-      }
-    : {
-        createPath: '/organizacion/puestos-trabajo/crear',
-      }
-
-  const extraRowActions = (puesto) => (
+  const extraRowActions = (puesto, { showLabel = false } = {}) => (
     <button
       type="button"
       onClick={() => setFunctionsModalPuesto(puesto)}
@@ -55,7 +44,7 @@ export default function QueryWorkPositions() {
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '8px 12px',
+        padding: showLabel ? '8px 16px' : '8px 12px',
         backgroundColor: COLORS.secondaryBtn,
         color: COLORS.white,
         border: 'none',
@@ -70,6 +59,7 @@ export default function QueryWorkPositions() {
       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = COLORS.secondaryBtn)}
     >
       <FaListUl size={14} aria-hidden="true" focusable="false" />
+      {showLabel && 'Funciones'}
     </button>
   )
 
@@ -88,7 +78,9 @@ export default function QueryWorkPositions() {
           `¿Está seguro de que desea eliminar el puesto de trabajo "${puesto.nombre}"? Esta acción no se puede deshacer.`
         }
         extraRowActions={extraRowActions}
-        {...formProps}
+        renderCreateModal={({ isOpen, onClose, onSuccess }) => (
+          <CreateWorkPositions isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
+        )}
       />
 
       <Modal

@@ -9,9 +9,11 @@ namespace Backend.DTOs;
 internal sealed record CreateAreaDto(
     [property: Required(ErrorMessage = "El nombre del área es obligatorio.")]
     [property: MaxLength(50, ErrorMessage = "El nombre no puede superar los 50 caracteres.")]
+    [property: RegularExpression(ValidationPatterns.SoloLetrasYPuntuacion, ErrorMessage = "El nombre solo puede contener letras, números, espacios, puntos, comas y dos puntos.")]
     string Nombre,
     [property: Required(ErrorMessage = "La descripción es obligatoria.")]
     [property: MaxLength(2048, ErrorMessage = "La descripción no puede superar los 2048 caracteres.")]
+    [property: RegularExpression(ValidationPatterns.SoloLetrasYPuntuacion, ErrorMessage = "La descripción solo puede contener letras, números, espacios, puntos, comas y dos puntos.")]
     string Descripcion,
     [property: Range(0, 1, ErrorMessage = "El estado debe ser 0 (Inactivo) o 1 (Activo).")]
     int? Estado)

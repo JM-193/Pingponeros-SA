@@ -50,7 +50,7 @@ describe('ProtectedRoute', () => {
       </MemoryRouter>,
     )
 
-    // Navigate should redirect to "/"
+    // Navigate debería redirigir a "/"
     expect(screen.queryByText('Homepage')).not.toBeInTheDocument()
   })
 

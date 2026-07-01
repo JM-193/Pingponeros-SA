@@ -5,7 +5,6 @@ import { obtenerAreas } from '../services/areaService'
 import { obtenerDepartamentos } from '../services/departmentService'
 import { obtenerSecciones } from '../services/sectionService'
 import { buildNameMap, formatStatusLabel, resolveOptionValueKey } from '../utils/organizationOptions'
-import { ENTITY_FORMS_AS_MODAL } from '../constants/uiMode'
 import CreateUnits from './CreateUnits'
 import EditUnits from './EditUnits'
 
@@ -91,19 +90,6 @@ export default function QueryUnits() {
     )
   }
 
-  const formProps = ENTITY_FORMS_AS_MODAL
-    ? {
-        renderCreateModal: ({ isModal, isOpen, onClose, onSuccess }) => (
-          <CreateUnits isModal={isModal} isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
-        ),
-        renderEditModal: ({ isModal, isOpen, onClose, onSuccess, item }) =>
-          item && <EditUnits isModal={isModal} isOpen={isOpen} entityName={item.nombre} onClose={onClose} onSuccess={onSuccess} />,
-      }
-    : {
-        createPath: '/organizacion/unidades/crear',
-        editPath: (unidad) => `/organizacion/unidades/editar/${encodeURIComponent(unidad.nombre)}`,
-      }
-
   return (
     <EntityListPage
       title="Unidades"
@@ -113,7 +99,11 @@ export default function QueryUnits() {
       matchesSearch={matchesSearch}
       getRowId={(unidad) => unidad.id ?? unidad.idUnidad}
       searchPlaceholder="Ingrese el nombre, descripción, área o dependencia de la unidad"
-      {...formProps}
+      renderCreateModal={({ isOpen, onClose, onSuccess }) => (
+        <CreateUnits isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
+      )}
+      renderEditModal={({ isOpen, onClose, onSuccess, item }) =>
+        item && <EditUnits isOpen={isOpen} entityName={item.nombre} onClose={onClose} onSuccess={onSuccess} />}
     />
   )
 }

@@ -39,4 +39,10 @@ export const COLORS = {
   footerBg: '#2D2F34',
   navBg: '#0e4671',
   submenuBg: '#002948',
+  borderSubtle: '#eee',
+  warnSoftBg: '#fff8e1',
+  warnStrong: '#8a6d00',
+  warnSoftBorder: '#ffe082',
+  authBtnDisabled: '#5a7db5',
+  surfacePanel: '#d9d9d9',
 }

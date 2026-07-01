@@ -1,3 +1,4 @@
+// FunctionEndpoints.cs
 using Backend.DTOs;
 using Backend.Helpers;
 using Backend.Models;
@@ -8,12 +9,18 @@ namespace Backend.Endpoints;
 
 internal static class FunctionEndpoints
 {
+    // ---------------------------------------------------------------- //
+    // Rutas de Funciones Oficiales                                      //
+    // ---------------------------------------------------------------- //
     public static void MapFunctionEndpoints(this IEndpointRouteBuilder app, bool isDev)
     {
         var funciones = app.MapGroup("/funciones");
 
+        // GET    /funciones         — Lista todas las funciones oficiales del catálogo institucional
         funciones.MapGet("/", (IFunctionRepository repo) => ListarAsync(repo, isDev));
+        // POST   /funciones         — Crea una nueva función oficial (nombre único)
         funciones.MapPost("/", (CreateFunctionDto dto, IFunctionRepository repo) => CrearAsync(dto, repo, isDev));
+        // DELETE /funciones/{nombre} — Elimina una función oficial (solo si no está usada en actividades de declaraciones)
         funciones.MapDelete("/{nombre}", (string nombre, IFunctionRepository repo) => EliminarAsync(nombre, repo, isDev));
     }
 

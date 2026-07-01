@@ -11,6 +11,12 @@ internal static class DepartmentEndpoints
 {
     // ---------------------------------------------------------------- //
     // Rutas de Departamentos                                            //
+    // La fábrica MapOrgCrudEndpoints registra estas rutas:             //
+    //   GET    /departamentos          — Lista todos los departamentos  //
+    //   POST   /departamentos          — Crea un departamento (vinculado a un Área) //
+    //   GET    /departamentos/{nombre} — Busca un departamento por nombre //
+    //   PUT    /departamentos/{nombre} — Edita un departamento existente //
+    //   DELETE /departamentos/{id}     — Desactiva un departamento      //
     // ---------------------------------------------------------------- //
     public static void MapDepartmentEndpoints(this IEndpointRouteBuilder app, bool isDev) =>
         app.MapOrgCrudEndpoints(new OrgCrudEndpoints<IDepartmentRepository, Department, CreateDepartmentDto>

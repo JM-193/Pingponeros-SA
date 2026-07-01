@@ -67,16 +67,16 @@ export default function Login() {
       }
 
       if (!token) {
-        // Defensive: if the backend did not send a token for some reason, we 
-        // do not navigate to /home with a half-finished session.
+        // Defensivo: si por alguna razón el backend no envió un token,
+        // no se navega a /home con una sesión a medio iniciar.
         setServerError('No se pudo iniciar sesión. Intente de nuevo.')
         return
       }
 
       guardarSesion(token, usuario.contrasenaTemporal)
 
-      // A temporary password must be changed before anything else; send the user
-      // straight to the change page (the blocking alert is shown there).
+      // Una contraseña temporal debe cambiarse antes que nada; se envía al usuario
+      // directamente a la página de cambio (allí se muestra la alerta bloqueante).
       if (usuario.contrasenaTemporal) {
         navigate('/cambiar-contrasena')
         return
@@ -200,7 +200,7 @@ export default function Login() {
           disabled={loading}
           style={{
             padding: '14px',
-            backgroundColor: loading ? '#5a7db5' : COLORS.authBtn,
+            backgroundColor: loading ? COLORS.authBtnDisabled : COLORS.authBtn,
             color: COLORS.white,
             border: 'none',
             borderRadius: '4px',

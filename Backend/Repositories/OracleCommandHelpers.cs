@@ -40,6 +40,15 @@ internal static class OracleCommandHelpers
         cmd.Parameters.Add(param);
     }
 
+    internal static void AddDecimalParam(OracleCommand cmd, string paramName, decimal value)
+    {
+        var param = new OracleParameter(paramName, OracleDbType.Decimal)
+        {
+            Value = value
+        };
+        cmd.Parameters.Add(param);
+    }
+
     // El número de plaza es un entero sin signo (NUMBER(20)). Se enlaza como Decimal porque
     // OracleDbType no tiene un tipo UInt64 y un valor > long.MaxValue desbordaría Int64;
     // decimal representa todo el rango de ulong sin pérdida.

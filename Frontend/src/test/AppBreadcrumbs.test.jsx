@@ -57,20 +57,6 @@ describe('AppBreadcrumbs', () => {
     })
   })
 
-  describe('/usuarios/editar/:correo', () => {
-    it('muestra Editar como última miga, no el valor del correo', () => {
-      renderAt('/usuarios/editar/user@ucr.ac.cr')
-      expect(screen.getByText('Editar')).toBeInTheDocument()
-      expect(screen.queryByText('user@ucr.ac.cr')).toBeNull()
-    })
-
-    it('Usuarios es un enlace a /usuarios/consultar', () => {
-      renderAt('/usuarios/editar/user@ucr.ac.cr')
-      const link = screen.getByRole('link', { name: 'Usuarios' })
-      expect(link).toHaveAttribute('href', '/usuarios/consultar')
-    })
-  })
-
   describe('/organizacion/areas/consultar', () => {
     it('muestra las 4 migas', () => {
       renderAt('/organizacion/areas/consultar')
@@ -86,43 +72,6 @@ describe('AppBreadcrumbs', () => {
       expect(screen.queryByRole('link', { name: 'Organización' })).toBeNull()
       expect(screen.queryByRole('link', { name: 'Áreas' })).toBeNull()
       expect(screen.queryByRole('link', { name: 'Consultar' })).toBeNull()
-    })
-  })
-
-  describe('/organizacion/areas/crear', () => {
-    it('Áreas es un enlace a /organizacion/areas/consultar', () => {
-      renderAt('/organizacion/areas/crear')
-      const link = screen.getByRole('link', { name: 'Áreas' })
-      expect(link).toHaveAttribute('href', '/organizacion/areas/consultar')
-    })
-
-    it('Crear no es un enlace', () => {
-      renderAt('/organizacion/areas/crear')
-      expect(screen.queryByRole('link', { name: 'Crear' })).toBeNull()
-      expect(screen.getByText('Crear')).toBeInTheDocument()
-    })
-  })
-
-  describe('/organizacion/areas/editar/:nombre', () => {
-    it('muestra Editar como última miga, no el valor del parámetro', () => {
-      renderAt('/organizacion/areas/editar/Area-Test')
-      expect(screen.getByText('Editar')).toBeInTheDocument()
-      expect(screen.queryByText('Area-Test')).toBeNull()
-    })
-
-    it('Áreas es un enlace a /organizacion/areas/consultar', () => {
-      renderAt('/organizacion/areas/editar/Area-Test')
-      const link = screen.getByRole('link', { name: 'Áreas' })
-      expect(link).toHaveAttribute('href', '/organizacion/areas/consultar')
-    })
-  })
-
-  describe('/organizacion/plazas/editar/:numeroPlaza', () => {
-    it('muestra Editar como última miga para plazas', () => {
-      renderAt('/organizacion/plazas/editar/42')
-      expect(screen.getByText('Plazas')).toBeInTheDocument()
-      expect(screen.getByText('Editar')).toBeInTheDocument()
-      expect(screen.queryByText('42')).toBeNull()
     })
   })
 

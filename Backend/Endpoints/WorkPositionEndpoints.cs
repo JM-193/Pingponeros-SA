@@ -1,3 +1,4 @@
+// WorkPositionEndpoints.cs
 using Backend.DTOs;
 using Backend.Helpers;
 using Backend.Models;
@@ -8,16 +9,25 @@ namespace Backend.Endpoints;
 
 internal static class WorkPositionEndpoints
 {
+    // ---------------------------------------------------------------- //
+    // Rutas de Puestos de Trabajo                                       //
+    // ---------------------------------------------------------------- //
     public static void MapWorkPositionEndpoints(this IEndpointRouteBuilder app, bool isDev)
     {
         var puestos = app.MapGroup("/puestos-trabajo");
 
+        // GET  /puestos-trabajo            — Lista todos los puestos de trabajo
         puestos.MapGet("/", (IWorkPositionRepository repo) => ListarAsync(repo, isDev));
+        // POST /puestos-trabajo            — Crea un nuevo puesto de trabajo
         puestos.MapPost("/", (CreateWorkPositionDto dto, IWorkPositionRepository repo) => CrearAsync(dto, repo, isDev));
+        // DELETE /puestos-trabajo/{nombre} — Elimina un puesto (solo si no está vinculado a ninguna plaza)
         puestos.MapDelete("/{nombre}", (string nombre, IWorkPositionRepository repo) => EliminarAsync(nombre, repo, isDev));
 
+        // GET  /puestos-trabajo/{id}/funciones               — Lista las funciones oficiales asignadas al puesto
         puestos.MapGet("/{id:int}/funciones", (int id, IWorkPositionFunctionRepository repo) => ListarFuncionesAsync(id, repo, isDev));
+        // POST /puestos-trabajo/{id}/funciones               — Asigna una función oficial al puesto
         puestos.MapPost("/{id:int}/funciones", (int id, AssignFunctionToPositionDto dto, IWorkPositionFunctionRepository repo) => AgregarFuncionAsync(id, dto, repo, isDev));
+        // DELETE /puestos-trabajo/{id}/funciones/{idFuncion} — Desvincula una función del puesto
         puestos.MapDelete("/{id:int}/funciones/{idFuncion:int}", (int id, int idFuncion, IWorkPositionFunctionRepository repo) => QuitarFuncionAsync(id, idFuncion, repo, isDev));
     }
 

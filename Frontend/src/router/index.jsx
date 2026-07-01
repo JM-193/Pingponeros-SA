@@ -3,30 +3,22 @@ import Login from '../pages/Login'
 import Home from '../pages/Home'
 import ForgotPassword from '../pages/ForgotPassword'
 import ChangePassword from '../pages/ChangePassword'
-import CreateUsers from '../pages/CreateUsers'
-import EditUsers from '../pages/EditUsers'
 import QueryUsers from '../pages/QueryUsers'
-import CreateAreas from '../pages/CreateAreas'
-import EditAreas from '../pages/EditAreas'
 import QueryAreas from '../pages/QueryAreas'
-import CreateDepartments from '../pages/CreateDepartments'
-import EditDepartments from '../pages/EditDepartments'
 import QueryDepartments from '../pages/QueryDepartments'
-import CreateSections from '../pages/CreateSections'
-import EditSections from '../pages/EditSections'
 import QuerySections from '../pages/QuerySections'
-import CreateUnits from '../pages/CreateUnits'
-import EditUnits from '../pages/EditUnits'
 import QueryUnits from '../pages/QueryUnits'
-import CreatePositions from '../pages/CreatePositions'
-import EditPositions from '../pages/EditPositions'
 import QueryPositions from '../pages/QueryPositions'
-import CreateWorkPositions from '../pages/CreateWorkPositions'
 import QueryWorkPositions from '../pages/QueryWorkPositions'
-import CreateFunctions from '../pages/CreateFunctions'
+import QueryOccupationalClasses from '../pages/QueryOccupationalClasses'
 import QueryFunctions from '../pages/QueryFunctions'
-import CreateUserFunctions from '../pages/CreateUserFunctions'
 import QueryUserFunctions from '../pages/QueryUserFunctions'
+import Declarations from '../pages/Declarations'
+import DeclarationForm from '../pages/DeclarationForm'
+import DeclarationView from '../pages/DeclarationView'
+import Reports from '../pages/Reports'
+import Dashboard from '../pages/Dashboard'
+import UserProfile from '../pages/UserProfile'
 import ProtectedRoute from '../components/ProtectedRoute'
 
 export default function AppRouter() {
@@ -40,35 +32,26 @@ export default function AppRouter() {
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/cambiar-contrasena" element={<ChangePassword />} />
+          <Route path="/perfil" element={<UserProfile />} />
           <Route path="/home" element={<Home />} />
-          {/* <Route path="/declaraciones/consultar" element={<QueryDeclarations />} /> */}
-          <Route path="/funciones/usuarios/crear" element={<CreateUserFunctions />} />
+          <Route path="/declaraciones" element={<Declarations />} />
+          <Route path="/declaraciones/formulario" element={<DeclarationForm />} />
+          <Route path="/declaraciones/ver/:id" element={<DeclarationView />} />
           <Route path="/funciones/usuarios/consultar" element={<QueryUserFunctions />} />
 
           {/* Admin-only routes */}
           <Route element={<ProtectedRoute allowedRoles={[1]} />}>
-            <Route path="/usuarios/crear" element={<CreateUsers />} />
-            <Route path="/usuarios/editar/:correo" element={<EditUsers />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/usuarios/consultar" element={<QueryUsers />} />
-            <Route path="/plazas/crear" element={<CreatePositions />} />
-            <Route path="/plazas/editar/:numeroPlaza" element={<EditPositions />} />
             <Route path="/plazas/consultar" element={<QueryPositions />} />
-            <Route path="/organizacion/areas/crear" element={<CreateAreas />} />
-            <Route path="/organizacion/areas/editar/:nombre" element={<EditAreas />} />
             <Route path="/organizacion/areas/consultar" element={<QueryAreas />} />
-            <Route path="/organizacion/departamentos/crear" element={<CreateDepartments />} />
-            <Route path="/organizacion/departamentos/editar/:nombre" element={<EditDepartments />} />
             <Route path="/organizacion/departamentos/consultar" element={<QueryDepartments />} />
-            <Route path="/organizacion/secciones/crear" element={<CreateSections />} />
-            <Route path="/organizacion/secciones/editar/:nombre" element={<EditSections />} />
             <Route path="/organizacion/secciones/consultar" element={<QuerySections />} />
-            <Route path="/organizacion/unidades/crear" element={<CreateUnits />} />
-            <Route path="/organizacion/unidades/editar/:nombre" element={<EditUnits />} />
             <Route path="/organizacion/unidades/consultar" element={<QueryUnits />} />
-            <Route path="/organizacion/puestos-trabajo/crear" element={<CreateWorkPositions />} />
             <Route path="/puestos-trabajo/consultar" element={<QueryWorkPositions />} />
-            <Route path="/organizacion/funciones/crear" element={<CreateFunctions />} />
-            <Route path="/funciones/consultar" element={<QueryFunctions />} />
+            <Route path="/clases-ocupacionales/consultar" element={<QueryOccupationalClasses />} />
+            <Route path="/funciones/oficiales/consultar" element={<QueryFunctions />} />
+            <Route path="/reportes" element={<Reports />} />
           </Route>
         </Route>
       </Routes>

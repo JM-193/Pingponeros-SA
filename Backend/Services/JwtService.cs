@@ -7,10 +7,10 @@ using Microsoft.IdentityModel.Tokens;
 namespace Backend.Services;
 
 /// <summary>
-/// Generates signed JWTs for authenticated users.
-/// The signing key, issuer, and expiration time are read from configuration
-/// (appsettings.json / appsettings.Development.json / environment variables),
-/// never hardcoded in the code.
+/// Genera JWT firmados para los usuarios autenticados.
+/// La clave de firma, el emisor y el tiempo de expiración se leen de la configuración
+/// (appsettings.json / appsettings.Development.json / variables de entorno),
+/// nunca incrustados directamente en el código.
 /// </summary>
 internal class JwtService : IJwtService
 {
@@ -21,7 +21,7 @@ internal class JwtService : IJwtService
 
     public JwtService(IConfiguration configuration)
     {
-        // Jwt:Key must ALWAYS come from configuration/environment variable, never in the code.
+        // Jwt:Key SIEMPRE debe provenir de la configuración / variable de entorno, nunca del código.
         _clave = configuration["Jwt:Key"]
             ?? throw new InvalidOperationException(
                 "Falta configurar 'Jwt:Key'. Defínela en appsettings.Development.json " +
@@ -35,7 +35,7 @@ internal class JwtService : IJwtService
     }
 
     /// <summary>
-    /// Generates a signed JWT with the basic claims of the authenticated user.
+    /// Genera un JWT firmado con los claims básicos del usuario autenticado.
     /// </summary>
     public string GenerarToken(
         string correoInstitucional,

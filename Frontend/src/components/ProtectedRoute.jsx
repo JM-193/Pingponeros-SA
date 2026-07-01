@@ -3,8 +3,8 @@ import PropTypes from 'prop-types'
 import { obtenerSesion, esContrasenaTemporal } from '../services/session'
 
 /**
- * Wraps protected routes and redirects to the login page if not logged in.
- * Also blocks non-admin users from accessing admin routes.
+ * Envuelve las rutas protegidas y redirige a la página de inicio de sesión si no hay sesión.
+ * También impide que los usuarios sin rol de administrador accedan a rutas de administración.
  */
 export default function ProtectedRoute({
   children,
@@ -12,25 +12,25 @@ export default function ProtectedRoute({
 }) {
   const { pathname } = useLocation()
 
-  // Fetch session
+  // Obtiene la sesión
   const sesion = obtenerSesion()
 
-  // If no session, redirect to login
+  // Si no hay sesión, redirige al inicio de sesión
   if (!sesion) {
     return <Navigate to="/" replace />
   }
 
-  // Force users with a temporary password to change it before doing anything else.
+  // Obliga a los usuarios con contraseña temporal a cambiarla antes de hacer cualquier otra cosa.
   if (esContrasenaTemporal() && pathname !== '/cambiar-contrasena') {
     return <Navigate to="/cambiar-contrasena" replace />
   }
 
-  // Check for allowed roles
+  // Verifica los roles permitidos
   if (allowedRoles && !allowedRoles.includes(sesion?.rol)) {
     return <Navigate to="/home" replace />
   }
 
-  // Everything is fine, render outlet
+  // Todo está correcto, renderiza el outlet
   return children ?? <Outlet />
 }
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { FiKey, FiLogOut, FiMenu, FiX } from 'react-icons/fi'
+import { FiKey, FiLogOut, FiMenu, FiUser, FiX } from 'react-icons/fi'
 import PropTypes from 'prop-types'
 import { cerrarSesion, obtenerSesion } from '../services/session'
 import { COLORS } from '../constants/colors'
@@ -9,23 +9,21 @@ import { notifyInfo } from '../utils/notify'
 
 const NAV_ITEMS = [
   {
+    label: 'Dashboard',
+    path: '/dashboard',
+    activeOn: '/dashboard',
+    roles: [1],
+  },
+  {
     label: 'Página Principal',
     path: '/home',
     activeOn: '/home'
   },
   {
     label: 'Declaraciones',
-    /* path: '/declaraciones/consultar',*/
+    path: '/declaraciones',
     activeOn: '/declaraciones'
   },
-  /*{
-    label: 'Consultas',
-    activeOn: '/consultas',
-    submenu: [
-      { label: 'Diagnostico de carga', path: '/organizacion/consultas/diagnostico' },
-      { label: 'Consultas adicionales', path: '/organizacion/consultas/adicionales' },
-    ],
-  },*/
   {
     label: 'Usuarios',
     path: '/usuarios/consultar',
@@ -34,12 +32,9 @@ const NAV_ITEMS = [
   },
   {
     label: 'Plazas',
-    activeOn: '/plazas',
+    path: '/plazas/consultar',
+    activeOn: '/plazas/consultar',
     roles: [1],
-    submenu: [
-      { label: 'Consultar', path: '/plazas/consultar'},
-      { label: 'Asignar', /* path: '/plazas/asignar' */ },
-    ]
   },
   {
     label: 'Organización',
@@ -66,19 +61,29 @@ const NAV_ITEMS = [
   },
   {
     label: 'Puestos de trabajo',
-    activeOn: '/puestos-trabajo',
+    path: '/puestos-trabajo/consultar',
+    activeOn: '/puestos-trabajo/consultar',
     roles: [1],
-    submenu: [
-      { label: 'Consultar', path: '/puestos-trabajo/consultar'},
-    ]
+  },
+  {
+    label: 'Clases Ocupacionales',
+    path: '/clases-ocupacionales/consultar',
+    activeOn: '/clases-ocupacionales/consultar',
+    roles: [1],
   },
   {
     label: 'Funciones',
     activeOn: '/funciones',
     submenu: [
-      { label: 'Oficiales', path: '/funciones/consultar', roles: [1] },
+      { label: 'Oficiales', path: '/funciones/oficiales/consultar', roles: [1] },
       { label: 'Usuarios', path: '/funciones/usuarios/consultar' },
     ],
+  },
+  {
+    label: 'Reportes',
+    path: '/reportes',
+    activeOn: '/reportes',
+    roles: [1],
   },
 ]
 
@@ -460,7 +465,9 @@ function ProfileDropdown({
         display: 'flex',
         alignItems: 'center',
         order: isMobile ? 1 : 0,
-        minHeight: isMobile ? '50px' : 'auto',
+        minHeight: isMobile ? '50px' : '48px',
+        alignSelf: isMobile ? undefined : 'flex-start',
+        flexShrink: isMobile ? undefined : 0,
       }}
     >
       <button
@@ -524,7 +531,7 @@ function ProfileDropdown({
               gap: '12px',
               width: '100%',
               padding: '14px 16px',
-              borderBottom: '1px solid #eee',
+              borderBottom: `1px solid ${COLORS.borderSubtle}`,
               backgroundColor: COLORS.white,
             }}
           >
@@ -575,6 +582,25 @@ function ProfileDropdown({
             </div>
           </div>
           <button
+            onClick={() => navigate('/perfil')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              width: '100%',
+              padding: '12px 16px',
+              textAlign: 'left',
+              border: 'none',
+              background: 'none',
+              fontSize: '13px',
+              color: COLORS.headerBg,
+              cursor: 'pointer',
+            }}
+          >
+            <FiUser size={16} />
+            <span>Perfil</span>
+          </button>
+          <button
             onClick={() => navigate('/cambiar-contrasena')}
             style={{
               display: 'flex',
@@ -607,7 +633,7 @@ function ProfileDropdown({
               padding: '12px 16px',
               textAlign: 'left',
               border: 'none',
-              borderTop: '1px solid #fff',
+              borderTop: `1px solid ${COLORS.white}`,
               background: 'none',
               fontSize: '13px',
               color: COLORS.danger,
@@ -746,9 +772,9 @@ export default function Navbar() {
         backgroundColor: COLORS.navBg,
         padding: isMobile ? '0 16px' : '0 24px',
         display: 'flex',
-        alignItems: isMobile ? 'center' : 'stretch',
+        alignItems: isMobile ? 'center' : 'flex-start',
         justifyContent: 'space-between',
-        flexWrap: 'wrap',
+        flexWrap: isMobile ? 'wrap' : 'nowrap',
         gap: 0,
         minHeight: isMobile ? '50px' : 'auto',
       }}
@@ -789,6 +815,7 @@ export default function Navbar() {
           order: isMobile ? 2 : 0,
           width: isMobile ? 'calc(100% + 32px)' : 'auto',
           margin: isMobile ? '0 -16px' : 0,
+          flex: isMobile ? undefined : '1 1 0',
         }}
       >
         <NavbarMenu

@@ -6,7 +6,6 @@ import { obtenerDepartamentos } from '../services/departmentService'
 import { obtenerSecciones } from '../services/sectionService'
 import { obtenerAreas } from '../services/areaService'
 import { buildNameMap, resolveOptionValueKey } from '../utils/organizationOptions'
-import { ENTITY_FORMS_AS_MODAL } from '../constants/uiMode'
 import CreatePositions from './CreatePositions'
 import EditPositions from './EditPositions'
 
@@ -92,19 +91,6 @@ export default function QueryPositions() {
     )
   }
 
-  const formProps = ENTITY_FORMS_AS_MODAL
-    ? {
-        renderCreateModal: ({ isModal, isOpen, onClose, onSuccess }) => (
-          <CreatePositions isModal={isModal} isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
-        ),
-        renderEditModal: ({ isModal, isOpen, onClose, onSuccess, item }) =>
-          item && <EditPositions isModal={isModal} isOpen={isOpen} entityId={String(item.numeroPlaza)} onClose={onClose} onSuccess={onSuccess} />,
-      }
-    : {
-        createPath: '/organizacion/plazas/crear',
-        editPath: (plaza) => `/organizacion/plazas/editar/${encodeURIComponent(plaza.numeroPlaza)}`,
-      }
-
   return (
     <EntityListPage
       title="Plazas"
@@ -114,7 +100,11 @@ export default function QueryPositions() {
       matchesSearch={matchesSearch}
       getRowId={(plaza) => plaza.numeroPlaza}
       searchPlaceholder="Ingrese el número de plaza, unidad, departamento, sección o área"
-      {...formProps}
+      renderCreateModal={({ isOpen, onClose, onSuccess }) => (
+        <CreatePositions isOpen={isOpen} onClose={onClose} onSuccess={onSuccess} />
+      )}
+      renderEditModal={({ isOpen, onClose, onSuccess, item }) =>
+        item && <EditPositions isOpen={isOpen} entityId={String(item.numeroPlaza)} onClose={onClose} onSuccess={onSuccess} />}
     />
   )
 }

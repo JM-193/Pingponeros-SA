@@ -41,7 +41,7 @@ describe('QueryUnits Page', () => {
       </BrowserRouter>,
     )
 
-    // Wait for the unit name to appear
+    // Espera a que aparezca el nombre de la unidad
     await waitFor(() => {
       expect(screen.getByText('Unidad Técnica')).toBeInTheDocument()
     }, { timeout: 3000 })

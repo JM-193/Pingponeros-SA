@@ -203,14 +203,14 @@ describe('ChangePassword Page', () => {
         target: { value: 'StrongPass1!' },
       })
 
-      // All 5 checklist items rendered
+      // Los 5 elementos del checklist renderizados
       expect(screen.getByText('Mínimo 12 caracteres')).toBeInTheDocument()
       expect(screen.getByText('Una mayúscula')).toBeInTheDocument()
       expect(screen.getByText('Una minúscula')).toBeInTheDocument()
       expect(screen.getByText('Un número')).toBeInTheDocument()
       expect(screen.getByText('Un carácter especial (!@#$%&*)')).toBeInTheDocument()
 
-      // The li elements with valid class (react-password-checklist marks valid items)
+      // Los elementos li con clase valid (react-password-checklist marca los elementos válidos)
       const validItems = document.querySelectorAll('li.valid')
       expect(validItems.length).toBeGreaterThan(0)
     })

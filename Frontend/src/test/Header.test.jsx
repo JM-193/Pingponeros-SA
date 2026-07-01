@@ -2,6 +2,7 @@
 import { render, screen } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import Header from '../components/Header'
+import { COLORS } from '../constants/colors'
 
 describe('Header', () => {
   it('renderiza el header con fondo azul', () => {
@@ -13,7 +14,7 @@ describe('Header', () => {
 
     const header = container.querySelector('header')
     expect(header).toBeInTheDocument()
-    expect(header).toHaveStyle('background-color: #57bde8')
+    expect(header).toHaveStyle(`background-color: ${COLORS.headerBg}`)
   })
 
   it('renderiza imágenes de logos', () => {

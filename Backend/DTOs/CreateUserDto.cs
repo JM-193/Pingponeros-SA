@@ -12,7 +12,7 @@ namespace Backend.DTOs;
     Justification = "Instanciado por el enlazador de modelos de ASP.NET Core.")]
 internal sealed record CreateUserDto(
     [property: Required(ErrorMessage = "El correo institucional es obligatorio.")]
-    [property: MaxLength(100, ErrorMessage = "El correo no puede superar los 100 caracteres.")]
+    [property: MaxLength(190, ErrorMessage = "El correo no puede superar los 190 caracteres.")]
     [property: RegularExpression(ValidationPatterns.CorreoUcr,
         ErrorMessage = "El correo debe ser válido. Formato: nombre.apellido@ucr.ac.cr (solo letras antes de @).")]
     string CorreoInstitucional,

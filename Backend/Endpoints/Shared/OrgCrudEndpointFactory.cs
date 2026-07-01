@@ -1,4 +1,5 @@
 // OrgCrudEndpointFactory.cs
+using System.Diagnostics.CodeAnalysis;
 using Backend.Helpers;
 using Oracle.ManagedDataAccess.Client;
 using static Backend.Endpoints.Shared.CrudEndpointHelpers;
@@ -26,6 +27,15 @@ internal sealed class CrudMessages
 /// HTTP una sola vez. Se usan delegados (en lugar de interfaces compartidas) para no acoplar
 /// los modelos ni los repositorios, que difieren en nombres ("ObtenerTodas/os") y en campos.
 /// </summary>
+[SuppressMessage("Major Code Smell",
+    "S2436:Types and methods should not have too many generic parameters",
+    Justification =
+        "Los tres parámetros (TRepo, TEntity, TCreateDto) aportan tipado real y no " +
+        "redundante: TCreateDto es el cuerpo enlazado por el model binder, TEntity es el " +
+        "modelo de dominio y TRepo es el repositorio inyectado por petición. Se usan " +
+        "delegados en lugar de una interfaz de repositorio compartida porque los " +
+        "repositorios divergen en el nombre del método de listado (ObtenerTodas/os); " +
+        "unificarlo rompería la concordancia de género y generaría churn en pruebas/DI.")]
 internal sealed class OrgCrudEndpoints<TRepo, TEntity, TCreateDto>
     where TRepo : notnull
 {

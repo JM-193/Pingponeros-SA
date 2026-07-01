@@ -1,16 +1,11 @@
 import { useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import { crearPuesto } from '../services/workPositionService'
-import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
 import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
 import { useOrganizationEntityForm } from '../hooks/useOrganizationEntityForm'
 
-export default function CreateWorkPositions({ isModal, isOpen, onSuccess, onClose }) {
-  const navigate = useNavigate()
-  const delayedNavigate = useDelayedNavigate()
+export default function CreateWorkPositions({ isOpen, onSuccess, onClose }) {
   const callbackTimeoutRef = useRef(null)
   useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
 
@@ -29,20 +24,12 @@ export default function CreateWorkPositions({ isModal, isOpen, onSuccess, onClos
     successMessage: 'Puesto de trabajo creado correctamente',
     onSuccess: () => {
       resetFormData()
-      if (isModal && onSuccess) {
-        callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
-      } else {
-        delayedNavigate('/organizacion/puestos-trabajo/consultar', 1500)
-      }
+      callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
     },
   })
 
   const handleCancel = () => {
-    if (isModal && onClose) {
-      onClose()
-    } else {
-      navigate('/organizacion/puestos-trabajo/consultar')
-    }
+    onClose()
   }
 
   const formFields = (
@@ -58,7 +45,7 @@ export default function CreateWorkPositions({ isModal, isOpen, onSuccess, onClos
     />
   )
 
-  return isModal ? (
+  return (
     <OrganizationEntityFormModal
       isOpen={isOpen}
       title="Crear Puesto de Trabajo"
@@ -69,30 +56,15 @@ export default function CreateWorkPositions({ isModal, isOpen, onSuccess, onClos
     >
       {formFields}
     </OrganizationEntityFormModal>
-  ) : (
-    <OrganizationEntityFormPage
-      title="Crear Puesto de Trabajo"
-      subtitle="Formulario de Registro"
-      onSubmit={handleSubmit}
-      onCancel={handleCancel}
-      isBusy={isSubmitting}
-      primaryLabel="Crear"
-    >
-      {formFields}
-    </OrganizationEntityFormPage>
   )
 }
 
 CreateWorkPositions.propTypes = {
-  isModal: PropTypes.bool,
   isOpen: PropTypes.bool,
-  onSuccess: PropTypes.func,
-  onClose: PropTypes.func,
+  onSuccess: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
 }
 
 CreateWorkPositions.defaultProps = {
-  isModal: false,
   isOpen: false,
-  onSuccess: null,
-  onClose: null,
 }

@@ -1,19 +1,23 @@
 import PropTypes from 'prop-types'
 import { COLORS } from '../constants/colors'
 
-function FormContainer({ children, onSubmit, title, subtitle, requiredNote }) {
+function FormContainer({ children, onSubmit, title, subtitle, requiredNote, embedded }) {
   return (
     <form
       onSubmit={onSubmit}
       noValidate
-      style={{
-        maxWidth: '700px',
-        margin: '0 auto',
-        backgroundColor: COLORS.inputBg,
-        padding: '32px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-      }}
+      style={
+        embedded
+          ? {}
+          : {
+              maxWidth: '700px',
+              margin: '0 auto',
+              backgroundColor: COLORS.inputBg,
+              padding: '32px',
+              borderRadius: '8px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            }
+      }
     >
       {!!title && (
         <h1
@@ -71,12 +75,14 @@ FormContainer.propTypes = {
   title: PropTypes.string,
   subtitle: PropTypes.string,
   requiredNote: PropTypes.bool,
+  embedded: PropTypes.bool,
 }
 
 FormContainer.defaultProps = {
   title: '',
   subtitle: '',
   requiredNote: false,
+  embedded: false,
 }
 
 export default FormContainer

@@ -68,11 +68,11 @@ export default function ForgotPassword() {
       {sent ? (
         <div
           style={{
-            backgroundColor: '#d4edda',
-            border: '1px solid #c3e6cb',
+            backgroundColor: COLORS.successSoftBg,
+            border: `1px solid ${COLORS.successSoftBorder}`,
             borderRadius: '4px',
             padding: '16px 18px',
-            color: '#155724',
+            color: COLORS.successStrong,
             fontSize: '14px',
             marginBottom: '24px',
           }}

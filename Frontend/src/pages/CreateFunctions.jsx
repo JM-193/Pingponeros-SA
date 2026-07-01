@@ -1,16 +1,11 @@
 import { useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import PropTypes from 'prop-types'
 import { crearFuncion } from '../services/functionService'
-import OrganizationEntityFormPage from '../components/OrganizationEntityFormPage'
 import OrganizationEntityFormModal from '../components/OrganizationEntityFormModal'
 import OrganizationEntityFormFields from '../components/OrganizationEntityFormFields'
 import { useOrganizationEntityForm } from '../hooks/useOrganizationEntityForm'
 
-export default function CreateFunctions({ isModal, isOpen, onSuccess, onClose }) {
-  const navigate = useNavigate()
-  const delayedNavigate = useDelayedNavigate()
+export default function CreateFunctions({ isOpen, onSuccess, onClose }) {
   const callbackTimeoutRef = useRef(null)
   useEffect(() => () => clearTimeout(callbackTimeoutRef.current), [])
 
@@ -29,20 +24,12 @@ export default function CreateFunctions({ isModal, isOpen, onSuccess, onClose })
     successMessage: 'Función oficial creada correctamente',
     onSuccess: () => {
       resetFormData()
-      if (isModal && onSuccess) {
-        callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
-      } else {
-        delayedNavigate('/funciones/consultar', 1500)
-      }
+      callbackTimeoutRef.current = setTimeout(() => onSuccess(), 1200)
     },
   })
 
   const handleCancel = () => {
-    if (isModal && onClose) {
-      onClose()
-    } else {
-      navigate('/funciones/consultar')
-    }
+    onClose()
   }
 
   const formFields = (
@@ -59,7 +46,7 @@ export default function CreateFunctions({ isModal, isOpen, onSuccess, onClose })
     />
   )
 
-  return isModal ? (
+  return (
     <OrganizationEntityFormModal
       isOpen={isOpen}
       title="Crear Función Oficial"
@@ -70,30 +57,15 @@ export default function CreateFunctions({ isModal, isOpen, onSuccess, onClose })
     >
       {formFields}
     </OrganizationEntityFormModal>
-  ) : (
-    <OrganizationEntityFormPage
-      title="Crear Función Oficial"
-      subtitle="Formulario de Registro"
-      onSubmit={handleSubmit}
-      onCancel={handleCancel}
-      isBusy={isSubmitting}
-      primaryLabel="Crear"
-    >
-      {formFields}
-    </OrganizationEntityFormPage>
   )
 }
 
 CreateFunctions.propTypes = {
-  isModal: PropTypes.bool,
   isOpen: PropTypes.bool,
-  onSuccess: PropTypes.func,
-  onClose: PropTypes.func,
+  onSuccess: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
 }
 
 CreateFunctions.defaultProps = {
-  isModal: false,
   isOpen: false,
-  onSuccess: null,
-  onClose: null,
 }

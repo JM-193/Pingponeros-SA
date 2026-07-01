@@ -24,6 +24,9 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<TestEntryP
     internal IWorkPositionFunctionRepository FuncionPuestoRepo { get; } = Substitute.For<IWorkPositionFunctionRepository>();
     internal IFunctionRepository FuncionRepo { get; } = Substitute.For<IFunctionRepository>();
     internal IUserFunctionRepository FuncionUsuarioRepo { get; } = Substitute.For<IUserFunctionRepository>();
+    internal IDeclaracionRepository DeclaracionRepo { get; } = Substitute.For<IDeclaracionRepository>();
+    internal IReporteRepository ReporteRepo { get; } = Substitute.For<IReporteRepository>();
+    internal IOccupationalClassRepository ClasesRepo { get; } = Substitute.For<IOccupationalClassRepository>();
     internal IDbExecutor DbExecutor { get; } = Substitute.For<IDbExecutor>();
     internal IQueryExecutor QueryExecutor { get; } = Substitute.For<IQueryExecutor>();
     internal IEmailService EmailService { get; } = Substitute.For<IEmailService>();
@@ -57,6 +60,9 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<TestEntryP
             services.RemoveAll<IWorkPositionFunctionRepository>();
             services.RemoveAll<IFunctionRepository>();
             services.RemoveAll<IUserFunctionRepository>();
+            services.RemoveAll<IDeclaracionRepository>();
+            services.RemoveAll<IReporteRepository>();
+            services.RemoveAll<IOccupationalClassRepository>();
             services.RemoveAll<IEmailService>();
             services.AddScoped<IDbExecutor>(_ => DbExecutor);
             services.AddScoped<IQueryExecutor>(_ => QueryExecutor);
@@ -71,6 +77,9 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<TestEntryP
             services.AddScoped<IWorkPositionFunctionRepository>(_ => FuncionPuestoRepo);
             services.AddScoped<IFunctionRepository>(_ => FuncionRepo);
             services.AddScoped<IUserFunctionRepository>(_ => FuncionUsuarioRepo);
+            services.AddScoped<IDeclaracionRepository>(_ => DeclaracionRepo);
+            services.AddScoped<IReporteRepository>(_ => ReporteRepo);
+            services.AddScoped<IOccupationalClassRepository>(_ => ClasesRepo);
             services.AddScoped<IEmailService>(_ => EmailService);
         });
     }

@@ -19,6 +19,7 @@ export default function OrganizationEntityFormModal({
       <FormContainer
         onSubmit={onSubmit}
         requiredNote
+        embedded
       >
         {children}
 

@@ -56,7 +56,14 @@ const closeButtonStyle = {
   lineHeight: 1,
 }
 
-export default function Modal({ isOpen, title, onClose, children, maxWidth }) {
+export default function Modal({
+  isOpen,
+  title = '',
+  onClose,
+  children,
+  maxWidth = '700px',
+  width = 'min(700px, 92vw)',
+}) {
   useEffect(() => {
     if (!isOpen) return
 
@@ -84,7 +91,7 @@ export default function Modal({ isOpen, title, onClose, children, maxWidth }) {
           borderRadius: '10px',
           boxShadow: '0 12px 30px rgba(0,0,0,0.18)',
           maxWidth,
-          width: '50%',
+          width,
           padding: '24px',
           position: 'relative',
           zIndex: 1,
@@ -115,9 +122,6 @@ Modal.propTypes = {
   onClose: PropTypes.func.isRequired,
   children: PropTypes.node.isRequired,
   maxWidth: PropTypes.string,
+  width: PropTypes.string,
 }
 
-Modal.defaultProps = {
-  title: '',
-  maxWidth: '700px',
-}
