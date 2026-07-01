@@ -1,7 +1,7 @@
 import { SOLO_LETRAS_PUNTUACION_REGEX } from '../constants/regex'
 
 // Campos de texto libre que solo admiten letras, espacios y puntuación básica (. , :).
-const CAMPOS_SOLO_TEXTO = ['nombre', 'descripcion']
+const CAMPOS_SOLO_TEXTO = new Set(['nombre', 'descripcion'])
 
 // Elimina, al escribir/pegar, los caracteres no permitidos por SOLO_LETRAS_PUNTUACION_REGEX.
 const CARACTERES_INVALIDOS = /[^A-Za-z0-9áéíóúÁÉÍÓÚñÑüÜ.,:\s]/g
@@ -13,7 +13,7 @@ export function createOrganizationEntityInputChangeHandler(setFormData, clearFee
   return (event) => {
     const { name, value } = event.target
     clearFeedback()
-    const sanitized = CAMPOS_SOLO_TEXTO.includes(name) ? value.replace(CARACTERES_INVALIDOS, '') : value
+    const sanitized = CAMPOS_SOLO_TEXTO.has(name) ? value.replace(CARACTERES_INVALIDOS, '') : value
     setFormData((prev) => ({
       ...prev,
       [name]: sanitized,

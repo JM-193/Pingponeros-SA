@@ -17,7 +17,7 @@ import { notifySuccess, notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
 import { SOLO_LETRAS_PUNTUACION_REGEX } from '../constants/regex'
 
-const CAMPOS_SOLO_TEXTO = ['lugarTrabajo']
+const CAMPOS_SOLO_TEXTO = new Set(['lugarTrabajo'])
 
 const CARACTERES_INVALIDOS = /[^A-Za-z0-9áéíóúÁÉÍÓÚñÑüÜ.,:\s]/g
 
@@ -85,7 +85,7 @@ export default function UserPositionsSection({ correo }) {
   const handleFieldChange = (e) => {
     const { name, value } = e.target
     setErrors((prev) => (prev[name] ? { ...prev, [name]: undefined } : prev))
-    const sanitized = CAMPOS_SOLO_TEXTO.includes(name) ? value.replace(CARACTERES_INVALIDOS, '') : value
+    const sanitized = CAMPOS_SOLO_TEXTO.has(name) ? value.replace(CARACTERES_INVALIDOS, '') : value
     setForm((prev) => ({ ...prev, [name]: sanitized }))
   }
 

@@ -34,7 +34,8 @@ function FormButton({ label, type, variant, onClick, disabled, width }) {
   const { bg, bgHover, color, border } = VARIANT_STYLES[variant] ?? VARIANT_STYLES.secondary
 
   const isFilled = variant === 'primary' || variant === 'secondary'
-  const backgroundColor = disabled ? (isFilled ? COLORS.disabledBg : 'transparent') : bg
+  const isFilledBg = isFilled ? COLORS.disabledBg : 'transparent'
+  const backgroundColor = disabled ? isFilledBg : bg
   const textColor = disabled ? COLORS.disabledColor : color
 
   return (

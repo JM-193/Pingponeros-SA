@@ -82,7 +82,7 @@ internal sealed class DashboardService : IDashboardService
     private static List<ConteoEtiqueta> RellenarUltimosMeses(List<ConteoEtiqueta> datos)
     {
         var porMes = datos.ToDictionary(d => d.Etiqueta, d => d.Cantidad, StringComparer.Ordinal);
-        var inicio = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1)
+        var inicio = new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1)
             .AddMonths(-(MesesPeriodo - 1));
 
         var serie = new List<ConteoEtiqueta>(MesesPeriodo);

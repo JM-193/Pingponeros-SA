@@ -11,7 +11,7 @@ import { SOLO_LETRAS_PUNTUACION_REGEX } from '../constants/regex'
 const NUEVA = '__nueva__'
 
 // Campos de texto libre de la "nueva función": solo letras, espacios y puntuación básica (. , :).
-const CAMPOS_SOLO_TEXTO = ['nuevaNombre', 'nuevaDescripcion']
+const CAMPOS_SOLO_TEXTO = new Set(['nuevaNombre', 'nuevaDescripcion'])
 const CARACTERES_INVALIDOS = /[^A-Za-z0-9áéíóúÁÉÍÓÚñÑüÜ.,:\s]/g
 const MENSAJE_NOMBRE = 'El nombre solo puede contener letras, números, espacios, puntos, comas y dos puntos'
 const MENSAJE_DESCRIPCION = 'La descripción solo puede contener letras, números, espacios, puntos, comas y dos puntos'
@@ -70,7 +70,7 @@ export default function DeclarationActivityModal({
   const handleChange = (e) => {
     const { name, value } = e.target
     setErrors((prev) => (prev[name] ? { ...prev, [name]: undefined } : prev))
-    const sanitized = CAMPOS_SOLO_TEXTO.includes(name) ? value.replace(CARACTERES_INVALIDOS, '') : value
+    const sanitized = CAMPOS_SOLO_TEXTO.has(name) ? value.replace(CARACTERES_INVALIDOS, '') : value
     setForm((prev) => {
       // Al cambiar de tipo se reinicia la función seleccionada y los campos de "nueva".
       if (name === 'tipoFuncion') {
