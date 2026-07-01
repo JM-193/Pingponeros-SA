@@ -21,7 +21,7 @@ public sealed class SeccionesEndpointsTests : IClassFixture<TestWebApplicationFa
     [Fact]
     public async Task GetSecciones_Returns200ConLista()
     {
-        _factory.SeccionRepo.ObtenerTodasAsync().Returns(new List<Seccion>
+        _factory.SeccionRepo.ObtenerTodasAsync().Returns(new List<Section>
         {
             new() { Id = 1, IdArea = 1, Nombre = "sistemas", Descripcion = "Sección Sistemas", Estado = 1 }
         });
@@ -34,7 +34,7 @@ public sealed class SeccionesEndpointsTests : IClassFixture<TestWebApplicationFa
     [Fact]
     public async Task GetSeccionPorNombre_Returns200CuandoExiste()
     {
-        var seccion = new Seccion { Id = 1, IdArea = 1, Nombre = "sistemas", Descripcion = "Sección Sistemas", Estado = 1 };
+        var seccion = new Section { Id = 1, IdArea = 1, Nombre = "sistemas", Descripcion = "Sección Sistemas", Estado = 1 };
         _factory.SeccionRepo.ObtenerPorNombreAsync("sistemas").Returns(seccion);
 
         var response = await _client.GetAsync("/secciones/sistemas");
@@ -45,7 +45,7 @@ public sealed class SeccionesEndpointsTests : IClassFixture<TestWebApplicationFa
     [Fact]
     public async Task GetSeccionPorNombre_Returns404CuandoNoExiste()
     {
-        _factory.SeccionRepo.ObtenerPorNombreAsync(Arg.Any<string>()).Returns((Seccion?)null);
+        _factory.SeccionRepo.ObtenerPorNombreAsync(Arg.Any<string>()).Returns((Section?)null);
 
         var response = await _client.GetAsync("/secciones/noexiste");
 
@@ -77,7 +77,7 @@ public sealed class SeccionesEndpointsTests : IClassFixture<TestWebApplicationFa
     {
         // El DTO permite null, esto es válido
         _factory.SeccionRepo.ExisteNombreAsync(Arg.Any<string>()).Returns(false);
-        _factory.SeccionRepo.InsertarAsync(Arg.Any<Seccion>()).Returns(1);
+        _factory.SeccionRepo.InsertarAsync(Arg.Any<Section>()).Returns(1);
         var dto = new { Nombre = "Sistemas", IdArea = (int?)null, Descripcion = "Descripción" };
 
         var response = await _client.PostAsJsonAsync("/secciones", dto);
@@ -100,7 +100,7 @@ public sealed class SeccionesEndpointsTests : IClassFixture<TestWebApplicationFa
     public async Task CrearSeccion_Returns201CuandoSeCreaCorrecto()
     {
         _factory.SeccionRepo.ExisteNombreAsync(Arg.Any<string>()).Returns(false);
-        _factory.SeccionRepo.InsertarAsync(Arg.Any<Seccion>()).Returns(1);
+        _factory.SeccionRepo.InsertarAsync(Arg.Any<Section>()).Returns(1);
         var dto = new { Nombre = "Soporte", IdArea = 1, Descripcion = "Sección Soporte" };
 
         var response = await _client.PostAsJsonAsync("/secciones", dto);
@@ -111,16 +111,16 @@ public sealed class SeccionesEndpointsTests : IClassFixture<TestWebApplicationFa
     [Fact]
     public async Task CrearSeccion_NormalizaNombreYDescripcionAntesDeInsertar()
     {
-        Seccion? capturada = null;
+        Section? capturada = null;
         _factory.SeccionRepo.ExisteNombreAsync(Arg.Any<string>()).Returns(false);
-        _factory.SeccionRepo.InsertarAsync(Arg.Do<Seccion>(sec => capturada = sec)).Returns(1);
+        _factory.SeccionRepo.InsertarAsync(Arg.Do<Section>(sec => capturada = sec)).Returns(1);
         var dto = new { Nombre = "  Soporte  ", IdArea = 1, Descripcion = "  Sección Soporte  " };
 
         var response = await _client.PostAsJsonAsync("/secciones", dto);
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         Assert.NotNull(capturada);
-        Assert.Equal("soporte", capturada!.Nombre);
+        Assert.Equal("Soporte", capturada!.Nombre);
         Assert.Equal("Sección Soporte", capturada.Descripcion);
     }
 
@@ -128,7 +128,7 @@ public sealed class SeccionesEndpointsTests : IClassFixture<TestWebApplicationFa
     public async Task ActualizarSeccion_Returns200CuandoSeActualiza()
     {
         _factory.SeccionRepo.ExisteNombreAsync(Arg.Any<string>()).Returns(false);
-        _factory.SeccionRepo.ActualizarAsync(Arg.Any<string>(), Arg.Any<Seccion>()).Returns(true);
+        _factory.SeccionRepo.ActualizarAsync(Arg.Any<string>(), Arg.Any<Section>()).Returns(true);
         var dto = new { Nombre = "sistemas", IdArea = 1, Descripcion = "Descripción actualizada" };
 
         var response = await _client.PutAsJsonAsync("/secciones/sistemas", dto);
@@ -151,7 +151,7 @@ public sealed class SeccionesEndpointsTests : IClassFixture<TestWebApplicationFa
     public async Task ActualizarSeccion_Returns404CuandoNoExiste()
     {
         _factory.SeccionRepo.ExisteNombreAsync(Arg.Any<string>()).Returns(false);
-        _factory.SeccionRepo.ActualizarAsync(Arg.Any<string>(), Arg.Any<Seccion>()).Returns(false);
+        _factory.SeccionRepo.ActualizarAsync(Arg.Any<string>(), Arg.Any<Section>()).Returns(false);
         var dto = new { Nombre = "noexiste", IdArea = 1, Descripcion = "Descripción" };
 
         var response = await _client.PutAsJsonAsync("/secciones/noexiste", dto);

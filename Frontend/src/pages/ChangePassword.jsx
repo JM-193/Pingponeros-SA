@@ -1,30 +1,46 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useDelayedNavigate } from '../hooks/useDelayedNavigate'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-import { obtenerSesion } from '../services/session'
+import PasswordChecklist from 'react-password-checklist'
+import { obtenerSesion, esContrasenaTemporal, limpiarContrasenaTemporal } from '../services/session'
 import { cambiarContrasena } from '../services/authService'
+import { notifySuccess, notifyApiError } from '../utils/notify'
+import { blockingInfo } from '../utils/alerts'
 import { COLORS } from '../constants/colors'
 import FormContainer from '../components/FormContainer'
 import PasswordInput from '../components/PasswordInput'
 import FormButton from '../components/FormButton'
-import StatusMessage from '../components/StatusMessage'
 
 export default function ChangePassword() {
   const navigate = useNavigate()
+  const delayedNavigate = useDelayedNavigate()
   const [userEmail] = useState(() => {
     const sesion = obtenerSesion()
     return sesion?.correoInstitucional ?? ''
   })
+  // Modo forzado: el usuario inició sesión con una contraseña temporal y debe cambiarla
+  // antes de hacer cualquier otra cosa.
+  const [forced] = useState(() => esContrasenaTemporal())
   const [formData, setFormData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   })
   const [errors, setErrors] = useState({})
-  const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [newPasswordValid, setNewPasswordValid] = useState(false)
+
+  useEffect(() => {
+    if (forced) {
+      blockingInfo(
+        'Contraseña temporal',
+        'Tu contraseña es temporal. Debes establecer una nueva para continuar.'
+      )
+    }
+  }, [forced])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -34,17 +50,7 @@ export default function ChangePassword() {
     }))
   }
 
-  const validatePasswordComplexity = (password) => {
-    const requirements = []
-    if (password.length < 12) requirements.push('mínimo 12 caracteres')
-    if (!/[A-Z]/.test(password)) requirements.push('una mayúscula')
-    if (!/[a-z]/.test(password)) requirements.push('una minúscula')
-    if (!/\d/.test(password)) requirements.push('un número')
-    if (!/[!@#$%&*]/.test(password)) requirements.push('un carácter especial (!@#$%&*)')
-    return requirements
-  }
-
-  const validateForm = (data) => {
+  const validateForm = (data, isComplexityValid) => {
     const newErrors = {}
 
     if (!data.currentPassword) {
@@ -52,9 +58,8 @@ export default function ChangePassword() {
     }
 
     if (data.newPassword) {
-      const requirements = validatePasswordComplexity(data.newPassword)
-      if (requirements.length > 0) {
-        newErrors.newPassword = `La contraseña debe contener: ${requirements.join(', ')}`
+      if (!isComplexityValid) {
+        newErrors.newPassword = 'La nueva contraseña no cumple los requisitos de complejidad'
       }
     } else {
       newErrors.newPassword = 'La nueva contraseña es requerida'
@@ -75,7 +80,7 @@ export default function ChangePassword() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    const newErrors = validateForm(formData)
+    const newErrors = validateForm(formData, newPasswordValid)
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
@@ -87,12 +92,15 @@ export default function ChangePassword() {
 
     try {
       await cambiarContrasena(userEmail, formData.currentPassword, formData.newPassword)
-      setSuccess(true)
-      setTimeout(() => {
-        navigate('/home')
-      }, 1500)
+
+      if (forced) {
+        limpiarContrasenaTemporal()
+      }
+
+      notifySuccess('Contraseña actualizada correctamente.')
+      delayedNavigate('/home', 1500)
     } catch (err) {
-      setErrors({ submit: err.message })
+      notifyApiError(err)
     } finally {
       setLoading(false)
     }
@@ -100,12 +108,12 @@ export default function ChangePassword() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: COLORS.bodyBg }}>
-      {/* Header */}
+      {/* Encabezado */}
       <Header />
 
       <Navbar />
 
-      {/* Main content */}
+      {/* Contenido principal */}
       <main
         style={{
           flex: 1,
@@ -120,76 +128,79 @@ export default function ChangePassword() {
         }}
       >
         <div style={{ width: '100%', maxWidth: '500px' }}>
-          {success ? (
-            <StatusMessage
-              variant="success"
-              message="Contraseña Actualizada"
-              style={{ textAlign: 'center' }}
-            >
-              <p style={{ margin: '8px 0 0', fontSize: '14px' }}>
-                Tu contraseña ha sido cambiada exitosamente. Redirigiendo...
-              </p>
-            </StatusMessage>
-          ) : (
-            <FormContainer
-              title="Cambiar Contraseña"
-              onSubmit={handleSubmit}
-            >
-              <PasswordInput
-                label="Contraseña Actual"
-                id="currentPassword"
-                name="currentPassword"
-                value={formData.currentPassword}
-                onChange={handleInputChange}
-                placeholder="Ingresa tu contraseña actual"
-                error={errors.currentPassword}
-                required
-              />
+          <FormContainer
+            title="Cambiar Contraseña"
+            onSubmit={handleSubmit}
+          >
+            <PasswordInput
+              label="Contraseña Actual"
+              id="currentPassword"
+              name="currentPassword"
+              value={formData.currentPassword}
+              onChange={handleInputChange}
+              placeholder="Ingresa tu contraseña actual"
+              error={errors.currentPassword}
+              required
+            />
 
-              <PasswordInput
-                label="Nueva Contraseña"
-                id="newPassword"
-                name="newPassword"
-                value={formData.newPassword}
-                onChange={handleInputChange}
-                placeholder="Ingresa tu nueva contraseña"
-                error={errors.newPassword}
-                required
-              />
+            <PasswordInput
+              label="Nueva Contraseña"
+              id="newPassword"
+              name="newPassword"
+              value={formData.newPassword}
+              onChange={handleInputChange}
+              placeholder="Ingresa tu nueva contraseña"
+              error={errors.newPassword}
+              required
+            />
 
-              <PasswordInput
-                label="Confirmar Nueva Contraseña"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                placeholder="Confirma tu nueva contraseña"
-                error={errors.confirmPassword}
-                required
-              />
-
-              {errors.submit && (
-                <StatusMessage
-                  variant="error"
-                  message="Error"
-                  style={{ marginBottom: '18px' }}
-                >
-                  {errors.submit}
-                </StatusMessage>
-              )}
-
-              <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-                <FormButton
-                  label={loading ? 'Cambiando contraseña...' : 'Cambiar Contraseña'}
-                  type="submit"
-                  disabled={loading}
-                  variant="primary"
-                  width="100%"
+            {formData.newPassword && (
+              <div style={{ marginTop: '-12px', marginBottom: '20px' }}>
+                <PasswordChecklist
+                  rules={['minLength', 'capital', 'lowercase', 'number', 'specialChar']}
+                  minLength={12}
+                  specialCharsRegex={/[!@#$%&*]/}
+                  value={formData.newPassword}
+                  onChange={(isValid) => setNewPasswordValid(isValid)}
+                  validColor={COLORS.successColor}
+                  invalidColor={COLORS.danger}
+                  messages={{
+                    minLength: 'Mínimo 12 caracteres',
+                    capital: 'Una mayúscula',
+                    lowercase: 'Una minúscula',
+                    number: 'Un número',
+                    specialChar: 'Un carácter especial (!@#$%&*)',
+                  }}
+                  iconSize={13}
+                  style={{ fontSize: '13px' }}
                 />
               </div>
+            )}
 
+            <PasswordInput
+              label="Confirmar Nueva Contraseña"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              placeholder="Confirma tu nueva contraseña"
+              error={errors.confirmPassword}
+              required
+            />
+
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+              <FormButton
+                label={loading ? 'Cambiando contraseña...' : 'Cambiar Contraseña'}
+                type="submit"
+                disabled={loading}
+                variant="primary"
+                width="100%"
+              />
+            </div>
+
+            {!forced && (
               <button
-                onClick={() => navigate('/home')}
+                onClick={() => navigate(-1)}
                 type="button"
                 style={{
                   display: 'block',
@@ -210,12 +221,12 @@ export default function ChangePassword() {
               >
                 Cancelar
               </button>
-            </FormContainer>
-          )}
+            )}
+          </FormContainer>
         </div>
       </main>
 
-      {/* Footer */}
+      {/* Pie de página */}
       <Footer />
     </div>
   )

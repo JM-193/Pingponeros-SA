@@ -1,8 +1,8 @@
-﻿// OrganizationEntityForm.test.js
+// OrganizationEntityForm.test.js
 import { describe, it, expect } from 'vitest'
 import {
   createOrganizationEntityInputChangeHandler,
-  getOrganizationEntityFormError,
+  getOrganizationEntityFormErrors,
   getOrganizationEntityPayload,
 } from '../utils/organizationEntityForm'
 
@@ -78,6 +78,32 @@ describe('OrganizationEntityForm utilities', () => {
       expect(updates[0].descripcion).toBe('New desc')
     })
 
+    it('elimina símbolos del nombre y conserva dígitos al escribir', () => {
+      const updates = []
+      const setFormData = vi.fn((fn) => {
+        updates.push(fn({ nombre: '', descripcion: '' }))
+      })
+
+      const handler = createOrganizationEntityInputChangeHandler(setFormData, () => {})
+
+      handler({ target: { name: 'nombre', value: 'Área3#' } })
+
+      expect(updates[0].nombre).toBe('Área3')
+    })
+
+    it('conserva la puntuación básica y los dígitos en la descripción', () => {
+      const updates = []
+      const setFormData = vi.fn((fn) => {
+        updates.push(fn({ nombre: 'Test', descripcion: '' }))
+      })
+
+      const handler = createOrganizationEntityInputChangeHandler(setFormData, () => {})
+
+      handler({ target: { name: 'descripcion', value: 'Hola, mundo.9#' } })
+
+      expect(updates[0].descripcion).toBe('Hola, mundo.9')
+    })
+
     it('preserva otros campos al actualizar uno', () => {
       const initialData = { nombre: 'Original', descripcion: 'Original desc' }
       const setFormData = vi.fn((fn) => {
@@ -98,59 +124,65 @@ describe('OrganizationEntityForm utilities', () => {
     })
   })
 
-  describe('getOrganizationEntityFormError', () => {
-    it('retorna error cuando nombre está vacÃ­o', () => {
-      const formData = { nombre: '', descripcion: 'Descripción' }
-
-      const error = getOrganizationEntityFormError(formData)
-
-      expect(error).toBe('El nombre del área es requerido')
+  describe('getOrganizationEntityFormErrors', () => {
+    it('retorna error de nombre cuando está vacío', () => {
+      const errors = getOrganizationEntityFormErrors({ nombre: '', descripcion: 'Descripción' })
+      expect(errors.nombre).toBe('El nombre del área es requerido')
     })
 
-    it('retorna error cuando nombre solo tiene espacios', () => {
-      const formData = { nombre: '   ', descripcion: 'Descripción' }
-
-      const error = getOrganizationEntityFormError(formData)
-
-      expect(error).toBe('El nombre del área es requerido')
+    it('retorna error de nombre cuando solo tiene espacios', () => {
+      const errors = getOrganizationEntityFormErrors({ nombre: '   ', descripcion: 'Descripción' })
+      expect(errors.nombre).toBe('El nombre del área es requerido')
     })
 
-    it('retorna error cuando descripción está vacÃ­a', () => {
-      const formData = { nombre: 'Administración', descripcion: '' }
-
-      const error = getOrganizationEntityFormError(formData)
-
-      expect(error).toBe('La descripción es requerida')
+    it('retorna error de descripción cuando está vacía', () => {
+      const errors = getOrganizationEntityFormErrors({ nombre: 'Administración', descripcion: '' })
+      expect(errors.descripcion).toBe('La descripción es requerida')
     })
 
-    it('retorna error cuando descripción solo tiene espacios', () => {
-      const formData = { nombre: 'Administración', descripcion: '   ' }
-
-      const error = getOrganizationEntityFormError(formData)
-
-      expect(error).toBe('La descripción es requerida')
+    it('retorna error de descripción cuando solo tiene espacios', () => {
+      const errors = getOrganizationEntityFormErrors({ nombre: 'Administración', descripcion: '   ' })
+      expect(errors.descripcion).toBe('La descripción es requerida')
     })
 
-    it('retorna string vacÃ­o cuando ambos campos son válidos', () => {
-      const formData = {
+    it('retorna objeto vacío cuando ambos campos son válidos', () => {
+      const errors = getOrganizationEntityFormErrors({
         nombre: 'Administración',
-        descripcion: 'Ãrea de administración',
-      }
-
-      const error = getOrganizationEntityFormError(formData)
-
-      expect(error).toBe('')
+        descripcion: 'Área de administración',
+      })
+      expect(errors).toEqual({})
     })
 
-    it('valida correctamente con nombre y descripción con espacios', () => {
-      const formData = {
-        nombre: 'Ãrea de Contabilidad',
-        descripcion: 'Encargada de procesos contables',
-      }
+    it('retorna error de nombre cuando tiene símbolos no permitidos', () => {
+      const errors = getOrganizationEntityFormErrors({ nombre: 'Área#', descripcion: 'Válida' })
+      expect(errors.nombre).toBe('El nombre solo puede contener letras, números, espacios, puntos, comas y dos puntos')
+    })
 
-      const error = getOrganizationEntityFormError(formData)
+    it('retorna error de descripción cuando tiene caracteres no permitidos', () => {
+      const errors = getOrganizationEntityFormErrors({ nombre: 'Área', descripcion: 'Costo #5' })
+      expect(errors.descripcion).toBe('La descripción solo puede contener letras, números, espacios, puntos, comas y dos puntos')
+    })
 
-      expect(error).toBe('')
+    it('acepta nombre y descripción con puntuación básica permitida', () => {
+      const errors = getOrganizationEntityFormErrors({
+        nombre: 'Área: Norte',
+        descripcion: 'Sede central, edificio principal.',
+      })
+      expect(errors).toEqual({})
+    })
+
+    it('reporta nombre y descripción a la vez cuando ambos faltan', () => {
+      const errors = getOrganizationEntityFormErrors({ nombre: '', descripcion: '' })
+      expect(errors.nombre).toBe('El nombre del área es requerido')
+      expect(errors.descripcion).toBe('La descripción es requerida')
+    })
+
+    it('retorna error de área cuando requireArea y no hay idArea', () => {
+      const errors = getOrganizationEntityFormErrors(
+        { nombre: 'X', descripcion: 'Y', idArea: '' },
+        { requireArea: true },
+      )
+      expect(errors.idArea).toBe('El área es requerida')
     })
   })
 
@@ -196,13 +228,13 @@ describe('OrganizationEntityForm utilities', () => {
 
     it('preserva contenido interno con espacios', () => {
       const formData = {
-        nombre: 'Ãrea de Operaciones',
+        nombre: 'Área de Operaciones',
         descripcion: 'Encargada de todas las operaciones',
       }
 
       const payload = getOrganizationEntityPayload(formData)
 
-      expect(payload.nombre).toBe('Ãrea de Operaciones')
+      expect(payload.nombre).toBe('Área de Operaciones')
       expect(payload.descripcion).toBe('Encargada de todas las operaciones')
     })
 
@@ -245,4 +277,3 @@ describe('OrganizationEntityForm utilities', () => {
     })
   })
 })
-

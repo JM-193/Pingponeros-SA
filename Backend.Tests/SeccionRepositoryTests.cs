@@ -1,4 +1,4 @@
-// SeccionRepositoryTests.cs
+// SectionRepositoryTests.cs
 using System.Data;
 using System.Data.Common;
 using Backend.Models;
@@ -10,10 +10,10 @@ using Xunit;
 
 namespace Backend.Tests;
 
-public sealed class SeccionRepositoryTests
+public sealed class SectionRepositoryTests
 {
     [Fact]
-    public async Task SeccionRepository_ObtenerTodasAsync_ReturnsSecciones()
+    public async Task SectionRepository_ObtenerTodasAsync_ReturnsSecciones()
     {
         var table = new DataTable();
         table.Columns.Add("ID_SECCION", typeof(int));
@@ -25,16 +25,16 @@ public sealed class SeccionRepositoryTests
         table.Rows.Add(2, DBNull.Value, "Seccion B", "Desc B", 0);
 
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<Seccion>>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<List<Section>>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<List<Seccion>>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<List<Section>>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
 
-        var repo = new SeccionRepository(q);
+        var repo = new SectionRepository(q);
         var res = await repo.ObtenerTodasAsync();
 
         Assert.Equal(2, res.Count);
@@ -45,7 +45,7 @@ public sealed class SeccionRepositoryTests
     }
 
     [Fact]
-    public async Task SeccionRepository_ExisteNombreAsync_ReturnsTrueWhenExists()
+    public async Task SectionRepository_ExisteNombreAsync_ReturnsTrueWhenExists()
     {
         var q = Substitute.For<IQueryExecutor>();
         q.ExecuteScalarAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
@@ -55,14 +55,14 @@ public sealed class SeccionRepositoryTests
                 return Task.FromResult<object?>(1);
             });
 
-        var repo = new SeccionRepository(q);
+        var repo = new SectionRepository(q);
         var exists = await repo.ExisteNombreAsync("Seccion A");
 
         Assert.True(exists);
     }
 
     [Fact]
-    public async Task SeccionRepository_ExisteNombreAsync_ReturnsFalseWhenNotExists()
+    public async Task SectionRepository_ExisteNombreAsync_ReturnsFalseWhenNotExists()
     {
         var q = Substitute.For<IQueryExecutor>();
         q.ExecuteScalarAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
@@ -72,14 +72,14 @@ public sealed class SeccionRepositoryTests
                 return Task.FromResult<object?>(0);
             });
 
-        var repo = new SeccionRepository(q);
+        var repo = new SectionRepository(q);
         var exists = await repo.ExisteNombreAsync("NoExiste");
 
         Assert.False(exists);
     }
 
     [Fact]
-    public async Task SeccionRepository_InsertarAsync_ReturnsInsertedId()
+    public async Task SectionRepository_InsertarAsync_ReturnsInsertedId()
     {
         var q = Substitute.For<IQueryExecutor>();
         q.ExecuteScalarAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
@@ -89,23 +89,23 @@ public sealed class SeccionRepositoryTests
                 return Task.FromResult<object?>(new OracleDecimal(42));
             });
 
-        var repo = new SeccionRepository(q);
-        var id = await repo.InsertarAsync(new Seccion { IdArea = 10, Nombre = "X", Descripcion = "Y", Estado = 1 });
+        var repo = new SectionRepository(q);
+        var id = await repo.InsertarAsync(new Section { IdArea = 10, Nombre = "X", Descripcion = "Y", Estado = 1 });
 
         Assert.Equal(42, id);
     }
 
     [Fact]
-    public async Task SeccionRepository_InsertarAsync_LanzaExcepcionCuandoSeccionEsNulo()
+    public async Task SectionRepository_InsertarAsync_LanzaExcepcionCuandoSeccionEsNulo()
     {
         var q = Substitute.For<IQueryExecutor>();
-        var repo = new SeccionRepository(q);
+        var repo = new SectionRepository(q);
 
         await Assert.ThrowsAsync<ArgumentNullException>(() => repo.InsertarAsync(null!));
     }
 
     [Fact]
-    public async Task SeccionRepository_ObtenerPorNombreAsync_ReturnsSeccionCuandoExiste()
+    public async Task SectionRepository_ObtenerPorNombreAsync_ReturnsSeccionCuandoExiste()
     {
         var table = new DataTable();
         table.Columns.Add("ID_SECCION", typeof(int));
@@ -116,16 +116,16 @@ public sealed class SeccionRepositoryTests
         table.Rows.Add(5, 10, "Sistemas", "Seccion de sistemas", 1);
 
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Seccion?>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Section?>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<Seccion?>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<Section?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
 
-        var repo = new SeccionRepository(q);
+        var repo = new SectionRepository(q);
         var seccion = await repo.ObtenerPorNombreAsync("Sistemas");
 
         Assert.NotNull(seccion);
@@ -135,7 +135,7 @@ public sealed class SeccionRepositoryTests
     }
 
     [Fact]
-    public async Task SeccionRepository_ObtenerPorNombreAsync_ReturnsNullCuandoNoExiste()
+    public async Task SectionRepository_ObtenerPorNombreAsync_ReturnsNullCuandoNoExiste()
     {
         var table = new DataTable();
         table.Columns.Add("ID_SECCION", typeof(int));
@@ -145,23 +145,23 @@ public sealed class SeccionRepositoryTests
         table.Columns.Add("ESTADO", typeof(int));
 
         var q = Substitute.For<IQueryExecutor>();
-        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Seccion?>>>())
+        q.QueryAsync(Arg.Any<Func<OracleConnection, OracleCommand>>(), Arg.Any<Func<DbDataReader, Task<Section?>>>())
             .Returns(ci =>
             {
                 ((Func<OracleConnection, OracleCommand>)ci[0]!)(new OracleConnection());
-                var map = (Func<DbDataReader, Task<Seccion?>>)ci[1]!;
+                var map = (Func<DbDataReader, Task<Section?>>)ci[1]!;
                 using var reader = table.CreateDataReader();
                 return map(reader);
             });
 
-        var repo = new SeccionRepository(q);
+        var repo = new SectionRepository(q);
         var seccion = await repo.ObtenerPorNombreAsync("NoExiste");
 
         Assert.Null(seccion);
     }
 
     [Fact]
-    public async Task SeccionRepository_ActualizarAsync_ReturnsTrueWhenUpdated()
+    public async Task SectionRepository_ActualizarAsync_ReturnsTrueWhenUpdated()
     {
         var q = Substitute.For<IQueryExecutor>();
         q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
@@ -171,14 +171,14 @@ public sealed class SeccionRepositoryTests
                 return Task.FromResult(1);
             });
 
-        var repo = new SeccionRepository(q);
-        var updated = await repo.ActualizarAsync("Sistemas", new Seccion { Nombre = "Sistemas", Descripcion = "Nueva desc", Estado = 1 });
+        var repo = new SectionRepository(q);
+        var updated = await repo.ActualizarAsync("Sistemas", new Section { Nombre = "Sistemas", Descripcion = "Nueva desc", Estado = 1 });
 
         Assert.True(updated);
     }
 
     [Fact]
-    public async Task SeccionRepository_ActualizarAsync_ReturnsFalseWhenNotFound()
+    public async Task SectionRepository_ActualizarAsync_ReturnsFalseWhenNotFound()
     {
         var q = Substitute.For<IQueryExecutor>();
         q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
@@ -188,23 +188,23 @@ public sealed class SeccionRepositoryTests
                 return Task.FromResult(0);
             });
 
-        var repo = new SeccionRepository(q);
-        var updated = await repo.ActualizarAsync("NoExiste", new Seccion { Nombre = "NoExiste", Descripcion = "Desc", Estado = 1 });
+        var repo = new SectionRepository(q);
+        var updated = await repo.ActualizarAsync("NoExiste", new Section { Nombre = "NoExiste", Descripcion = "Desc", Estado = 1 });
 
         Assert.False(updated);
     }
 
     [Fact]
-    public async Task SeccionRepository_ActualizarAsync_LanzaExcepcionCuandoSeccionEsNulo()
+    public async Task SectionRepository_ActualizarAsync_LanzaExcepcionCuandoSeccionEsNulo()
     {
         var q = Substitute.For<IQueryExecutor>();
-        var repo = new SeccionRepository(q);
+        var repo = new SectionRepository(q);
 
         await Assert.ThrowsAsync<ArgumentNullException>(() => repo.ActualizarAsync("Sistemas", null!));
     }
 
     [Fact]
-    public async Task SeccionRepository_DesactivarAsync_ReturnsTrueWhenDeactivated()
+    public async Task SectionRepository_DesactivarAsync_ReturnsTrueWhenDeactivated()
     {
         var q = Substitute.For<IQueryExecutor>();
         q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
@@ -214,14 +214,14 @@ public sealed class SeccionRepositoryTests
                 return Task.FromResult(1);
             });
 
-        var repo = new SeccionRepository(q);
+        var repo = new SectionRepository(q);
         var result = await repo.DesactivarAsync(1);
 
         Assert.True(result);
     }
 
     [Fact]
-    public async Task SeccionRepository_DesactivarAsync_ReturnsFalseWhenNotFound()
+    public async Task SectionRepository_DesactivarAsync_ReturnsFalseWhenNotFound()
     {
         var q = Substitute.For<IQueryExecutor>();
         q.ExecuteAsync(Arg.Any<Func<OracleConnection, OracleCommand>>())
@@ -231,7 +231,7 @@ public sealed class SeccionRepositoryTests
                 return Task.FromResult(0);
             });
 
-        var repo = new SeccionRepository(q);
+        var repo = new SectionRepository(q);
         var result = await repo.DesactivarAsync(99);
 
         Assert.False(result);

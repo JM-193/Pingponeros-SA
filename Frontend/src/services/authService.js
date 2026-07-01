@@ -1,11 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5119'
+import { apiFetch } from './apiClient'
 
-function crearErrorApi(response, data) {
-  const error = new Error(data.mensaje ?? `Error inesperado (${response.status})`)
-  error.status = response.status
-  error.codigo = data.codigo
-  return error
-}
+const JSON_HEADERS = { 'Content-Type': 'application/json' }
 
 /**
  * Envía las credenciales al backend y devuelve los datos del usuario.
@@ -14,19 +9,11 @@ function crearErrorApi(response, data) {
  * @returns {Promise<object>} Datos del usuario autenticado.
  */
 export async function login(correoInstitucional, contrasena) {
-  const response = await fetch(`${API_URL}/auth/login`, {
+  return apiFetch('/auth/login', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: JSON_HEADERS,
     body: JSON.stringify({ correoInstitucional, contrasena }),
   })
-
-  const data = await response.json().catch(() => ({}))
-
-  if (!response.ok) {
-    throw crearErrorApi(response, data)
-  }
-
-  return data
 }
 
 /**
@@ -35,19 +22,11 @@ export async function login(correoInstitucional, contrasena) {
  * @returns {Promise<object>} Respuesta del servidor.
  */
 export async function recuperarContrasena(correoInstitucional) {
-  const response = await fetch(`${API_URL}/auth/recuperar-contrasena`, {
+  return apiFetch('/auth/recuperar-contrasena', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: JSON_HEADERS,
     body: JSON.stringify({ correoInstitucional }),
   })
-
-  const data = await response.json().catch(() => ({}))
-
-  if (!response.ok) {
-    throw crearErrorApi(response, data)
-  }
-
-  return data
 }
 
 /**
@@ -57,22 +36,10 @@ export async function recuperarContrasena(correoInstitucional) {
  * @param {string} contraseñaNueva
  * @returns {Promise<object>} Respuesta del servidor.
  */
-export async function cambiarContrasena(correoInstitucional, contraseñaActual, contraseñaNueva) {
-  const response = await fetch(`${API_URL}/auth/cambiar-contrasena`, {
+export async function cambiarContrasena(correoInstitucional, contrasenaActual, contrasenaNueva) {
+  return apiFetch('/auth/cambiar-contrasena', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      correoInstitucional,
-      contraseñaActual,
-      contraseñaNueva,
-    }),
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ correoInstitucional, contrasenaActual, contrasenaNueva }),
   })
-
-  const data = await response.json().catch(() => ({}))
-
-  if (!response.ok) {
-    throw crearErrorApi(response, data)
-  }
-
-  return data
 }

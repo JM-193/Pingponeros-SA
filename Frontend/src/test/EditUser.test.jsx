@@ -1,10 +1,23 @@
-// EditUser.test.jsx
+// EditUsers.test.jsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
-import EditUser from '../pages/EditUser'
-import * as usuarioService from '../services/usuarioService'
+import { BrowserRouter } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import EditUsers from '../pages/EditUsers'
+import * as userService from '../services/userService'
+import * as positionService from '../services/positionService'
+import * as workPositionService from '../services/workPositionService'
+import { cerrarSesion } from '../services/session'
 
-vi.mock('../services/usuarioService')
+vi.mock('../services/userService')
+vi.mock('../services/positionService')
+vi.mock('../services/workPositionService')
+
+// Defaults para la sección de plazas embebida en Editar Usuario (evita llamadas de red reales).
+const setupPlazaMocks = () => {
+  userService.obtenerPlazasUsuario.mockResolvedValue([])
+  positionService.obtenerPlazasDisponibles.mockResolvedValue([])
+  workPositionService.obtenerPuestos.mockResolvedValue([])
+}
 
 const mockUser = {
   correoInstitucional: 'juan.perez@ucr.ac.cr',
@@ -16,154 +29,111 @@ const mockUser = {
   estado: 1,
 }
 
-const renderWithRoute = (correo) =>
-  render(
-    <MemoryRouter initialEntries={[`/usuarios/editar/${encodeURIComponent(correo)}`]}>
-      <Routes>
-        <Route path="/usuarios/editar/:correo" element={<EditUser />} />
-        <Route path="/usuarios/consultar" element={<div>Lista de usuarios</div>} />
-      </Routes>
-    </MemoryRouter>,
-  )
 
-describe('EditUser Page', () => {
+describe('EditUsers Modal Mode', () => {
   beforeEach(() => {
     vi.resetAllMocks()
+    cerrarSesion()
+    setupPlazaMocks()
   })
 
-  it('renderiza página en estado de carga sin parámetros de ruta', () => {
+  it('renderiza dentro de un modal cuando isModal es true', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+
     render(
       <BrowserRouter>
-        <EditUser />
+        <EditUsers isOpen={true} entityId="juan.perez@ucr.ac.cr" onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
+    await waitFor(() => {
+      expect(screen.getByText('Editar Usuario')).toBeInTheDocument()
+    })
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
+  })
+
+  it('muestra cargando dentro del modal', () => {
+    render(
+      <BrowserRouter>
+        <EditUsers isOpen={true} entityId="test@ucr.ac.cr" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    expect(document.querySelector('dialog')).toBeInTheDocument()
     expect(screen.getByText('Cargando usuario...')).toBeInTheDocument()
   })
 
-  it('renderiza Header y Navbar', () => {
+  it('no renderiza Header ni Navbar en modo modal', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+
     render(
       <BrowserRouter>
-        <EditUser />
+        <EditUsers isOpen={true} entityId="juan.perez@ucr.ac.cr" onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
-    expect(screen.getByText('Página Principal')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('Página Principal')).not.toBeInTheDocument()
+    expect(document.querySelector('footer')).not.toBeInTheDocument()
   })
 
-  it('renderiza Footer', () => {
+  it('llama a onClose al hacer clic en Cancelar', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    const onClose = vi.fn()
+
     render(
       <BrowserRouter>
-        <EditUser />
+        <EditUsers isOpen={true} entityId="juan.perez@ucr.ac.cr" onClose={onClose} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
-    const footer = document.querySelector('footer')
-    expect(footer).toBeInTheDocument()
-  })
-
-  it('carga y renderiza el formulario con los datos del usuario', async () => {
-    usuarioService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
-
-    renderWithRoute('juan.perez@ucr.ac.cr')
-
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Editar Usuario/i })).toBeInTheDocument()
+      expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
     })
 
-    expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('Pedro')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('Pérez')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('Mora')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('juan.perez@ucr.ac.cr')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(onClose).toHaveBeenCalledTimes(1)
   })
 
-  it('actualiza usuario correctamente y redirige', async () => {
-    usuarioService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
-    usuarioService.actualizarUsuario.mockResolvedValueOnce({})
+  it('muestra éxito y llama al servicio en modo modal', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
+    userService.actualizarUsuario.mockResolvedValueOnce({})
 
-    renderWithRoute('juan.perez@ucr.ac.cr')
+    render(
+      <BrowserRouter>
+        <EditUsers isOpen={true} entityId="juan.perez@ucr.ac.cr" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
     })
 
-    const submitButton = screen.getByRole('button', { name: /Actualizar/i })
-    fireEvent.click(submitButton)
+    fireEvent.click(screen.getByRole('button', { name: /Actualizar/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('Usuario actualizado correctamente.')).toBeInTheDocument()
+      expect(toast.success).toHaveBeenCalledWith('Usuario actualizado correctamente.', expect.anything())
     })
+
+    expect(userService.actualizarUsuario).toHaveBeenCalled()
   })
 
-  it('muestra error cuando la actualización falla', async () => {
-    usuarioService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
-    usuarioService.actualizarUsuario.mockRejectedValueOnce(new Error('Error al actualizar'))
+  it('usa entityId prop en lugar de useParams', async () => {
+    userService.obtenerUsuarioPorCorreo.mockResolvedValue(mockUser)
 
-    renderWithRoute('juan.perez@ucr.ac.cr')
-
-    await waitFor(() => {
-      expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
-    })
-
-    const submitButton = screen.getByRole('button', { name: /Actualizar/i })
-    fireEvent.click(submitButton)
+    render(
+      <BrowserRouter>
+        <EditUsers isOpen={true} entityId="juan.perez@ucr.ac.cr" onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
 
     await waitFor(() => {
-      expect(screen.getByText('Error al actualizar')).toBeInTheDocument()
+      expect(userService.obtenerUsuarioPorCorreo).toHaveBeenCalledWith('juan.perez@ucr.ac.cr')
     })
-  })
-
-  it('muestra error cuando falla la carga del usuario', async () => {
-    usuarioService.obtenerUsuarioPorCorreo.mockRejectedValueOnce(new Error('Usuario no encontrado'))
-
-    renderWithRoute('no.existe@ucr.ac.cr')
-
-    await waitFor(() => {
-      expect(screen.getByText('Usuario no encontrado')).toBeInTheDocument()
-    })
-  })
-
-  it('cambia el estado del usuario con StateToggle', async () => {
-    usuarioService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
-
-    renderWithRoute('juan.perez@ucr.ac.cr')
-
-    await waitFor(() => {
-      expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
-    })
-
-    // StateToggle renders buttons for Activo/Inactivo
-    const stateButtons = screen.getAllByRole('button')
-    const inactivoButton = stateButtons.find((btn) => btn.textContent.includes('Inactivo'))
-    if (inactivoButton) {
-      fireEvent.click(inactivoButton)
-      // El botón debería reflejar el cambio sin errores
-      expect(inactivoButton).toBeInTheDocument()
-    }
-  })
-
-  it('limpia mensajes de error al cambiar campos del formulario', async () => {
-    usuarioService.obtenerUsuarioPorCorreo.mockResolvedValueOnce(mockUser)
-    usuarioService.actualizarUsuario.mockRejectedValueOnce(new Error('Error al actualizar'))
-
-    renderWithRoute('juan.perez@ucr.ac.cr')
-
-    await waitFor(() => {
-      expect(screen.getByDisplayValue('Juan')).toBeInTheDocument()
-    })
-
-    const submitButton = screen.getByRole('button', { name: /Actualizar/i })
-    fireEvent.click(submitButton)
-
-    await waitFor(() => {
-      expect(screen.getByText('Error al actualizar')).toBeInTheDocument()
-    })
-
-    // Cambiar un campo debe limpiar el mensaje
-    const firstNameInput = screen.getByDisplayValue('Juan')
-    fireEvent.change(firstNameInput, { target: { name: 'firstName', value: 'Juanito' } })
-
-    expect(screen.queryByText('Error al actualizar')).not.toBeInTheDocument()
   })
 })

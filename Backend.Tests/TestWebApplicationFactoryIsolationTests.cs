@@ -25,12 +25,12 @@ public sealed class TestWebApplicationFactoryIsolationTests : IClassFixture<Test
         Assert.Empty(services.GetServices<OracleConnection>());
         Assert.Same(_factory.DbExecutor, services.GetRequiredService<IDbExecutor>());
         Assert.Same(_factory.QueryExecutor, services.GetRequiredService<IQueryExecutor>());
-        Assert.Same(_factory.UsuarioRepo, services.GetRequiredService<IUsuarioRepository>());
+        Assert.Same(_factory.UsuarioRepo, services.GetRequiredService<IUserRepository>());
         Assert.Same(_factory.AreaRepo, services.GetRequiredService<IAreaRepository>());
-        Assert.Same(_factory.DepartamentoRepo, services.GetRequiredService<IDepartamentoRepository>());
-        Assert.Same(_factory.SeccionRepo, services.GetRequiredService<ISeccionRepository>());
-        Assert.Same(_factory.UnidadRepo, services.GetRequiredService<IUnidadRepository>());
-        Assert.Same(_factory.PlazaRepo, services.GetRequiredService<IPlazaRepository>());
+        Assert.Same(_factory.DepartamentoRepo, services.GetRequiredService<IDepartmentRepository>());
+        Assert.Same(_factory.SeccionRepo, services.GetRequiredService<ISectionRepository>());
+        Assert.Same(_factory.UnidadRepo, services.GetRequiredService<IUnitRepository>());
+        Assert.Same(_factory.PlazaRepo, services.GetRequiredService<IPositionRepository>());
         Assert.Same(_factory.EmailService, services.GetRequiredService<IEmailService>());
     }
 }

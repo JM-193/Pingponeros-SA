@@ -75,6 +75,44 @@ describe('EntityResultsTable', () => {
     expect(onEdit).toHaveBeenCalledWith(rows[0])
   })
 
+  it('renderiza botones de eliminar en móvil', () => {
+    mockMatchMedia(true)
+    const onDelete = vi.fn()
+
+    render(<EntityResultsTable {...defaultProps} onDelete={onDelete} />)
+
+    const deleteButtons = screen.getAllByRole('button', { name: 'Eliminar' })
+    expect(deleteButtons).toHaveLength(rows.length)
+  })
+
+  it('llama a onDelete al hacer clic en Eliminar en móvil', () => {
+    mockMatchMedia(true)
+    const onDelete = vi.fn()
+
+    render(<EntityResultsTable {...defaultProps} onDelete={onDelete} />)
+
+    const deleteButtons = screen.getAllByRole('button', { name: 'Eliminar' })
+    fireEvent.click(deleteButtons[0])
+    expect(onDelete).toHaveBeenCalledWith(rows[0])
+  })
+
+  it('deshabilita el botón eliminar en móvil cuando la fila está siendo eliminada', () => {
+    mockMatchMedia(true)
+    const onDelete = vi.fn()
+
+    render(
+      <EntityResultsTable
+        {...defaultProps}
+        onDelete={onDelete}
+        deletingRowId={rows[0].id}
+      />
+    )
+
+    const deleteButtons = screen.getAllByRole('button', { name: 'Eliminar' })
+    expect(deleteButtons[0]).toBeDisabled()
+    expect(deleteButtons[1]).not.toBeDisabled()
+  })
+
   it('permite ordenar columnas en escritorio', () => {
     mockMatchMedia(false)
     const onSort = vi.fn()
@@ -89,5 +127,45 @@ describe('EntityResultsTable', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Ordenar por Nombre descendente' }))
     expect(onSort).toHaveBeenCalledWith('nombre')
+  })
+
+  it('permite ordenar columnas en móvil', () => {
+    mockMatchMedia(true)
+    const onSort = vi.fn()
+
+    render(
+      <EntityResultsTable
+        {...defaultProps}
+        sortConfig={{ key: 'nombre', direction: 'asc' }}
+        onSort={onSort}
+      />
+    )
+
+    fireEvent.change(screen.getByLabelText('Ordenar por'), { target: { value: 'codigo' } })
+    expect(onSort).toHaveBeenCalledWith('codigo')
+  })
+
+  it('alterna la dirección de orden en móvil', () => {
+    mockMatchMedia(true)
+    const onSort = vi.fn()
+
+    render(
+      <EntityResultsTable
+        {...defaultProps}
+        sortConfig={{ key: 'nombre', direction: 'asc' }}
+        onSort={onSort}
+      />
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cambiar orden a descendente' }))
+    expect(onSort).toHaveBeenCalledWith('nombre')
+  })
+
+  it('no muestra el control de orden en móvil cuando no hay onSort', () => {
+    mockMatchMedia(true)
+
+    render(<EntityResultsTable {...defaultProps} />)
+
+    expect(screen.queryByLabelText('Ordenar por')).not.toBeInTheDocument()
   })
 })

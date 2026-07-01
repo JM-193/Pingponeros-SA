@@ -1,0 +1,183 @@
+// PositionAssignmentRepository.cs
+using System.Globalization;
+using Oracle.ManagedDataAccess.Client;
+using Backend.Models;
+
+namespace Backend.Repositories;
+
+internal sealed class PositionAssignmentRepository : IPositionAssignmentRepository
+{
+    private const string ColumnNumeroPlaza = "NUMERO_PLAZA";
+    private const string ColumnCorreo = "CORREO_INSTITUCIONAL";
+    private const string ColumnIdPuesto = "ID_PUESTO";
+    private const string ColumnPuestoNombre = "PUESTO_NOMBRE";
+    private const string ColumnIdClaseOcupacional = "ID_CLASE_OCUPACIONAL";
+    private const string ColumnClaseOcupacionalNombre = "CLASE_OCUPACIONAL"; // alias del JOIN
+    private const string ColumnLugarTrabajo = "LUGAR_TRABAJO";
+    private const string ColumnFechaInicio = "FECHA_INICIO";
+    private const string ColumnFechaFinal = "FECHA_FINAL";
+
+    // Columnas reutilizadas para el mapeo de plazas disponibles.
+    private const string ColumnIdUnidad = "ID_UNIDAD";
+    private const string ColumnIdDepartamento = "ID_DEPARTAMENTO";
+    private const string ColumnIdSeccion = "ID_SECCION";
+    private const string ColumnIdArea = "ID_AREA";
+
+    private readonly IQueryExecutor _q;
+
+    public PositionAssignmentRepository(IQueryExecutor q) => _q = q;
+
+    private static PositionAssignment MapearAsignacion(System.Data.Common.DbDataReader r) => new()
+    {
+        NumeroPlaza = Convert.ToUInt64(r.GetValue(r.GetOrdinal(ColumnNumeroPlaza)), CultureInfo.InvariantCulture),
+        CorreoInstitucional = r.GetString(r.GetOrdinal(ColumnCorreo)),
+        IdPuesto = r.GetInt32(r.GetOrdinal(ColumnIdPuesto)),
+        PuestoNombre = r.IsDBNull(r.GetOrdinal(ColumnPuestoNombre)) ? null : r.GetString(r.GetOrdinal(ColumnPuestoNombre)),
+        IdClaseOcupacional = r.GetInt64(r.GetOrdinal(ColumnIdClaseOcupacional)),
+        ClaseOcupacionalNombre = r.IsDBNull(r.GetOrdinal(ColumnClaseOcupacionalNombre)) ? null : r.GetString(r.GetOrdinal(ColumnClaseOcupacionalNombre)),
+        LugarTrabajo = r.GetString(r.GetOrdinal(ColumnLugarTrabajo)),
+        FechaInicio = r.GetDateTime(r.GetOrdinal(ColumnFechaInicio)),
+        FechaFinal = r.IsDBNull(r.GetOrdinal(ColumnFechaFinal)) ? null : r.GetDateTime(r.GetOrdinal(ColumnFechaFinal)),
+    };
+
+    private static Position MapearPlaza(System.Data.Common.DbDataReader r) => new()
+    {
+        NumeroPlaza = Convert.ToUInt64(r.GetValue(r.GetOrdinal(ColumnNumeroPlaza)), CultureInfo.InvariantCulture),
+        IdUnidad = r.IsDBNull(r.GetOrdinal(ColumnIdUnidad)) ? null : r.GetInt32(r.GetOrdinal(ColumnIdUnidad)),
+        IdDepartamento = r.IsDBNull(r.GetOrdinal(ColumnIdDepartamento)) ? null : r.GetInt32(r.GetOrdinal(ColumnIdDepartamento)),
+        IdSeccion = r.IsDBNull(r.GetOrdinal(ColumnIdSeccion)) ? null : r.GetInt32(r.GetOrdinal(ColumnIdSeccion)),
+        IdArea = r.IsDBNull(r.GetOrdinal(ColumnIdArea)) ? null : r.GetInt32(r.GetOrdinal(ColumnIdArea)),
+    };
+
+    private static void AgregarParamNumeroPlaza(OracleCommand cmd, ulong numeroPlaza)
+    {
+        OracleCommandHelpers.AddUInt64Param(cmd, ":numeroPlaza", numeroPlaza);
+    }
+
+    private static void AgregarParamCorreo(OracleCommand cmd, string correo)
+    {
+        OracleCommandHelpers.AddStringParam(cmd, ":correo", correo);
+    }
+
+    private static void AgregarParametros(OracleCommand cmd, PositionAssignment asignacion)
+    {
+        AgregarParamNumeroPlaza(cmd, asignacion.NumeroPlaza);
+        AgregarParamCorreo(cmd, asignacion.CorreoInstitucional);
+        OracleCommandHelpers.AddInt32Param(cmd, ":idPuesto", asignacion.IdPuesto);
+        OracleCommandHelpers.AddInt64Param(cmd, ":idClaseOcupacional", asignacion.IdClaseOcupacional);
+        OracleCommandHelpers.AddStringParam(cmd, ":lugarTrabajo", asignacion.LugarTrabajo);
+        OracleCommandHelpers.AddDateParam(cmd, ":fechaInicio", asignacion.FechaInicio);
+        OracleCommandHelpers.AddNullableDateParam(cmd, ":fechaFinal", asignacion.FechaFinal);
+    }
+
+    public async Task<List<PositionAssignment>> ObtenerActivasPorUsuarioAsync(string correo)
+    {
+        const string sql = """
+            SELECT pu.NUMERO_PLAZA, pu.CORREO_INSTITUCIONAL, pu.ID_PUESTO,
+                   pt.NOMBRE AS PUESTO_NOMBRE, pu.ID_CLASE_OCUPACIONAL,
+                   co.NOMBRE AS CLASE_OCUPACIONAL, pu.LUGAR_TRABAJO,
+                   pu.FECHA_INICIO, pu.FECHA_FINAL
+            FROM   PLAZAS_USUARIOS pu
+            JOIN   PUESTOS_TRABAJO pt ON pt.ID_PUESTO = pu.ID_PUESTO
+            JOIN   CLASES_OCUPACIONALES co ON co.ID_CLASE_OCUPACIONAL = pu.ID_CLASE_OCUPACIONAL
+            WHERE  pu.CORREO_INSTITUCIONAL = :correo
+            AND    (pu.FECHA_FINAL IS NULL OR pu.FECHA_FINAL > SYSDATE)
+            ORDER BY pu.NUMERO_PLAZA
+            """;
+
+        return await _q.QueryAsync(connection =>
+        {
+            var cmd = new OracleCommand(sql, connection) { BindByName = true };
+            AgregarParamCorreo(cmd, correo);
+            return cmd;
+        }, async reader =>
+        {
+            var lista = new List<PositionAssignment>();
+            while (await reader.ReadAsync().ConfigureAwait(false))
+                lista.Add(MapearAsignacion(reader));
+            return lista;
+        }).ConfigureAwait(false);
+    }
+
+    public async Task<List<Position>> ObtenerPlazasDisponiblesAsync()
+    {
+        const string sql = """
+            SELECT p.NUMERO_PLAZA, p.ID_UNIDAD, p.ID_DEPARTAMENTO, p.ID_SECCION, p.ID_AREA
+            FROM   PLAZAS p
+            WHERE  NOT EXISTS (
+                       SELECT 1 FROM PLAZAS_USUARIOS pu
+                       WHERE  pu.NUMERO_PLAZA = p.NUMERO_PLAZA
+                       AND    (pu.FECHA_FINAL IS NULL OR pu.FECHA_FINAL > SYSDATE)
+                   )
+            ORDER BY p.NUMERO_PLAZA
+            """;
+
+        return await _q.QueryAsync(connection =>
+        {
+            var cmd = new OracleCommand(sql, connection) { BindByName = true };
+            return cmd;
+        }, async reader =>
+        {
+            var lista = new List<Position>();
+            while (await reader.ReadAsync().ConfigureAwait(false))
+                lista.Add(MapearPlaza(reader));
+            return lista;
+        }).ConfigureAwait(false);
+    }
+
+    public async Task<bool> PlazaTieneAsignacionActivaAsync(ulong numeroPlaza)
+    {
+        var result = await _q.ExecuteScalarAsync(connection =>
+        {
+            var cmd = new OracleCommand(
+                "SELECT COUNT(*) FROM PLAZAS_USUARIOS WHERE NUMERO_PLAZA = :numeroPlaza AND (FECHA_FINAL IS NULL OR FECHA_FINAL > SYSDATE)",
+                connection)
+            {
+                BindByName = true,
+            };
+            AgregarParamNumeroPlaza(cmd, numeroPlaza);
+            return cmd;
+        }).ConfigureAwait(false);
+        return Convert.ToInt32(result, CultureInfo.InvariantCulture) > 0;
+    }
+
+    public async Task AsignarAsync(PositionAssignment asignacion)
+    {
+        ArgumentNullException.ThrowIfNull(asignacion);
+
+        const string sql = """
+            INSERT INTO PLAZAS_USUARIOS
+                (NUMERO_PLAZA, CORREO_INSTITUCIONAL, ID_PUESTO, ID_CLASE_OCUPACIONAL, LUGAR_TRABAJO, FECHA_INICIO, FECHA_FINAL)
+            VALUES
+                (:numeroPlaza, :correo, :idPuesto, :idClaseOcupacional, :lugarTrabajo, :fechaInicio, :fechaFinal)
+            """;
+
+        await _q.ExecuteAsync(connection =>
+        {
+            var cmd = new OracleCommand(sql, connection) { BindByName = true };
+            AgregarParametros(cmd, asignacion);
+            return cmd;
+        }).ConfigureAwait(false);
+    }
+
+    public async Task<bool> DesasignarAsync(ulong numeroPlaza, string correo)
+    {
+        const string sql = """
+            UPDATE PLAZAS_USUARIOS
+            SET    FECHA_FINAL = SYSDATE
+            WHERE  NUMERO_PLAZA = :numeroPlaza
+            AND    CORREO_INSTITUCIONAL = :correo
+            AND    (FECHA_FINAL IS NULL OR FECHA_FINAL > SYSDATE)
+            """;
+
+        var filas = await _q.ExecuteAsync(connection =>
+        {
+            var cmd = new OracleCommand(sql, connection) { BindByName = true };
+            AgregarParamNumeroPlaza(cmd, numeroPlaza);
+            AgregarParamCorreo(cmd, correo);
+            return cmd;
+        }).ConfigureAwait(false);
+
+        return filas > 0;
+    }
+}

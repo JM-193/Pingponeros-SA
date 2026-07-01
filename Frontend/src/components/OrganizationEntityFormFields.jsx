@@ -6,11 +6,13 @@ import { COLORS } from '../constants/colors'
 export default function OrganizationEntityFormFields({
   formData,
   onChange,
+  errors = {},
   namePrefix,
   namePlaceholder,
   descriptionPlaceholder,
   nameLabel,
   descriptionLabel = 'Descripción',
+  maxNameLength = 50,
   areaOptions,
   areaLabel = 'Área',
   areaRequired = false,
@@ -32,6 +34,8 @@ export default function OrganizationEntityFormFields({
   const shouldShowParentType = Array.isArray(parentTypeOptions)
   const resolvedNameLabel = nameLabel ?? namePrefix
 
+  const fieldErrorStyle = { fontSize: '12px', color: COLORS.danger, marginTop: '6px', display: 'block' }
+
   const areaSelect = shouldShowArea ? (
     <FormSelect
       label={areaLabel}
@@ -42,6 +46,7 @@ export default function OrganizationEntityFormFields({
       options={areaOptions}
       required={areaRequired}
       defaultLabel={areaDefaultLabel}
+      error={errors.idArea}
     />
   ) : null
 
@@ -55,6 +60,7 @@ export default function OrganizationEntityFormFields({
       options={parentTypeOptions}
       required={parentRequired}
       defaultLabel={parentTypeDefaultLabel}
+      error={errors.parentType}
     />
   ) : null
 
@@ -85,6 +91,7 @@ export default function OrganizationEntityFormFields({
           options={departmentOptions}
           required={parentRequired}
           defaultLabel={departmentDefaultLabel}
+          error={errors.idDepartamento}
         />
       )}
 
@@ -98,6 +105,7 @@ export default function OrganizationEntityFormFields({
           options={sectionOptions}
           required={parentRequired}
           defaultLabel={sectionDefaultLabel}
+          error={errors.idSeccion}
         />
       )}
 
@@ -122,17 +130,20 @@ export default function OrganizationEntityFormFields({
           onChange={onChange}
           required
           placeholder={namePlaceholder}
+          aria-invalid={errors.nombre ? 'true' : undefined}
           style={{
             width: '100%',
             padding: '10px',
-            border: `1px solid ${COLORS.borderColor}`,
+            border: errors.nombre ? `2px solid ${COLORS.danger}` : `1px solid ${COLORS.borderColor}`,
             borderRadius: '4px',
             fontSize: '14px',
             boxSizing: 'border-box',
             backgroundColor: COLORS.inputBg,
             color: COLORS.black,
           }}
+          maxLength={maxNameLength}
         />
+        {errors.nombre && <span style={fieldErrorStyle}>{errors.nombre}</span>}
       </div>
 
       <div style={{ marginBottom: '20px' }}>
@@ -155,10 +166,11 @@ export default function OrganizationEntityFormFields({
           value={formData.descripcion}
           onChange={onChange}
           required
+          aria-invalid={errors.descripcion ? 'true' : undefined}
           style={{
             width: '100%',
             padding: '10px',
-            border: `1px solid ${COLORS.borderColor}`,
+            border: errors.descripcion ? `2px solid ${COLORS.danger}` : `1px solid ${COLORS.borderColor}`,
             borderRadius: '4px',
             fontSize: '14px',
             boxSizing: 'border-box',
@@ -168,8 +180,10 @@ export default function OrganizationEntityFormFields({
             minHeight: '100px',
             resize: 'vertical',
           }}
+          maxLength={2048}
           placeholder={descriptionPlaceholder}
         />
+        {errors.descripcion && <span style={fieldErrorStyle}>{errors.descripcion}</span>}
       </div>
     </>
   )
@@ -184,11 +198,13 @@ OrganizationEntityFormFields.propTypes = {
     descripcion: PropTypes.string.isRequired,
   }).isRequired,
   onChange: PropTypes.func.isRequired,
+  errors: PropTypes.object,
   namePrefix: PropTypes.string.isRequired,
   namePlaceholder: PropTypes.string.isRequired,
   descriptionPlaceholder: PropTypes.string.isRequired,
   nameLabel: PropTypes.string,
   descriptionLabel: PropTypes.string,
+  maxNameLength: PropTypes.number,
   areaOptions: PropTypes.arrayOf(
     PropTypes.shape({
       value: PropTypes.string.isRequired,

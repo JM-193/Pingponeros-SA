@@ -1,16 +1,16 @@
-﻿// ConsultarArea.test.jsx
+﻿// QueryAreas.test.jsx
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import ConsultarArea from '../pages/ConsultarArea'
+import QueryAreas from '../pages/QueryAreas'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/areaService')
 
-describe('ConsultarArea Page', () => {
+describe('QueryAreas Page', () => {
   const mockAreas = [
-    { id: 1, nombre: 'Administración', descripcion: 'Ãrea de administración', estado: 1 },
-    { id: 2, nombre: 'Contabilidad', descripcion: 'Ãrea de contabilidad', estado: 1 },
-    { id: 3, nombre: 'Recursos Humanos', descripcion: 'Ãrea de RRHH', estado: 0 },
+    { id: 1, nombre: 'Administración', descripcion: 'Área de administración', estado: 1 },
+    { id: 2, nombre: 'Contabilidad', descripcion: 'Área de contabilidad', estado: 1 },
+    { id: 3, nombre: 'Recursos Humanos', descripcion: 'Área de RRHH', estado: 0 },
   ]
 
   beforeEach(() => {
@@ -21,7 +21,7 @@ describe('ConsultarArea Page', () => {
   it('carga y renderiza áreas', async () => {
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -34,7 +34,7 @@ describe('ConsultarArea Page', () => {
   it('renderiza tabla con columnas correctas', async () => {
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -55,7 +55,7 @@ describe('ConsultarArea Page', () => {
 
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -76,7 +76,7 @@ describe('ConsultarArea Page', () => {
   it('renderiza botones de editar', async () => {
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -86,10 +86,10 @@ describe('ConsultarArea Page', () => {
     })
   })
 
-  it('renderiza campo de bÃºsqueda', () => {
+  it('renderiza campo de búsqueda', () => {
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -102,7 +102,7 @@ describe('ConsultarArea Page', () => {
   it('renderiza Header y Navbar', () => {
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -112,7 +112,7 @@ describe('ConsultarArea Page', () => {
   it('renderiza footer', () => {
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -123,7 +123,7 @@ describe('ConsultarArea Page', () => {
   it('tiene layout con full height', () => {
     const { container } = render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -134,7 +134,7 @@ describe('ConsultarArea Page', () => {
   it('llama a obtenerAreas en mount', () => {
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -146,7 +146,7 @@ describe('ConsultarArea Page', () => {
 
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -161,7 +161,7 @@ describe('ConsultarArea Page', () => {
   it('muestra la lista de áreas correctamente', async () => {
     render(
       <BrowserRouter>
-        <ConsultarArea />
+        <QueryAreas />
       </BrowserRouter>,
     )
 
@@ -174,5 +174,75 @@ describe('ConsultarArea Page', () => {
     if (emptyMessage) {
       expect(emptyMessage).toBeInTheDocument()
     }
+  })
+
+  it('abre modal de crear al hacer clic en Crear', async () => {
+    render(
+      <BrowserRouter>
+        <QueryAreas />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Administración')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
+
+    await waitFor(() => {
+      const dialog = document.querySelector('dialog')
+      expect(dialog).toBeInTheDocument()
+      expect(screen.getByText('Crear Área')).toBeInTheDocument()
+    })
+  })
+
+  it('abre modal de editar al hacer clic en Editar', async () => {
+    areaService.obtenerAreaPorNombre.mockResolvedValue({
+      nombre: 'Administración',
+      descripcion: 'Área de administración',
+      estado: 1,
+    })
+
+    render(
+      <BrowserRouter>
+        <QueryAreas />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Administración')).toBeInTheDocument()
+    })
+
+    const editButtons = screen.getAllByRole('button', { name: /Editar/i })
+    fireEvent.click(editButtons[0])
+
+    await waitFor(() => {
+      const dialogs = document.querySelectorAll('dialog')
+      expect(dialogs.length).toBeGreaterThan(0)
+    })
+  })
+
+  it('cierra modal de crear al hacer clic en cerrar', async () => {
+    render(
+      <BrowserRouter>
+        <QueryAreas />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Administración')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
+
+    await waitFor(() => {
+      expect(document.querySelector('dialog')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar modal' }))
+
+    await waitFor(() => {
+      expect(document.querySelector('dialog')).not.toBeInTheDocument()
+    })
   })
 })

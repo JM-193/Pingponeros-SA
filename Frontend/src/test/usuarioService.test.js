@@ -1,8 +1,8 @@
-﻿// usuarioService.test.js
+﻿// userService.test.js
 import { describe, it, expect, beforeEach } from 'vitest'
-import { crearUsuario, obtenerUsuarios, eliminarUsuario, obtenerUsuarioPorCorreo, actualizarUsuario } from '../services/usuarioService'
+import { crearUsuario, obtenerUsuarios, eliminarUsuario, obtenerUsuarioPorCorreo, actualizarUsuario } from '../services/userService'
 
-describe('usuarioService', () => {
+describe('userService', () => {
   const mockFetch = vi.fn()
 
   beforeEach(() => {

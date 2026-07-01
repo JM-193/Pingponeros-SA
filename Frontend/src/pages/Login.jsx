@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
 import { login } from '../services/authService'
 import { guardarSesion } from '../services/session'
+import { notifySuccess, notifyApiError } from '../utils/notify'
 import { COLORS } from '../constants/colors'
+import { EMAIL_REGEX } from '../constants/regex'
 
 /* UCR brand palette
    Azul UCR  #00AEEF  (Pantone 299 C)
@@ -13,9 +15,9 @@ import { COLORS } from '../constants/colors'
    */
 
 const TEMP_PASSWORD_EXPIRED_MESSAGE =
-  'La contraseña temporal ha expirado. Contacte al equipo de soporte para recuperar el acceso.'
+  'Contraseña expirada. Por favor realice el proceso de recuperación de contraseña.'
 
-function temporalPasswordExpired(usuario) {
+function temporaryPasswordExpired(usuario) {
   if (!usuario?.contrasenaTemporal || !usuario?.fechaExpiracionContrasena) return false
 
   const expirationTime = new Date(usuario.fechaExpiracionContrasena).getTime()
@@ -36,7 +38,7 @@ export default function Login() {
 
     if (!email.trim()) {
       newErrors.email = 'El correo es requerido'
-    } else if (!/^[a-zA-Z]+\.[a-zA-Z]+@[uU][cC][rR]\.[aA][cC]\.[cC][rR]$/.test(email.trim())) {
+    } else if (!EMAIL_REGEX.test(email.trim())) {
       newErrors.email = 'El correo debe ser válido. Formato: nombre.apellidos@ucr.ac.cr (solo letras antes de @)'
     }
 
@@ -54,19 +56,36 @@ export default function Login() {
     setLoading(true)
 
     try {
-      const usuario = await login(email.trim().toLowerCase(), password)
+      const { token, ...usuario } = await login(email.trim().toLowerCase(), password)
       if (usuario.estado !== undefined && usuario.estado !== 1) {
         setServerError('La cuenta de usuario se encuentra inactiva. Contacte al equipo de soporte.')
         return
       }
-      if (temporalPasswordExpired(usuario)) {
+      if (temporaryPasswordExpired(usuario)) {
         setServerError(TEMP_PASSWORD_EXPIRED_MESSAGE)
         return
       }
-      guardarSesion(usuario)
+
+      if (!token) {
+        // Defensivo: si por alguna razón el backend no envió un token,
+        // no se navega a /home con una sesión a medio iniciar.
+        setServerError('No se pudo iniciar sesión. Intente de nuevo.')
+        return
+      }
+
+      guardarSesion(token, usuario.contrasenaTemporal)
+
+      // Una contraseña temporal debe cambiarse antes que nada; se envía al usuario
+      // directamente a la página de cambio (allí se muestra la alerta bloqueante).
+      if (usuario.contrasenaTemporal) {
+        navigate('/cambiar-contrasena')
+        return
+      }
+
+      notifySuccess('Sesión iniciada correctamente.')
       navigate('/home')
     } catch (err) {
-      setServerError(err.message)
+      notifyApiError(err)
     } finally {
       setLoading(false)
     }
@@ -101,6 +120,7 @@ export default function Login() {
 
       <form
         onSubmit={handleSubmit}
+        noValidate
         style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' }}>
@@ -130,6 +150,7 @@ export default function Login() {
               color: COLORS.textDark,
               transition: 'border-color 0.2s',
             }}
+            maxLength={100}
           />
           {errors.email && (
             <span style={{ fontSize: '12px', color: COLORS.danger }}>
@@ -165,6 +186,7 @@ export default function Login() {
               color: COLORS.textDark,
               transition: 'border-color 0.2s',
             }}
+            maxLength={30}
           />
           {errors.password && (
             <span style={{ fontSize: '12px', color: COLORS.danger }}>
@@ -178,7 +200,7 @@ export default function Login() {
           disabled={loading}
           style={{
             padding: '14px',
-            backgroundColor: loading ? '#5a7db5' : COLORS.authBtn,
+            backgroundColor: loading ? COLORS.authBtnDisabled : COLORS.authBtn,
             color: COLORS.white,
             border: 'none',
             borderRadius: '4px',

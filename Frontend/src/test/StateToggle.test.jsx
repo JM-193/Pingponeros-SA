@@ -1,6 +1,7 @@
 // StateToggle.test.jsx
 import { render, screen, fireEvent } from '@testing-library/react'
 import StateToggle from '../components/StateToggle'
+import { COLORS } from '../constants/colors'
 
 describe('StateToggle', () => {
   const defaultProps = {
@@ -94,21 +95,21 @@ describe('StateToggle', () => {
     render(<StateToggle currentState={1} onStateChange={vi.fn()} />)
 
     const activoBtn = screen.getByRole('button', { name: 'Activo' })
-    expect(activoBtn).toHaveStyle({ backgroundColor: '#fff' })
+    expect(activoBtn).toHaveStyle({ backgroundColor: COLORS.white })
   })
 
   it('el botón activo tiene fondo blanco cuando currentState es 0', () => {
     render(<StateToggle currentState={0} onStateChange={vi.fn()} />)
 
     const inactivoBtn = screen.getByRole('button', { name: 'Inactivo' })
-    expect(inactivoBtn).toHaveStyle({ backgroundColor: '#fff' })
+    expect(inactivoBtn).toHaveStyle({ backgroundColor: COLORS.white })
   })
 
   it('el botón inactivo (no seleccionado) no tiene fondo blanco', () => {
     render(<StateToggle currentState={1} onStateChange={vi.fn()} />)
 
     const inactivoBtn = screen.getByRole('button', { name: 'Inactivo' })
-    expect(inactivoBtn).not.toHaveStyle({ backgroundColor: '#fff' })
+    expect(inactivoBtn).not.toHaveStyle({ backgroundColor: COLORS.white })
   })
 
   it('aplica opacity 0.5 en botones cuando disabled es true', () => {
@@ -161,7 +162,7 @@ describe('StateToggle', () => {
     const activoBtn = screen.getByRole('button', { name: 'Activo' })
     fireEvent.mouseLeave(activoBtn)
 
-    expect(activoBtn).toHaveStyle({ backgroundColor: '#fff' })
+    expect(activoBtn).toHaveStyle({ backgroundColor: COLORS.white })
   })
 
   it('el primer botón tiene border-radius redondeado a la izquierda', () => {

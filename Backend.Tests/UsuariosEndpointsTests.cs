@@ -21,7 +21,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task GetUsuarios_Returns200ConLista()
     {
-        var lista = new List<Usuario>
+        var lista = new List<User>
         {
             new() { CorreoInstitucional = "ana@test.com", PrimerNombre = "Ana", PrimerApellido = "Lopez", Rol = 0, Estado = 1 }
         };
@@ -35,7 +35,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task GetUsuarioPorCorreo_Returns200CuandoExiste()
     {
-        var usuario = new Usuario { CorreoInstitucional = "ana@test.com", PrimerNombre = "Ana", PrimerApellido = "Lopez", Rol = 0, Estado = 1 };
+        var usuario = new User { CorreoInstitucional = "ana@test.com", PrimerNombre = "Ana", PrimerApellido = "Lopez", Rol = 0, Estado = 1 };
         _factory.UsuarioRepo.ObtenerPorCorreoAsync("ana@test.com").Returns(usuario);
 
         var response = await _client.GetAsync("/usuarios/ana%40test.com");
@@ -46,7 +46,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task GetUsuarioPorCorreo_Returns404CuandoNoExiste()
     {
-        _factory.UsuarioRepo.ObtenerPorCorreoAsync(Arg.Any<string>()).Returns((Usuario?)null);
+        _factory.UsuarioRepo.ObtenerPorCorreoAsync(Arg.Any<string>()).Returns((User?)null);
 
         var response = await _client.GetAsync("/usuarios/noexiste%40test.com");
 
@@ -107,7 +107,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     public async Task CrearUsuario_Returns201CuandoSeCreaCorrecto()
     {
         _factory.UsuarioRepo
-            .InsertarConContrasenaAsync(Arg.Any<Usuario>(), Arg.Any<string>())
+            .InsertarConContrasenaAsync(Arg.Any<User>(), Arg.Any<string>())
             .Returns(Task.CompletedTask);
         var dto = new { CorreoInstitucional = "nuevo.usuario@ucr.ac.cr", PrimerNombre = "Juan", PrimerApellido = "Perez", SegundoApellido = "Garcia", Rol = 0 };
 
@@ -119,11 +119,11 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task CrearUsuario_NormalizaCamposAntesDeInsertar()
     {
-        Usuario? capturado = null;
+        User? capturado = null;
         string? hashCapturado = null;
         _factory.UsuarioRepo
             .InsertarConContrasenaAsync(
-                Arg.Do<Usuario>(usuario => capturado = usuario),
+                Arg.Do<User>(usuario => capturado = usuario),
                 Arg.Do<string>(hash => hashCapturado = hash))
             .Returns(Task.CompletedTask);
         var dto = new
@@ -204,7 +204,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     public async Task CrearUsuario_Returns201CuandoSegundoNombreEsValidoOpcional()
     {
         _factory.UsuarioRepo
-            .InsertarConContrasenaAsync(Arg.Any<Usuario>(), Arg.Any<string>())
+            .InsertarConContrasenaAsync(Arg.Any<User>(), Arg.Any<string>())
             .Returns(Task.CompletedTask);
         var dto = new { CorreoInstitucional = "maria.garcia@ucr.ac.cr", PrimerNombre = "María", SegundoNombre = "José", PrimerApellido = "García", SegundoApellido = "López", Rol = 0 };
 
@@ -216,9 +216,9 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     [Fact]
     public async Task CrearUsuario_ConvierteSegundoNombreEnNullCuandoVacio()
     {
-        Usuario? capturado = null;
+        User? capturado = null;
         _factory.UsuarioRepo
-            .InsertarConContrasenaAsync(Arg.Do<Usuario>(usuario => capturado = usuario), Arg.Any<string>())
+            .InsertarConContrasenaAsync(Arg.Do<User>(usuario => capturado = usuario), Arg.Any<string>())
             .Returns(Task.CompletedTask);
         var dto = new
         {
@@ -242,7 +242,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     public async Task ActualizarUsuario_Returns200CuandoSeActualiza()
     {
         _factory.UsuarioRepo
-            .ActualizarAsync(Arg.Any<string>(), Arg.Any<Usuario>())
+            .ActualizarAsync(Arg.Any<string>(), Arg.Any<User>())
             .Returns(true);
         var body = new { CorreoInstitucional = "ana@test.com", PrimerNombre = "Ana", PrimerApellido = "Lopez", Rol = 0, Estado = 1 };
 
@@ -255,7 +255,7 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
     public async Task ActualizarUsuario_Returns404CuandoNoExiste()
     {
         _factory.UsuarioRepo
-            .ActualizarAsync(Arg.Any<string>(), Arg.Any<Usuario>())
+            .ActualizarAsync(Arg.Any<string>(), Arg.Any<User>())
             .Returns(false);
         var body = new { CorreoInstitucional = "noexiste@test.com", PrimerNombre = "Ana", PrimerApellido = "Lopez", Rol = 0, Estado = 1 };
 
@@ -280,6 +280,127 @@ public sealed class UsuariosEndpointsTests : IClassFixture<TestWebApplicationFac
         _factory.UsuarioRepo.EliminarAsync(Arg.Any<string>()).Returns(false);
 
         var response = await _client.DeleteAsync("/usuarios/noexiste%40test.com");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    // ---------------------------------------------------------------- //
+    // Plazas vinculadas al usuario (PLAZAS_USUARIOS)                    //
+    // ---------------------------------------------------------------- //
+    [Fact]
+    public async Task GetPlazasUsuario_Returns200ConLista()
+    {
+        _factory.AsignacionRepo.ObtenerActivasPorUsuarioAsync("ana@test.com").Returns(new List<PositionAssignment>
+        {
+            new() { NumeroPlaza = 1001, CorreoInstitucional = "ana@test.com", IdPuesto = 5, PuestoNombre = "Analista", IdClaseOcupacional = 1, ClaseOcupacionalNombre = "Profesional A", FechaInicio = new DateTime(2026, 1, 1) }
+        });
+
+        var response = await _client.GetAsync("/usuarios/ana%40test.com/plazas");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AsignarPlaza_Returns201CuandoSeVincula()
+    {
+        PositionAssignment? capturada = null;
+        _factory.PlazaRepo.ExisteNumeroPlazaAsync(1001).Returns(true);
+        _factory.AsignacionRepo.PlazaTieneAsignacionActivaAsync(1001).Returns(false);
+        _factory.ClasesRepo.ObtenerPorIdAsync(3).Returns(new OccupationalClass { IdClaseOcupacional = 3, Codigo = 5200, Nombre = "Profesional A" });
+        _factory.AsignacionRepo.AsignarAsync(Arg.Do<PositionAssignment>(a => capturada = a)).Returns(Task.CompletedTask);
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, IdClaseOcupacional = 3, LugarTrabajo = "Oficina Central", FechaInicio = "2026-01-01", FechaFinal = (string?)null };
+
+        var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Assert.NotNull(capturada);
+        Assert.Equal(1001UL, capturada!.NumeroPlaza);
+        Assert.Equal("ana@test.com", capturada.CorreoInstitucional);
+        Assert.Equal(5, capturada.IdPuesto);
+        Assert.Equal(3L, capturada.IdClaseOcupacional);
+        Assert.Equal("Oficina Central", capturada.LugarTrabajo);
+        Assert.Null(capturada.FechaFinal);
+    }
+
+    [Fact]
+    public async Task AsignarPlaza_Returns409CuandoPlazaYaOcupada()
+    {
+        _factory.PlazaRepo.ExisteNumeroPlazaAsync(1001).Returns(true);
+        _factory.AsignacionRepo.PlazaTieneAsignacionActivaAsync(1001).Returns(true);
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, IdClaseOcupacional = 3, LugarTrabajo = "Oficina Central", FechaInicio = "2026-01-01", FechaFinal = (string?)null };
+
+        var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AsignarPlaza_Returns404CuandoPlazaNoExiste()
+    {
+        _factory.PlazaRepo.ExisteNumeroPlazaAsync(9999).Returns(false);
+        var dto = new { NumeroPlaza = 9999, IdPuesto = 5, IdClaseOcupacional = 3, LugarTrabajo = "Oficina Central", FechaInicio = "2026-01-01", FechaFinal = (string?)null };
+
+        var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AsignarPlaza_Returns400CuandoFaltaFechaInicio()
+    {
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, IdClaseOcupacional = 3, LugarTrabajo = "Oficina Central", FechaFinal = (string?)null };
+
+        var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AsignarPlaza_Returns400CuandoFaltaPuesto()
+    {
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 0, IdClaseOcupacional = 3, LugarTrabajo = "Oficina Central", FechaInicio = "2026-01-01" };
+
+        var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AsignarPlaza_Returns400CuandoIdClaseOcupacionalEsCero()
+    {
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, IdClaseOcupacional = 0, LugarTrabajo = "Oficina Central", FechaInicio = "2026-01-01" };
+
+        var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AsignarPlaza_Returns400CuandoLugarTrabajoTieneCaracteresInvalidos()
+    {
+        var dto = new { NumeroPlaza = 1001, IdPuesto = 5, IdClaseOcupacional = 3, LugarTrabajo = "Edificio#", FechaInicio = "2026-01-01" };
+
+        var response = await _client.PostAsJsonAsync("/usuarios/ana%40test.com/plazas", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DesasignarPlaza_Returns200CuandoSeDesvincula()
+    {
+        _factory.AsignacionRepo.DesasignarAsync(1001, "ana@test.com").Returns(true);
+
+        var response = await _client.DeleteAsync("/usuarios/ana%40test.com/plazas/1001");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DesasignarPlaza_Returns404CuandoNoHayVinculacionActiva()
+    {
+        _factory.AsignacionRepo.DesasignarAsync(9999, "ana@test.com").Returns(false);
+
+        var response = await _client.DeleteAsync("/usuarios/ana%40test.com/plazas/9999");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }

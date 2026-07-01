@@ -1,0 +1,341 @@
+using System.Globalization;
+using Backend.Helpers;
+using Backend.Models;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+
+namespace Backend.Reports;
+
+/// <summary>
+/// Genera los reportes en PDF con QuestPDF. Mantiene un encabezado y pie comunes (título,
+/// "Vicerrectoría de Administración", fecha de generación y numeración de página) para que todos
+/// los documentos se vean homogéneos. La licencia Community se fija en <c>Program.cs</c> al arrancar.
+/// </summary>
+internal static class ReportePdfBuilder
+{
+    private const string Subtitulo = "Vicerrectoría de Administración";
+
+    // Tipos de función en el orden en que se muestran en la vista de la declaración (DeclarationView.jsx).
+    private static readonly (string Tipo, string Titulo)[] CategoriasFuncion =
+    [
+        ("Propia de mi puesto", "Propias de mi puesto"),
+        ("De otro puesto", "De otro puesto"),
+        ("De apoyo ocasional", "De apoyo ocasional"),
+        ("Definida por mí", "Definida por mí"),
+    ];
+
+    /// <summary>Reporte tabular genérico (funcionarios, declaraciones, horas) en orientación horizontal.</summary>
+    public static byte[] BuildTabla(ReporteTabular datos)
+    {
+        ArgumentNullException.ThrowIfNull(datos);
+
+        return Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4.Landscape());
+                page.Margin(28);
+                page.DefaultTextStyle(x => x.FontSize(9));
+
+                page.Header().Element(c => ComposeEncabezado(c, datos.Titulo));
+                page.Content().PaddingTop(8).Element(c => ComposeTablaGenerica(c, datos));
+
+                ComposePie(page);
+            });
+        }).GeneratePdf();
+    }
+
+    /// <summary>
+    /// Documento oficial completo de una declaración jurada, pensado para imprimirse y firmarse de
+    /// forma física: refleja la vista de pantalla (información general, diagnóstico de la carga por
+    /// tipo de función, información adicional) y cierra con la cláusula de juramento y el bloque de firma.
+    /// </summary>
+    public static byte[] BuildDeclaracionJurada(DeclaracionDetalle detalle, string titular)
+    {
+        ArgumentNullException.ThrowIfNull(detalle);
+
+        return Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(36);
+                page.DefaultTextStyle(x => x.FontSize(10));
+
+                page.Header().Element(c => ComposeEncabezado(c, "Declaración Jurada del Puesto de Trabajo"));
+                page.Content().PaddingTop(8).Column(col =>
+                {
+                    col.Spacing(6);
+
+                    col.Item().Text(
+                        $"Plaza N.º {detalle.Declaracion.NumeroPlaza.ToString(CultureInfo.InvariantCulture)}  ·  " +
+                        detalle.Declaracion.FechaDeclaracion.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))
+                        .FontSize(10).FontColor(Colors.Grey.Darken1);
+
+                    ComposeInformacionGeneral(col, detalle);
+
+                    TituloSeccion(col, "Diagnóstico de la Carga de Trabajo");
+                    ComposeActividadesPorFuncion(col, detalle, incluirHoras: false);
+
+                    ComposeInformacionAdicional(col, detalle);
+
+                    ComposeFirma(col, titular);
+                });
+
+                ComposePie(page);
+            });
+        }).GeneratePdf();
+    }
+
+    /// <summary>Reporte personal de horas de una declaración: info general + tablas por tipo de función + total.</summary>
+    public static byte[] BuildReporteHorasDeclaracion(DeclaracionDetalle detalle, string titular)
+    {
+        ArgumentNullException.ThrowIfNull(detalle);
+
+        var totalMinutos = WorkloadCalculator.TotalMinutosSemanales(detalle.Actividades);
+
+        return Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(32);
+                page.DefaultTextStyle(x => x.FontSize(10));
+
+                page.Header().Element(c => ComposeEncabezado(c, "Reporte de Horas del Puesto de Trabajo"));
+                page.Content().PaddingTop(8).Column(col =>
+                {
+                    col.Spacing(6);
+
+                    TituloSeccion(col, "Información General");
+                    Campo(col, "Titular del puesto", titular);
+                    Campo(col, "Número de plaza", detalle.Declaracion.NumeroPlaza.ToString(CultureInfo.InvariantCulture));
+                    Campo(col, "Cargo del puesto", detalle.Cargo);
+                    Campo(col, "Clase ocupacional", detalle.ClaseOcupacional);
+                    Campo(col, "Lugar de trabajo", detalle.LugarTrabajo);
+                    Campo(col, "Jornada laboral", detalle.Horario?.JornadaLaboral);
+                    Campo(col, "Horario laboral",
+                        detalle.Horario is { } h ? $"{h.HoraEntrada} a {h.HoraSalida}" : null);
+                    Campo(col, "Fecha de la declaración",
+                        detalle.Declaracion.FechaDeclaracion.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+
+                    TituloSeccion(col, "Horas Registradas por Función");
+                    ComposeActividadesPorFuncion(col, detalle, incluirHoras: true);
+
+                    col.Item().PaddingTop(10).AlignRight()
+                        .Text($"Total de horas semanales: {WorkloadCalculator.FormatearMinutos(totalMinutos)}")
+                        .SemiBold().FontSize(11);
+                });
+
+                ComposePie(page);
+            });
+        }).GeneratePdf();
+    }
+
+    // ---------------------------------------------------------------- //
+    // Composición compartida                                            //
+    // ---------------------------------------------------------------- //
+    private static void ComposeEncabezado(IContainer container, string titulo)
+    {
+        container.Column(col =>
+        {
+            col.Item().Text(titulo).Bold().FontSize(16).FontColor(Colors.Black);
+            col.Item().Text(Subtitulo).FontSize(11).FontColor(Colors.Grey.Darken1);
+            col.Item().PaddingTop(2).Text(
+                $"Generado el {DateTime.Now.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture)}")
+                .FontSize(8).FontColor(Colors.Grey.Medium);
+            col.Item().PaddingTop(6).LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
+        });
+    }
+
+    private static void ComposePie(PageDescriptor page)
+    {
+        page.Footer().AlignCenter().Text(text =>
+        {
+            text.DefaultTextStyle(x => x.FontSize(8).FontColor(Colors.Grey.Medium));
+            text.Span("Página ");
+            text.CurrentPageNumber();
+            text.Span(" de ");
+            text.TotalPages();
+        });
+    }
+
+    /// <summary>Tabla del reporte tabular genérico: una columna relativa por encabezado y una celda por dato.</summary>
+    private static void ComposeTablaGenerica(IContainer container, ReporteTabular datos)
+    {
+        container.Table(table =>
+        {
+            table.ColumnsDefinition(columns =>
+            {
+                foreach (var _ in datos.Encabezados)
+                    columns.RelativeColumn();
+            });
+
+            table.Header(header =>
+            {
+                foreach (var encabezado in datos.Encabezados)
+                    header.Cell().Element(CeldaEncabezado).Text(encabezado).SemiBold();
+            });
+
+            if (datos.Filas.Count == 0)
+            {
+                table.Cell().ColumnSpan((uint)datos.Encabezados.Count)
+                    .Element(CeldaCuerpo).Text("Sin datos.");
+            }
+
+            foreach (var fila in datos.Filas)
+                foreach (var celda in fila)
+                    table.Cell().Element(CeldaCuerpo).Text(celda);
+        });
+    }
+
+    private static void ComposeTablaActividades(
+        IContainer container, IReadOnlyList<Actividad> actividades, bool incluirHoras = true)
+    {
+        container.Table(table =>
+        {
+            table.ColumnsDefinition(columns =>
+            {
+                columns.RelativeColumn(3); // Nombre
+                columns.RelativeColumn(4); // Descripción
+                columns.RelativeColumn(2); // Periodicidad
+                columns.RelativeColumn(2); // Veces
+                columns.RelativeColumn(2); // Duración
+                if (incluirHoras) columns.RelativeColumn(2); // Horas/semana
+            });
+
+            table.Header(header =>
+            {
+                header.Cell().Element(CeldaEncabezado).Text("Nombre").SemiBold();
+                header.Cell().Element(CeldaEncabezado).Text("Descripción").SemiBold();
+                header.Cell().Element(CeldaEncabezado).Text("Periodicidad").SemiBold();
+                header.Cell().Element(CeldaEncabezado).Text("Cantidad de veces").SemiBold();
+                header.Cell().Element(CeldaEncabezado).Text("Duración (min.)").SemiBold();
+                if (incluirHoras) header.Cell().Element(CeldaEncabezado).Text("Horas/semana").SemiBold();
+            });
+
+            foreach (var a in actividades)
+            {
+                table.Cell().Element(CeldaCuerpo).Text(a.Nombre ?? "—");
+                table.Cell().Element(CeldaCuerpo).Text(a.Descripcion ?? "—");
+                table.Cell().Element(CeldaCuerpo).Text(a.Periodicidad);
+                table.Cell().Element(CeldaCuerpo).Text(WorkloadCalculator.Numero(a.VecesRealizadas));
+                table.Cell().Element(CeldaCuerpo).Text(WorkloadCalculator.Numero(a.Duracion));
+                if (incluirHoras)
+                {
+                    var minutos = WorkloadCalculator.MinutosSemanales(a.Periodicidad, a.VecesRealizadas, a.Duracion);
+                    table.Cell().Element(CeldaCuerpo).Text(WorkloadCalculator.FormatearMinutos(minutos));
+                }
+            }
+        });
+    }
+
+    /// <summary>Sección "Información General": datos identificativos de la plaza y su horario.</summary>
+    private static void ComposeInformacionGeneral(ColumnDescriptor col, DeclaracionDetalle detalle)
+    {
+        TituloSeccion(col, "Información General");
+        Campo(col, "Número de plaza", detalle.Declaracion.NumeroPlaza.ToString(CultureInfo.InvariantCulture));
+        Campo(col, "Cargo del puesto", detalle.Cargo);
+        Campo(col, "Clase ocupacional", detalle.ClaseOcupacional);
+        Campo(col, "Lugar de trabajo", detalle.LugarTrabajo);
+        Campo(col, "Jornada laboral", detalle.Horario?.JornadaLaboral);
+        Campo(col, "Horario laboral",
+            detalle.Horario is { } h ? $"{h.HoraEntrada} a {h.HoraSalida}" : null);
+    }
+
+    /// <summary>
+    /// Una subtabla por cada tipo de función con actividades declaradas (en el orden de
+    /// <see cref="CategoriasFuncion"/>); si no hay ninguna actividad, deja constancia de ello.
+    /// </summary>
+    private static void ComposeActividadesPorFuncion(
+        ColumnDescriptor col, DeclaracionDetalle detalle, bool incluirHoras)
+    {
+        foreach (var (tipo, tituloCategoria) in CategoriasFuncion)
+        {
+            var actividades = detalle.Actividades.Where(a => a.TipoFuncion == tipo).ToList();
+            if (actividades.Count == 0) continue;
+            col.Item().PaddingTop(4).Text(tituloCategoria).SemiBold().FontSize(11);
+            col.Item().Element(c => ComposeTablaActividades(c, actividades, incluirHoras));
+        }
+
+        if (detalle.Actividades.Count == 0)
+            col.Item().Text("Sin funciones declaradas.").Italic();
+    }
+
+    /// <summary>Sección "Información Adicional": descanso y, si existen, permisos y tiempo extra declarados.</summary>
+    private static void ComposeInformacionAdicional(ColumnDescriptor col, DeclaracionDetalle detalle)
+    {
+        TituloSeccion(col, "Información Adicional");
+        Campo(col, "Tiempo de descanso al día",
+            detalle.Descanso is { } d ? WorkloadCalculator.FormatearMinutos((double)d.Tiempo) : null);
+        if (detalle.PermisoAusencia is { } pa)
+        {
+            Campo(col, "Permiso o licencia (días por semana)", FormatDecimal(pa.Dias));
+            Campo(col, "Detalle del permiso o licencia", pa.Justificacion);
+            Campo(col, "¿De conocimiento de la jefatura?", pa.ConocimientoJefatura == 1 ? "Sí" : "No");
+        }
+        if (detalle.HoraExtra is { } he)
+        {
+            Campo(col, "Tiempo adicional (minutos por semana)", FormatDecimal(he.TiempoAdicional));
+            Campo(col, "Justificación del tiempo adicional", he.Justificacion);
+            Campo(col, "¿De conocimiento de la jefatura?", he.ConocimientoJefatura == 1 ? "Sí" : "No");
+        }
+    }
+
+    /// <summary>Cláusula de juramento y bloque de firma física (titular y fecha) al pie del documento.</summary>
+    private static void ComposeFirma(ColumnDescriptor col, string titular)
+    {
+        col.Item().PaddingTop(20).Text(
+            "Declaro bajo juramento que la información consignada en este documento es verídica y completa.")
+            .Italic().FontSize(9).FontColor(Colors.Grey.Darken2);
+
+        col.Item().PaddingTop(48).Row(row =>
+        {
+            row.RelativeItem().Column(c =>
+            {
+                c.Item().LineHorizontal(0.75f).LineColor(Colors.Grey.Darken1);
+                c.Item().PaddingTop(4).Text(text =>
+                {
+                    text.Span(string.IsNullOrWhiteSpace(titular) ? "—" : titular).SemiBold();
+                    text.Span("  (Firma)").FontSize(8).FontColor(Colors.Grey.Medium);
+                });
+                c.Item().Text("Titular del puesto").FontSize(8).FontColor(Colors.Grey.Medium);
+            });
+            row.ConstantItem(48);
+            row.RelativeItem().Column(c =>
+            {
+                c.Item().LineHorizontal(0.75f).LineColor(Colors.Grey.Darken1);
+                c.Item().PaddingTop(4).Text("Fecha en que se firmó").FontSize(8).FontColor(Colors.Grey.Medium);
+            });
+        });
+    }
+
+    /// <summary>Formatea un decimal sin ceros sobrantes (entero si no tiene parte fraccionaria).</summary>
+    private static string FormatDecimal(decimal valor) =>
+        valor == Math.Truncate(valor)
+            ? ((long)valor).ToString(CultureInfo.InvariantCulture)
+            : valor.ToString("0.##", CultureInfo.InvariantCulture);
+
+    private static void TituloSeccion(ColumnDescriptor col, string texto)
+    {
+        col.Item().PaddingTop(8).Text(texto).Bold().FontSize(12).FontColor(Colors.Black);
+        col.Item().LineHorizontal(0.5f).LineColor(Colors.Grey.Lighten1);
+    }
+
+    private static void Campo(ColumnDescriptor col, string etiqueta, string? valor)
+    {
+        col.Item().Text(text =>
+        {
+            text.Span($"{etiqueta}: ").SemiBold();
+            text.Span(string.IsNullOrWhiteSpace(valor) ? "—" : valor);
+        });
+    }
+
+    private static IContainer CeldaEncabezado(IContainer container) =>
+        container.Border(0.5f).BorderColor(Colors.Grey.Lighten1)
+            .Background(Colors.Grey.Lighten3).Padding(4);
+
+    private static IContainer CeldaCuerpo(IContainer container) =>
+        container.Border(0.5f).BorderColor(Colors.Grey.Lighten2).Padding(4);
+}

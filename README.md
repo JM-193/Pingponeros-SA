@@ -14,7 +14,7 @@ Administrative Workloads Project (UCR).
 
 The system is designed as a full-stack web platform with:
 
-- Frontend: React + TypeScript
+- Frontend: React + JavaScript
 - Backend: ASP.NET Core + C#
 - Database: Oracle Database
 
@@ -47,7 +47,7 @@ This project provides a reliable digital system to centralize and automate those
 ### Frontend
 
 - React 18: Component-based UI library with role-oriented rendering.
-- TypeScript: Static typing across the frontend codebase.
+- JavaScript: Dynamic, widely used frontend language.
 - Tailwind CSS: Responsive, consistent styling system.
 - React Router: Client-side navigation and protected routes.
 - React Hook Form: Form handling with real-time validation.
@@ -71,9 +71,9 @@ This project provides a reliable digital system to centralize and automate those
 
 ## Static Analysis and Quality
 
-- ESLint + Prettier (frontend): Catch common React/TypeScript issues and enforce consistent style.
+- ESLint + Prettier (frontend): Catch common React/JavaScript issues and enforce consistent style.
 - Roslyn Analyzers (backend): Detect C# code smells, bad practices, and security-relevant issues at compile time.
-- SonarCloud (cross-stack): Unified quality dashboard for C# and TypeScript.
+- SonarCloud (cross-stack): Unified quality dashboard for C# and JavaScript.
 
 ## Architecture and Practices
 
@@ -97,7 +97,10 @@ This project provides a reliable digital system to centralize and automate those
 - Organizational structure management (admin):
   - Full CRUD for areas, departments, sections, and units.
 - Position and function management (admin):
-  - Full CRUD for positions, position types, and functions.
+  - Plazas (positions): create, read, and update. Plazas cannot be deleted.
+  - Puestos de trabajo (job roles) and functions: create and read; they cannot be
+    edited, and they can only be deleted if they have never been assigned/used, to
+    preserve historical records.
   - Function metadata includes periodicity (daily to yearly).
 - Reports:
   - Admin reports in Excel and PDF (staff profile, schedules by org unit, out-of-schedule workload).

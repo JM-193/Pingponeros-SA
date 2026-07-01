@@ -1,84 +1,105 @@
-﻿// CreateArea.test.jsx
+// CreateAreas.test.jsx
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import CreateArea from '../pages/CreateArea'
+import { toast } from 'react-toastify'
+import CreateAreas from '../pages/CreateAreas'
 import * as areaService from '../services/areaService'
 
 vi.mock('../services/areaService')
 
-describe('CreateArea Page', () => {
+describe('CreateAreas Modal', () => {
   beforeEach(() => {
     vi.resetAllMocks()
   })
 
-  it('renderiza formulario de crear área', () => {
+  it('renderiza dentro de un modal', () => {
     render(
       <BrowserRouter>
-        <CreateArea />
+        <CreateAreas isOpen={true} onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
-    expect(screen.getByRole('heading', { name: /Crear Área/i })).toBeInTheDocument()
+    const dialog = document.querySelector('dialog')
+    expect(dialog).toBeInTheDocument()
+    expect(screen.getByText('Crear Área')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('Nombre del área')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('Ingrese la descripción del área')).toBeInTheDocument()
   })
 
-  it('renderiza Header y Navbar', () => {
+  it('no renderiza Header ni Navbar', () => {
     render(
       <BrowserRouter>
-        <CreateArea />
+        <CreateAreas isOpen={true} onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
-    expect(screen.getByText('Página Principal')).toBeInTheDocument()
+    expect(screen.queryByText('Página Principal')).not.toBeInTheDocument()
+    expect(document.querySelector('footer')).not.toBeInTheDocument()
+  })
+
+  it('no renderiza nada cuando isOpen es false', () => {
+    const { container } = render(
+      <BrowserRouter>
+        <CreateAreas isOpen={false} onClose={() => {}} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    expect(container.querySelector('dialog')).toBeNull()
   })
 
   it('valida que nombre sea requerido', async () => {
-    const { container } = render(
+    render(
       <BrowserRouter>
-        <CreateArea />
+        <CreateAreas isOpen={true} onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
-    const form = container.querySelector('form')
+    const form = document.querySelector('form')
     await act(async () => { fireEvent.submit(form) })
 
     expect(screen.getByText('El nombre del área es requerido')).toBeInTheDocument()
   })
 
   it('valida que descripción sea requerida', async () => {
-    const { container } = render(
+    render(
       <BrowserRouter>
-        <CreateArea />
+        <CreateAreas isOpen={true} onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
-    const nombreInput = screen.getByPlaceholderText('Nombre del área')
-    fireEvent.change(nombreInput, { target: { value: 'Administración' } })
+    fireEvent.change(screen.getByPlaceholderText('Nombre del área'), { target: { value: 'Administración' } })
 
-    const form = container.querySelector('form')
+    const form = document.querySelector('form')
     await act(async () => { fireEvent.submit(form) })
 
     expect(screen.getByText('La descripción es requerida')).toBeInTheDocument()
   })
 
-  it('crea área correctamente', async () => {
+  it('llama a onClose al hacer clic en Cancelar', () => {
+    const onClose = vi.fn()
+    render(
+      <BrowserRouter>
+        <CreateAreas isOpen={true} onClose={onClose} onSuccess={() => {}} />
+      </BrowserRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('crea área correctamente y llama al servicio', async () => {
     areaService.crearArea.mockResolvedValueOnce({ id: 1, nombre: 'Administración' })
 
     render(
       <BrowserRouter>
-        <CreateArea />
+        <CreateAreas isOpen={true} onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
-    const nombreInput = screen.getByPlaceholderText('Nombre del área')
-    fireEvent.change(nombreInput, { target: { value: 'Administración' } })
+    fireEvent.change(screen.getByPlaceholderText('Nombre del área'), { target: { value: 'Administración' } })
+    fireEvent.change(screen.getByPlaceholderText('Ingrese la descripción del área'), { target: { value: 'Área de administración' } })
 
-    const descInput = screen.getByPlaceholderText('Ingrese la descripción del área')
-    fireEvent.change(descInput, { target: { value: 'Área de administración' } })
-
-    const submitButton = screen.getByRole('button', { name: /Crear/i })
-    fireEvent.click(submitButton)
+    fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
 
     await waitFor(() => {
       expect(areaService.crearArea).toHaveBeenCalledWith({
@@ -94,21 +115,17 @@ describe('CreateArea Page', () => {
 
     render(
       <BrowserRouter>
-        <CreateArea />
+        <CreateAreas isOpen={true} onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
-    const nombreInput = screen.getByPlaceholderText('Nombre del área')
-    fireEvent.change(nombreInput, { target: { value: 'Test' } })
+    fireEvent.change(screen.getByPlaceholderText('Nombre del área'), { target: { value: 'Test' } })
+    fireEvent.change(screen.getByPlaceholderText('Ingrese la descripción del área'), { target: { value: 'Descripción' } })
 
-    const descInput = screen.getByPlaceholderText('Ingrese la descripción del área')
-    fireEvent.change(descInput, { target: { value: 'Descripción' } })
-
-    const submitButton = screen.getByRole('button', { name: /Crear/i })
-    fireEvent.click(submitButton)
+    fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('Área creada correctamente')).toBeInTheDocument()
+      expect(toast.success).toHaveBeenCalledWith('Área creada correctamente', expect.anything())
     })
   })
 
@@ -117,21 +134,17 @@ describe('CreateArea Page', () => {
 
     render(
       <BrowserRouter>
-        <CreateArea />
+        <CreateAreas isOpen={true} onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
-    const nombreInput = screen.getByPlaceholderText('Nombre del área')
-    fireEvent.change(nombreInput, { target: { value: 'Existing' } })
+    fireEvent.change(screen.getByPlaceholderText('Nombre del área'), { target: { value: 'Existing' } })
+    fireEvent.change(screen.getByPlaceholderText('Ingrese la descripción del área'), { target: { value: 'Desc' } })
 
-    const descInput = screen.getByPlaceholderText('Ingrese la descripción del área')
-    fireEvent.change(descInput, { target: { value: 'Desc' } })
-
-    const submitButton = screen.getByRole('button', { name: /Crear/i })
-    fireEvent.click(submitButton)
+    fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('Área ya existe')).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('Área ya existe', expect.anything())
     })
   })
 
@@ -140,7 +153,7 @@ describe('CreateArea Page', () => {
 
     render(
       <BrowserRouter>
-        <CreateArea />
+        <CreateAreas isOpen={true} onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
@@ -150,8 +163,7 @@ describe('CreateArea Page', () => {
     fireEvent.change(nombreInput, { target: { value: 'Test Area' } })
     fireEvent.change(descInput, { target: { value: 'Test Description' } })
 
-    const submitButton = screen.getByRole('button', { name: /Crear/i })
-    fireEvent.click(submitButton)
+    fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
 
     await waitFor(() => {
       expect(nombreInput).toHaveValue('')
@@ -164,18 +176,14 @@ describe('CreateArea Page', () => {
 
     render(
       <BrowserRouter>
-        <CreateArea />
+        <CreateAreas isOpen={true} onClose={() => {}} onSuccess={() => {}} />
       </BrowserRouter>,
     )
 
-    const nombreInput = screen.getByPlaceholderText('Nombre del área')
-    fireEvent.change(nombreInput, { target: { value: '  Test  ' } })
+    fireEvent.change(screen.getByPlaceholderText('Nombre del área'), { target: { value: '  Test  ' } })
+    fireEvent.change(screen.getByPlaceholderText('Ingrese la descripción del área'), { target: { value: '  Description  ' } })
 
-    const descInput = screen.getByPlaceholderText('Ingrese la descripción del área')
-    fireEvent.change(descInput, { target: { value: '  Description  ' } })
-
-    const submitButton = screen.getByRole('button', { name: /Crear/i })
-    fireEvent.click(submitButton)
+    fireEvent.click(screen.getByRole('button', { name: /Crear/i }))
 
     await waitFor(() => {
       expect(areaService.crearArea).toHaveBeenCalledWith({
@@ -186,4 +194,3 @@ describe('CreateArea Page', () => {
     })
   })
 })
-

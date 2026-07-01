@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import Header from './Header'
 import Navbar from './Navbar'
+import AppBreadcrumbs from './AppBreadcrumbs'
 import Footer from './Footer'
 import { COLORS } from '../constants/colors'
 
@@ -27,6 +28,7 @@ export default function PageLayout({ children, mainStyle }) {
           ...mainStyle,
         }}
       >
+        <AppBreadcrumbs />
         {children}
       </main>
       <Footer />

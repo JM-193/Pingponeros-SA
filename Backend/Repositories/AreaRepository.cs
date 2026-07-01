@@ -8,10 +8,34 @@ namespace Backend.Repositories;
 
 internal sealed class AreaRepository : IAreaRepository
 {
-    private const string ParamNombre = ":nombre";
+    private const string ColumnIdArea = "ID_AREA";
+    private const string ColumnNombre = "NOMBRE";
+    private const string ColumnDescripcion = "DESCRIPCION";
+    private const string ColumnEstado = "ESTADO";
+
     private readonly IQueryExecutor _q;
 
     public AreaRepository(IQueryExecutor q) => _q = q;
+
+    private static Area MapearFila(System.Data.Common.DbDataReader reader) => new()
+    {
+        Id = reader.GetInt32(reader.GetOrdinal(ColumnIdArea)),
+        Nombre = reader.IsDBNull(reader.GetOrdinal(ColumnNombre)) ? string.Empty : reader.GetString(reader.GetOrdinal(ColumnNombre)),
+        Descripcion = reader.IsDBNull(reader.GetOrdinal(ColumnDescripcion)) ? string.Empty : reader.GetString(reader.GetOrdinal(ColumnDescripcion)),
+        Estado = reader.GetInt32(reader.GetOrdinal(ColumnEstado)),
+    };
+
+    private static void AgregarParamNombre(OracleCommand cmd, string nombre)
+    {
+        OracleCommandHelpers.AddStringParam(cmd, ":nombre", nombre);
+    }
+
+    private static void AgregarParametros(OracleCommand cmd, Area area)
+    {
+        AgregarParamNombre(cmd, area.Nombre);
+        OracleCommandHelpers.AddStringParam(cmd, ":descripcion", area.Descripcion);
+        OracleCommandHelpers.AddInt32Param(cmd, ":estado", area.Estado);
+    }
 
     public async Task<List<Area>> ObtenerTodasAsync()
     {
@@ -27,13 +51,7 @@ internal sealed class AreaRepository : IAreaRepository
             var areas = new List<Area>();
             while (await reader.ReadAsync().ConfigureAwait(false))
             {
-                areas.Add(new Area
-                {
-                    Id = Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
-                    Nombre = reader["NOMBRE"].ToString() ?? "",
-                    Descripcion = reader["DESCRIPCION"].ToString() ?? "",
-                    Estado = Convert.ToInt32(reader["ESTADO"], CultureInfo.InvariantCulture),
-                });
+                areas.Add(MapearFila(reader));
             }
             return areas;
         }).ConfigureAwait(false);
@@ -47,7 +65,7 @@ internal sealed class AreaRepository : IAreaRepository
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(ParamNombre, nombre);
+            AgregarParamNombre(cmd, nombre);
             return cmd;
         }).ConfigureAwait(false);
         var count = Convert.ToInt32(result, CultureInfo.InvariantCulture);
@@ -70,9 +88,7 @@ internal sealed class AreaRepository : IAreaRepository
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(ParamNombre, area.Nombre);
-            cmd.Parameters.Add(":descripcion", area.Descripcion);
-            cmd.Parameters.Add(":estado", area.Estado);
+            AgregarParametros(cmd, area);
             var idParam = new OracleParameter(":id", OracleDbType.Int32, ParameterDirection.Output);
             cmd.Parameters.Add(idParam);
             return cmd;
@@ -89,19 +105,13 @@ internal sealed class AreaRepository : IAreaRepository
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(ParamNombre, nombre);
+            AgregarParamNombre(cmd, nombre);
             return cmd;
         }, async reader =>
         {
             if (await reader.ReadAsync().ConfigureAwait(false))
             {
-                return new Area
-                {
-                    Id = Convert.ToInt32(reader["ID_AREA"], CultureInfo.InvariantCulture),
-                    Nombre = reader["NOMBRE"].ToString() ?? "",
-                    Descripcion = reader["DESCRIPCION"].ToString() ?? "",
-                    Estado = Convert.ToInt32(reader["ESTADO"], CultureInfo.InvariantCulture),
-                };
+                return MapearFila(reader);
             }
             return null;
         }).ConfigureAwait(false);
@@ -123,10 +133,8 @@ internal sealed class AreaRepository : IAreaRepository
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(ParamNombre, area.Nombre);
-            cmd.Parameters.Add(":descripcion", area.Descripcion);
-            cmd.Parameters.Add(":estado", area.Estado);
-            cmd.Parameters.Add(":nombreOriginal", nombreOriginal);
+            AgregarParametros(cmd, area);
+            OracleCommandHelpers.AddStringParam(cmd, ":nombreOriginal", nombreOriginal);
             return cmd;
         }).ConfigureAwait(false);
 
@@ -141,7 +149,7 @@ internal sealed class AreaRepository : IAreaRepository
             {
                 BindByName = true,
             };
-            cmd.Parameters.Add(":id", id);
+            OracleCommandHelpers.AddInt32Param(cmd, ":id", id);
             return cmd;
         }).ConfigureAwait(false);
         return rows > 0;

@@ -1,7 +1,10 @@
+import { useId } from 'react'
 import PropTypes from 'prop-types'
-import { FaPencilAlt, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa'
+import { FaPencilAlt, FaSort, FaSortDown, FaSortUp, FaTrash } from 'react-icons/fa'
+import Select from 'react-select'
 import { COLORS } from '../constants/colors'
 import { useMediaQuery } from '../hooks/useMediaQuery'
+import { buildSelectStyles, selectTheme, menuPortalTarget } from '../utils/selectStyles'
 
 const getCellAlign = (align) => align ?? 'left'
 const getHeaderJustifyContent = (align) => {
@@ -16,23 +19,199 @@ const getSortIcon = (isSorted, direction) => {
   return <FaSortDown size={12} aria-hidden="true" focusable="false" />
 }
 
+function MobileSortControl({ columns, sortConfig, onSort }) {
+  const selectId = useId()
+  const activeKey = sortConfig?.key ?? ''
+  const isSorted = Boolean(activeKey)
+  const sortOptions = columns.map((column) => ({ value: column.key, label: column.label }))
+  const directionLabel = sortConfig?.direction === 'desc' ? 'descendente' : 'ascendente'
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-end',
+        gap: '8px',
+        marginBottom: '12px',
+      }}
+    >
+      <div style={{ flex: 1 }}>
+        <label
+          htmlFor={selectId}
+          style={{
+            display: 'block',
+            marginBottom: '6px',
+            fontWeight: 600,
+            fontSize: '12px',
+            color: COLORS.textSubtle,
+          }}
+        >
+          Ordenar por
+        </label>
+        <Select
+          inputId={selectId}
+          value={sortOptions.find((option) => option.value === activeKey) || null}
+          onChange={(option) => option && onSort(option.value)}
+          options={sortOptions}
+          isSearchable
+          isClearable={false}
+          placeholder="Seleccione una columna"
+          noOptionsMessage={() => 'Sin resultados'}
+          classNamePrefix="form-select"
+          menuPortalTarget={menuPortalTarget}
+          styles={buildSelectStyles()}
+          theme={selectTheme}
+        />
+      </div>
+      <button
+        type="button"
+        onClick={() => onSort(sortConfig.key)}
+        disabled={!isSorted}
+        aria-label={`Cambiar orden a ${sortConfig?.direction === 'asc' ? 'descendente' : 'ascendente'}`}
+        title={`Orden ${directionLabel}`}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minWidth: '44px',
+          height: '40px',
+          padding: '0 12px',
+          backgroundColor: isSorted ? COLORS.primaryBtn : COLORS.disabledBg,
+          color: isSorted ? COLORS.white : COLORS.disabledColor,
+          border: 'none',
+          borderRadius: '4px',
+          cursor: isSorted ? 'pointer' : 'not-allowed',
+        }}
+      >
+        {getSortIcon(isSorted, sortConfig?.direction)}
+      </button>
+    </div>
+  )
+}
+
+MobileSortControl.propTypes = {
+  columns: PropTypes.arrayOf(
+    PropTypes.shape({
+      key: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  sortConfig: PropTypes.shape({
+    key: PropTypes.string,
+    direction: PropTypes.oneOf(['asc', 'desc']),
+  }),
+  onSort: PropTypes.func.isRequired,
+}
+
+MobileSortControl.defaultProps = {
+  sortConfig: null,
+}
+
+function EditButton({ row, onEdit, showLabel }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onEdit(row)}
+      aria-label="Editar"
+      title="Editar"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: showLabel ? '8px 16px' : '8px 12px',
+        backgroundColor: COLORS.primaryBtn,
+        color: COLORS.white,
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontSize: '12px',
+        fontWeight: 600,
+        gap: '6px',
+        transition: 'background-color 0.2s',
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = COLORS.primaryBtnHover)}
+      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = COLORS.primaryBtn)}
+    >
+      <FaPencilAlt size={14} aria-hidden="true" focusable="false" />
+      {showLabel && 'Editar'}
+    </button>
+  )
+}
+
+EditButton.propTypes = {
+  row: PropTypes.object.isRequired,
+  onEdit: PropTypes.func.isRequired,
+  showLabel: PropTypes.bool.isRequired,
+}
+
+function DeleteButton({ row, onDelete, deletingRowId, rowId, showLabel }) {
+  const isDeleting = deletingRowId === rowId
+  return (
+    <button
+      type="button"
+      onClick={() => onDelete(row)}
+      disabled={isDeleting}
+      aria-label="Eliminar"
+      title="Eliminar"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: showLabel ? '8px 16px' : '8px 12px',
+        backgroundColor: isDeleting ? COLORS.disabledBg : COLORS.danger,
+        color: isDeleting ? COLORS.disabledColor : COLORS.white,
+        border: 'none',
+        borderRadius: '4px',
+        cursor: isDeleting ? 'not-allowed' : 'pointer',
+        fontSize: '12px',
+        fontWeight: 600,
+        gap: '6px',
+        transition: 'background-color 0.2s',
+      }}
+      onMouseEnter={(e) => !isDeleting && (e.currentTarget.style.backgroundColor = COLORS.errorStrong)}
+      onMouseLeave={(e) => !isDeleting && (e.currentTarget.style.backgroundColor = COLORS.danger)}
+    >
+      <FaTrash size={14} aria-hidden="true" focusable="false" />
+      {showLabel && 'Eliminar'}
+    </button>
+  )
+}
+
+DeleteButton.propTypes = {
+  row: PropTypes.object.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  deletingRowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  rowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  showLabel: PropTypes.bool.isRequired,
+}
+
+DeleteButton.defaultProps = {
+  deletingRowId: null,
+}
+
 export default function EntityResultsTable({
   columns,
   rows,
   onEdit,
+  onDelete,
+  deletingRowId,
   getRowId,
   sortConfig,
   onSort,
+  extraRowActions,
 }) {
-  const hasActions = Boolean(onEdit)
+  const hasActions = Boolean(onEdit) || Boolean(onDelete) || Boolean(extraRowActions)
   const canSort = Boolean(onSort)
 
   const isMobile = useMediaQuery('(max-width: 768px)')
 
-  // Mobile view for the table
+  // Vista móvil de la tabla
   if (isMobile) {
     return (
       <div style={{ marginBottom: '24px' }}>
+        {canSort && rows.length > 0 && (
+          <MobileSortControl columns={columns} sortConfig={sortConfig} onSort={onSort} />
+        )}
         {rows.map((row) => {
           const rowId = getRowId(row)
           return (
@@ -86,33 +265,11 @@ export default function EntityResultsTable({
                 </div>
               ))}
 
-              {hasActions && onEdit && (
-                <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '12px' }}>
-                  <button
-                    onClick={() => onEdit(row)}
-                    aria-label="Editar"
-                    title="Editar"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '8px 16px',
-                      backgroundColor: COLORS.primaryBtn,
-                      color: COLORS.white,
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      gap: '6px',
-                      transition: 'background-color 0.2s',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = COLORS.primaryBtnHover)}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = COLORS.primaryBtn)}
-                  >
-                    <FaPencilAlt size={14} aria-hidden="true" focusable="false" />
-                    Editar
-                  </button>
+              {hasActions && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '12px' }}>
+                  {extraRowActions?.(row, { showLabel: true })}
+                  {onEdit && <EditButton row={row} onEdit={onEdit} showLabel />}
+                  {onDelete && <DeleteButton row={row} onDelete={onDelete} deletingRowId={deletingRowId} rowId={rowId} showLabel />}
                 </div>
               )}
             </div>
@@ -132,13 +289,13 @@ export default function EntityResultsTable({
         marginBottom: '24px',
       }}
     >
-      <div style={{ overflowX: 'auto' }}>
+      <div style={{ overflowX: 'hidden' }}>
         <table
           style={{
             width: '100%',
             borderCollapse: 'collapse',
             fontSize: '14px',
-            tableLayout: 'fixed',
+            tableLayout: 'auto',
           }}
         >
           <thead>
@@ -195,11 +352,10 @@ export default function EntityResultsTable({
               {hasActions && (
                 <th
                   style={{
-                    padding: '12px 32px',
+                    padding: '12px 16px',
                     textAlign: 'right',
                     fontWeight: 600,
                     borderBottom: `1px solid ${COLORS.borderColor}`,
-                    width: '10%',
                     whiteSpace: 'nowrap',
                   }}
                 />
@@ -239,38 +395,15 @@ export default function EntityResultsTable({
                   {hasActions && (
                     <td
                       style={{
-                        padding: '12px 32px',
-                        textAlign: 'center',
-                        width: '10%',
+                        padding: '12px 16px',
+                        textAlign: 'right',
                         whiteSpace: 'nowrap',
                       }}
                     >
                       <div style={{ display: 'inline-flex', gap: '8px' }}>
-                        {onEdit && (
-                          <button
-                            onClick={() => onEdit(row)}
-                            aria-label="Editar"
-                            title="Editar"
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              padding: '8px 12px',
-                              backgroundColor: COLORS.primaryBtn,
-                              color: COLORS.white,
-                              border: 'none',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              fontSize: '12px',
-                              fontWeight: 600,
-                              transition: 'background-color 0.2s',
-                            }}
-                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = COLORS.primaryBtnHover)}
-                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = COLORS.primaryBtn)}
-                          >
-                            <FaPencilAlt size={14} aria-hidden="true" focusable="false" />
-                          </button>
-                        )}
+                        {extraRowActions?.(row, { showLabel: false })}
+                        {onEdit && <EditButton row={row} onEdit={onEdit} showLabel={false} />}
+                        {onDelete && <DeleteButton row={row} onDelete={onDelete} deletingRowId={deletingRowId} rowId={rowId} showLabel={false} />}
                       </div>
                     </td>
                   )}
@@ -297,16 +430,22 @@ EntityResultsTable.propTypes = {
   ).isRequired,
   rows: PropTypes.arrayOf(PropTypes.object).isRequired,
   onEdit: PropTypes.func,
+  onDelete: PropTypes.func,
+  deletingRowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   getRowId: PropTypes.func.isRequired,
   sortConfig: PropTypes.shape({
     key: PropTypes.string,
     direction: PropTypes.oneOf(['asc', 'desc']),
   }),
   onSort: PropTypes.func,
+  extraRowActions: PropTypes.func,
 }
 
 EntityResultsTable.defaultProps = {
   onEdit: null,
+  onDelete: null,
+  deletingRowId: null,
   sortConfig: null,
   onSort: null,
+  extraRowActions: null,
 }

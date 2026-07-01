@@ -72,7 +72,7 @@ describe('AuthLayout', () => {
     expect(page).toHaveStyle('min-height: 100vh')
   })
 
-  it('renderiza mÃºltiples hijos complejos', () => {
+  it('renderiza múltiples hijos complejos', () => {
     render(
       <BrowserRouter>
         <AuthLayout>

@@ -12,7 +12,7 @@ describe('Home Page', () => {
     )
 
     expect(screen.getByText('Vicerrectoría de Administración')).toBeInTheDocument()
-    expect(screen.getByText('La Aplicación de Cargas de Trabajo')).toBeInTheDocument()
+    expect(screen.getByText('Aplicación de Cargas de Trabajo')).toBeInTheDocument()
   })
 
   it('renderiza descripción de la aplicación', () => {

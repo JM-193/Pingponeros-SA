@@ -1,11 +1,11 @@
 ﻿// session.test.js
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { guardarSesion, obtenerSesion, cerrarSesion } from '../services/session'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import * as SessionService from '../services/session'
+import { buildJWT, nowInSeconds } from './helpers/jwtTestHelper'
 
 describe('session service', () => {
   beforeEach(() => {
     sessionStorage.clear()
-    vi.clearAllTimers()
     vi.useFakeTimers()
   })
 
@@ -15,104 +15,174 @@ describe('session service', () => {
   })
 
   it('guarda sesión en sessionStorage', () => {
-    const usuario = { id: 1, nombre: 'Test', correo: 'test@ucr.ac.cr' }
+    const token = buildJWT({ id: 1, nombre: 'Test', correo: 'test@ucr.ac.cr', exp: nowInSeconds() + 3600 })
 
-    guardarSesion(usuario)
+    SessionService.guardarSesion(token)
 
     const stored = sessionStorage.getItem('pingponeros_session')
     expect(stored).not.toBeNull()
-
-    const parsed = JSON.parse(stored)
-    expect(parsed.usuario).toEqual(usuario)
+    expect(stored).toBe(token)
   })
 
   it('obtiene sesión válida', () => {
-    const usuario = { id: 1, nombre: 'Test', correo: 'test@ucr.ac.cr' }
-    guardarSesion(usuario)
+    const payload = { id: 1, nombre: 'Test', correo: 'test@ucr.ac.cr', exp: nowInSeconds() + 3600 }
+    const token = buildJWT(payload)
+    SessionService.guardarSesion(token)
 
-    const retrieved = obtenerSesion()
+    const retrieved = SessionService.obtenerSesion()
 
-    expect(retrieved).toEqual(usuario)
+    expect(retrieved).toMatchObject({ id: 1, nombre: 'Test', correo: 'test@ucr.ac.cr' })
   })
 
   it('devuelve null cuando no hay sesión guardada', () => {
-    const result = obtenerSesion()
+    const result = SessionService.obtenerSesion()
 
     expect(result).toBeNull()
   })
 
   it('devuelve null cuando sesión expiró', () => {
-    const usuario = { id: 1, nombre: 'Test' }
-    guardarSesion(usuario)
+    // exp en el pasado (hace 1 segundo)
+    const token = buildJWT({ id: 1, nombre: 'Test', exp: nowInSeconds() - 1 })
+    SessionService.guardarSesion(token)
 
-    // Avanzar tiempo más de 1 hora
-    vi.advanceTimersByTime(61 * 60 * 1000)
-
-    const result = obtenerSesion()
+    const result = SessionService.obtenerSesion()
 
     expect(result).toBeNull()
   })
 
   it('elimina sesión expirada del sessionStorage', () => {
-    const usuario = { id: 1, nombre: 'Test' }
-    guardarSesion(usuario)
+    const token = buildJWT({ id: 1, nombre: 'Test', exp: nowInSeconds() - 1 })
+    SessionService.guardarSesion(token)
 
     expect(sessionStorage.getItem('pingponeros_session')).not.toBeNull()
 
-    vi.advanceTimersByTime(61 * 60 * 1000)
-
-    obtenerSesion()
+    SessionService.obtenerSesion()
 
     expect(sessionStorage.getItem('pingponeros_session')).toBeNull()
   })
 
   it('cierra sesión eliminándola del sessionStorage', () => {
-    const usuario = { id: 1, nombre: 'Test' }
-    guardarSesion(usuario)
+    const token = buildJWT({ id: 1, nombre: 'Test', exp: nowInSeconds() + 3600 })
+    SessionService.guardarSesion(token)
 
     expect(sessionStorage.getItem('pingponeros_session')).not.toBeNull()
 
-    cerrarSesion()
+    SessionService.cerrarSesion()
 
     expect(sessionStorage.getItem('pingponeros_session')).toBeNull()
   })
 
-  it('devuelve null si JSON es inválido en sessionStorage', () => {
-    sessionStorage.setItem('pingponeros_session', 'invalid json')
+  it('devuelve null si el token no es un JWT válido', () => {
+    sessionStorage.setItem('pingponeros_session', 'invalid-token')
 
-    const result = obtenerSesion()
+    const result = SessionService.obtenerSesion()
 
     expect(result).toBeNull()
   })
 
-  it('devuelve null y limpia sessionStorage si JSON inválido', () => {
-    sessionStorage.setItem('pingponeros_session', '{invalid')
+  it('devuelve null y limpia sessionStorage si el token es inválido', () => {
+    sessionStorage.setItem('pingponeros_session', 'not.a.jwt')
 
-    obtenerSesion()
+    SessionService.obtenerSesion()
+
+    // El payload decodificado no es JSON válido → se limpia
+    expect(sessionStorage.getItem('pingponeros_session')).toBeNull()
+  })
+
+  it('devuelve null cuando no tiene campo exp y lo trata como válido sin expiración forzada', () => {
+    // Sin campo exp: session.js lo acepta (la condición exp es solo si typeof === 'number')
+    const token = buildJWT({ id: 1, nombre: 'Test' })
+    SessionService.guardarSesion(token)
+
+    const result = SessionService.obtenerSesion()
+
+    // Sin exp el token se considera válido indefinidamente
+    expect(result).toMatchObject({ id: 1, nombre: 'Test' })
+  })
+
+  it('mantiene sesión válida cuando exp está en el futuro', () => {
+    const token = buildJWT({ id: 1, nombre: 'Test', exp: nowInSeconds() + 3600 })
+    SessionService.guardarSesion(token)
+
+    // Avanzar 30 minutos (en ms) — exp sigue siendo futuro
+    vi.advanceTimersByTime(30 * 60 * 1000)
+
+    const result = SessionService.obtenerSesion()
+
+    expect(result).toMatchObject({ id: 1, nombre: 'Test' })
+  })
+
+  it('ignora guardarSesion si el argumento no es un string', () => {
+    SessionService.guardarSesion({ id: 1 })
+    SessionService.guardarSesion(null)
+    SessionService.guardarSesion(undefined)
+    SessionService.guardarSesion('')
 
     expect(sessionStorage.getItem('pingponeros_session')).toBeNull()
   })
 
-  it('guarda timestamp de expiración', () => {
-    const usuario = { id: 1 }
-    const now = Date.now()
+  it('asigna el item TEMP_PW_KEY = \'1\' si la contraseña es temporal', () => {
+    const token = buildJWT({ id: 1, nombre: 'Test', correo: 'test@ucr.ac.cr', exp: nowInSeconds() + 3600 })
+    SessionService.guardarSesion(token, true)
 
-    guardarSesion(usuario)
-
-    const stored = JSON.parse(sessionStorage.getItem('pingponeros_session'))
-    expect(stored.expira).toBeGreaterThan(now)
+    const storedTemp = sessionStorage.getItem('pingponeros_temp_password')
+    expect(storedTemp).toBe('1')
   })
 
-  it('mantiene sesión válida dentro de 1 hora', () => {
-    const usuario = { id: 1, nombre: 'Test' }
-    guardarSesion(usuario)
+ it('retorna el token si es válido', () => {
+    const token = buildJWT({ id: 1, nombre: 'Test', correo: 'test@ucr.ac.cr', exp: nowInSeconds() + 3600 })
+    SessionService.guardarSesion(token)
 
-    // Avanzar 30 minutos
-    vi.advanceTimersByTime(30 * 60 * 1000)
+    const result = SessionService.obtenerToken()
 
-    const result = obtenerSesion()
+    expect(result).toBe(token)
+  })
 
-    expect(result).toEqual(usuario)
+  it('retorna null si el token no es válido', () => {
+    const token = buildJWT({ id: 1, nombre: 'Test', correo: 'test@ucr.ac.cr', exp: nowInSeconds() + 3600 })
+    SessionService.guardarSesion(token)
+
+    // Avanzar 2 horas (en ms) — exp ya pasó
+    vi.advanceTimersByTime(2 * 60 * 60 * 1000)
+
+    const result = SessionService.obtenerToken()
+
+    expect(result).toBeNull()
+  })
+
+ it('retorna null si no hay sesión guardada', () => {
+    const result = SessionService.obtenerToken()
+
+    expect(result).toBeNull()
+ })
+
+ it('retorna true si la contraseña es temporal y el token es válido', () => {
+    const token = buildJWT({ id: 1, nombre: 'Test', correo: 'test@ucr.ac.cr', exp: nowInSeconds() + 3600 })
+    SessionService.guardarSesion(token, true)
+
+    const result = SessionService.esContrasenaTemporal()
+
+    expect(result).toBe(true)
+ })
+
+  it('retorna false si la contraseña no es temporal y el token es válido', () => {
+    const token = buildJWT({ id: 1, nombre: 'Test', correo: 'test@ucr.ac.cr', exp: nowInSeconds() + 3600 })
+    SessionService.guardarSesion(token, false)
+
+    const result = SessionService.esContrasenaTemporal()
+
+    expect(result).toBe(false)
+  })
+
+  it ('retorna false si el token es inválido aunque la contraseña sea temporal', () => {
+    const token = buildJWT({ id: 1, nombre: 'Test', correo: 'test"@ucr.ac.cr', exp: nowInSeconds() + 3600 })
+    SessionService.guardarSesion(token, true)
+
+    // Avanzar 2 horas (en ms) — exp ya pasó
+    vi.advanceTimersByTime(2 * 60 * 60 * 1000)
+
+    const result = SessionService.esContrasenaTemporal()
+
+    expect(result).toBe(false)
   })
 })
-

@@ -11,8 +11,12 @@ function FormInput({
   required,
   placeholder,
   disabled,
+  maxLength,
+  error,
   style,
 }) {
+  const isDisabledBorder = disabled ? COLORS.borderDisabled : COLORS.borderColor
+
   return (
     <div style={{ marginBottom: '20px', ...style }}>
       <label
@@ -37,10 +41,14 @@ function FormInput({
         required={required}
         placeholder={placeholder}
         disabled={disabled}
+        maxLength={maxLength}
+        aria-invalid={error ? 'true' : undefined}
         style={{
           width: '100%',
           padding: '10px',
-          border: `1px solid ${disabled ? COLORS.borderDisabled : COLORS.borderColor}`,
+          border: error
+            ? `2px solid ${COLORS.danger}`
+            : `1px solid ${isDisabledBorder}`,
           borderRadius: '4px',
           fontSize: '14px',
           boxSizing: 'border-box',
@@ -50,6 +58,11 @@ function FormInput({
           opacity: disabled ? 0.7 : 1,
         }}
       />
+      {error && (
+        <span style={{ fontSize: '12px', color: COLORS.danger, marginTop: '6px', display: 'block' }}>
+          {error}
+        </span>
+      )}
     </div>
   )
 }
@@ -64,6 +77,8 @@ FormInput.propTypes = {
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   disabled: PropTypes.bool,
+  maxLength: PropTypes.number,
+  error: PropTypes.string,
   style: PropTypes.object,
 }
 
@@ -72,6 +87,7 @@ FormInput.defaultProps = {
   required: false,
   placeholder: '',
   disabled: false,
+  error: '',
 }
 
 export default FormInput

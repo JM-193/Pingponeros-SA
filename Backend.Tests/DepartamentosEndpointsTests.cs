@@ -21,7 +21,7 @@ public sealed class DepartamentosEndpointsTests : IClassFixture<TestWebApplicati
     [Fact]
     public async Task GetDepartamentos_Returns200ConLista()
     {
-        _factory.DepartamentoRepo.ObtenerTodosAsync().Returns(new List<Departamento>
+        _factory.DepartamentoRepo.ObtenerTodosAsync().Returns(new List<Department>
         {
             new() { Id = 1, IdArea = 1, Nombre = "recursos humanos", Descripcion = "Depto RH", Estado = 1 }
         });
@@ -34,7 +34,7 @@ public sealed class DepartamentosEndpointsTests : IClassFixture<TestWebApplicati
     [Fact]
     public async Task GetDepartamentoPorNombre_Returns200CuandoExiste()
     {
-        var depto = new Departamento { Id = 1, IdArea = 1, Nombre = "recursos humanos", Descripcion = "Depto RH", Estado = 1 };
+        var depto = new Department { Id = 1, IdArea = 1, Nombre = "recursos humanos", Descripcion = "Depto RH", Estado = 1 };
         _factory.DepartamentoRepo.ObtenerPorNombreAsync("recursos humanos").Returns(depto);
 
         var response = await _client.GetAsync("/departamentos/recursos%20humanos");
@@ -45,7 +45,7 @@ public sealed class DepartamentosEndpointsTests : IClassFixture<TestWebApplicati
     [Fact]
     public async Task GetDepartamentoPorNombre_Returns404CuandoNoExiste()
     {
-        _factory.DepartamentoRepo.ObtenerPorNombreAsync(Arg.Any<string>()).Returns((Departamento?)null);
+        _factory.DepartamentoRepo.ObtenerPorNombreAsync(Arg.Any<string>()).Returns((Department?)null);
 
         var response = await _client.GetAsync("/departamentos/noexiste");
 
@@ -66,6 +66,16 @@ public sealed class DepartamentosEndpointsTests : IClassFixture<TestWebApplicati
     public async Task CrearDepartamento_Returns400ConDescripcionVacia()
     {
         var dto = new { Nombre = "RH", IdArea = 1, Descripcion = "" };
+
+        var response = await _client.PostAsJsonAsync("/departamentos", dto);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CrearDepartamento_Returns400CuandoNombreTieneCaracteresInvalidos()
+    {
+        var dto = new { Nombre = "RH#", IdArea = 1, Descripcion = "Descripción válida" };
 
         var response = await _client.PostAsJsonAsync("/departamentos", dto);
 
@@ -98,7 +108,7 @@ public sealed class DepartamentosEndpointsTests : IClassFixture<TestWebApplicati
     public async Task CrearDepartamento_Returns201CuandoSeCreaCorrecto()
     {
         _factory.DepartamentoRepo.ExisteNombreAsync(Arg.Any<string>()).Returns(false);
-        _factory.DepartamentoRepo.InsertarAsync(Arg.Any<Departamento>()).Returns(1);
+        _factory.DepartamentoRepo.InsertarAsync(Arg.Any<Department>()).Returns(1);
         var dto = new { Nombre = "Finanzas", IdArea = 1, Descripcion = "Depto Finanzas" };
 
         var response = await _client.PostAsJsonAsync("/departamentos", dto);
@@ -109,16 +119,16 @@ public sealed class DepartamentosEndpointsTests : IClassFixture<TestWebApplicati
     [Fact]
     public async Task CrearDepartamento_NormalizaNombreYDescripcionAntesDeInsertar()
     {
-        Departamento? capturada = null;
+        Department? capturada = null;
         _factory.DepartamentoRepo.ExisteNombreAsync(Arg.Any<string>()).Returns(false);
-        _factory.DepartamentoRepo.InsertarAsync(Arg.Do<Departamento>(depto => capturada = depto)).Returns(1);
+        _factory.DepartamentoRepo.InsertarAsync(Arg.Do<Department>(depto => capturada = depto)).Returns(1);
         var dto = new { Nombre = "  Finanzas  ", IdArea = 1, Descripcion = "  Depto Finanzas  " };
 
         var response = await _client.PostAsJsonAsync("/departamentos", dto);
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         Assert.NotNull(capturada);
-        Assert.Equal("finanzas", capturada!.Nombre);
+        Assert.Equal("Finanzas", capturada!.Nombre);
         Assert.Equal("Depto Finanzas", capturada.Descripcion);
     }
 
@@ -126,7 +136,7 @@ public sealed class DepartamentosEndpointsTests : IClassFixture<TestWebApplicati
     public async Task ActualizarDepartamento_Returns200CuandoSeActualiza()
     {
         _factory.DepartamentoRepo.ExisteNombreAsync(Arg.Any<string>()).Returns(false);
-        _factory.DepartamentoRepo.ActualizarAsync(Arg.Any<string>(), Arg.Any<Departamento>()).Returns(true);
+        _factory.DepartamentoRepo.ActualizarAsync(Arg.Any<string>(), Arg.Any<Department>()).Returns(true);
         var dto = new { Nombre = "rh", IdArea = 1, Descripcion = "Descripción actualizada" };
 
         var response = await _client.PutAsJsonAsync("/departamentos/rh", dto);
@@ -149,7 +159,7 @@ public sealed class DepartamentosEndpointsTests : IClassFixture<TestWebApplicati
     public async Task ActualizarDepartamento_Returns404CuandoNoExiste()
     {
         _factory.DepartamentoRepo.ExisteNombreAsync(Arg.Any<string>()).Returns(false);
-        _factory.DepartamentoRepo.ActualizarAsync(Arg.Any<string>(), Arg.Any<Departamento>()).Returns(false);
+        _factory.DepartamentoRepo.ActualizarAsync(Arg.Any<string>(), Arg.Any<Department>()).Returns(false);
         var dto = new { Nombre = "noexiste", IdArea = 1, Descripcion = "Descripción" };
 
         var response = await _client.PutAsJsonAsync("/departamentos/noexiste", dto);
