@@ -143,7 +143,9 @@ Cada caso indica objetivo, precondiciones, pasos a seguir, resultado esperado y 
 
 ## Captura de Pantalla
 
-[Insertar captura aquí]
+![Pantalla de inicio de sesión](../images/Login.png)
+![Inicio de sesión — Funcionario](../images/Login(PublicServant).png)
+![Inicio de sesión — Administrador](../images/Login(AdministratorUser).png)
 
 ---
 
@@ -159,7 +161,8 @@ Cada caso indica objetivo, precondiciones, pasos a seguir, resultado esperado y 
 
 ## Captura de Pantalla
 
-[Insertar captura aquí]
+![Recuperación de contraseña — paso 1](../images/Forgottenpassword1.png)
+![Recuperación de contraseña — paso 2](<../images/Forgotten password2.png>)
 
 ---
 
@@ -175,7 +178,9 @@ Cada caso indica objetivo, precondiciones, pasos a seguir, resultado esperado y 
 
 ## Captura de Pantalla
 
-[Insertar captura aquí]
+![Contraseña temporal — paso 1](../images/TemporaryPassword1.png)
+![Contraseña temporal — paso 2](../images/TemporaryPassword2.png)
+![Contraseña temporal — paso 3](../images/TemporaryPassword3.png)
 
 ---
 
@@ -191,7 +196,8 @@ Cada caso indica objetivo, precondiciones, pasos a seguir, resultado esperado y 
 
 ## Captura de Pantalla
 
-[Insertar captura aquí]
+![Menú según rol — Funcionario](../images/NavbarRolPublicServant.png)
+![Menú según rol — Administrador](../images/NavbarRolAdministrator.png)
 
 ---
 
@@ -207,7 +213,7 @@ Cada caso indica objetivo, precondiciones, pasos a seguir, resultado esperado y 
 
 ## Captura de Pantalla
 
-[Insertar captura aquí]
+![Registro de declaración jurada de carga de trabajo](../images/WorkloadDeclaration.png)
 
 ---
 
@@ -223,7 +229,7 @@ Cada caso indica objetivo, precondiciones, pasos a seguir, resultado esperado y 
 
 ## Captura de Pantalla
 
-[Insertar captura aquí]
+![Vista detallada de declaración guardada](../images/ViewWorkloadDeclaration.png)
 
 ---
 
@@ -239,7 +245,7 @@ Cada caso indica objetivo, precondiciones, pasos a seguir, resultado esperado y 
 
 ## Captura de Pantalla
 
-[Insertar captura aquí]
+![Cancelación de declaración en progreso](../images/CancellationWorkloadDeclaration.png)
 
 ---
 
@@ -255,7 +261,8 @@ Cada caso indica objetivo, precondiciones, pasos a seguir, resultado esperado y 
 
 ## Captura de Pantalla
 
-[Insertar captura aquí]
+![Perfil del usuario](../images/Profile.png)
+![Cambio de contraseña](../images/ChangePassword.png)
 
 ---
 
@@ -271,7 +278,7 @@ Cada caso indica objetivo, precondiciones, pasos a seguir, resultado esperado y 
 
 ## Captura de Pantalla
 
-[Insertar captura aquí]
+![Gestión de usuarios](../images/User.png)
 
 ---
 
@@ -287,7 +294,7 @@ Cada caso indica objetivo, precondiciones, pasos a seguir, resultado esperado y 
 
 ## Captura de Pantalla
 
-[Insertar captura aquí]
+![Gestión de plazas](../images/Position.png)
 
 ---
 
@@ -303,7 +310,10 @@ Cada caso indica objetivo, precondiciones, pasos a seguir, resultado esperado y 
 
 ## Captura de Pantalla
 
-[Insertar captura aquí]
+![Gestión de áreas](../images/Area.png)
+![Gestión de departamentos](../images/Departament.png)
+![Gestión de secciones](../images/Section.png)
+![Gestión de unidades](../images/Unit.png)
 
 ---
 
@@ -319,7 +329,7 @@ Cada caso indica objetivo, precondiciones, pasos a seguir, resultado esperado y 
 
 ## Captura de Pantalla
 
-[Insertar captura aquí]
+![Gestión de puestos de trabajo](../images/PositionWork.png)
 
 ---
 
