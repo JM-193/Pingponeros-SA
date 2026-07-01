@@ -39,30 +39,7 @@ internal static class ReportePdfBuilder
                 page.DefaultTextStyle(x => x.FontSize(9));
 
                 page.Header().Element(c => ComposeEncabezado(c, datos.Titulo));
-                page.Content().PaddingTop(8).Table(table =>
-                {
-                    table.ColumnsDefinition(columns =>
-                    {
-                        foreach (var _ in datos.Encabezados)
-                            columns.RelativeColumn();
-                    });
-
-                    table.Header(header =>
-                    {
-                        foreach (var encabezado in datos.Encabezados)
-                            header.Cell().Element(CeldaEncabezado).Text(encabezado).SemiBold();
-                    });
-
-                    if (datos.Filas.Count == 0)
-                    {
-                        table.Cell().ColumnSpan((uint)datos.Encabezados.Count)
-                            .Element(CeldaCuerpo).Text("Sin datos.");
-                    }
-
-                    foreach (var fila in datos.Filas)
-                        foreach (var celda in fila)
-                            table.Cell().Element(CeldaCuerpo).Text(celda);
-                });
+                page.Content().PaddingTop(8).Element(c => ComposeTablaGenerica(c, datos));
 
                 ComposePie(page);
             });
@@ -96,41 +73,12 @@ internal static class ReportePdfBuilder
                         detalle.Declaracion.FechaDeclaracion.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))
                         .FontSize(10).FontColor(Colors.Grey.Darken1);
 
-                    TituloSeccion(col, "Información General");
-                    Campo(col, "Número de plaza", detalle.Declaracion.NumeroPlaza.ToString(CultureInfo.InvariantCulture));
-                    Campo(col, "Cargo del puesto", detalle.Cargo);
-                    Campo(col, "Clase ocupacional", detalle.ClaseOcupacional);
-                    Campo(col, "Lugar de trabajo", detalle.LugarTrabajo);
-                    Campo(col, "Jornada laboral", detalle.Horario?.JornadaLaboral);
-                    Campo(col, "Horario laboral",
-                        detalle.Horario is { } h ? $"{h.HoraEntrada} a {h.HoraSalida}" : null);
+                    ComposeInformacionGeneral(col, detalle);
 
                     TituloSeccion(col, "Diagnóstico de la Carga de Trabajo");
-                    foreach (var (tipo, tituloCategoria) in CategoriasFuncion)
-                    {
-                        var actividades = detalle.Actividades.Where(a => a.TipoFuncion == tipo).ToList();
-                        if (actividades.Count == 0) continue;
-                        col.Item().PaddingTop(4).Text(tituloCategoria).SemiBold().FontSize(11);
-                        col.Item().Element(c => ComposeTablaActividades(c, actividades, incluirHoras: false));
-                    }
-                    if (detalle.Actividades.Count == 0)
-                        col.Item().Text("Sin funciones declaradas.").Italic();
+                    ComposeActividadesPorFuncion(col, detalle, incluirHoras: false);
 
-                    TituloSeccion(col, "Información Adicional");
-                    Campo(col, "Tiempo de descanso al día",
-                        detalle.Descanso is { } d ? WorkloadCalculator.FormatearMinutos((double)d.Tiempo) : null);
-                    if (detalle.PermisoAusencia is { } pa)
-                    {
-                        Campo(col, "Permiso o licencia (días por semana)", FormatDecimal(pa.Dias));
-                        Campo(col, "Detalle del permiso o licencia", pa.Justificacion);
-                        Campo(col, "¿De conocimiento de la jefatura?", pa.ConocimientoJefatura == 1 ? "Sí" : "No");
-                    }
-                    if (detalle.HoraExtra is { } he)
-                    {
-                        Campo(col, "Tiempo adicional (minutos por semana)", FormatDecimal(he.TiempoAdicional));
-                        Campo(col, "Justificación del tiempo adicional", he.Justificacion);
-                        Campo(col, "¿De conocimiento de la jefatura?", he.ConocimientoJefatura == 1 ? "Sí" : "No");
-                    }
+                    ComposeInformacionAdicional(col, detalle);
 
                     ComposeFirma(col, titular);
                 });
@@ -173,16 +121,7 @@ internal static class ReportePdfBuilder
                         detalle.Declaracion.FechaDeclaracion.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
 
                     TituloSeccion(col, "Horas Registradas por Función");
-                    foreach (var (tipo, tituloCategoria) in CategoriasFuncion)
-                    {
-                        var actividades = detalle.Actividades.Where(a => a.TipoFuncion == tipo).ToList();
-                        if (actividades.Count == 0) continue;
-                        col.Item().PaddingTop(4).Text(tituloCategoria).SemiBold().FontSize(11);
-                        col.Item().Element(c => ComposeTablaActividades(c, actividades));
-                    }
-
-                    if (detalle.Actividades.Count == 0)
-                        col.Item().Text("Sin funciones declaradas.").Italic();
+                    ComposeActividadesPorFuncion(col, detalle, incluirHoras: true);
 
                     col.Item().PaddingTop(10).AlignRight()
                         .Text($"Total de horas semanales: {WorkloadCalculator.FormatearMinutos(totalMinutos)}")
@@ -219,6 +158,35 @@ internal static class ReportePdfBuilder
             text.CurrentPageNumber();
             text.Span(" de ");
             text.TotalPages();
+        });
+    }
+
+    /// <summary>Tabla del reporte tabular genérico: una columna relativa por encabezado y una celda por dato.</summary>
+    private static void ComposeTablaGenerica(IContainer container, ReporteTabular datos)
+    {
+        container.Table(table =>
+        {
+            table.ColumnsDefinition(columns =>
+            {
+                foreach (var _ in datos.Encabezados)
+                    columns.RelativeColumn();
+            });
+
+            table.Header(header =>
+            {
+                foreach (var encabezado in datos.Encabezados)
+                    header.Cell().Element(CeldaEncabezado).Text(encabezado).SemiBold();
+            });
+
+            if (datos.Filas.Count == 0)
+            {
+                table.Cell().ColumnSpan((uint)datos.Encabezados.Count)
+                    .Element(CeldaCuerpo).Text("Sin datos.");
+            }
+
+            foreach (var fila in datos.Filas)
+                foreach (var celda in fila)
+                    table.Cell().Element(CeldaCuerpo).Text(celda);
         });
     }
 
@@ -261,6 +229,58 @@ internal static class ReportePdfBuilder
                 }
             }
         });
+    }
+
+    /// <summary>Sección "Información General": datos identificativos de la plaza y su horario.</summary>
+    private static void ComposeInformacionGeneral(ColumnDescriptor col, DeclaracionDetalle detalle)
+    {
+        TituloSeccion(col, "Información General");
+        Campo(col, "Número de plaza", detalle.Declaracion.NumeroPlaza.ToString(CultureInfo.InvariantCulture));
+        Campo(col, "Cargo del puesto", detalle.Cargo);
+        Campo(col, "Clase ocupacional", detalle.ClaseOcupacional);
+        Campo(col, "Lugar de trabajo", detalle.LugarTrabajo);
+        Campo(col, "Jornada laboral", detalle.Horario?.JornadaLaboral);
+        Campo(col, "Horario laboral",
+            detalle.Horario is { } h ? $"{h.HoraEntrada} a {h.HoraSalida}" : null);
+    }
+
+    /// <summary>
+    /// Una subtabla por cada tipo de función con actividades declaradas (en el orden de
+    /// <see cref="CategoriasFuncion"/>); si no hay ninguna actividad, deja constancia de ello.
+    /// </summary>
+    private static void ComposeActividadesPorFuncion(
+        ColumnDescriptor col, DeclaracionDetalle detalle, bool incluirHoras)
+    {
+        foreach (var (tipo, tituloCategoria) in CategoriasFuncion)
+        {
+            var actividades = detalle.Actividades.Where(a => a.TipoFuncion == tipo).ToList();
+            if (actividades.Count == 0) continue;
+            col.Item().PaddingTop(4).Text(tituloCategoria).SemiBold().FontSize(11);
+            col.Item().Element(c => ComposeTablaActividades(c, actividades, incluirHoras));
+        }
+
+        if (detalle.Actividades.Count == 0)
+            col.Item().Text("Sin funciones declaradas.").Italic();
+    }
+
+    /// <summary>Sección "Información Adicional": descanso y, si existen, permisos y tiempo extra declarados.</summary>
+    private static void ComposeInformacionAdicional(ColumnDescriptor col, DeclaracionDetalle detalle)
+    {
+        TituloSeccion(col, "Información Adicional");
+        Campo(col, "Tiempo de descanso al día",
+            detalle.Descanso is { } d ? WorkloadCalculator.FormatearMinutos((double)d.Tiempo) : null);
+        if (detalle.PermisoAusencia is { } pa)
+        {
+            Campo(col, "Permiso o licencia (días por semana)", FormatDecimal(pa.Dias));
+            Campo(col, "Detalle del permiso o licencia", pa.Justificacion);
+            Campo(col, "¿De conocimiento de la jefatura?", pa.ConocimientoJefatura == 1 ? "Sí" : "No");
+        }
+        if (detalle.HoraExtra is { } he)
+        {
+            Campo(col, "Tiempo adicional (minutos por semana)", FormatDecimal(he.TiempoAdicional));
+            Campo(col, "Justificación del tiempo adicional", he.Justificacion);
+            Campo(col, "¿De conocimiento de la jefatura?", he.ConocimientoJefatura == 1 ? "Sí" : "No");
+        }
     }
 
     /// <summary>Cláusula de juramento y bloque de firma física (titular y fecha) al pie del documento.</summary>
