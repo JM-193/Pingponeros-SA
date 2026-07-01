@@ -11,6 +11,12 @@ internal static class UnitEndpoints
 {
     // ---------------------------------------------------------------- //
     // Rutas de Unidades                                                 //
+    // La fábrica MapOrgCrudEndpoints registra estas rutas:             //
+    //   GET    /unidades          — Lista todas las unidades            //
+    //   POST   /unidades          — Crea una unidad (depende de un Departamento O una Sección, no ambos) //
+    //   GET    /unidades/{nombre} — Busca una unidad por nombre         //
+    //   PUT    /unidades/{nombre} — Edita una unidad existente          //
+    //   DELETE /unidades/{id}     — Desactiva una unidad                //
     // ---------------------------------------------------------------- //
     public static void MapUnitEndpoints(this IEndpointRouteBuilder app, bool isDev) =>
         app.MapOrgCrudEndpoints(new OrgCrudEndpoints<IUnitRepository, Unit, CreateUnitDto>

@@ -11,6 +11,12 @@ internal static class AreaEndpoints
 {
     // ---------------------------------------------------------------- //
     // Rutas de Áreas                                                    //
+    // La fábrica MapOrgCrudEndpoints registra estas rutas:             //
+    //   GET    /areas          — Lista todas las áreas activas          //
+    //   POST   /areas          — Crea un área nueva (nombre único)      //
+    //   GET    /areas/{nombre} — Busca un área por nombre               //
+    //   PUT    /areas/{nombre} — Edita nombre/descripción de un área    //
+    //   DELETE /areas/{id}     — Desactiva (borrado lógico) un área     //
     // ---------------------------------------------------------------- //
     public static void MapAreaEndpoints(this IEndpointRouteBuilder app, bool isDev) =>
         app.MapOrgCrudEndpoints(new OrgCrudEndpoints<IAreaRepository, Area, CreateAreaDto>

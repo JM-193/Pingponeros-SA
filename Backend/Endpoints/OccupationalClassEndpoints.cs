@@ -1,3 +1,4 @@
+// OccupationalClassEndpoints.cs
 using Backend.DTOs;
 using Backend.Helpers;
 using Backend.Models;
@@ -8,12 +9,18 @@ namespace Backend.Endpoints;
 
 internal static class OccupationalClassEndpoints
 {
+    // ---------------------------------------------------------------- //
+    // Rutas de Clases Ocupacionales                                     //
+    // ---------------------------------------------------------------- //
     public static void MapOccupationalClassEndpoints(this IEndpointRouteBuilder app, bool isDev)
     {
         var clases = app.MapGroup("/clases-ocupacionales");
 
+        // GET    /clases-ocupacionales      — Lista todas las clases ocupacionales
         clases.MapGet("/", (IOccupationalClassRepository repo) => ListarAsync(repo, isDev));
+        // POST   /clases-ocupacionales      — Crea una nueva clase ocupacional (código único + nombre único)
         clases.MapPost("/", (CreateOccupationalClassDto dto, IOccupationalClassRepository repo) => CrearAsync(dto, repo, isDev));
+        // DELETE /clases-ocupacionales/{id} — Elimina una clase (solo si no está vinculada a ninguna plaza)
         clases.MapDelete("/{id:long}", (long id, IOccupationalClassRepository repo) => EliminarAsync(id, repo, isDev));
     }
 

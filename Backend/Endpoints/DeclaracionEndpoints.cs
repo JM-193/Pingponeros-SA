@@ -1,3 +1,4 @@
+// DeclaracionEndpoints.cs
 using Backend.DTOs;
 using Backend.Services;
 
@@ -5,6 +6,9 @@ namespace Backend.Endpoints;
 
 internal static class DeclaracionEndpoints
 {
+    // ---------------------------------------------------------------- //
+    // Rutas de Declaraciones Juradas de Carga de Trabajo               //
+    // ---------------------------------------------------------------- //
     public static void MapDeclaracionEndpoints(this IEndpointRouteBuilder app, bool isDev)
     {
         var declaraciones = app.MapGroup("/declaraciones");
